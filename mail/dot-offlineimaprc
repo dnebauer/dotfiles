@@ -1,0 +1,108 @@
+# ~/.offlineimaprc
+
+# offlineimap configuration file
+
+[general]
+accounts = austdomains,bigpond
+#accounts = hotkey,bigpond,gmail
+#accounts = austdomains
+#accounts = bigpond
+ui = ttyui
+pythonfile = /home/david/.local/mail/utils/offlineimap.py
+maxsyncaccounts = 5
+
+[Account austdomains]
+localrepository = austdomains-local
+remoterepository = austdomains-remote-secure
+
+[Account hotkey]
+localrepository = hotkey-local
+remoterepository = hotkey-remote
+
+[Account bigpond]
+localrepository = bigpond-local
+remoterepository = bigpond-remote
+
+[Account gmail]
+localrepository = gmail-local
+remoterepository = gmail-remote
+
+[Repository austdomains-local]
+type = Maildir
+localfolders = ~/.local/mail/maildirs/austdomains
+
+[Repository austdomains-remote-secure]
+type = IMAP
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+remotehost = cp-wc07.syd02.ds.network
+port = 993
+starttls = yes
+nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
+remoteuser = david@nebauer.id.au
+remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'austdomains']).strip()
+
+[Repository austdomains-remote-insecure]
+type = IMAP
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+remotehost = mail.nebauer.id.au
+port = 143
+starttls = no
+nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
+remoteuser = david@nebauer.id.au
+remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'austdomains']).strip()
+
+[Repository hotkey-local]
+type = Maildir
+localfolders = ~/.local/mail/maildirs/hotkey
+
+[Repository hotkey-remote]
+type = IMAP
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+#remotehost = pop.iprimus.com.au
+remotehost = pop.hotkey.net.au
+starttls = no
+nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
+remoteuser = davidnebauer
+remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'hotkey']).strip()
+
+[Repository bigpond-local]
+type = Maildir
+localfolders = ~/.local/mail/maildirs/bigpond
+
+[Repository bigpond-remote]
+type = IMAP
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+remotehost = mail.bigpond.com
+remoteuser = davidnebauer3@bigpond.com
+nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
+remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'bigpond']).strip()
+
+[Repository gmail-local]
+type = Maildir
+localfolders = ~/.local/mail/maildirs/gmail
+nametrans: lambda s: dict((value,key) for key,value in
+                      {  '[Gmail]/Starred' : 'starred',
+                         '[Gmail]/Trash'   : 'trash',
+                         '[Gmail]/Spam'    : 'spam',
+                         '[Gmail]/Sent Mail' : 'sent',
+                         '[Gmail]/Important' : 'important',
+                         '[Gmail]/Drafts'    : 'drafts',
+                         '[Gmail]/All Mail'  : 'archive',
+                         'INBOX'             : 'inbox',
+                      }.iteritems()).get (s, s).decode ('utf8').encode ('imap4-utf-7')
+
+[Repository gmail-remote]
+type = Gmail
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+remotehost = imap.gmail.com
+remoteuser = davidnebauer@gmail.com
+remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'gmail']).strip()
+nametrans: lambda s: {  '[Gmail]/Starred' : 'starred',
+                        '[Gmail]/Trash'   : 'trash',
+                        '[Gmail]/Spam'    : 'spam',
+                        '[Gmail]/Sent Mail' : 'sent',
+                        '[Gmail]/Important' : 'important',
+                        '[Gmail]/Drafts'    : 'drafts',
+                        '[Gmail]/All Mail'  : 'archive',
+                        'INBOX'             : 'inbox',
+                      }.get (s, s).decode ('imap4-utf-7').encode ('utf8')

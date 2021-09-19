@@ -1,0 +1,197 @@
+# For the benefit of emacs users: -*- shell-script -*-
+###########################
+# xbindkeys configuration #
+###########################
+#
+# Version: 1.8.6
+#
+# If you edit this file, do not forget to uncomment any lines
+# that you change.
+# The pound(#) symbol may be used anywhere for comments.
+
+# To get the descriptor for an associated key or key combination,
+# you can use 'xbindkeys --key' or 'xbindkeys --multikey' and use
+# one of the two output lines in this file.
+
+# The format of a command line is:
+#    "command to start"
+#       associated key
+
+# A list of keys is in /usr/include/X11/keysym.h and in
+# /usr/include/X11/keysymdef.h
+# The XK_ is not needed.
+
+# List of modifiers:
+#   Release, Control, Shift, Mod1 (Alt), Mod2 (NumLock),
+#   Mod3 (CapsLock), Mod4, Mod5 (Scroll).
+#
+# The Release modifier is not a standard X modifier, but you can
+# use it if you want to catch release events instead of press events
+#
+# By defaults, xbindkeys does not pay attention to the
+# NumLock, CapsLock and ScrollLock modifiers.
+# Uncomment the lines below if you want to pay attention to them.
+#keystate_numlock = enable
+#keystate_capslock = enable
+#keystate_scrolllock= enable
+
+# When using konsole as a terminal in which to launch a
+# console utility, note the following:
+# --background-mode
+#   * option is supposed to start konsole in background mode
+#   * F12 toggles between background and foreground modes
+#   * works when executing the konsole command manually
+#   * does not work when executing via xbindkeys
+# --background <color>
+#   * unable to get this to work manually at all
+# --geometry
+#   * this option has been broken for years 
+
+# To re-read configuration file, send a HUP signal to xbindkeys:
+#    killall -HUP xbindkeys
+# Change takes effect only after moving the mouse
+
+
+# HOTKEYS
+
+# Show all commands
+# [Ctrl-Alt-s]
+"xbindkeys_show" 
+  control+alt + s
+
+# Open terminal
+# [Ctrl-Alt-t]
+"konsole"
+  control+alt + t
+
+# Open superuser terminal
+# [Ctrl-Alt-u]
+"konsole -p tabtitle=superuser_shell --icon /home/david/.local/share/icons/hicolor/48x48/apps/konsole-superuser.png -e su"
+  control+alt + u
+
+# Run graphical neovim
+# [Ctrl-Alt-v]
+"nvim-qt"
+  control+alt + v
+
+# Select value to send to clipboard
+# [F1]
+"dn-load-clipboard"
+  mod2 + F1
+
+# Open Tellico (collection manager)
+# [F3]
+"tellico"
+  mod2 + F3
+
+# Show time
+# [Alt-F10]
+"dn-show-time"
+  mod1 + F10
+
+# Open web browser
+# [Ctrl-Alt-b]
+"qutebrowser"
+  control+alt+mod2 + b
+
+# Volume up
+# [XF86AudioRaiseVolume]
+"pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ +5%"
+  XF86AudioRaiseVolume
+
+# Volume down
+# [XF86AudioLowerVolume]
+"pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ -5%"
+  XF86AudioLowerVolume
+
+##################################
+# End of xbindkeys configuration #
+##################################
+
+# ARCHIVED HOTKEYS
+
+## Screen shot
+## [Print Screen]
+#"scrot '%Y-%m-%d–%s_$wx$h_scrot.png' -e 'mv $f ~/screenshots/'"
+#  Print
+
+## Volume up
+## [XF86AudioRaiseVolume]
+#"amixer -q set Master 5%+ unmute"
+#  XF86AudioRaiseVolume
+
+## Volume down
+## [XF86AudioLowerVolume]
+#"amixer -q set Master 5%- unmute"
+#  XF86AudioLowerVolume
+
+## Run dn-keep-awake
+## [Ctrl-Alt-w]
+##  control+alt+mod2 + k
+#"dn-keep-awake"
+#  control+alt + w
+
+## Run dn-use-internet
+## [Ctrl-Alt-i]
+## stop using F2 aka "E-Mail" (mod2 + F2) because it prevents using F2 in mc
+#"/usr/bin/dn-use-internet"
+#  control+alt+mod2 + i
+
+## Open amarok music player
+## ["Alt-F9"]
+#"amarok"
+#  mod1 + F9
+
+## Display details of current Amarok track
+## ["Alt-F8"]
+#"dn-amarok-track"
+#  mod1 + F8
+
+## Open TuxCards (notebook)
+## [F1 aka "Home"]
+#"tuxcards"
+#  mod2 + F1
+
+## Open aMule
+## [Ctrl-Alt-m]
+#"amule"
+#  control+alt + m
+
+## Internet radio
+## [Shift-F4]
+#"perl -- @bin_dir@/dn-radio"
+#  shift+mod2 + F4
+
+## Open web browser
+## [Ctrl-Alt-w]
+#"iceweasel-chroot"
+#  control+alt + w
+
+## Run wammu (gui version of gammu)
+## [Ctrl-Alt-g]
+#"wammu"
+#  control+alt + g
+
+## Run dn-drive-ops
+## ["Alt-F8"]
+#"konsole --title Drive\ Operations --icon /usr/share/icons/dn-drive-ops.png -e /usr/bin/dn-drive-ops"
+#  mod1 + F8
+
+## Run dn-schedule
+## ["Calculator"]
+#"konsole --title Scheduler --icon /usr/share/dn-schedule/dn-schedule.png -e dn-schedule -c"
+#  m:0x10 + c:161
+## [Ctrl-Alt-c]
+#"konsole --title Scheduler --icon /usr/share/dn-schedule/dn-schedule.png -e dn-schedule -c"
+#  control+alt + c
+
+## gPodder
+## [Ctrl-Alt-p]
+#"gpodder" 
+#  control+alt + p
+
+## Open superuser terminal
+## [Ctrl-Alt-u]
+#"konsole --title Shell\ -\ Konsole\ \(Superuser\) --icon @icons_dir@/dn-xbindkeys-superuser.png -e su"
+#  control+alt + u
+

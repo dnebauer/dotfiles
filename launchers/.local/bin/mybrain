@@ -1,0 +1,355 @@
+#!/usr/bin/env bash
+
+# File: mybrain
+# Author: David Nebauer
+# Purpose: start personal wiki server and browser client
+# Created: 2021-08-18
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+usage='Usage:'
+parameters='[-v] [-d] [-s]'
+# what follows are the variables used to build the various commands executed
+# by the script -- bear the following in mind when reviewing them:
+# 1. Command templates include placeholder tokens
+#    which are later substituted for appropiate variables
+# 2. A terminal is launched and from within that terminal
+#    the wiki server is launched
+# 3. The command used to launch the terminal and wiki server is:
+#        ${terminal_cmd} "${server_cmd}" &
+#    where ${terminal_cmd} launches the terminal, and ${server_cmd}
+#    launches the wiki server, and it will be apparent that
+#    ${terminal_cmd} must end in such a way that the next string
+#    expected is the command to execute within the terminal
+# 3. The command used to launch the client is:
+#        ${client_cmd} > /dev/null 2>&1 &
+# - terminal in which to launch wiki server
+terminal='konsole'
+# - command to invoke terminal
+#       '-qwindowtitle' 'launcher_tiddlywiki'
+terminal_cmd_array=(
+    'konsole'
+        '--hide-menubar'
+        '--hide-tabbar'
+        '-p' 'tabtitle=launcher_tiddlywiki'
+        '-e'
+)
+terminal_cmd="${terminal_cmd_array[*]}"
+# - port for client-server communication
+port=10744
+# - wiki executable name
+server='TiddlyWiki'
+server_exe='tiddlywiki'
+# - location of wiki database
+wiki_db_dir="$HOME/data/misc/auxiliary-memory"
+# - command to launch wiki server
+server_cmd_template='%SERVER_EXE% %WIKI_DB_DIR% --listen port=%PORT%'
+# - perform variable substitutions
+server_cmd="$server_cmd_template"
+server_cmd="${server_cmd//%SERVER_EXE%/$server_exe}"
+server_cmd="${server_cmd//%WIKI_DB_DIR%/$wiki_db_dir}"
+server_cmd="${server_cmd//%PORT%/$port}"
+# - browser to run wiki client
+browser='qutebrowser'
+# - url to open wiki client in browser
+url_template='http://localhost:%PORT%'
+# - perform variable substitutions
+url="$url_template"
+url="${url//%PORT%/$port}"
+# - command to launch wiki client
+client_cmd_template='%BROWSER% %URL%'
+# - perform variable substitutions
+client_cmd="$client_cmd_template"
+client_cmd="${client_cmd//%BROWSER%/$browser}"
+client_cmd="${client_cmd//%URL%/$url}"
+# note: the grep matcher matches the *entire* process command
+# - matching string for finding the terminal+server command in ps output
+terminal_grep="$terminal_cmd $server_cmd"
+# - matching string for finding server command in ps output
+wiki_exe_grep_array=(
+    'node'
+        "$(which tiddlywiki)"
+        "$wiki_db_dir"
+        "--listen port=$port"
+)
+wiki_exe_grep="${wiki_exe_grep_array[*]}"
+# - all grep matches to grep for detecting a running wiki server
+grep_matchers=("$terminal_grep" "$wiki_exe_grep")
+# - whether to echo shell cmds to stdout
+show_cmd=false
+# - whether connected to a terminal
+connected_to_terminal=false
+unset -v client_cmd_template  server_cmd_template  terminal_cmd_array
+unset -v terminal_grep  url  url_template  wiki_exe_grep  wiki_exe_grep_array
+# tools whose absence will cause a fatal error
+required_tools=(
+    $terminal
+    $browser
+    $server_exe
+    getopt
+    grep
+    dn-tk-info
+    dn-tk-error
+)    # }}}1
+
+# PROCEDURES
+
+# display_usage() -> void    {{{1
+#   params: nil
+#   prints: nil
+#   return: nil
+display_usage () {
+cat << _USAGE
+${self}: start personal wiki server and browser client
+
+Starts the wiki server ($server_exe) in a terminal
+($terminal) and, once it is running, starts the client
+in a web browser ($browser). Server and client
+communicate over port $port.
+
+${usage} ${self} ${parameters}
+       ${self} -h
+
+Options: -s,--showcmd = echo shell commands to stdout
+         -h,--help    = display help
+         -v,--verbose = print input lines as they are read
+                        (set -o verbose)
+         -d,--debug   = print commands and args as executed
+                        (set -o xtrace)
+_USAGE
+}
+
+# process_options() -> void    {{{1
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+process_options () {
+	# read the command line options
+    local OPTIONS="$(                            \
+        getopt                                   \
+            --options hvds                       \
+            --long    showcmd,help,verbose,debug \
+            --name    "${BASH_SOURCE[0]}"        \
+            -- "${@}"                            \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+	while true ; do
+		case "${1}" in
+        -s | --showcmd ) show_cmd=true  ; shift 1 ;;
+        -h | --help    ) display_usage  ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+		esac
+	done
+	ARGS="${@}"  # remaining arguments
+}
+
+# join_by() -> void    {{{1
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function join_by () {
+    local delimiter=${1:-''}
+    shift
+    local items=${1:-''}
+    shift
+    printf %s "$items" "${@/#/$delimiter}"
+}
+
+# determine_terminal_connection() -> bool   {{{1
+#
+#     does: determine whether script is connected to a terminal
+#   params: nil
+#   prints: nil
+# displays: nil
+#  returns: nil
+function determine_terminal_connection {
+    # on KDE Plasma 5 the '-t -p' test used below does not work,
+    # so as temporary workaround brute force a false result
+    if [[ "$DESKTOP_SESSION" = 'plasma' ]] ; then
+        connected_to_terminal=false
+        return
+    fi
+
+    # '-t 0' means stdin is open and refers to a terminal
+    # '-p /dev/stdin' means stdin exists and is a pipe (socket)
+    local interactive=false fd=0
+    [[ -t "$fd" || -p /dev/stdin ]] && interactive=true 
+    # set connection flag
+    connected_to_terminal=$interactive
+}
+
+# feedback($msg_type, $msg1[, ...]) -> void    {{{1
+#
+#     does: display messages, in terminal if present,
+#           otherwise via a notification
+#   params: $msg_type - message type [required, must be 'fatal' or 'info']
+#           $msg1+    - message strings [required]
+#   prints: message if connected to terminal
+# displays: first message string only, as a notification,
+#           if not connected to terminal
+#  returns: nil
+#     note: the gui dialog displays the first message as a header, so it
+#           should be a summary of the message
+function feedback {
+    # param 1 = $msg_type
+    local msg_type
+    msg_type="$1"
+    shift
+    # param 2+ = $msg, ...
+    local -a msgs
+    while [[ -n "${1+x}" ]] ; do
+        msgs+=("$1")
+        shift
+    done
+    # print messages if connected to a terminal
+    if $connected_to_terminal ; then
+        local output
+        for msg in "${msgs[@]}" ; do
+            output="$self:"
+            [[ "x$msg_type" == 'xfatal' ]] && output+=' fatal:'
+            output+=" $msg"
+            case $msg_type in
+                fatal) echo "$output" > /dev/stderr ;;
+                info ) echo "$output" ;;
+                *    ) echo "Invalid message type '$msg_type'" > /dev/stderr
+                       exit ;;
+            esac
+        done
+        return
+    fi
+    # display in dialog box if not connected to a terminal
+    caption="${msgs[0]}"
+    msgs=("${msgs[@]:1}")
+    detail="$(join_by '\n' "${msgs[@]}")"
+    if [[ "x$msg_type" == 'xfatal' ]] ; then
+        dn-tk-error --title "$self" --caption "$caption" --detail "$detail"
+    else
+        dn-tk-info --title "$self" --caption "$caption" --detail "$detail"
+    fi
+}
+
+# fb_fatal($msg1[, ...]) -> void    {{{1
+#
+#     does: echo/display fatal error messages and abort (exit) script
+#   params: $msg1+ - error message strings [required]
+#   prints: error messages if connected to terminal
+# displays: notification message if not connected to terminal
+#  returns: nil
+function fb_fatal {
+    feedback 'fatal' "$@"
+    exit
+}
+
+# fb_info($msg1[, ...]) -> void    {{{1
+#
+#     does: echo/display messages and abort (exit) script
+#   params: $msg1+ - error message strings [required]
+#   prints: messages if connected to terminal
+# displays: notification message if not connected to terminal
+#  returns: nil
+function fb_info {
+    feedback 'info' "$@"
+}
+
+# fb_wait_for_server_start() -> void    {{{1
+#
+#     does: pause execution till TW server is running
+#   params: nil
+#   prints: message if connected to terminal
+# displays: message if dn-tk-info available, otherwise notification,
+#           if not connected to terminal
+#  returns: nil
+function fb_wait_for_server_start {
+    local msg_term
+    msg_term='When TiddlyWiki server is running, '
+    msg_term+='press any button to open client'
+    if $connected_to_terminal ; then
+        read -r -s -n 1 -p "$self: $msg_term"
+        echo ''
+    else
+        sleep 1  # ensure server terminal has opened so dlg gets focus
+        fb_info "Waiting for $server server" \
+                "When $server server is running, " \
+                "press [OK] to open client in $browser"
+    fi
+}    # }}}1
+
+# MAIN
+
+# determine whether connected to terminal    {{{1
+# - this comes first because it is needed by fb_fatal,
+#   which is used in the next step
+determine_terminal_connection
+
+# check for required tools    {{{1
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || fb_fatal "Need required tools to run" \
+                "Cannot locate: $(join_by ', ' "${missing[@]}")"
+unset missing tools required_tools
+
+# process command line options    {{{1
+# - results in $ARGS holding remaining non-option command line arguments
+process_options "${@}"
+unset port  server_exe  terminal
+
+# check that wiki database directory is valid    {{{1
+if [ ! -d "$wiki_db_dir" ] ; then
+    fb_fatal 'Need wiki directory to run' \
+             "Cannot locate wiki database directory: $wiki_db_dir"
+fi
+unset -v wiki_db_dir
+
+# check server is not already running    {{{1
+# - use ps, not pgrep, because pgrep only checks executable name,
+#   not the entire command (so suppress shellcheck warning SC2009)
+for matcher in "${grep_matchers[@]}" ; do
+    $show_cmd && echo "if ps -e -o cmd | grep \"\^$matcher\$\" ; then"
+    # shellcheck disable=SC2009
+    if ps -e -o cmd | grep "^$matcher$" > /dev/null 2>&1 ; then
+        fb_fatal "$server is already running" \
+                 "Found process matching: '$matcher'"
+    fi
+done
+unset -v grep_matchers
+
+# start server in terminal    {{{1
+$show_cmd && echo "$terminal_cmd \"$server_cmd\" &"
+$terminal_cmd "$server_cmd" &
+fb_wait_for_server_start
+unset -v browser  connected_to_terminal  server  server_cmd  terminal_cmd
+
+# start client in browser    {{{1
+$show_cmd && echo "$client_cmd > /dev/null 2>&1 &"
+$client_cmd > /dev/null 2>&1 &
+unset -v client_cmd  show_cmd
+# }}}1
+
+# vim:foldmethod=marker:

@@ -1,0 +1,31 @@
+# Author: David Nebauer <david@nebauer.id.au>
+# File: /etc/apparmor.d/local/usr.bin.msmtp
+
+## errors accessing symlinked files
+
+# example errors:
+# > msmtp: /home/david/.msmtprc: Permission denied
+# > msmtp: cannot log to /home/david/.local/mail/log/msmtp.log: cannot open: Permission denied
+
+# cause
+# - apparmor profile /etc/apparmor.d/usr.bin.msmtp
+#   does not include permissions for symlink targets
+
+# fix:
+# - this file informs apparmor about symlinked files 
+
+# access modes (file permissions):
+# - r = read mode
+# - w = write mode
+# - k = lock mode
+
+owner @{HOME}/.config/dotfiles/mail/dot-msmtprc  r,
+owner @{HOME}/.local/mail/**                     rwk,
+
+# post-install instructions:
+# - after installing this file restart apparmor with:
+#   > systemctl restart apparmor
+#   or
+#   > service apparmor restart
+
+# vim:syntax=apparmor:

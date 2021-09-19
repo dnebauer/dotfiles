@@ -1,0 +1,21 @@
+# opening four panes in empty window
+
+# split current pane vertically into two halves
+# - open new pane in same directory
+select-pane  -t 1
+split-window -h -p 50 -c '#{pane_current_path}'
+
+# select the new, second (2) pane and split it horizontally into two halves
+# - open new pane in same directory
+select-pane  -t 2
+split-window -v -p 50 -c '#{pane_current_path}'
+
+# select the first (1) pane and split it horizontally into two halves
+# - open new pane in same directory
+select-pane  -t 1
+split-window -v -p 50 -c '#{pane_current_path}'
+ 
+# go back to the first pane
+select-pane  -t 1
+
+# vim: ft=tmux :

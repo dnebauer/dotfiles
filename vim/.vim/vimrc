@@ -1,0 +1,650 @@
+" Configuration file for (n)vim
+" Last change: 2018 Aug 12
+" Maintainer: David Nebauer
+" License: GPL3
+
+" Uses subsidiary configuration files in 'rc' subdirectory, and
+" uses function file $VIMHOME/autoload/dn/rc.vim
+
+" NOTES:    {{{1
+" detect whether running vim or nvim    {{{2
+" - now that vim has ':terminal' command cannot distinguish between
+"   vim|nvim using ':shell' and ':terminal', respectively
+" - vim no longer has('vim') but nvim has('nvim') so use that
+"   . vim:  if !has('nvim')
+"   . nvim: if has('nvim')    }}}2
+
+" PLUGINS:    {{{1
+" using github.com/junegunn/vim-plug
+" python required by several plugins    {{{2
+" - in python 3.5 there is no python3 exe installed
+if dn#rc#isNvim() && dn#rc#os() ==# 'windows'
+    call dn#rc#configureWinPython()
+endif
+" - in *nix can get non-deb python exes in /bin/ as well as /usr/bin/
+"   and neovim's checkhealth command recommends using g:python[3]_host_prog
+if !empty(glob('/usr/bin/python2', 1, 1)) && !empty(glob('/bin/python2', 1, 1))
+    let g:python_host_prog = '/usr/bin/python2'
+endif
+if !empty(glob('/usr/bin/python3', 1, 1)) && !empty(glob('/bin/python3', 1, 1))
+    let g:python3_host_prog = '/usr/bin/python3'
+endif
+" variables required by plugins    {{{2
+" - vimtex issues warning if tex_flavor not set    {{{3
+if !exists('g:tex_flavor') | let g:tex_flavor = 'latex' | endif
+" plugin manager requirements    {{{2
+" - using vim-plug
+" - required tools and vim version    {{{3
+if !dn#rc#hasPluginManagerRequirements()
+    " function displays error message if fails
+    finish
+endif
+" - required settings    {{{3
+"   vint: -ProhibitSetNoCompatible
+set nocompatible
+" ensure vim-plug plugin manager is installed    {{{2
+if empty(glob(dn#rc#pluginRoot('vim-plug')))
+    if !dn#rc#installPluginManager() | finish | endif
+endif
+" install missing plugins at startup    {{{2
+augroup vrc_missing_plugins
+    autocmd!
+    autocmd VimEnter * call dn#rc#installMissingPlugins()
+augroup END
+" remove commands set to execute after initial plugin loading    {{{2
+call dn#rc#pluginCmdsClear()
+" specify root plugin directory    {{{2
+call plug#begin(dn#rc#pluginsDir())
+" plugin dependencies    {{{2
+" - the vim-plug plugin manager does not handle dependencies so they must be
+"   managed manually
+" - what follows is a dependency chart
+" - one-to-one relationships look like:
+"     A > B
+"   where plugin B depends on plugin A
+" - one-to-many relationships look like:
+"     A > {B
+"         {C
+"   where plugin B and plugin C depend on plugin A
+" - many-to-one relationships look like:
+"     A} > C
+"     B}
+"   where plugin C depends on both plugin A and plugin B
+" - many-to-many relationships look like:
+"     A} > {C
+"     B}   {D
+"   where both plugin C and plugin D depend on both plugin A and plugin B
+" ************************************************************************
+" dnebauer/vim-dn-utils > {dnebauer/vim-dn-print-dialog
+"                         {dnebauer/vim-dn-docbk   
+"                         {dnebauer/vim-dn-latex   
+"                         {dnebauer/vim-dn-lua     
+"                         {dnebauer/vim-dn-md-utils
+"                         {dnebauer/vim-dn-perl    
+" 
+" honza/vim-snippets > shougo/neosnippet.vim
+" 
+" kana/vim-textobj-user > {kana/vim-textobj-entire
+"                         {reedes/vim-textobj-sentence
+" 
+" mattn/webapi-vim > christoomey/vim-quicklink
+" 
+" shougo/neco-syntax} > shougo/deoplete.nvim > {zchee/deoplete-clang
+" shougo/neopairs   }                          {carlitux/deoplete-ternjs
+"                                              {deoplete-plugins/deoplete-go
+" 
+" shougo/neomru.vim       } > shougo/denite.nvim  > {iyuuya/denite-ale
+" shougo/neoinclude.vim   }                         {chemzqm/denite-extra
+" roxma/nvim-yarp         }                         {ozelentok/denite-gtags
+" roxma/vim-hug-neovim-rpc}
+" 
+" tpope/vim-repeat > {tpope/vim-unimpaired
+"                    {tpope/vim-surround
+" 
+" tyru/open-browser.vim > kannokanno/previm
+" 
+" vim-airline/vim-airline > vim-airline/vim-airline-themes
+" ************************************************************************
+" bundles: utilities    {{{2
+" - dn-utils : general utilities    {{{3
+"   . required by: dnebauer/vim-dn-docbk, dnebauer/vim-dn-latex,
+"                  dnebauer/vim-dn-lua, dnebauer/vim-dn-md-utils,
+"                  dnebauer/vim-dn-perl, dnebauer/vim-dn-print-dialog
+Plug 'dnebauer/vim-dn-utils'
+" - dn-logevents : log autocmd events    {{{3
+Plug 'dnebauer/vim-dn-logevents', {
+            \ 'on' : ['LogEvents',    'EventLoggingStatus',
+            \         'EventLogFile', 'AnnotateEventLog',   'DeleteEventLog'],
+            \ }
+" - repeat : plugin helper for repeating commands    {{{3
+"   . used by: tpope/vim-surround, tpope/unimpaired
+Plug 'tpope/vim-repeat'
+" - context_filetype : plugin helper    {{{3
+Plug 'shougo/context_filetype.vim'
+" bundles: shell integration    {{{2
+" - file-line : open vim on given line    {{{3
+Plug 'bogado/file-line'
+" - superman : shell uses vim as manpage viewer    {{{3
+if has('unix')
+    Plug 'dnebauer/vim-superman'
+endif
+" - eunuch : unix shell commands as vim commands    {{{3
+"   . disable plugin-set autocommands after sourcing because they
+"     a) make all new files executable (not desirable), and
+"     b) insert templates into new files (conflicts with
+"        template plugins)
+if has('unix')
+    Plug 'tpope/vim-eunuch', {
+            \ 'on' : ['Remove', 'Unlink',    'Move',     'Rename',
+            \         'Chmod',  'Mkdir',     'Find',     'Locate',
+            \         'Wall',   'SudoWrite', 'SudoEdit'],
+            \ }
+    call dn#rc#pluginCmdsAdd('call dn#rc#removeAugroupEunuch()')
+endif
+" - vimpager : unix shell uses vim as pager    {{{3
+"   . sets shell PAGER variable to use vim
+"   . sets alias 'less' to $PAGER
+if has('unix')
+    Plug 'rkitover/vimpager', { 'on': ['Page'] }
+endif
+" - iron : read-val-print loop (REPL)    {{{3
+if dn#rc#isNvim()
+    Plug 'hkupty/iron.nvim', { 'on': ['IronRepl', 'IronPromptRepl'] }
+endif
+" - codi : interactive scratchpad (REPL)    {{{3
+"   . TODO: disable linting engines while in codi
+if dn#rc#isNvim() || (has('job') && has('channel'))
+    Plug 'metakirby5/codi.vim', { 'on': ['Codi'] }
+endif
+" bundles: editing    {{{2
+" - unimpaired : various paired mappings    {{{3
+"   . uses: tpope/vim-repeat
+Plug 'tpope/vim-unimpaired'
+" - surround : delete/change surrounding parens, etc.    {{{3
+"   . uses: tpope/vim-repeat
+Plug 'tpope/vim-surround'
+" - commentary : comment and uncomment lines    {{{3
+Plug 'tpope/vim-commentary', {
+            \ 'on': ['Commentary', 'CommentaryLine', 'ChangeCommentary'] }
+" - gundo : undo tree    {{{3
+Plug 'sjl/gundo.vim', { 'on': ['GundoToggle'] }
+" - DeleteTrailingWhitespace : delete trailing whitespace    {{{3
+Plug 'vim-scripts/DeleteTrailingWhitespace'
+" - unicode : unicode/digraph handling    {{{3
+"   . using 'on' results in error in airline plugin:
+"     'E117: Unknown function: airline#extensions#unicode#init'
+"   . so load on startup
+Plug 'chrisbra/unicode.vim'
+" - multiple-cursors : multiple selections    {{{3
+Plug 'terryma/vim-multiple-cursors'
+" bundles: encryption    {{{2
+" - gnupg : transparently edit gpg-encrypted files    {{{3
+Plug 'jamessan/vim-gnupg'
+" bundles: searching and finding    {{{2
+" - denite : integrated information display    {{{3
+"   . gave up loading denite on demand as the dependencies are
+"     too fragile; only works dependably if force load at start
+"   . uses: shougo/neoinclude.vim, shougo/neomru.vim, chemzqm/denite-extra,
+"           ozelentok/denite-gtags, roxma/nvim-yarp, roxma/vim-hug-neovim-rpc
+Plug 'shougo/denite.nvim'
+call dn#rc#pluginCmdsAdd('call dn#rc#configureDenite()')
+" - session : denite helper - extra sources    {{{3
+"   . depends on: shougo/denite.nvim
+Plug 'chemzqm/denite-extra'
+" - global : denite helper - global/gtags    {{{3
+if executable('global') && executable('gtags')
+    Plug 'ozelentok/denite-gtags'
+endif
+" - ale : denite helper - ale errors/warnings    {{{3
+if dn#rc#lintEngine() ==# 'ale'
+    Plug 'iyuuya/denite-ale'
+endif
+" - neoinclude : completion framework helper    {{{3
+"   . used by: shougo/denite.nvim
+Plug 'shougo/neoinclude.vim'
+" - neomru : denite helper - recently used files    {{{3
+"   . used by: shougo/denite.nvim in vim
+Plug 'shougo/neomru.vim'
+" - vim-hug-neovim-rpc : denite helper - rpc    {{{3
+"   . used by: shougo/denite.nvim in vim8
+if dn#rc#isVim() && v:version >= 800
+    Plug 'roxma/vim-hug-neovim-rpc'
+endif
+" - nvim-yarp : denite helper - rpc    {{{3
+"   . used by: shougo/denite.nvim
+"   . depends on: roxma/vim-hug-neovim-rpc
+if dn#rc#isVim() && v:version >= 800
+    Plug 'roxma/nvim-yarp'
+endif
+" bundles: cut and paste    {{{2
+" - highlightedyank : highlight yanked text    {{{3
+Plug 'machakann/vim-highlightedyank'
+if dn#rc#isVim() && !has('patch-8.0.1394')
+    map y <Plug>(highlightedyank)
+endif
+" bundles: templates    {{{2
+" - template : file templates    {{{3
+Plug 'hotoo/template.vim'
+" bundles: internet    {{{2
+" - vim-g : google lookup    {{{3
+if executable('perl')
+    Plug 'szw/vim-g', { 'on': ['Google', 'Googlef'] }
+endif
+" - webapi : web browser API    {{{3
+"   . required by: christoomey/vim-quicklink
+Plug 'mattn/webapi-vim'
+" - quicklink : md-specific web lookup and link inserter    {{{3
+"   . depends on: mattn/webapi-vim
+Plug 'christoomey/vim-quicklink', { 'for': ['markdown', 'markdown.pandoc'] }
+" - open-browser : open uri in browser    {{{3
+"   . required by: kannokanno/previm
+Plug 'tyru/open-browser.vim', {
+            \ 'on' : ['OpenBrowser', 'OpenBrowserSearch',
+            \         'OpenBrowserSmartSearch',
+            \         '<Plug>(openbrowser-smart-search)'],
+            \ }
+" - whatdomain : look up top level domain    {{{3
+Plug 'vim-scripts/whatdomain.vim', { 'on': ['WhatDomain'] }
+" - w3m : console browser    {{{3
+if executable('w3m')
+    Plug 'yuratomo/w3m.vim', {
+                \ 'on' : ['W3m',             'W3mTab',
+                \         'W3mSplit',        'W3mVSplit',
+                \         'W3m',             'W3mClose',
+                \         'W3mCopyUrl',      'W3mReload',
+                \         'W3mAddressBar',   'W3mShowExternalBrowser',
+                \         'W3mSyntaxOff',    'W3mSyntaxOn',
+                \         'W3mSetUserAgent', 'W3mHistory',
+                \         'W3mHistoryClear'],
+                \ }
+endif
+" - address : notmuch email addresses    {{{3
+if executable('notmuch')
+    Plug 'dnebauer/vim-notmuch-address', { 'for': ['mail', 'notmuch-compose'] }
+else
+    call dn#rc#error(['vim-notmuch-address: notmuch is not installed'])
+endif
+" bundles: printing    {{{2
+" - dn-print-dialog : pure vim print dialog    {{{3
+"   . depends on: dnebauer/vim-dn-utils
+Plug 'dnebauer/vim-dn-print-dialog', { 'on':  ['PrintDialog'] }
+" bundles: calendar    {{{2
+" - calendar : display calendar    {{{3
+Plug 'mattn/calendar-vim', { 'on': ['Calendar', 'CalendarH', 'CalendarT'] }
+" bundles: completion    {{{2
+" - neopairs : completion helper closes paired structures    {{{3
+"   . required by: shougo/deoplete.nvim
+if dn#rc#isNvim() || (v:version >= 704 &&  has('patch-7.4.774'))
+    Plug 'shougo/neopairs.vim'
+endif
+" - neco-syntax : completion syntax helper    {{{3
+"   . required by: shougo/deoplete.nvim
+Plug 'shougo/neco-syntax'
+" - deoplete : nvim completion engine    {{{3
+"   . depends on: shougo/neopairs.vim, shougo/neco-syntax
+"   . required by: zchee/deoplete-clang, carlitux/deoplete-ternjs
+if dn#rc#isNvim()
+    Plug 'shougo/deoplete.nvim'
+endif
+" - neco-vim : completion source helper    {{{3
+Plug 'shougo/neco-vim', { 'for': ['vim'] }
+" - echodoc : plugin helper that prints to echo area    {{{3
+if exists('v:completed_item')
+    Plug 'shougo/echodoc.vim', { 'on': [] }
+    augroup vrc_load_echodoc
+        autocmd!
+        autocmd CompleteDone * call plug#load('echodoc.vim')
+    augroup END
+    call dn#rc#configureEchodoc()
+endif
+" - perlomni : perl completion    {{{3
+if dn#rc#isNvim() || v:version >= 702
+    Plug 'c9s/perlomni.vim', { 'for': ['perl'] }
+endif
+" - delimitMate : completion helper closes paired syntax    {{{3
+Plug 'raimondi/delimitMate', { 'on': [] }
+augroup vrc_load_delimitmate
+    autocmd!
+    autocmd InsertEnter * call plug#load('delimitMate')
+augroup END
+" bundles: snippets    {{{2
+" - snippets : snippet library    {{{3
+"   . required by: shougo/neosnippet.vim
+Plug 'honza/vim-snippets'
+" - neosnippet : snippet engine    {{{3
+"   . depends on: honza/vim-snippets
+Plug 'shougo/neosnippet.vim'
+" bundles: formatting    {{{2
+" - tabular : align text    {{{3
+Plug 'godlygeek/tabular', {
+            \ 'on': ['Tabularize', 'AddTabularPattern', 'AddTabularPipeline'] }
+" - splitjoin : single <-> multi-line statements    {{{3
+Plug 'andrewradev/splitjoin.vim', { 'on': ['SplitjoinSplit', 'SplitjoinJoin'] }
+" bundles: spelling, grammar, word choice    {{{2
+" - dict : online dictionary (dict client)    {{{3
+Plug 'szw/vim-dict', { 'on': ['Dict'] }
+" - grammarous : grammar checker    {{{3
+Plug 'rhysd/vim-grammarous'
+" - wordy : find usage problems    {{{3
+Plug 'reedes/vim-wordy', {
+            \ 'on': ['Wordy', 'NoWordy', 'NextWordy', 'PrevWordy'] }
+" - thesaurus-query : local and online thesaurus    {{{3
+Plug 'Ron89/thesaurus_query.vim'
+" - abolish : word replace and format variable names    {{{3
+Plug 'tpope/vim-abolish', { 'on': ['Abolish', 'Subvert'] }
+" bundles: keyboard navigation    {{{2
+" - hardmode : restrict navigation keys    {{{3
+Plug 'wikitopian/hardmode', { 'on': ['HardMode', 'EasyMode'] }
+" - matchit : jump around matched structures    {{{3
+Plug 'vim-scripts/matchit.zip'
+" - sneak : two-character motion plugin    {{{3
+Plug 'justinmk/vim-sneak'
+" - vim-textobj-user : mechanism for defining text objects    {{{3
+"   . required by: kana/vim-textobj-entire, reedes/vim-textobj-sentence
+Plug 'kana/vim-textobj-user'
+" - vim-textobj-sentence : improve sentence text object/motion    {{{3
+"   . depends on: kana/vim-textobj-user
+Plug 'reedes/vim-textobj-sentence'
+" - vim-textobj-entire : text objects for whole buffer    {{{3
+"   . depends on: kana/vim-textobj-user
+Plug 'kana/vim-textobj-entire'
+" - vim-lastplace : reopen files at last edit position    {{{3
+Plug 'farmergreg/vim-lastplace'
+" bundles: ui    {{{2
+" - airline : status line    {{{3
+"   . required by: vim-airline/vim-airline-themes
+if dn#rc#isNvim() || v:version >= 702
+    Plug 'vim-airline/vim-airline'
+endif
+" - airline-themes : airline helper    {{{3
+"   . depends on: vim-airline/vim-airline
+Plug 'vim-airline/vim-airline-themes'
+" - tagbar : outline viewer    {{{3
+if executable('ctags') && (dn#rc#isNvim() || v:version >= 701)
+    Plug 'majutsushi/tagbar', {
+                \ 'on' : ['TagbarOpen',          'TagbarClose',
+                \         'TagbarToggle',        'Tagbar',
+                \         'TagbarOpenAutoClose', 'TagbarTogglePause',
+                \         'TagbarSetFoldLevel',  'TagbarShowTag',
+                \         'TagbarCurrentTag',    'TagbarGetTypeConfig',
+                \         'TagbarDebug',         'TagbarDebugEnd'],
+                \ }
+endif
+" - [various] : colour schemes    {{{3
+Plug 'atelierbram/vim-colors_atelier-schemes'  " atelier
+Plug 'morhetz/gruvbox'                         " gruvbox
+Plug 'w0ng/vim-hybrid'                         " hybrid
+Plug 'jonathanfilip/vim-lucius'                " lucius
+Plug 'nlknguyen/papercolor-theme'              " papercolor
+Plug 'vim-scripts/peaksea'                     " peaksea
+Plug 'vim-scripts/print_bw.zip'                " print_bw
+Plug 'jpo/vim-railscasts-theme'                " railscast
+Plug 'altercation/vim-colors-solarized'        " solarized
+Plug 'icymind/NeoSolarized'                    " neosolarized
+if dn#rc#isNvim() || (has("patch-7.4.1826"))
+    Plug 'jnurmine/zenburn'                    " zenburn
+endif
+" - terminus : enhance terminal integration    {{{3
+if !has('gui')
+    Plug 'wincent/terminus'
+endif
+" - numbers : number <->relativenumber switching    {{{3
+Plug 'myusuf3/numbers.vim'
+" bundles: linting    {{{2
+" - ale : linter for vim/nvim    {{{3
+if dn#rc#lintEngine() ==# 'ale'
+    Plug 'w0rp/ale', { 'do': function('dn#rc#aleLinters') }
+endif
+" - neomake : linter for vim/nvim    {{{3
+if dn#rc#lintEngine() ==# 'neomake'
+    Plug 'neomake/neomake', { 'do': function('dn#rc#neomakeLinters') }
+endif
+" - syntastic : linter for vim    {{{3
+if dn#rc#lintEngine() ==# 'syntastic' && dn#rc#isVim()
+    Plug 'scrooloose/syntastic'
+endif    " }}}3
+" bundles: tags    {{{2
+" - misc : plugin library used by other scripts    {{{3
+if executable('ctags')
+    Plug 'xolox/vim-misc'
+endif
+            " - fails in git-bash/MinTTY with error:
+            "   'Failed to read temporary file...'
+" - shell : asynchronous operations in ms windows    {{{3
+if executable('ctags')
+    Plug 'xolox/vim-shell'
+endif
+" - [tag generators] : decide which tag plugin to load    {{{3
+"   . prefer gen_tags over easytags unless
+"     file 'vimrc_prefer_easytags' is present
+"   . to use gen_tags, need executables 'global' and 'gtags'
+"   . to use easytags, need executable 'ctags'
+if     dn#rc#tagPlugin('<sfile>:p:h') ==# 'easytags'
+    Plug 'xolox/vim-easytags'
+elseif dn#rc#tagPlugin('<sfile>:p:h') ==# 'gen_tags'
+    Plug 'jsfaint/gen_tags.vim'
+elseif dn#rc#tagPlugin('<sfile>:p:h') is v:null
+    call dn#rc#warn(['Did not load a tag generator plugin'])
+endif
+" bundles: version control    {{{2
+" - gitgutter : git giff symbols in gutter    {{{3
+if executable('git')
+    if dn#rc#isNvim() || (has('patch-7.4.1826'))
+        Plug 'airblade/vim-gitgutter'
+    endif
+endif
+" - fugitive : git integration    {{{3
+if executable('git')
+    Plug 'tpope/vim-fugitive'
+endif
+" bundles: clang support    {{{2
+" . depends on: shougo/deoplete.nvim
+if dn#rc#isNvim()
+    Plug 'zchee/deoplete-clang', { 'for': ['c', 'cpp', 'objc'] }
+endif
+" bundles: docbook support    {{{2
+" - snippets : docbook5 snippets    {{{3
+Plug 'jhradilek/vim-snippets', { 'for': ['docbk'] }
+" - docbk : docbook5 support    {{{3
+Plug 'jhradilek/vim-docbk', { 'for': ['docbk'] }
+" - dn-docbk : docbook5 support    {{{3
+"   . depends on: dnebauer/vim-dn-utils
+Plug 'dnebauer/vim-dn-docbk', { 'for': ['docbk'] }
+" bundles: go support    {{{2
+" - vim-go : language support    {{{3
+if (dn#rc#isVim() && has('patch-8.0.1453'))
+            \ || (dn#rc#isNvim() && has('nvim-0.4.0'))
+    Plug 'fatih/vim-go', { 'for': ['go'], 'do': ':GoUpdateBinaries' }
+endif
+" - deoplete-go : deoplete helper    {{{3
+if dn#rc#isNvim()
+    Plug 'deoplete-plugins/deoplete-go', { 'for': ['go'], 'do': 'make' }
+endif
+
+" bundles: html support    {{{2
+" - html5 : html5 support    {{{3
+Plug 'othree/html5.vim', { 'for': ['html'] }
+" - sparkup : condensed html parser    {{{3
+Plug 'rstacruz/sparkup', { 'for': ['html'] }
+" - emmet : expand abbreviations    {{{3
+Plug 'mattn/emmet-vim', { 'for': ['html', 'css'] }
+" - matchtagalways : highlight tag pairs    {{{3
+Plug 'Valloric/MatchTagAlways', { 'for': ['html', 'xhtml', 'xml', 'jinja'] }
+" bundles: java support    {{{2
+" - javacomplete2 - completion    {{{3
+Plug 'artur-shaik/vim-javacomplete2', { 'for': ['java'] }
+" bundles: javascript support    {{{2
+" - tern + jsctags : javascript tag generator    {{{3
+" - jsctags install details    {{{4
+"   . provides tag support for javascript
+"   . is installed by npm as binaries
+"     - npm requires node.js which is no longer supported on cygwin
+"     - so cannot install jsctags on cygwin
+"   . requires tern_for_vim
+"   . is reinstalled whenever tern is updated - see tern install next
+"   . npm install command used below assumes npm is configured to
+"     install in global mode without needing superuser privileges
+" - tern install details    {{{4
+"   . is installed by npm
+"     - npm requires node.js which is no longer supported on cygwin
+"     - so cannot install tern on cygwin
+"   . npm install command used below assumes npm is configured to
+"     install in global mode without needing superuser privileges
+"   . update of tern is used as trigger to reinstall jsctags
+if !dn#rc#cygwin()
+    if dn#rc#isVim()
+        Plug 'ternjs/tern_for_vim', {
+                    \ 'for': ['javascript', 'javascript.jsx'],
+                    \ 'do':  function('dn#rc#buildTernAndJsctags') }
+        if dn#rc#isNvim()
+            " depends on: shougo/deoplete.nvim
+            Plug 'carlitux/deoplete-ternjs', {
+                        \ 'for': ['javascript', 'javascript.jsx'],
+                        \ 'do':  function('dn#rc#buildTernjs') }
+            call dn#rc#pluginCmdsAdd('call dn#rc#configureTernjs()')
+        endif
+    endif
+endif
+" bundles: json support    {{{2
+" - vim-json : json highlighting/indenting    {{{3
+    Plug 'elzr/vim-json', { 'for': ['json', 'jsonl', 'jsonp'] }
+" bundles: latex support    {{{2
+" - vimtex : latex support    {{{3
+Plug 'lervag/vimtex', { 'for': ['tex', 'latex'] }
+" - dn-latex : latex support    {{{3
+"   . depends on: dnebauer/vim-dn-utils
+Plug 'dnebauer/vim-dn-latex', { 'for': ['tex', 'latex'] }
+" bundles: lua support    {{{2
+" - ftplugin : lua support    {{{3
+Plug 'xolox/vim-lua-ftplugin', { 'for': ['lua'] }
+" - manual : language support    {{{3
+Plug 'indiefun/vim-lua-manual', { 'for': ['lua'] }
+" - lua : improved lua 5.3 syntax and indentation support    {{{3
+Plug 'tbastos/vim-lua', { 'for': ['lua'] }
+" - dn-lua : lua support    {{{3
+"   . depends on: dnebauer/vim-dn-utils
+Plug 'dnebauer/vim-dn-lua', { 'for': ['lua'] }
+" bundles: markdown support    {{{2
+" - vim-pandoc : pandoc integration    {{{3
+"   . uses panzer
+if dn#rc#isNvim() || (v:version >= 704 && has('python3'))
+    Plug 'vim-pandoc/vim-pandoc', {
+                \ 'for' : ['markdown', 'markdown.pandoc'],
+                \ 'do'  : function('dn#rc#buildPandoc') }
+endif
+" - vim-pandoc-syntax : pandoc md syntax    {{{3
+if dn#rc#isNvim() || (v:version >= 704 && has('python3'))
+    Plug 'vim-pandoc/vim-pandoc-syntax', {
+                \ 'for': ['markdown', 'markdown.pandoc'] }
+endif
+" - vim-pandoc-after : third-party plugin integration    {{{3
+if dn#rc#isNvim() || (v:version >= 704 && has('python3'))
+    Plug 'vim-pandoc/vim-pandoc-after', {
+                \ 'for': ['markdown', 'markdown.pandoc'] }
+endif
+" - markdown2ctags : tag generator    {{{3
+Plug 'jszakmeister/markdown2ctags', { 'for': ['markdown', 'markdown.pandoc'] }
+" - dn-md-utils : markdown utilities    {{{3
+"   . depends on: dnebauer/vim-dn-utils
+Plug 'dnebauer/vim-dn-md-utils', { 'for': ['markdown', 'markdown.pandoc'] }
+" - previm : realtime preview    {{{3
+"   . depends on: tyru/open-browser.vim
+Plug 'kannokanno/previm', {
+            \ 'for': ['markdown', 'markdown.pandoc'], 'on': ['PrevimOpen'] }
+" - toc : generate table of contents    {{{3
+Plug 'mzlogin/vim-markdown-toc', {
+            \ 'for': ['markdown', 'markdown.pandoc'],
+            \ 'on':  ['GenTocGFM', 'GenTocRedcarpet',
+            \          'UpdateToc', 'RemoveToc'] }
+" bundles: perl support    {{{2
+" - perl : perl support    {{{3
+Plug 'vim-perl/vim-perl', {
+            \ 'for': ['perl'], 'do': function('dn#rc#perlContrib') }
+" - dn-perl : perl support    {{{3
+"   . depends on: dnebauer/vim-dn-utils
+Plug 'dnebauer/vim-dn-perl', { 'for': ['perl'] }
+" - perlhelp : provide help with perldoc    {{{3
+if executable('perldoc')
+    Plug 'vim-scripts/perlhelp.vim', { 'for': ['perl'] }
+endif
+" - syntastic-perl6 : syntax hecking for perl6    {{{3
+if dn#rc#lintEngine() ==# 'syntastic' && dn#rc#isVim()
+    Plug 'nxadm/syntastic-perl6', { 'for': ['perl6'] }
+endif
+" bundles: php support    {{{2
+" - phpctags : tag generation    {{{3
+if !dn#rc#cygwin() && executable('curl')
+    Plug 'vim-php/tagbar-phpctags.vim', { 'for': ['php'], 'do': 'make' }
+    "           build 'phpctags' executable
+    "           build fails in cygwin
+endif
+" bundles: python support    {{{2
+"  - jedi : autocompletion    {{{3
+if dn#rc#isVim()
+    Plug 'davidhalter/jedi-vim', {
+                \ 'for': ['python'], 'do': function('dn#rc#buildJedi') }
+endif
+" - deoplete-jedi : deoplete helper    {{{3
+"   . depends on: shougo/deoplete.nvim
+if executable('python3')
+    Plug 'zchee/deoplete-jedi', {
+                \ 'for': ['python'], 'do': function('dn#rc#buildJedi') }
+endif
+" - pep8 : indentation support    {{{3
+Plug 'hynek/vim-python-pep8-indent', { 'for': 'python' }
+" bundles: tiddlywiki support    {{{2
+" tiddlywiki-ftplugin : wikitext support    {{{3
+" - load at startup to get filetype detection
+Plug 'dnebauer/vim-tiddlywiki-ftplugin'
+" bundles: tmux support    {{{2
+" navigator : split navigation    {{{3
+Plug 'christoomey/vim-tmux-navigator'
+" tmux : tmux.conf support    {{{3
+Plug 'tmux-plugins/vim-tmux', { 'for': ['tmux'] }
+" bundles: vimhelp support    {{{2
+" - vimhelplint : lint for vim help    {{{3
+Plug 'machakann/vim-vimhelplint', { 'for': ['help'], 'on': ['VimhelpLint'] }
+" bundles: xml support    {{{2
+" - xml : xml support    {{{3
+Plug 'vim-scripts/xml.vim', { 'for': ['xml'] }
+" - matchtagalways : highlight tag pairs    {{{3
+"   . defined in html support section
+" bundles: xquery support    {{{2
+" - indentomnicomplete : autoindent and omnicomplete    {{{3
+Plug 'vim-scripts/XQuery-indentomnicompleteftplugin', { 'for': ['xquery'] }
+" bundles: zsh support    {{{2
+" - deoplete-zsh : deoplete helper    {{{3
+Plug 'zchee/deoplete-zsh', { 'for': ['zsh'] }
+" initialise plugin system    {{{2
+call plug#end()
+" set preferred settings    {{{2
+filetype on
+filetype plugin on
+filetype indent on
+syntax enable
+" execute commands delayed until after initial plugin loading    {{{2
+call dn#rc#pluginCmdsExecute()
+
+" SUBSIDIARY CONFIGURATION FILES:    " {{{1
+call dn#rc#source(dn#rc#vimPath('home').'/rc', resolve(expand('<sfile>:p')))
+
+" FINAL CONFIGURATION:    {{{1
+" set filetype to 'text' if not known    {{{2
+augroup vrc_unknown_files
+    autocmd!
+    autocmd BufEnter *
+                \ if &filetype == "" |
+                \   setlocal ft=text |
+                \ endif
+augroup END
+
+" set colour column    {{{2
+" - placing this line in subsidiary configuration files has no effect,
+"   but placed here it works
+" - note: &colorcolumn was set in subsidiary config file 'align.vim'
+if exists('+colorcolumn')
+    highlight ColorColumn term=Reverse ctermbg=Yellow guibg=LightYellow
+endif    " }}}2
+" }}}1
+
+" vim:foldmethod=marker:

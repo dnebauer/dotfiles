@@ -1,0 +1,252 @@
+#!/usr/bin/env bash
+
+# File: syncthing-launcher
+# Author: David Nebauer
+# Purpose: launch syncthing server and browser client
+# Created: 2021-08-22
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+usage='Usage:'
+parameters='[-v] [-d] [-s]'
+# what follows are the variables used to build the various commands executed
+# by the script -- bear the following in mind when reviewing them:
+# 1. Command templates include placeholder tokens
+#    which are later substituted for appropiate variables
+# 2. A terminal is launched and from within that terminal
+#    the syncthing server is launched
+# 3. The command used to launch the terminal and syncthing server is:
+#        ${terminal_cmd} "${server_cmd}" &
+#    where ${terminal_cmd} launches the terminal, and ${server_cmd}
+#    launches the syncthing server, and it will be apparent that
+#    ${terminal_cmd} must end in such a way that the next string
+#    expected is the command to execute within the terminal
+# 3. The browser client is automatically opened in the default browser.
+# - terminal in which to launch syncthing server
+terminal='konsole'
+# - terminal options
+#   '-qwindowtitle' 'launcher_syncthing'
+terminal_opts_template_array=(
+    '--hide-menubar'
+    '--hide-tabbar'
+    '-p' 'tabtitle=launcher_syncthing'
+    '-e'
+)
+terminal_opts_template="${terminal_opts_template_array[*]}"
+# - command to invoke terminal
+terminal_cmd_template="$terminal $terminal_opts_template"
+# - perform variable substitutions
+terminal_cmd="$terminal_cmd_template"
+terminal_cmd="${terminal_cmd//%TERMINAL%/$terminal}"
+# - port for client-server communication
+port=10744
+# - syncthing executable name
+server='Syncthing'
+server_exe='syncthing'
+# - command to launch wiki server
+server_cmd_template='%SERVER_EXE%'
+# - perform variable substitutions
+server_cmd="$server_cmd_template"
+server_cmd="${server_cmd//%SERVER_EXE%/$server_exe}"
+# note: the grep matcher matches the *entire* process command
+# - matching string for finding the terminal+server command in ps output
+grep_matcher="$terminal_cmd $server_cmd"
+# - whether to echo shell cmds to stdout
+show_cmd=false
+# - whether connected to a terminal
+connected_to_terminal=false
+unset -v server_cmd_template           terminal_cmd_template   \
+         terminal_opts_template_array  terminal_opts_template
+# tools whose absence will cause a fatal error
+required_tools=(
+    $terminal
+    $server_exe
+    getopt
+    grep
+    dn-tk-error
+)    # }}}1
+
+# PROCEDURES
+
+# display_usage() -> void    {{{1
+#   params: nil
+#   prints: nil
+#   return: nil
+display_usage () {
+cat << _USAGE
+${self}: start syncthing server and browser client
+
+Starts the $server server ($server_exe) in a terminal
+($terminal) and starts the client in the default
+web browser.
+
+${usage} ${self} ${parameters}
+       ${self} -h
+
+Options: -s,--showcmd = echo shell commands to stdout
+         -h,--help    = display help
+         -v,--verbose = print input lines as they are read
+                        (set -o verbose)
+         -d,--debug   = print commands and args as executed
+                        (set -o xtrace)
+_USAGE
+}
+
+# process_options() -> void    {{{1
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+process_options () {
+	# read the command line options
+    local OPTIONS="$(                            \
+        getopt                                   \
+            --options hvds                       \
+            --long    showcmd,help,verbose,debug \
+            --name    "${BASH_SOURCE[0]}"        \
+            -- "${@}"                            \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+	while true ; do
+		case "${1}" in
+        -s | --showcmd ) show_cmd=true  ; shift 1 ;;
+        -h | --help    ) display_usage  ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+		esac
+	done
+	ARGS="${@}"  # remaining arguments
+}
+
+# join_by() -> void    {{{1
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function join_by () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}
+
+# determine_terminal_connection() -> bool   {{{1
+#
+#     does: determine whether script is connected to a terminal
+#   params: nil
+#   prints: nil
+# displays: nil
+#  returns: nil
+function determine_terminal_connection {
+    # on KDE Plasma 5 the '-t -p' test used below does not work,
+    # so as temporary workaround brute force a false result
+    if [[ "$DESKTOP_SESSION" = 'plasma' ]] ; then
+        connected_to_terminal=false
+        return
+    fi
+
+    # '-t 0' means stdin is open and refers to a terminal
+    # '-p /dev/stdin' means stdin exists and is a pipe (socket)
+    local interactive=false fd=0
+    [[ -t "$fd" || -p /dev/stdin ]] && interactive=true 
+    # set connection flag
+    connected_to_terminal=$interactive
+}
+
+# fatal($msg1[, ...]) -> void    {{{1
+#
+#     does: display messages, in terminal if present,
+#           otherwise via a notification
+#   params: $msg1+    - message strings [required]
+#   prints: message if connected to terminal
+# displays: first message string only, as a notification,
+#           if not connected to terminal
+#  returns: nil
+#     note: the gui dialog displays the first message as a header, so it
+#           should be a summary of the message
+function fatal {
+    # param 1+ = $msg, ...
+    local -a msgs
+    while [[ -n "${1+x}" ]] ; do
+        msgs+=("$1")
+        shift
+    done
+    # print messages if connected to a terminal
+    if $connected_to_terminal ; then
+        local output
+        for msg in "${msgs[@]}" ; do
+            output="$self: fatal:"
+            output+=" $msg"
+            echo "$output" > /dev/stderr
+        done
+        return
+    fi
+    # display in dialog box if not connected to a terminal
+    caption="${msgs[0]}"
+    msgs=("${msgs[@]:1}")
+    detail="$(join_by '\n' "${msgs[@]}")"
+    dn-tk-error --title "$self" --caption "$caption" --detail "$detail"
+}    #}}}1
+
+# MAIN
+
+# determine whether connected to terminal    {{{1
+# - this comes first because it is needed by fatal(),
+#   which is used in the next step
+determine_terminal_connection
+
+# check for required tools    {{{1
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || fatal "Need required tools to run" \
+             "Cannot locate: $(join_by ', ' "${missing[@]}")"
+unset missing tools required_tools
+
+# process command line options    {{{1
+# - results in $ARGS holding remaining non-option command line arguments
+process_options "${@}"
+unset server_exe  terminal
+
+# check server is not already running    {{{1
+# - use ps, not pgrep, because pgrep only checks executable name,
+#   not the entire command (so suppress shellcheck warning SC2009)
+$show_cmd && echo "if ps -e -o cmd | grep \"\^$grep_matcher\$\" ; then"
+# shellcheck disable=SC2009
+if ps -e -o cmd | grep "^$grep_matcher$" > /dev/null 2>&1 ; then
+    fatal "$server is already running" \
+          "Found process running: '$grep_matcher'"
+fi
+unset -v connected_to_terminal  grep_matcher  server
+
+# start server in terminal    {{{1
+$show_cmd && echo "$terminal_cmd \"$server_cmd\" &"
+$terminal_cmd "$server_cmd" &
+unset -v server_cmd  show_cmd  terminal_cmd
+# }}}1
+
+# vim:foldmethod=marker:

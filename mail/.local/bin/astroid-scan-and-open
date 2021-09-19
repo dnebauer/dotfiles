@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# check attachment for virus before opening
+
+# requires: clamscan, notify-send, inotifywait, xdg-open
+for TOOL in clamscan notify-send inotifywait xdg-open ; do
+    if ! command -v $TOOL &>/dev/null ; then
+        SUMMARY='Virus checking unavailable'
+        DETAILS="Cannot locate '$TOOL'"
+        notify-send "$SUMMARY" "$DETAILS" --icon=dialog-warning
+        exit 1
+    fi
+done
+
+ATTACHMENT="$1"
+
+# check for viruses
+SUMMARY='Checking attachment'
+DETAILS='Please wait, scanning for viruses...'
+notify-send "$SUMMARY" "$DETAILS" --icon=dialog-information --category=email
+if ! clamscan "$ATTACHMENT" ; then
+    SUMMARY='Virus found!'
+    DETAILS='Clamscan detected a virus – not opening attachment!'
+    notify-send "$SUMMARY" "$DETAILS" --icon=dialog-warning --category=email
+    exit 1
+fi
+
+# monitor attachment file until it closes
+inotifywait -e close "$ATTACHMENT" &
+IP=$!  # pid of monitor which exists until attachment closes
+
+# open attachment
+xdg-open "$ATTACHMENT"
+
+# don't exit script until attachment closes
+# - according to https://github.com/astroidmail/astroid/wiki/
+#   (see page 'Opening attachments and virus detection')
+#   there can be problems with astroid deleting an
+#   attachment before xdg-opens it 
+wait $IP

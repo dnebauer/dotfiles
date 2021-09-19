@@ -1,0 +1,84 @@
+# ~/.msmtprc
+
+# msmtp configuration file
+
+########################### NOTES ##########################
+
+# password retrieval:
+# - previously used python command to retrieve password from secret-tool
+# - command was like this one for the austdomains account:
+#   > passwordeval python -c "import subprocess; print subprocess.check_output(['secret-tool', 'lookup', 'isp', 'austdomains']).strip()"
+# - now use secret-tool lookup command directly
+
+# tls trust file:
+# - file used for tls_trust_file setting is the same file used in
+#   ~/.offlineinaprc for the sslcacertfile setting
+
+##################### DEFAULT SETTINGS #####################
+
+defaults
+auth            on
+tls             on
+tls_trust_file  /etc/ssl/certs/ca-certificates.crt
+logfile         ~/.local/mail/log/msmtp.log
+
+######################### ACCOUNTS #########################
+
+#################
+## austdomains ##
+#################
+
+# SSL/TLS settings:
+# - get error: 'server sent an empty reply'
+# - doesn't matter whether TLS certificate checking is on or off
+# - uses settings: host cp-wc07.syd02.ds.network, port 465
+# non-SSL/TLS settings
+# - if TLS certificate checking is on you get the error:
+#   "TLS certificate verification failed:...
+#   ... the certificate owner does not match hostname"
+# - works if turn off TLS certificate checking, so use these
+# - uses settings: tls_certcheck off, host mail.nebauer.id.au, port 587
+account        austdomains
+tls_certcheck  off
+host           mail.nebauer.id.au
+port           587
+user           david@nebauer.id.au
+from           david@nebauer.id.au
+passwordeval   secret-tool lookup isp austdomains
+
+############
+## hotkey ##
+############
+
+account       hotkey
+host          smtp.hotkey.net.au
+port          587
+user          davidnebauer
+from          davidnebauer@hotkey.net.au
+passwordeval  secret-tool lookup isp hotkey
+
+#############
+## bigpond ##
+#############
+
+account       bigpond
+host          mail.bigpond.com
+user          davidnebauer3@bigpond.com
+from          davidnebauer3@bigpond.com
+passwordeval  secret-tool lookup isp bigpond
+
+###########
+## gmail ##
+###########
+
+account       gmail
+host          smtp.gmail.com
+port          587
+user          davidnebauer@gmail.com
+from          davidnebauer@gmail.com
+passwordeval  secret-tool lookup isp gmail
+
+
+account default : austdomains
+
+###################### ACCOUNTS - end ######################

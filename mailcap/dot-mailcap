@@ -1,0 +1,124 @@
+application/vnd.sun.xml.writer;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.writer.global;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.writer;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.writer-global;/home/david/.openoffice/1.0.2/soffice %s
+application/x-starwriter;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.writer.template;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.calc;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.calc;/home/david/.openoffice/1.0.2/soffice %s
+application/x-starcalc;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.calc.template;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.impress;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.impress;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.impress-packed;/home/david/.openoffice/1.0.2/soffice %s
+application/x-starimpress;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.impress.template;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.draw;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.draw;/home/david/.openoffice/1.0.2/soffice %s
+application/x-stardraw;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.draw.template;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.math;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.math;/home/david/.openoffice/1.0.2/soffice %s
+application/x-starmath;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.writer;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.writer.global;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.writer;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.writer-global;/home/david/.openoffice/1.0.2/soffice %s
+application/x-starwriter;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.writer.template;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.calc;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.calc;/home/david/.openoffice/1.0.2/soffice %s
+application/x-starcalc;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.calc.template;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.impress;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.impress;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.impress-packed;/home/david/.openoffice/1.0.2/soffice %s
+application/x-starimpress;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.impress.template;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.draw;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.draw;/home/david/.openoffice/1.0.2/soffice %s
+application/x-stardraw;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.draw.template;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.sun.xml.math;/home/david/.openoffice/1.0.2/soffice %s
+application/vnd.stardivision.math;/home/david/.openoffice/1.0.2/soffice %s
+application/x-starmath;/home/david/.openoffice/1.0.2/soffice %s
+# Java Web Start
+application/x-java-jnlp-file; /home/david/data/evaluation/j2re1.4.2_08/javaws/javaws %s
+# Play audio files in GUI player so can terminate if need to
+audio/x-musepack-mpc; /usr/bin/smplayer -close-at-end '%s'; description="Mpc audio"
+# 	musepack compression audio file
+# 	(mime-type defined in ~/.mime.types file)
+audio/mpeg; /usr/bin/smplayer -close-at-end '%s'; description="Mpeg Audio"
+audio/x-flac; /usr/bin/vlc --play-and-exit '%s'; description="FLAC Audio"
+audio/flac; /usr/bin/vlc --play-and-exit '%s'; description="FLAC Audio"
+audio/ac3; /usr/bin/smplayer -close-at-end '%s'; description="AC-3 Audio"
+audio/mp4; /usr/bin/smplayer -close-at-end '%s'; description="Mpeg-4 Audio"
+audio/x-ms-wma; /usr/bin/smplayer -close-at-end '%s'; description="Windows Media Audio"
+audio/x-ogg; /usr/bin/smplayer -close-at-end '%s'; description="Ogg Audio"
+# Play video in GUI player
+video/mp4; /usr/bin/smplayer -close-at-end '%s'; description="Mpeg Video"
+# PDF
+# - xpdf is currently broken (2014-01)
+#application/pdf; /usr/bin/xpdf '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+#application/x-pdf; /usr/bin/xpdf '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+#application/pdf; /usr/bin/xpdf '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+#application/x-pdf; /usr/bin/xpdf '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+application/pdf; /usr/bin/okular '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+application/x-pdf; /usr/bin/okular '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+application/pdf; /usr/bin/okular '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+application/x-pdf; /usr/bin/okular '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+# RTF
+text/rtf; /usr/bin/ted '%s' &>/dev/null; description="Rich Text Format";
+nametemplate=%s.rtf
+# images
+# BUG #1: Gwenview using temporary directories
+# - following package update on 2013-05-25 a bug was detected opening image files
+#   from Midnight Commander (mc)
+# - steps to reproduce:
+#   . open mc in directory containing multiple images
+#   . highlight a file and press Enter
+# - actual outcome:
+#   . highlighted file is copied to a temporary directory
+#   . gwenview opens copy in temporary directory
+#   . user is unable to step through other images in
+#     original directory because gwenview is "in" the
+#     temporary directory
+# - expected behaviour
+#   . gwenview opens image in original directory and user
+#     is able to step through other images in directory
+# - cause
+#   [2013-05-25]
+#   . the documented behaviour of run-mailcap is to copy the
+#     file to a temporary file and alias (symlink) to it when
+#     the file name contains shell meta-characters, including
+#     spaces
+#   . investigation showed the cause is the mailcap command
+#     (in /etc/mailcap) for images
+#   . the command includes parameters:
+#       -caption "%c" %i
+#   . the aberrant behaviour occurs when these parameters
+#     are present but not when they are absent
+#   [2015-09-29]
+#   . the documented behaviour that is supposed to occur when
+#     the file name contains shell meta-characters (copy to
+#     temporary file and alias to it) is now occurring for
+#     *all* files
+# - solution:
+#   [2013-05-25]
+#   . override system mailcap commands with commands that do not have
+#     the problematic parameters
+#   [2015-09-29]
+#   . no current solution
+inode/directory; gwenview %s; test=test -n "$DISPLAY"
+image/gif; gwenview "%s"; test=test -n "$DISPLAY"
+image/jpeg; gwenview "%s"; test=test -n "$DISPLAY"
+image/png; gwenview "%s"; test=test -n "$DISPLAY"
+image/png; gwenview "%s"; test=test -n "$DISPLAY"
+image/bmp; gwenview "%s"; test=test -n "$DISPLAY"
+image/x-eps; gwenview "%s"; test=test -n "$DISPLAY"
+image/x-ico; gwenview "%s"; test=test -n "$DISPLAY"
+image/x-portable-bitmap; gwenview "%s"; test=test -n "$DISPLAY"
+image/x-portable-graymap; gwenview "%s"; test=test -n "$DISPLAY"
+image/x-portable-pixmap; gwenview "%s"; test=test -n "$DISPLAY"
+image/x-xbitmap; gwenview "%s"; test=test -n "$DISPLAY"
+image/x-xpixmap; gwenview "%s"; test=test -n "$DISPLAY"

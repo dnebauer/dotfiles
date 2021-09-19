@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Synchronise plugin beamer files with TEXMFHOME
+
+# this is for the vim-dn-latex repo
+repo="$(git remote -v | head -n1 | awk '{print $2}' | sed -e 's,.*:\(.*/\)\?,,' -e 's/\.git$//')"
+if test "${repo}" != "vim-dn-latex" ; then
+    exit
+fi
+
+# set variables
+rsync='rsync'
+kpsewhich='kpsewhich'
+mktexlsr='mktexlsr'
+src="${HOME}/.vim/bundle/vim-dn-latex/vim-dn-latex-resources/beamer"
+err_stub="Can't synchronise beamer files"
+
+# must have rsync
+if test "$(which ${rsync} &>/dev/null; echo ${?})" -ne 0 ; then
+    echo "${err_stub} - rsync not installed"
+    exit
+fi
+
+# must have kpsewhich
+if test "$(which ${kpsewhich} &>/dev/null; echo ${?})" -ne 0 ; then
+    echo "${err_stub} - kpsewhich not installed"
+    exit
+fi
+
+# must have mktexlsr
+if test "$(which ${mktexlsr} &>/dev/null; echo ${?})" -ne 0 ; then
+    echo "${err_stub} - kpsewhich not installed"
+    exit
+fi
+
+# must have plugin beamer files in expected location
+if ! test -d "${src}" ; then
+    echo "${err_stub} - can't find plugin beamer file"
+    echo "Expected them in '${src}'"
+    exit
+fi
+
+# get target directory
+target="$(kpsewhich --var-value TEXMFHOME)"
+
+# ensure target directory exists
+if ! test -d "${target}" ; then
+    mkdir -p "${target}"
+    if ! test -d "${target}" ; then
+        "${err_stub} - cannot create target directory '${target}'"
+        exit
+    fi
+fi
+
+# synchronise beamer files
+rsync -i -a --delete "${src}/" "${target}/"
+if test ${?} -ne 0 ; then
+    echo "${err_stub} - this rsync command failed:"
+    echo "rsync -i -a --delete \"${src}/\" \"${target}/\""
+    exit
+fi
+
+# update local tex ls-R database
+mktexlsr "${target}"
+if test ${?} -ne 0 ; then
+    echo "${err_stub} - unable to update local tex ls-R database"
+    exit
+fi
+
+echo "Successfully synchronised beamer files"

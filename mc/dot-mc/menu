@@ -1,0 +1,3 @@
+= t rxt
+e Email as attachment
+  /usr/bin/dn-attach %d %s
