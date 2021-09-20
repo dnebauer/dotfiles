@@ -200,8 +200,6 @@ autoload_my_fns git-add-all
 if type -f git-add-all &>/dev/null ; then
     alias gaa=git-add-all
 fi
-# - man pages open in vim    {{{3
-compdef vman='man'
 # - file navigation    {{{3
 #   . commands: to, bm, unbm and bms (where 'bm' is 'bookmark')
 #   . http://jeroenjanssens.com/2013/08/16/quickly-navigate-your-filesystem-from-the-command-line.html
