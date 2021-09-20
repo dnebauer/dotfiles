@@ -124,10 +124,6 @@ Plug 'shougo/context_filetype.vim'
 " bundles: shell integration    {{{2
 " - file-line : open vim on given line    {{{3
 Plug 'bogado/file-line'
-" - superman : shell uses vim as manpage viewer    {{{3
-if has('unix')
-    Plug 'dnebauer/vim-superman'
-endif
 " - eunuch : unix shell commands as vim commands    {{{3
 "   . disable plugin-set autocommands after sourcing because they
 "     a) make all new files executable (not desirable), and
