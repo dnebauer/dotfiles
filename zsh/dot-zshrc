@@ -154,13 +154,6 @@ alias zmv='noglob zmv'
 alias zcp='noglob zmv -C'
 alias zln='noglob zmv -Ls'
 
-# Pager uses vim    {{{1
-vimpager="$HOME/.cache/dein/repos/github.com/rkitover/vimpager/vimpager"
-if [ -f "$vimpager" ] ; then
-    export PAGER="$vimpager"
-    alias less=$PAGER
-    alias zless=$PAGER
-fi
 # Disable flow control (Ctrl-s, Ctrl-q)    {{{1
 # tip from http://www.reddit.com/r/commandline/comments/1dhame/tmux_and_konsole_have_something_called_flow/
 stty stop  undef
