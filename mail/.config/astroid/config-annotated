@@ -33,13 +33,31 @@
         }
     },
     "accounts": {
+        "vodien": {
+            "name": "David Nebauer",
+            "email": "david@nebauer.id.au",
+            "gpgkey": "",
+            "always_gpg_sign": "false",
+            "sendmail": "msmtpq --account=vodien -t --read-envelope-from",
+            "default": "true",
+            "save_sent": "true",
+            "save_sent_to": "\/home\/david\/.local\/mail\/\/maildirs\/vodien\/INBOX.Sent\/cur\/",
+            "additional_sent_tags": "sent",
+            "save_drafts_to": "\/home\/david\/.local\/mail\/\/maildirs\/vodien\/INBOX.Drafts\/cur\/",
+            "signature_separate": "false",
+            "signature_file": "",
+            "signature_file_markdown": "",
+            "signature_default_on": "false",
+            "signature_attach": "false",
+            "select_query": ""
+        },
         "austdomains": {
             "name": "David Nebauer",
             "email": "david@nebauer.id.au",
             "gpgkey": "",
             "always_gpg_sign": "false",
             "sendmail": "msmtpq --account=austdomains -t --read-envelope-from",
-            "default": "true",
+            "default": "false",
             "save_sent": "true",
             "save_sent_to": "\/home\/david\/.local\/mail\/\/maildirs\/austdomains\/INBOX.Sent\/cur\/",
             "additional_sent_tags": "sent",

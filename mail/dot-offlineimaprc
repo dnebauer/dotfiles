@@ -3,13 +3,18 @@
 # offlineimap configuration file
 
 [general]
-accounts = austdomains,bigpond
+accounts = vodien,austdomains,bigpond
+#accounts = austdomains,bigpond
 #accounts = hotkey,bigpond,gmail
 #accounts = austdomains
 #accounts = bigpond
 ui = ttyui
 pythonfile = /home/david/.local/mail/utils/offlineimap.py
 maxsyncaccounts = 5
+
+[Account vodien]
+localrepository = vodien-local
+remoterepository = vodien-remote-secure
 
 [Account austdomains]
 localrepository = austdomains-local
@@ -26,6 +31,30 @@ remoterepository = bigpond-remote
 [Account gmail]
 localrepository = gmail-local
 remoterepository = gmail-remote
+
+[Repository vodien-local]
+type = Maildir
+localfolders = ~/.local/mail/maildirs/vodien
+
+[Repository vodien-remote-secure]
+type = IMAP
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+remotehost = web205.vodien.com.au
+port = 993
+starttls = yes
+nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
+remoteuser = david@nebauer.id.au
+remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'vodien']).strip()
+
+[Repository vodien-remote-insecure]
+type = IMAP
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+remotehost = mail.nebauer.id.au
+port = 2079
+starttls = no
+nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
+remoteuser = david@nebauer.id.au
+remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'vodien']).strip()
 
 [Repository austdomains-local]
 type = Maildir
