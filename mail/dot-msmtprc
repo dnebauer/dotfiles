@@ -43,39 +43,6 @@ user           david@nebauer.id.au
 from           david@nebauer.id.au
 passwordeval   secret-tool lookup isp vodien
 
-#################
-## austdomains ##
-#################
-
-# SSL/TLS settings:
-# - get error: 'server sent an empty reply'
-# - doesn't matter whether TLS certificate checking is on or off
-# - uses settings: host cp-wc07.syd02.ds.network, port 465
-# non-SSL/TLS settings
-# - if TLS certificate checking is on you get the error:
-#   "TLS certificate verification failed:...
-#   ... the certificate owner does not match hostname"
-# - works if turn off TLS certificate checking, so use these
-# - uses settings: tls_certcheck off, host mail.nebauer.id.au, port 587
-account        austdomains
-tls_certcheck  off
-host           mail.nebauer.id.au
-port           587
-user           david@nebauer.id.au
-from           david@nebauer.id.au
-passwordeval   secret-tool lookup isp austdomains
-
-############
-## hotkey ##
-############
-
-account       hotkey
-host          smtp.hotkey.net.au
-port          587
-user          davidnebauer
-from          davidnebauer@hotkey.net.au
-passwordeval  secret-tool lookup isp hotkey
-
 #############
 ## bigpond ##
 #############
@@ -90,13 +57,45 @@ passwordeval  secret-tool lookup isp bigpond
 ## gmail ##
 ###########
 
-account       gmail
-host          smtp.gmail.com
-port          587
-user          davidnebauer@gmail.com
-from          davidnebauer@gmail.com
-passwordeval  secret-tool lookup isp gmail
+#account       gmail
+#host          smtp.gmail.com
+#port          587
+#user          davidnebauer@gmail.com
+#from          davidnebauer@gmail.com
+#passwordeval  secret-tool lookup isp gmail
 
+#################
+## austdomains ##
+#################
+
+## SSL/TLS settings:
+## - get error: 'server sent an empty reply'
+## - doesn't matter whether TLS certificate checking is on or off
+## - uses settings: host cp-wc07.syd02.ds.network, port 465
+## non-SSL/TLS settings
+## - if TLS certificate checking is on you get the error:
+##   "TLS certificate verification failed:...
+##   ... the certificate owner does not match hostname"
+## - works if turn off TLS certificate checking, so use these
+## - uses settings: tls_certcheck off, host mail.nebauer.id.au, port 587
+#account        austdomains
+#tls_certcheck  off
+#host           mail.nebauer.id.au
+#port           587
+#user           david@nebauer.id.au
+#from           david@nebauer.id.au
+#passwordeval   secret-tool lookup isp austdomains
+
+############
+## hotkey ##
+############
+
+#account       hotkey
+#host          smtp.hotkey.net.au
+#port          587
+#user          davidnebauer
+#from          davidnebauer@hotkey.net.au
+#passwordeval  secret-tool lookup isp hotkey
 
 account default : vodien
 
