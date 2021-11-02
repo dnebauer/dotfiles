@@ -177,6 +177,8 @@ Plug 'terryma/vim-multiple-cursors'
 " - gnupg : transparently edit gpg-encrypted files    {{{3
 Plug 'jamessan/vim-gnupg'
 " bundles: searching and finding    {{{2
+" - visual-star-search : do * or # search from visual block    {{{3
+Plug 'nelstrom/vim-visual-star-search'
 " - denite : integrated information display    {{{3
 "   . gave up loading denite on demand as the dependencies are
 "     too fragile; only works dependably if force load at start
