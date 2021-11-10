@@ -82,7 +82,7 @@ function! s:MarkdownSupport()
     " - inline code (`)    {{{2
     let b:surround_96 = "`\r`"
     " enter hard/unbreakable space with <Ctrl><Space>    {{{1
-    inoremap <buffer> <C-Space>  
+    inoremap <buffer> <C-Space> <C-v>xa0
     " rewrap paragraph using <M-q>, i.e., Alt-q    {{{1
     " - linux terminal key codes for <M-q> not recognised by vim
     " - get terminal key codes using 'cat' or 'sed -n l'
