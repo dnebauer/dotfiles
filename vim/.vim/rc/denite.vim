@@ -61,8 +61,8 @@ nnoremap <silent> [denite]c :<C-u>Denite
 nnoremap [denite]d :<C-u>Denite
 " - ,f : source = file search    {{{1
 if dn#rc#os() ==# 'windows'
-    nnoremap <silent> [denite]f :call <SID>Denite_Find_on_Windows()<CR>
-    function! s:Denite_Find_on_Windows()
+    nnoremap <silent> [denite]f :call <SID>DeniteFindOnWindows()<CR>
+    function! s:DeniteFindOnWindows()
         " possible utilities to use:
         " - RipGrep (rg)
         "   https://github.com/BurntSushi/ripgrep
@@ -76,7 +76,7 @@ if dn#rc#os() ==# 'windows'
                     \   'utility': 'RipGrep',
                     \   'exename': 'rg',
                     \   'command': ['rg', '--follow', '--color', 'never',
-                    \               '--hidden', ''],
+                    \               '--hidden', '--files', '--glob', '!.git'],
                     \  },
                     \  {
                     \   'utility': 'Silver Searcher',
@@ -111,23 +111,24 @@ if dn#rc#os() ==# 'windows'
         endif
         " succeeded, so:
         " - configure denite accordingly
-        call denite#custom#var('file_rec', 'command', l:file_rec.command)
+        call denite#custom#var('file/rec', 'command', l:file_rec.command)
         " - inform user
         redraw
         echomsg 'Using ' l:file_rec.utility . ' (' . l:file_rec.exename
-                    \ . ') for grep command'
+                    \ . ') for find command'
         call s:Prompt()
         " - remap ',f' to run denite command next time
         nnoremap [denite]f :<C-u>Denite
                     \ -buffer-name=files
-                    \ file_rec<CR>
+                    \ file/rec<CR>
         " - run unite command this time
-        Unite -buffer-name=files file_rec
+        Denite -buffer-name=files file/rec
     endfunction
 else  " non-windows operating system
+    " defaults to use 'find' on unix-like systems
     nnoremap <silent> [denite]f :<C-u>Denite
                 \ -buffer-name=files
-                \ file_rec<CR>
+                \ file/rec<CR>
 endif
 " - ,F : source = recent files    {{{1
 nnoremap <silent> [denite]F :<C-u>Denite
@@ -151,8 +152,11 @@ function! s:Denite_Grep()
                 \  {
                 \   'utility' : 'ugrep',
                 \   'command' : ['ugrep'],
-                \   'default' : ['-i', '--no-heading', '--no-color',
-                \                '-H', '--hidden',
+                \   'default' : ['--color=never', '--no-heading', '--hidden',
+                \                '--ignore-binary', '--ignore-case',
+                \                '--line-number', '--column-number', '--mmap',
+                \                '--no-group-separator', '--tabs=1',
+                \                '--with-filename',
                 \                '--exclude-dir={.hg,.svn,.git,.bzr}'],
                 \   'recurse' : ['--dereference-recursive'],
                 \   'pattern' : [],
@@ -162,7 +166,7 @@ function! s:Denite_Grep()
                 \  {
                 \   'utility' : 'Silver Searcher',
                 \   'command' : ['ag'],
-                \   'default' : ['-i', '--vimgrep', '--hidden',
+                \   'default' : ['--ignore-case', '--vimgrep', '--hidden',
                 \                '--ignore ''.hg''', '--ignore ''.svn''',
                 \                '--ignore ''.git''', '--ignore ''.bzr''',
                 \                '--smart-case'],
@@ -183,8 +187,9 @@ function! s:Denite_Grep()
                 \  {
                 \   'utility' : 'ack',
                 \   'command' : ['ack'],
-                \   'default' : ['-i', '--no-heading', '--no-color',
-                \                '-k', '-H'],
+                \   'default' : ['--ignore-case', '--noheading', '--nocolor',
+                \                '--known-types', '--with-filename',
+                \                '--nopager', '--nogroup', '--column'],
                 \   'recurse' : [],
                 \   'pattern' : ['--match'],
                 \   'delimit' : [],
@@ -217,8 +222,7 @@ function! s:Denite_Grep()
     call denite#custom#var('grep', 'final_opts',     l:grep.final)
     " - inform user
     redraw
-    echomsg 'Using ' . l:grep.utility . '(' . l:grep.command[0] . ') for grep'
-    call s:Prompt()
+    echomsg 'Using ' . l:grep.utility . ' (' . l:grep.command[0] . ') for grep'
     " - remap ',g' to run denite command next time
     nnoremap [denite]g :<C-u>Denite -buffer-name=grep grep<CR>
     " - run denite command this time
