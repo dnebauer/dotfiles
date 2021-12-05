@@ -32,6 +32,10 @@ nnoremap <Leader>u :GundoToggle<CR>
 "   (see https://vi.stackexchange.com/a/13329 for details)
 inoremap <buffer><silent><C-Space>  
 
+" Modify surround plugin mappings    {{{1
+" - this is done to play nice with the sneak plugin
+" - both sneak and surround mappings done in search.vim
+
 " Delete trailing whitespace    {{{1
 let g:DeleteTrailingWhitespace        = 1
 let g:DeleteTrailingWhitespace_Action = 'delete'

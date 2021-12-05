@@ -22,11 +22,9 @@ try | lang en_AU | catch /^Vim\((\a\+)\)\=:E197:/
 endtry
 
 " Use ; for : and vice versa    {{{1
+" - see search.vim for semicolon interaction with sneak plugin
 vnoremap : ;
 vnoremap ; :
-" - in normal mode must interact with sneak plugin
-" - rest of sneak configuration is in nav.vim
-nmap <expr> ; sneak#is_sneaking() ? '<Plug>SneakNext' : ':'
 
 " Files to ignore when file matching    {{{1
 set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,
