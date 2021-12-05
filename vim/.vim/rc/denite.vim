@@ -33,6 +33,15 @@ function! s:DeniteSettings()
     " suppress regular buffer features
     setlocal noswapfile
     setlocal undolevels=-1
+    nnoremap <silent><buffer><expr>  <CR>   denite#do_map('do_action')
+    nnoremap <silent><buffer><expr>  <Esc>  denite#do_map('quit')
+    nnoremap <silent><buffer><expr>  q  denite#do_map('quit')
+    nnoremap <silent><buffer><expr>  a  denite#do_map('choose_action')
+    nnoremap <silent><buffer><expr>  i  denite#do_map('open_filter_buffer')
+    nnoremap <silent><buffer><expr>  p  denite#do_map('do_action', 'preview')
+    nnoremap <silent><buffer><expr>  d  denite#do_map('do_action', 'delete')
+    nnoremap <silent><buffer><expr>  <Space>
+                \ denite#do_map('toggle_select').'j'
 endfunction
 " Prompt function    {{{1
 function! s:Prompt()
