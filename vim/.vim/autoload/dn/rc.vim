@@ -785,6 +785,29 @@ function dn#rc#perlContrib() abort
     endif    " }}}2
 endfunction
 
+" dn#rc#perlModuleInstalled(module)    {{{1
+
+""
+" @public
+" Determine whether a perl {module} is installed on the current system.
+" @throws BadArg if argument is non-string or empty string
+" @throws NoPerl if unable to find perl executable
+function! dn#rc#perlModuleInstalled(module) abort
+    " check arg
+    let l:arg_type = dn#util#varType(a:module)
+    let l:err = 'ERROR(BadArg): Expected string arg, got '. l:arg_type
+    if l:arg_type !=# 'string' | throw l:err | endif
+    if empty(a:module) | throw 'ERROR(BadArg): Empty argument' | endif
+    " need perl
+    let l:err = 'ERROR(NoPerl): Cannot find perl executable'
+    if !executable('perl') | throw l:err | endif
+    " check for module
+    let l:cmd = ['perl', '-M'.a:module, '-e', '1', '2>', '/dev/null']
+    call system(l:cmd)
+    " report result
+    return !v:shell_error
+endfunction
+
 " dn#rc#pipInstall(package, [short])    {{{1
 
 ""
