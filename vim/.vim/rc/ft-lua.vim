@@ -12,13 +12,7 @@ function! s:LuaSupport()
     " ale    {{{2
     if dn#rc#lintEngine() ==# 'ale'
         let g:ale_lua_luacheck_options = '--no-unused-args'
-    endif
-    " syntastic    {{{2
-    if dn#rc#lintEngine() ==# 'syntastic'
-        let g:syntastic_check_on_open     = 1
-        let g:syntastic_lua_checkers      = ['luac', 'luacheck']
-        let g:syntastic_lua_luacheck_args = '--no-unused-args'
-    endif
+    endif    " }}}2
     " }}}1
 endfunction
 

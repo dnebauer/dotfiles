@@ -560,16 +560,6 @@ function! dn#rc#message(message, ...) abort
     if l:insert | execute 'normal! l' | startinsert | endif
 endfunction
 
-" dn#rc#neomakeLinters()    {{{1
-
-""
-" @public
-" Update neomake linters:
-" * vim-vint - for vimscript
-function! dn#rc#neomakeLinters() abort
-    call dn#rc#updateLinters(['vim-vint'])
-endfunction
-
 " dn#rc#npmInstall(package, [short])    {{{1
 
 ""
@@ -1024,72 +1014,14 @@ function! dn#rc#setColorScheme(gui, terminal) abort
     endif
 endfunction
 
-" dn#rc#setLintEngine([engine])    {{{1
+" dn#rc#setLintEngine()    {{{1
 
 ""
 " @public
-" Sets linter engine to use. The linter [engine] can optionally be provided.
-" Valid values are:
-" * ale
-" * syntastic
-" * neomake
-" @default engine='ale'
-"
-" The provided, or default, engine will be overridden in the following
-" circumstances (and the user notified):
-" * cannot run syntastic in nvim, so in nvim switch syntastic to "neomake"
-" * for docbk files use "syntastic" (ftplugin defines custom linters)
-function! dn#rc#setLintEngine(...) abort
-    let l:override = v:false  " flag that choice was overridden
-    let l:messages = []  " user feedback
-    let l:default_engine = 'ale'  " make sure is in l:valid_engines
-    let l:valid_engines = ['ale', 'syntastic', 'neomake']
-    if !count(l:valid_engines, l:default_engine)  " default is not valid!
-        call dn#rc#error([
-                    \ 'Valid engines (' . join(l:valid_engines, ', ') . ')',
-                    \ 'do not include default (' . l:default_engine . ')'
-                    \ ])
-        return
-    endif
-    if a:0 && a:1 !=? ''  " set to user value or default
-        let l:engine = a:1
-        call add(l:messages, "User set linter engine to '" . l:engine . "'")
-    else
-        let l:engine = l:default_engine
-        call add(l:messages, "Linter engine defaulted to '" . l:engine . "'")
-    endif
-    if !count(l:valid_engines, l:engine)  " check validity
-        call extend(l:messages, [
-                    \ "Linter engine '" . l:engine . "' is not valid",
-                    \ "(must be one of '" . join(l:valid_engines, '|') . "')",
-                    \ "Setting to default: '" . l:default_engine . "'"
-                    \ ])
-        let l:override = v:true
-        let l:engine = l:default_engine
-    endif
-    " overridden in specific circumstances
-    " - can't use syntastic in nvim
-    if l:engine ==# 'syntastic' && dn#rc#isNvim()
-        call extend(l:messages, [
-                    \ 'Running nvim but syntastic requires vim',
-                    \ "Switching to use 'neomake' instead"
-                    \ ])
-        let l:override = v:true
-        let l:engine = 'neomake'
-    endif
-    " - docbk requires syntastic (ftplugin defines custom syntastic linters)
-    if &filetype ==# 'docbk' && l:engine !=# 'syntastic'
-        call extend(l:messages, [
-                    \ 'Ftplugin dn-docbk requires the syntastic linter',
-                    \ "Switching to use 'syntastic' instead"
-                    \ ])
-        let l:override = v:true
-        let l:engine = 'neomake'
-    endif
-    " provide feedback if overrode linter engine
-    if l:override | call dn#rc#warn(l:messages) | endif
-    " set linter engine
-    let s:lint_engine = l:engine
+" Sets linter engine to use. This previously used a much more complex
+" algorithm. Now it simply sets the linter engine to 'ale'.
+function! dn#rc#setLintEngine() abort
+    let s:lint_engine = 'ale'
 endfunction
 
 " dn#rc#source(directory, self)    {{{1

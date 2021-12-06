@@ -63,25 +63,7 @@ function! s:GoSupport()
     " - ensure command output is displayed    {{{2
     let g:go_list_type = 'quickfix'
     " linting    {{{1
-    " syntastic    {{{2
-    if dn#rc#lintEngine() ==# 'syntastic'
-        if !exists('g:syntastic_go_checkers')
-            let g:syntastic_go_checkers = []
-        endif
-        if executable('golint') && !count(g:syntastic_go_checkers, 'golint')
-            call add(g:syntastic_go_checkers, 'golint')
-        endif
-        if !count(g:syntastic_go_checkers, 'govet')
-            call add(g:syntastic_go_checkers, 'govet')
-        endif
-        if !count(g:syntastic_go_checkers, 'errcheck')
-            call add(g:syntastic_go_checkers, 'errcheck')
-        endif
-        let g:syntastic_mode_map = {
-                    \ 'mode'              : 'active',
-                    \ 'passive_filetypes' : ['go']
-                    \ }
-    endif    " }}}1
+    " }}}1
 endfunction
 
 augroup vrc_go_files
