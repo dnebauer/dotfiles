@@ -161,24 +161,6 @@ function! dn#rc#configureDenite() abort
     endif
 endfunction
 
-" dn#rc#configureEchodoc()    {{{1
-
-" @setting g:echodoc#enable_at_startup
-" Set to 1 - enable echodoc plugin at startup.
-" Default setting is 0 - do not enable at startup.
-
-" @setting g:echodoc#type
-" Set to 'popup'.
-
-""
-" @public
-" Configure echodoc plugin to enable at startup and use vim's popup window
-" feature.
-function! dn#rc#configureEchodoc() abort
-    let g:echodoc#enable_at_startup = 1
-    let g:echodoc#type = 'popup'
-endfunction
-
 " dn#rc#configureWinPython()    {{{1
 
 ""

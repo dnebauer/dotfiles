@@ -266,17 +266,6 @@ Plug 'dnebauer/vim-dn-print-dialog', { 'on':  ['PrintDialog'] }
 " - calendar : display calendar    {{{3
 Plug 'mattn/calendar-vim', { 'on': ['Calendar', 'CalendarH', 'CalendarT'] }
 " bundles: completion    {{{2
-" - neco-vim : completion source helper    {{{3
-Plug 'shougo/neco-vim', { 'for': ['vim'] }
-" - echodoc : plugin helper that prints to echo area    {{{3
-if exists('v:completed_item')
-    Plug 'shougo/echodoc.vim', { 'on': [] }
-    augroup vrc_load_echodoc
-        autocmd!
-        autocmd CompleteDone * call plug#load('echodoc.vim')
-    augroup END
-    call dn#rc#configureEchodoc()
-endif
 " - delimitMate : completion helper closes paired syntax    {{{3
 Plug 'raimondi/delimitMate', { 'on': [] }
 augroup vrc_load_delimitmate
