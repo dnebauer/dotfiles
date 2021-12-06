@@ -661,21 +661,6 @@ function! dn#rc#panderPath() abort
     endif
 endfunction
 
-" dn#rc#panzerPath()    {{{1
-
-""
-" @public
-" Provide path to panzer support directory.
-function! dn#rc#panzerPath() abort
-    let l:os = dn#rc#os()
-    let l:home = escape($HOME, ' ')
-    if     l:os ==# 'windows' | return resolve(
-                \                      expand('~/AppData/Local/panzer'))
-    elseif l:os ==# 'unix'    | return l:home . '/.config/panzer'
-    else                      | return l:home . '/.config/panzer'
-    endif
-endfunction
-
 " dn#rc#perlContrib()    {{{1
 
 ""
