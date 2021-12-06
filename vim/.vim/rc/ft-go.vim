@@ -13,26 +13,6 @@ function! s:GoSupport()
             \                'c:const'],
             \ }
     endif
-    " deoplete-go configuration    {{{1
-	" - gocode binary to use    {{{2
-    if executable('gocode')
-        let g:deoplete#sources#go#gocode_binary = exepath('gocode')
-    endif
-	" - words to include, and sort order    {{{2
-    let g:deoplete#sources#go#sort_class
-                \ = ['package', 'func', 'type', 'var', 'const']
-    " - json caching    {{{2
-    let g:deoplete#sources#go#use_cache = 1
-	let s:json_dir = '/home/david/.cache/dein/repos/github.com/zchee'
-                \  . '/deoplete-go/data/json/1.6.2/linux_amd64/go'
-	if isdirectory(s:json_dir)
-		let g:deoplete#sources#go#json_directory
-					\ = '/home/david/.cache/dein/repos/github.com'
-					\ . '/zchee/deoplete-go/data/json/1.6.2'
-                    \ . '/linux_amd64/go'
-	else
-		echoerr 'ft-go.vim: could not find ' . s:json_dir
-	endif
     " vim-go configuration    {{{1
     " - mappings    {{{2
     " - \r  : go run    {{{3

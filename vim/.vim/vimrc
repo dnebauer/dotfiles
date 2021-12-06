@@ -89,10 +89,6 @@ call plug#begin(dn#rc#pluginsDir())
 " 
 " mattn/webapi-vim > christoomey/vim-quicklink
 " 
-" shougo/neco-syntax} > shougo/deoplete.nvim > {zchee/deoplete-clang
-" shougo/neopairs   }                          {carlitux/deoplete-ternjs
-"                                              {deoplete-plugins/deoplete-go
-" 
 " shougo/neomru.vim       } > shougo/denite.nvim  > {iyuuya/denite-ale
 " shougo/neoinclude.vim   }                         {chemzqm/denite-extra
 " roxma/nvim-yarp         }                         {ozelentok/denite-gtags
@@ -270,20 +266,6 @@ Plug 'dnebauer/vim-dn-print-dialog', { 'on':  ['PrintDialog'] }
 " - calendar : display calendar    {{{3
 Plug 'mattn/calendar-vim', { 'on': ['Calendar', 'CalendarH', 'CalendarT'] }
 " bundles: completion    {{{2
-" - neopairs : completion helper closes paired structures    {{{3
-"   . required by: shougo/deoplete.nvim
-if dn#rc#isNvim() || (v:version >= 704 &&  has('patch-7.4.774'))
-    Plug 'shougo/neopairs.vim'
-endif
-" - neco-syntax : completion syntax helper    {{{3
-"   . required by: shougo/deoplete.nvim
-Plug 'shougo/neco-syntax'
-" - deoplete : nvim completion engine    {{{3
-"   . depends on: shougo/neopairs.vim, shougo/neco-syntax
-"   . required by: zchee/deoplete-clang, carlitux/deoplete-ternjs
-if dn#rc#isNvim()
-    Plug 'shougo/deoplete.nvim'
-endif
 " - neco-vim : completion source helper    {{{3
 Plug 'shougo/neco-vim', { 'for': ['vim'] }
 " - echodoc : plugin helper that prints to echo area    {{{3
@@ -294,10 +276,6 @@ if exists('v:completed_item')
         autocmd CompleteDone * call plug#load('echodoc.vim')
     augroup END
     call dn#rc#configureEchodoc()
-endif
-" - perlomni : perl completion    {{{3
-if dn#rc#isNvim() || v:version >= 702
-    Plug 'c9s/perlomni.vim', { 'for': ['perl'] }
 endif
 " - delimitMate : completion helper closes paired syntax    {{{3
 Plug 'raimondi/delimitMate', { 'on': [] }
@@ -427,11 +405,6 @@ endif
 if executable('git')
     Plug 'tpope/vim-fugitive'
 endif
-" bundles: clang support    {{{2
-" . depends on: shougo/deoplete.nvim
-if dn#rc#isNvim()
-    Plug 'zchee/deoplete-clang', { 'for': ['c', 'cpp', 'objc'] }
-endif
 " bundles: docbook support    {{{2
 " - snippets : docbook5 snippets    {{{3
 Plug 'jhradilek/vim-snippets', { 'for': ['docbk'] }
@@ -446,10 +419,6 @@ if (dn#rc#isVim() && has('patch-8.0.1453'))
             \ || (dn#rc#isNvim() && has('nvim-0.4.0'))
     Plug 'fatih/vim-go', { 'for': ['go'], 'do': ':GoUpdateBinaries' }
 endif
-" - deoplete-go : deoplete helper    {{{3
-if dn#rc#isNvim()
-    Plug 'deoplete-plugins/deoplete-go', { 'for': ['go'], 'do': 'make' }
-endif
 
 " bundles: html support    {{{2
 " - html5 : html5 support    {{{3
@@ -463,38 +432,6 @@ Plug 'Valloric/MatchTagAlways', { 'for': ['html', 'xhtml', 'xml', 'jinja'] }
 " bundles: java support    {{{2
 " - javacomplete2 - completion    {{{3
 Plug 'artur-shaik/vim-javacomplete2', { 'for': ['java'] }
-" bundles: javascript support    {{{2
-" - tern + jsctags : javascript tag generator    {{{3
-" - jsctags install details    {{{4
-"   . provides tag support for javascript
-"   . is installed by npm as binaries
-"     - npm requires node.js which is no longer supported on cygwin
-"     - so cannot install jsctags on cygwin
-"   . requires tern_for_vim
-"   . is reinstalled whenever tern is updated - see tern install next
-"   . npm install command used below assumes npm is configured to
-"     install in global mode without needing superuser privileges
-" - tern install details    {{{4
-"   . is installed by npm
-"     - npm requires node.js which is no longer supported on cygwin
-"     - so cannot install tern on cygwin
-"   . npm install command used below assumes npm is configured to
-"     install in global mode without needing superuser privileges
-"   . update of tern is used as trigger to reinstall jsctags
-if !dn#rc#cygwin()
-    if dn#rc#isVim()
-        Plug 'ternjs/tern_for_vim', {
-                    \ 'for': ['javascript', 'javascript.jsx'],
-                    \ 'do':  function('dn#rc#buildTernAndJsctags') }
-        if dn#rc#isNvim()
-            " depends on: shougo/deoplete.nvim
-            Plug 'carlitux/deoplete-ternjs', {
-                        \ 'for': ['javascript', 'javascript.jsx'],
-                        \ 'do':  function('dn#rc#buildTernjs') }
-            call dn#rc#pluginCmdsAdd('call dn#rc#configureTernjs()')
-        endif
-    endif
-endif
 " bundles: json support    {{{2
 " - vim-json : json highlighting/indenting    {{{3
     Plug 'elzr/vim-json', { 'for': ['json', 'jsonl', 'jsonp'] }
@@ -570,12 +507,6 @@ if dn#rc#isVim()
     Plug 'davidhalter/jedi-vim', {
                 \ 'for': ['python'], 'do': function('dn#rc#buildJedi') }
 endif
-" - deoplete-jedi : deoplete helper    {{{3
-"   . depends on: shougo/deoplete.nvim
-if executable('python3')
-    Plug 'zchee/deoplete-jedi', {
-                \ 'for': ['python'], 'do': function('dn#rc#buildJedi') }
-endif
 " - pep8 : indentation support    {{{3
 Plug 'hynek/vim-python-pep8-indent', { 'for': 'python' }
 " bundles: tiddlywiki support    {{{2
@@ -598,9 +529,6 @@ Plug 'vim-scripts/xml.vim', { 'for': ['xml'] }
 " bundles: xquery support    {{{2
 " - indentomnicomplete : autoindent and omnicomplete    {{{3
 Plug 'vim-scripts/XQuery-indentomnicompleteftplugin', { 'for': ['xquery'] }
-" bundles: zsh support    {{{2
-" - deoplete-zsh : deoplete helper    {{{3
-Plug 'zchee/deoplete-zsh', { 'for': ['zsh'] }
 " initialise plugin system    {{{2
 call plug#end()
 " set preferred settings    {{{2

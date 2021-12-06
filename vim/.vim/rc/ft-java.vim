@@ -5,19 +5,6 @@ function! s:JavaSupport()
     if dn#rc#isVim()
         setlocal omnifunc=javacomplete#Complete
     endif
-    " nvim completion with deoplete    {{{1
-    if dn#rc#isNvim()
-        if !exists('g:deoplete#omni#input_patterns')
-            let g:deoplete#omni#input_patterns = {}
-        endif
-        let g:deoplete#omni#input_patterns.java = [
-                    \ '[^. \t0-9]\.\w*',
-                    \ '[^. \t0-9]\->\w*',
-                    \ '[^. \t0-9]\::\w*',
-                    \ '\s[A-Z][a-z]',
-                    \ '^\s*@[A-Z][a-z]',
-                    \ ]
-    endif    " }}}1
 endfunction
 
 augroup vrc_java_files

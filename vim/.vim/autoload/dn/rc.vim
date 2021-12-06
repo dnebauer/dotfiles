@@ -132,57 +132,6 @@ function! dn#rc#buildPandoc() abort
                 \         'pandocinject')
 endfunction
 
-" dn#rc#buildTernAndJsctags()    {{{1
-
-""
-" @public
-" The utility jsctags is a javascript tag generator. It requires tern
-" ("tern_for_vim"). These utilities cannot be installed if vim is running
-" under Cygwin as Cygwin does not support node.js which is used by npm, the
-" installer for both jsctags and tern.
-function! dn#rc#buildTernAndJsctags() abort
-    " check install requirements
-    " - need npm
-    if !executable('npm')
-        let l:err = [ "Installer 'npm' is not available:",
-                    \ 'Cannot build jsctags and tern-for-vim']
-        call dn#rc#warn(l:err)
-        return
-    endif
-    " - cannot install under cygwin
-    if dn#rc#cygwin()
-        let l:err = [ 'Vim appears to be running under Cygwin',
-                    \ "Installer 'npm' is not available under Cygwin",
-                    \ 'Unable to build jsctags and tern-for-vim']
-        call dn#rc#warn(l:err)
-        return
-    endif
-    " build tern
-    let l:feedback = systemlist('npm install')
-    if v:shell_error
-        let l:err = ['Unable to build tern-for-vim plugin']
-        if !empty(l:feedback)
-            call map(l:feedback, '"  " . v:val')
-            call extend(l:err, ['Error message:'] + l:feedback)
-        endif
-        call dn#rc#warn(l:err)
-        return
-    endif
-    " build jsctags
-    call dn#rc#npmInstall('git+https://github.com/ramitos/jsctags.git',
-                \         'jsctags')
-endfunction
-
-" dn#rc#buildTernjs()    {{{1
-
-""
-" @public
-" Install tern-for-vim plugin. Tern is a code-analysis engine for JavaScript
-" intended to be used with a code editor plugin.
-function! dn#rc#buildTernjs() abort
-    call dn#rc#npmInstall('tern')
-endfunction
-
 " dn#rc#cdToLocalDir()    {{{1
 
 ""
@@ -228,24 +177,6 @@ endfunction
 function! dn#rc#configureEchodoc() abort
     let g:echodoc#enable_at_startup = 1
     let g:echodoc#type = 'popup'
-endfunction
-
-" dn#rc#configureTernjs()    {{{1
-
-" @setting g:tern_request_timeout
-" Set this parameter of the tern-for-vim plugin to 1.
-
-" @setting g:tern_show_signature_in_pum
-" Set this parameter of the tern-for-vim plugin to 0.
-
-""
-" @public
-" Configure the tern-for-vim plugin:
-" * |g:tern_request_timeout|
-" * |g:tern_show_signature_in_pum|
-function! dn#rc#configureTernjs() abort
-    let g:tern_request_timeout = 1
-    let g:tern_show_signature_in_pum = 0
 endfunction
 
 " dn#rc#configureWinPython()    {{{1
