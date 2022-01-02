@@ -1191,6 +1191,7 @@ function! dn#rc#updateLinters() abort
     call dn#rc#updateLinterRemarkLint()
     call dn#rc#updateLinterRubocop()
     call dn#rc#updateLinterStylelint()
+    call dn#rc#updateLinterTextlint()
     call dn#rc#updateLinterTidy()
     call dn#rc#updateLinterVimVint()
     call dn#rc#updateLinterWriteGood()
@@ -1337,6 +1338,20 @@ function! dn#rc#updateLinterStylelint() abort
     " standard config (see github repo stylelint/stylelint-config-standard)
     call dn#rc#npmInstall('stylelint-config-standard')
 endfunction
+
+" dn#rc#updateLinterTextlint()    {{{1
+
+""
+" @public
+" Update linter textlint for markdown. It consists of a javascript package
+" (node module).
+function! dn#rc#updateLinterTextlint() abort
+    " the linter
+    call dn#rc#npmInstall('textlint')
+    " configuration
+    call dn#rc#npmInstall('@textlint-rule/textlint-rule-preset-google')
+endfunction
+
 " dn#rc#updateLinterTidy()    {{{1
 
 ""

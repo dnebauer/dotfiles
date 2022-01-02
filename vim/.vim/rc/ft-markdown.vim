@@ -104,7 +104,7 @@ function! s:MarkdownSupport()
     "   . example error: 'Error: Could not find module `remark-gfm`'
     "   . seems likely problem is that remark cannot find globally installed
     "     modules (possible because of the prefix defined in ~/.npmrc)
-    let b:ale_linters = ['mdl', 'proselint', 'write-good']
+    let b:ale_linters = ['mdl', 'proselint', 'textlint', 'write-good']
     " }}}1
 endfunction
 
