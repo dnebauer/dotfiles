@@ -266,6 +266,8 @@ Plug 'dnebauer/vim-dn-print-dialog', { 'on':  ['PrintDialog'] }
 " - calendar : display calendar    {{{3
 Plug 'mattn/calendar-vim', { 'on': ['Calendar', 'CalendarH', 'CalendarT'] }
 " bundles: completion    {{{2
+" - coc : main completion engine    {{{3
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " - delimitMate : completion helper closes paired syntax    {{{3
 Plug 'raimondi/delimitMate', { 'on': [] }
 augroup vrc_load_delimitmate
@@ -358,7 +360,8 @@ Plug 'myusuf3/numbers.vim'
 " bundles: linting    {{{2
 " - ale : linter for vim/nvim    {{{3
 if dn#rc#lintEngine() ==# 'ale'
-    Plug 'w0rp/ale', { 'do': function('dn#rc#aleLinters') }
+    call dn#rc#configureAle()
+    Plug 'dense-analysis/ale', { 'do': function('dn#rc#updateLinters') }
 endif    " }}}3
 " bundles: tags    {{{2
 " - misc : plugin library used by other scripts    {{{3
