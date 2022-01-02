@@ -1311,7 +1311,10 @@ endfunction
 " Update linter stylelint for css and scss. It consists of a javascript
 " package (node module).
 function! dn#rc#updateLinterStylelint() abort
+    " the linter
     call dn#rc#npmInstall('stylelint')
+    " standard config (see github repo stylelint/stylelint-config-standard)
+    call dn#rc#npmInstall('stylelint-config-standard')
 endfunction
 " dn#rc#updateLinterTidy()    {{{1
 
