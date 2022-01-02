@@ -1292,7 +1292,28 @@ endfunction
 " (node module). The remark-cli package installs remark-lint and a
 " command-line interface.
 function! dn#rc#updateLinterRemarkLint() abort
+    " the linter
     call dn#rc#npmInstall('remark-cli')
+    " rules packages as per:
+    " https://tartansandal.github.io/vim/markdown/remark/2021/10/05/vim-remark.html
+    " see also configuration file: ~/.remarkrc.yml
+    call dn#rc#npmInstall('remark-gfm')
+    call dn#rc#npmInstall('remark-preset-lint-recommended')
+    call dn#rc#npmInstall('remark-preset-lint-markdown-style-guide')
+    call dn#rc#npmInstall('remark-lint-list-item-indent')
+    call dn#rc#npmInstall('remark-lint-ordered-list-marker-value')
+    call dn#rc#npmInstall('remark-lint-strikethrough-marker')
+    call dn#rc#npmInstall('remark-lint-checkbox-content-indent')
+    call dn#rc#npmInstall('remark-lint-checkbox-character-style')
+    call dn#rc#npmInstall('remark-lint-linebreak-style')
+    call dn#rc#npmInstall('remark-lint-unordered-list-marker-style')
+    call dn#rc#npmInstall('remark-lint-no-missing-blank-lines')
+    call dn#rc#npmInstall('remark-lint-link-title-style')
+    call dn#rc#npmInstall('remark-lint-first-heading-level')
+    call dn#rc#npmInstall('remark-lint-no-heading-indent')
+    call dn#rc#npmInstall('remark-lint-no-heading-like-paragraph')
+    call dn#rc#npmInstall('remark-lint-no-duplicate-headings-in-section')
+    call dn#rc#npmInstall('remark-lint-no-paragraph-content-indent')
 endfunction
 
 " dn#rc#updateLinterRubocop()    {{{1

@@ -14,9 +14,9 @@ endfunction
 " This error should be caught and handled when
 " setting autocommands.
 
-" Ale    {{{1
+" linting    {{{1
 if dn#rc#lintEngine() ==# 'ale'
-    " integrate with airline    {{{2
+    " integrate ALE with airline    {{{2
     let g:airline#extensions#ale#enabled = 1
     " save file after alteration    {{{2
     " - because some linters can't be run on buffer contents, only saved file
@@ -30,7 +30,11 @@ if dn#rc#lintEngine() ==# 'ale'
     augroup vrc_ale
         autocmd!
         autocmd InsertLeave,TextChanged * call s:SaveAfterAlteration()
-    augroup END    " }}}2
+    augroup END
+    " force remark plugin to use global config file    {{{2
+    let b:ale_markdown_remark_lint_use_global = 1
+    let b:ale_markdown_remark_lint_options = '-r ~/.remarkrc.yml'
+    " }}}2
 endif    " }}}1
 
 " vim:foldmethod=marker:

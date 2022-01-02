@@ -1,0 +1,58 @@
+# Source:
+# https://tartansandal.github.io/vim/markdown/remark/2021/10/05/vim-remark.html
+
+# Annotated version:
+# https://github.com/tartansandal/dotfiles/blob/master/remarkrc.yml
+
+# ----------------------------------------------------------------------------
+
+settings:
+
+  # prefer '-' over default '*'
+  rule: '-'
+
+  # always use fences for code blocks
+  fences: true
+
+  # indent list item content by bullet width plus one space
+  listItemIndent: one
+
+# ----------------------------------------------------------------------------
+
+plugins:
+
+  - remark-gfm
+
+  - remark-preset-lint-recommended
+  - remark-preset-lint-markdown-style-guide
+
+  - - remark-lint-list-item-indent
+    - space
+
+  - - remark-lint-ordered-list-marker-value
+    - ordered
+
+  - remark-lint-strikethrough-marker
+  - remark-lint-checkbox-content-indent
+
+  - - remark-lint-checkbox-character-style
+    - {checked: 'x', unchecked: ' '}
+
+  - remark-lint-linebreak-style
+
+  - - remark-lint-unordered-list-marker-style
+    - '*'
+
+  - - remark-lint-no-missing-blank-lines
+    - exceptTightLists: true
+
+  - - remark-lint-link-title-style
+    - false
+
+  - remark-lint-first-heading-level
+  - remark-lint-no-heading-indent
+  - remark-lint-no-heading-like-paragraph
+  - remark-lint-no-duplicate-headings-in-section
+  - remark-lint-no-paragraph-content-indent
+
+# ----------------------------------------------------------------------------
