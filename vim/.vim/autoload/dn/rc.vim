@@ -89,27 +89,6 @@ function! dn#rc#addThesaurus(file) abort
     let &thesaurus .= l:file
 endfunction
 
-" dn#rc#aleLinters()    {{{1
-
-""
-" @public
-" Update ale linters:
-" * autopep8    - for python
-" * flake8      - for python
-" * mdl         - for markdown
-" * proselint   - for English prose
-" * remark-lint - for markdown
-" * rubocop     - for ruby
-" * vim-vint    - for vimscript
-" * write-good  - for English prose
-function! dn#rc#aleLinters() abort
-    call dn#rc#updateLinters([
-                \ 'write-good',  'proselint', 'mdl',
-                \ 'remark-lint', 'vim-vint',  'flake8',
-                \ 'autopep8',    'rubocop',
-                \ ])
-endfunction
-
 " dn#rc#buildJedi()    {{{1
 
 ""
@@ -142,6 +121,20 @@ function! dn#rc#cdToLocalDir() abort
     if expand('%:p') !~? '://'
         lcd %:p:h
     endif
+endfunction
+
+" dn#rc#configureAle()    {{{1
+
+""
+" @public
+" Configure the ALE linter plugin. This function is intended to be called
+" before the plugin is loaded.
+function! dn#rc#configureAle() abort
+    " set plugin variables
+    let g:ale_fix_on_save = 1
+    let g:ale_fixers = {
+                \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+                \ }
 endfunction
 
 " dn#rc#configureDenite()    {{{1
@@ -273,14 +266,34 @@ endfunction
 
 ""
 " @public
-" Display error {messages}, a |List| of |Strings| using |hl-ErrorMsg|
-" highlighting and then pause till user presses Enter. Uses |:echomsg| to
-" ensure messages are saved to the |message-history|. There is no return
-" value.
+" Display error {messages} using |hl-ErrorMsg| highlighting. The messages are
+" expected to be a string or a |List| of |Strings|. Any other types of value
+" are stringified with |string()|.
+" Note that if there is more than one message vim will pause after displaying
+" them until the user presses Enter. 
+" Uses |:echomsg| to ensure messages are saved to the |message-history|. There
+" is no return value.
 function! dn#rc#error(messages) abort
-    if type(a:messages) != type([]) | return | endif
+    " convert to list of strings
+    " - cannot pass string to string() because it encloses in single quotes
+    let l:messages = []
+    let l:type = type(a:messages)
+    if l:type == v:t_list
+        for l:item in a:messages
+            if type(l:item) == v:t_string
+                call add(l:messages, l:item)
+            else
+                call add(l:messages, string(l:item))
+            endif
+        endfor
+    elseif l:type == v:t_string
+        call add(l:messages, l:item)
+    else
+        call add(l:messages, string(l:item))
+    endif
+    " display messages
     echohl ErrorMsg
-    for l:message in a:messages | echomsg l:message | endfor
+    for l:message in l:messages | echomsg l:message | endfor
     echohl None
     return
 endfunction
@@ -590,8 +603,7 @@ function dn#rc#perlContrib() abort
         return v:false
     endif
     if !isdirectory(l:after) && !dn#rc#createDir(l:after)
-        let l:err = [ 'Unable to move perl contrib syntax files to '
-                    \ . l:after]
+        let l:err = 'Unable to move perl contrib syntax files to ' . l:after
         call dn#rc#warn(l:err)
         return v:false
     endif
@@ -1148,44 +1160,190 @@ function! dn#rc#temp(part) abort
     endif
 endfunction
 
-" dn#rc#updateLinters(engines)    {{{1
+" dn#rc#updateLinters()    {{{1
 
 ""
 " @public
-" Update a |List| of linter {engines}. Valid engine names are:
+" Update ale linters:
 " * autopep8    - for python
 " * flake8      - for python
+" * htmlhint    - for html
 " * mdl         - for markdown
+" * luac        - for lua
+" * luacheck    - for lua
+" * perlcritic  - for perl5
 " * proselint   - for English prose
 " * remark-lint - for markdown
 " * rubocop     - for ruby
+" * stylelint   - for [s]css
+" * tidy        - for html
 " * vim-vint    - for vimscript
 " * write-good  - for English prose
-function! dn#rc#updateLinters(engines) abort
-    if type(a:engines) != type([])  " script error
-        echoerr 'Engines variable is not a list'
+function! dn#rc#updateLinters() abort
+    call dn#rc#updateLinterAutopep8()
+    call dn#rc#updateLinterFlake8()
+    call dn#rc#updateLinterHtmlhint()
+    call dn#rc#updateLinterMdl()
+    call dn#rc#updateLinterLuac()
+    call dn#rc#updateLinterLuacheck()
+    call dn#rc#updateLinterPerlcritic()
+    call dn#rc#updateLinterProselint()
+    call dn#rc#updateLinterRemarkLint()
+    call dn#rc#updateLinterRubocop()
+    call dn#rc#updateLinterStylelint()
+    call dn#rc#updateLinterTidy()
+    call dn#rc#updateLinterVimVint()
+    call dn#rc#updateLinterWriteGood()
+endfunction
+
+" dn#rc#updateLinterAutopep8()    {{{1
+
+""
+" @public
+" Update linter autopep8 for python.
+function! dn#rc#updateLinterAutopep8() abort
+    call dn#rc#pipInstall('autopep8')
+endfunction
+
+" dn#rc#updateLinterFlake8()    {{{1
+
+""
+" @public
+" Update linter flake8 for python. It consists of a python package.
+function! dn#rc#updateLinterFlake8() abort
+    call dn#rc#pipInstall('flake8')
+endfunction
+
+" dn#rc#updateLinterHtmlhint()    {{{1
+
+""
+" @public
+" Update linter htmlhint for html. It consists of a javascript package (node
+" module).
+function! dn#rc#updateLinterHtmlhint() abort
+    call dn#rc#npmInstall('htmlhint')
+endfunction
+
+" dn#rc#updateLinterMdl()    {{{1
+
+""
+" @public
+" Update linter mdl for markdown. It consists of a ruby package.
+function! dn#rc#updateLinterMdl() abort
+    call dn#rc#gemInstall('mdl')
+endfunction
+
+" dn#rc#updateLinterLuac()    {{{1
+
+""
+" @public
+" Update linter luac for lua. It is the lua compiler. On debian systems the
+" compiler executable is part of a deb package.
+function! dn#rc#updateLinterLuac() abort
+    if !executable('luac')
+        let l:msg = ["Cannot locate executable 'luac'",
+                    \ 'ALE will be unable to use it as a lua linter']
+        call dn#rc#error([l:msg])
     endif
-    for l:engine in a:engines
-        if     l:engine ==# 'autopep8'              " autopep8
-            call dn#rc#pipInstall('autopep8')
-        elseif l:engine ==# 'flake8'                " flake8
-            call dn#rc#pipInstall('flake8')
-        elseif l:engine ==# 'mdl'                   " mdl
-            call dn#rc#gemInstall('mdl')
-        elseif l:engine ==# 'proselint'             " proselint
-            call dn#rc#pipInstall('proselint')
-        elseif l:engine ==# 'remark-lint'           " remark-lint
-            call dn#rc#npmInstall('remark-lint')
-        elseif l:engine ==# 'rubocop'               " rubocop
-            call dn#rc#gemInstall('rubocop')
-        elseif l:engine ==# 'vim-vint'              " vim-vint
-            call dn#rc#pipInstall('vim-vint')
-        elseif l:engine ==# 'write-good'            " write-good
-            call dn#rc#npmInstall('write-good')
-        else
-            echoerr "Unknown linter keyword '" . l:engine . "'"
-        endif
-    endfor
+endfunction
+
+" dn#rc#updateLinterLuacheck()    {{{1
+
+""
+" @public
+" Update linter luacheck for lua. It consists of an executable. On debian
+" systems the executable is part of a deb package.
+function! dn#rc#updateLinterLuacheck() abort
+    if !executable('luacheck')
+        let l:msg = ["Cannot locate executable 'luacheck'",
+                    \ 'ALE will be unable to use it as a lua linter']
+        call dn#rc#error([l:msg])
+    endif
+endfunction
+
+" dn#rc#updateLinterPerlcritic()    {{{1
+
+""
+" @public
+" Update linter perlcritic for perl5. It consists of an executable. On debian
+" systems the executable is part of a deb package.
+function! dn#rc#updateLinterPerlcritic() abort
+    if !executable('perlcritic')
+        let l:msg = ["Cannot locate executable 'perlcritic'",
+                    \ 'ALE will be unable to use it as a perl linter']
+        call dn#rc#error([l:msg])
+    endif
+endfunction
+
+" dn#rc#updateLinterProselint()    {{{1
+
+""
+" @public
+" Update linter proselint for English prose. It consists of a python package.
+function! dn#rc#updateLinterProselint() abort
+    call dn#rc#pipInstall('proselint')
+endfunction
+
+" dn#rc#updateLinterRemarkLint()    {{{1
+
+""
+" @public
+" Update linter remark-lint for markdown. It consists of a javascript package
+" (node module). The remark-cli package installs remark-lint and a
+" command-line interface.
+function! dn#rc#updateLinterRemarkLint() abort
+    call dn#rc#npmInstall('remark-cli')
+endfunction
+
+" dn#rc#updateLinterRubocop()    {{{1
+
+""
+" @public
+" Update linter rubocop for ruby. It consists of a ruby package.
+function! dn#rc#updateLinterRubocop() abort
+    call dn#rc#gemInstall('rubocop')
+endfunction
+
+" dn#rc#updateLinterStylelint()    {{{1
+
+""
+" @public
+" Update linter stylelint for css and scss. It consists of a javascript
+" package (node module).
+function! dn#rc#updateLinterStylelint() abort
+    call dn#rc#npmInstall('stylelint')
+endfunction
+" dn#rc#updateLinterTidy()    {{{1
+
+""
+" @public
+" Update linter tidy for html. It consists of an executable. On debian systems
+" the executable is part of a deb package.
+function! dn#rc#updateLinterTidy() abort
+    if !executable('tidy')
+        let l:msg = ["Cannot locate executable 'tidy'",
+                    \ 'ALE will be unable to use it as a html linter']
+        call dn#rc#error([l:msg])
+    endif
+endfunction
+
+" dn#rc#updateLinterVimVint()    {{{1
+
+""
+" @public
+" Update linter vim-vint for vimscript. It consists of a pip python module.
+function! dn#rc#updateLinterVimVint() abort
+    call dn#rc#pipInstall('vim-vint')
+endfunction
+
+" dn#rc#updateLinterWriteGood()    {{{1
+
+""
+" @public
+" Update linter write-good for English prose. It consists of a javascript
+" package (node module).
+function! dn#rc#updateLinterWriteGood() abort
+    call dn#rc#npmInstall('write-good')
 endfunction
 
 " dn#rc#vimPath(type)    {{{1
@@ -1259,12 +1417,32 @@ endfunction
 
 ""
 " @public
-" Display warning {messages}, a |List| of |Strings| using |hl-WarningMsg|
-" highlighting and then pause until user presses Enter. Uses |:echomsg| to
-" ensure messages are saved to the |message-history|. There is no return
-" value.
+" Display warning {messages} using |hl-WarningMsg| highlighting. The messages
+" are expected to be a string or a |List| of |Strings|. Any other types of
+" value are stringified with |string()|.
+" Note that if there is more than one message vim will pause after displaying
+" them until the user presses Enter. 
+" Uses |:echomsg| to ensure messages are saved to the |message-history|. There
+" is no return value.
 function! dn#rc#warn(messages) abort
-    if type(a:messages) != type([]) | return | endif
+    " convert to list of strings
+    " - cannot pass string to string() because it encloses in single quotes
+    let l:messages = []
+    let l:type = type(a:messages)
+    if l:type == v:t_list
+        for l:item in a:messages
+            if type(l:item) == v:t_string
+                call add(l:messages, l:item)
+            else
+                call add(l:messages, string(l:item))
+            endif
+        endfor
+    elseif l:type == v:t_string
+        call add(l:messages, l:item)
+    else
+        call add(l:messages, string(l:item))
+    endif
+    " display messages
     echohl WarningMsg
     for l:message in a:messages | echomsg l:message | endfor
     echohl None
