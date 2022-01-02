@@ -1188,7 +1188,7 @@ function! dn#rc#updateLinters() abort
     call dn#rc#updateLinterLuacheck()
     call dn#rc#updateLinterPerlcritic()
     call dn#rc#updateLinterProselint()
-    call dn#rc#updateLinterRemarkLint()
+    "call dn#rc#updateLinterRemarkLint()
     call dn#rc#updateLinterRubocop()
     call dn#rc#updateLinterStylelint()
     call dn#rc#updateLinterTextlint()
