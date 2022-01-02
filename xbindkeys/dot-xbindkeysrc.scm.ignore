@@ -180,43 +180,58 @@
 
 ;; Show all commands
 ;; [Ctrl-Alt-s]
-(xbindkey '(control alt s) "xbindkeys_show")
+(xbindkey '(control alt s)
+    "xbindkeys_show")
 
 ;; Open terminal
 ;; [Ctrl-Alt-t]
-(xbindkey '(control alt t) "konsole")
+(xbindkey '(control alt t)
+    "konsole")
 
 ;; Open superuser terminal
 ;; [Ctrl-Alt-u]
-(xbindkey '(control alt u) "konsole --title Shell\ -\ Konsole\ \(Superuser\) --icon @icons_dir@/dn-xbindkeys-superuser.png -e su")
+(xbindkey '(control alt u)
+    "konsole --title Shell\ -\ Konsole\ \(Superuser\) --icon @icons_dir@/dn-xbindkeys-superuser.png -e su")
 
 ;; Run GVim
 ;; [Ctrl-Alt-v]
-(xbindkey '(control alt v) "gvim")
+(xbindkey '(control alt v)
+    "nvim-qt")
 
 ;; Select value to send to clipboard
 ;; [F1]
-(xbindkey '(F1) "dn-load-clipboard")
+(xbindkey '(F1)
+    "dn-load-clipboard")
 
 ;; Open Tellico (collection manager)
 ;; [F3]
-(xbindkey '(F3) "tellico")
+(xbindkey '(F3)
+    "tellico")
 
 ;; Show time
 ;; [Alt-F10]
-(xbindkey '(mod1 F10) "dn-show-time")
+(xbindkey '(mod1 F10)
+    "dn-show-time")
 
 ;; Open web browser
 ;; [Ctrl-Alt-b]
-(xbindkey '(control alt b) "qutebrowser")
+(xbindkey '(control alt b)
+    "qutebrowser")
 
 ;; Volume up
 ;; [XF86AudioRaiseVolume]
-(xbindkey '(XF86AudioRaiseVolume) "pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ +5%")
+(xbindkey '(XF86AudioRaiseVolume)
+    "pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ +5%")
 
 ;; Volume down
 ;; [XF86AudioLowerVolume]
-(xbindkey '(XF86AudioLowerVolume) "pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ -5%")
+(xbindkey '(XF86AudioLowerVolume)
+    "pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ -5%")
+
+;; KRunner
+;; [Alt-Space]
+(xbindkey '(mod1 space)
+    "krunner")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; End of xbindkeys guile configuration ;;

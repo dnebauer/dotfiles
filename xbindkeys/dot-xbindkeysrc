@@ -104,6 +104,11 @@
 "pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ -5%"
   XF86AudioLowerVolume
 
+# KRunner
+# [Alt-Space]
+"krunner"
+  mod1 + space
+
 ##################################
 # End of xbindkeys configuration #
 ##################################
