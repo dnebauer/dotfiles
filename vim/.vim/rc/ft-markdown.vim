@@ -96,7 +96,16 @@ function! s:MarkdownSupport()
     nnoremap <silent> <M-q> {gq}<Bar>:echo "Rewrapped paragraph"<CR>
     inoremap <silent> <M-q> <Esc>{gq}<CR>a
     " change filetype to trigger vim-pandoc plugin    {{{1
-    set filetype=markdown.pandoc    " }}}1
+    set filetype=markdown.pandoc
+    " specify linters for ALE    {{{1
+    " - not using 'remark'
+    "   . because it cannot find dependent node modules
+    "     despite them being installed:
+    "   . example error: 'Error: Could not find module `remark-gfm`'
+    "   . seems likely problem is that remark cannot find globally installed
+    "     modules (possible because of the prefix defined in ~/.npmrc)
+    let b:ale_linters = ['mdl', 'proselint', 'write-good']
+    " }}}1
 endfunction
 
 augroup vrc_markdown_files
