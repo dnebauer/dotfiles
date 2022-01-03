@@ -130,11 +130,13 @@ endfunction
 " Configure the ALE linter plugin. This function is intended to be called
 " before the plugin is loaded.
 function! dn#rc#configureAle() abort
-    " set plugin variables
+    " leave completion for CoC    {{{2
+    let g:ale_disable_lsp = 1  " required before loading ALE
+    " global fixers    {{{2
     let g:ale_fix_on_save = 1
     let g:ale_fixers = {
                 \ '*': ['remove_trailing_lines', 'trim_whitespace'],
-                \ }
+                \ }    " }}}2
 endfunction
 
 " dn#rc#configureDenite()    {{{1

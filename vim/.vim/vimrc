@@ -265,15 +265,6 @@ Plug 'dnebauer/vim-dn-print-dialog', { 'on':  ['PrintDialog'] }
 " bundles: calendar    {{{2
 " - calendar : display calendar    {{{3
 Plug 'mattn/calendar-vim', { 'on': ['Calendar', 'CalendarH', 'CalendarT'] }
-" bundles: completion    {{{2
-" - coc : main completion engine    {{{3
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" - delimitMate : completion helper closes paired syntax    {{{3
-Plug 'raimondi/delimitMate', { 'on': [] }
-augroup vrc_load_delimitmate
-    autocmd!
-    autocmd InsertEnter * call plug#load('delimitMate')
-augroup END
 " bundles: snippets    {{{2
 " - snippets : snippet library    {{{3
 "   . required by: shougo/neosnippet.vim
@@ -363,6 +354,15 @@ if dn#rc#lintEngine() ==# 'ale'
     call dn#rc#configureAle()
     Plug 'dense-analysis/ale', { 'do': function('dn#rc#updateLinters') }
 endif    " }}}3
+" bundles: completion    {{{2
+" - coc : main completion engine    {{{3
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" - delimitMate : completion helper closes paired syntax    {{{3
+Plug 'raimondi/delimitMate', { 'on': [] }
+augroup vrc_load_delimitmate
+    autocmd!
+    autocmd InsertEnter * call plug#load('delimitMate')
+augroup END
 " bundles: tags    {{{2
 " - misc : plugin library used by other scripts    {{{3
 if executable('ctags')
