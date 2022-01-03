@@ -427,6 +427,8 @@ Plug 'artur-shaik/vim-javacomplete2', { 'for': ['java'] }
 " bundles: json support    {{{2
 " - vim-json : json highlighting/indenting    {{{3
     Plug 'elzr/vim-json', { 'for': ['json', 'jsonl', 'jsonp'] }
+" - vim-jsonc : highlighting for json with comments    {{{3
+    Plug 'kevinoid/vim-jsonc'
 " bundles: latex support    {{{2
 " - vimtex : latex support    {{{3
 Plug 'lervag/vimtex', { 'for': ['tex', 'latex'] }
