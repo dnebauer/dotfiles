@@ -26,13 +26,12 @@ set pastetoggle=<F2>
 " Undo    {{{1
 nnoremap <Leader>u :GundoToggle<CR>
 
-" Insert hard space    {{{1
+" Insert hard space : S-F8    {{{1
 " - map unicode non-breaking space (U+00A0) to C-Space
 " - would prefer C-S-Space but terminal vim has a problem with mapping it
 "   (see https://vi.stackexchange.com/a/13329 for details)
-"inoremap <buffer><silent><C-Space>  
-inoremap <buffer><silent> <C-Space> <C-v>xa0
-nnoremap <buffer><silent> <C-Space> vc<C-v>xa0<Esc>
+inoremap <buffer><silent> <S-F8> <C-v>xa0
+nnoremap <buffer><silent> <S-F8> vc<C-v>xa0<Esc>
 
 " Modify surround plugin mappings    {{{1
 " - this is done to play nice with the sneak plugin

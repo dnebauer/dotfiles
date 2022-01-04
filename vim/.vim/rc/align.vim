@@ -17,12 +17,12 @@ set shiftwidth=4
 
 " Align text    {{{1
 " - align text on '=', ':' and '|'
-nnoremap <leader>a= :Tabularize /=<CR>
-vnoremap <leader>a= :Tabularize /=<CR>
-nnoremap <leader>a: :Tabularize /:\zs<CR>
-vnoremap <leader>a: :Tabularize /:\zs<CR>
-nnoremap <leader>a\| :Tabularize /\|<CR>
-vnoremap <leader>a\| :Tabularize /\|<CR>
+nnoremap <Leader>a= :Tabularize /=<CR>
+vnoremap <Leader>a= :Tabularize /=<CR>
+nnoremap <Leader>a: :Tabularize /:\zs<CR>
+vnoremap <Leader>a: :Tabularize /:\zs<CR>
+nnoremap <Leader>a\| :Tabularize /\|<CR>
+vnoremap <Leader>a\| :Tabularize /\|<CR>
 
 " Colour column 80    {{{1
 " - setting highlight group 'colorcolumn' here does not have any effect,

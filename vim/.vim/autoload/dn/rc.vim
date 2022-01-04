@@ -1,5 +1,5 @@
 " Vimrc library
-" Last change: 2018 Aug 12
+" Last change: 2021 Jan 01
 " Maintainer: David Nebauer
 " License: GPL3
 
@@ -132,6 +132,45 @@ endfunction
 function! dn#rc#configureAle() abort
     " leave completion for CoC    {{{2
     let g:ale_disable_lsp = 1  " required before loading ALE
+    " global fixers    {{{2
+    let g:ale_fix_on_save = 1
+    let g:ale_fixers = {
+                \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+                \ }    " }}}2
+endfunction
+
+" dn#rc#configureCoc()    {{{1
+
+""
+" @public
+" Configure the CoC (Conqueror of Completion) plugin. This function is
+" intended to be called before the plugin is loaded.
+function! dn#rc#configureCoc() abort
+    " extensions to install    {{{2
+    " - on initialisation CoC will try to install any
+    "   listed extension not already installed
+    " - extension names indicate associated file type except for:
+    "   eslint = javascript, jedi = python, texlab = latex
+    let g:coc_global_extensions = [
+                \ 'coc-css',
+                \ 'coc-eslint',
+                \ 'coc-git',
+                \ 'coc-go',
+                \ 'coc-html',
+                \ 'coc-html-css-support',
+                \ 'coc-java',
+                \ 'coc-jedi',
+                \ 'coc-json',
+                \ 'coc-perl',
+                \ 'coc-rls',
+                \ 'coc-sh',
+                \ 'coc-sumneko-lua',
+                \ 'coc-texlab',
+                \ 'coc-toml',
+                \ 'coc-vimlsp',
+                \ 'coc-xml',
+                \ 'coc-yaml',
+                \ ]
     " global fixers    {{{2
     let g:ale_fix_on_save = 1
     let g:ale_fixers = {
@@ -704,7 +743,36 @@ function! dn#rc#perlModuleInstalled(module) abort
     let l:err = 'ERROR(NoPerl): Cannot find perl executable'
     if !executable('perl') | throw l:err | endif
     " check for module
-    let l:cmd = ['perl', '-M'.a:module, '-e', '1', '2>', '/dev/null']
+    let l:cmd = 'perl' . '-M'.a:module . '-e 1 2>/dev/null'
+    call system(l:cmd)
+    " report result
+    return !v:shell_error
+endfunction
+
+" dn#rc#perlModuleInstallUpdate(module)    {{{1
+
+""
+" @public
+" Install/update a perl {module} on the current system. The command used is:
+" >
+"   cpanm Module::Name &> /dev/null
+" <
+" Any cpanm configuration must be done via the PERL_CPANM_HOME and
+" PERL_CPANM_OPT environment variables. See the cpanm manpage for further
+" information.
+" @throws BadArg if argument is non-string or empty string
+" @throws NoCpanm if unable to find cpanm executable
+function! dn#rc#perlModuleInstallUpdate(module) abort
+    " check arg
+    let l:arg_type = dn#util#varType(a:module)
+    let l:err = 'ERROR(BadArg): Expected string arg, got '. l:arg_type
+    if l:arg_type !=# 'string' | throw l:err | endif
+    if empty(a:module) | throw 'ERROR(BadArg): Empty argument' | endif
+    " need cpanm
+    let l:err = 'ERROR(NoCpanm): Cannot find cpanm executable'
+    if !executable('cpanm') | throw l:err | endif
+    " install/update module
+    let l:cmd = ['cpanm', a:module, '&>', '/dev/null']
     call system(l:cmd)
     " report result
     return !v:shell_error
@@ -1181,6 +1249,7 @@ endfunction
 " * tidy        - for html
 " * vim-vint    - for vimscript
 " * write-good  - for English prose
+" * yamllint    - for yaml
 function! dn#rc#updateLinters() abort
     call dn#rc#updateLinterAutopep8()
     call dn#rc#updateLinterFlake8()
@@ -1197,6 +1266,7 @@ function! dn#rc#updateLinters() abort
     call dn#rc#updateLinterTidy()
     call dn#rc#updateLinterVimVint()
     call dn#rc#updateLinterWriteGood()
+    call dn#rc#updateLinterYamllint()
 endfunction
 
 " dn#rc#updateLinterAutopep8()    {{{1
@@ -1245,7 +1315,7 @@ endfunction
 function! dn#rc#updateLinterLuac() abort
     if !executable('luac')
         let l:msg = ["Cannot locate executable 'luac'",
-                    \ 'ALE will be unable to use it as a lua linter']
+                    \ '- ALE will be unable to use it as a lua linter']
         call dn#rc#error([l:msg])
     endif
 endfunction
@@ -1259,7 +1329,7 @@ endfunction
 function! dn#rc#updateLinterLuacheck() abort
     if !executable('luacheck')
         let l:msg = ["Cannot locate executable 'luacheck'",
-                    \ 'ALE will be unable to use it as a lua linter']
+                    \ '- ALE will be unable to use it as a lua linter']
         call dn#rc#error([l:msg])
     endif
 endfunction
@@ -1273,7 +1343,7 @@ endfunction
 function! dn#rc#updateLinterPerlcritic() abort
     if !executable('perlcritic')
         let l:msg = ["Cannot locate executable 'perlcritic'",
-                    \ 'ALE will be unable to use it as a perl linter']
+                    \ '- ALE will be unable to use it as a perl linter']
         call dn#rc#error([l:msg])
     endif
 endfunction
@@ -1363,7 +1433,7 @@ endfunction
 function! dn#rc#updateLinterTidy() abort
     if !executable('tidy')
         let l:msg = ["Cannot locate executable 'tidy'",
-                    \ 'ALE will be unable to use it as a html linter']
+                    \ '- ALE will be unable to use it as a html linter']
         call dn#rc#error([l:msg])
     endif
 endfunction
@@ -1385,6 +1455,129 @@ endfunction
 " package (node module).
 function! dn#rc#updateLinterWriteGood() abort
     call dn#rc#npmInstall('write-good')
+endfunction
+
+" dn#rc#updateLinterYamllint()    {{{1
+
+""
+" @public
+" Update linter yamllint for yaml. It consists of an executable. On debian
+" systems the executable is part of a deb package.
+function! dn#rc#updateLinterYamllint() abort
+    if !executable('yamllint')
+        let l:msg = ["Cannot locate executable 'yamllint'",
+                    \ '- ALE will be unable to use it as a yaml linter']
+        call dn#rc#error([l:msg])
+    endif
+endfunction
+
+" dn#rc#updateLspClients()    {{{1
+
+""
+" @public
+" Update CoC language server protocol client extensions. See
+" |dn#rc#configureCoc()| for a list of installed extensions.
+function! dn#rc#updateLspClients() abort
+    " client-specific updates
+    call dn#rc#updateLspClientJava()
+    call dn#rc#updateLspClientJedi()
+    call dn#rc#updateLspClientPerl()
+    call dn#rc#updateLspClientXml()
+    " update all coc extensions
+    call coc#util#update_extensions(1)
+    " npm rebuild for coc extensions
+    call coc#util#rebuild()
+endfunction
+
+" dn#rc#updateLspClientJava()    {{{1
+
+""
+" @public
+" Update CoC language server protocol client extension coc-perl. This
+" extension requires a Java Development Kit (JDK) >= version 11. The JDK is
+" checked by:
+" * checking that the java compiler executable ('javac') is present
+" * checking the version of javac.
+function! dn#rc#updateLspClientJava() abort
+    " check JDK is present
+    if !executable('javac')
+        let l:msg = ["Cannot locate executable 'javac'",
+                    \ '- CoC requires it for java completion']
+        call dn#rc#error([l:msg])
+    endif
+    " check version of JDK
+    let l:min_ver = 11
+    let l:cmd = 'javac --version'
+    " - result is 'javac XX.YY.ZZ'
+    let l:feedback = systemlist(l:cmd)[0]
+    if empty(l:feedback)
+        call dn#rc#error('Unable to extract javac version string')
+        return
+    endif
+    let l:version = split(l:feedback)[1]
+    let l:major = split(l:version, '\.')[0]
+    if l:major < l:min_ver
+        let l:msg = ['Detected JDK version ' . l:major,
+                    \ '- CoC java extension requires JDK >= ' . l:min_ver]
+        call dn#rc#error(l:msg)
+    endif
+endfunction
+
+" dn#rc#updateLspClientJedi()    {{{1
+
+""
+" @public
+" Update CoC language server protocol client extension coc-jedi for python.
+" This extension relies on the Jedi Language Server, which consists of a pip
+" python module. (Note: it is also available as a debian package but that
+" package is a pure library and does not provide an executable; the coc
+" extension requires a jedi executable to function.)
+function! dn#rc#updateLspClientJedi() abort
+    call dn#rc#pipInstall('jedi-language-server')
+endfunction
+
+" dn#rc#updateLspClientPerl()    {{{1
+
+""
+" @public
+" Update CoC language server protocol client extension coc-perl. This
+" extension relies on perl module Perl::LanguageServer.
+function! dn#rc#updateLspClientPerl() abort
+    call dn#rc#perlModuleInstallUpdate('Perl::LanguageServer')
+endfunction
+
+" dn#rc#updateLspClientXml()    {{{1
+
+""
+" @public
+" Update CoC language server protocol client extension coc-xml. This
+" extension requires a Java Development Kit (JDK) >= version 8. The JDK is
+" checked by:
+" * checking that the java compiler executable ('javac') is present
+" * checking the version of javac.
+function! dn#rc#updateLspClientXml() abort
+    " check JDK is present
+    if !executable('javac')
+        let l:msg = ["Cannot locate executable 'javac'",
+                    \ '- CoC requires it for xml completion']
+        call dn#rc#error([l:msg])
+    endif
+    " check version of JDK
+    let l:min_ver = 8
+    let l:cmd = 'javac --version'
+    " - result is 'javac XX.YY.ZZ'
+    let l:feedback = systemlist(l:cmd)[0]
+    if empty(l:feedback)
+        call dn#rc#error('Unable to extract javac version string')
+        return
+    endif
+    let l:version = split(l:feedback)[1]
+    let l:major = split(l:version, '\.')[0]
+    if l:major < l:min_ver
+        let l:msg = ['Detected JDK version ' . l:major,
+                    \ '- CoC xml extension requires JDK >= ' . l:min_ver]
+        call dn#rc#error(l:msg)
+    endif
 endfunction
 
 " dn#rc#vimPath(type)    {{{1

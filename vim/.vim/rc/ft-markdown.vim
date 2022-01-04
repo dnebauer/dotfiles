@@ -105,6 +105,8 @@ function! s:MarkdownSupport()
     "   . seems likely problem is that remark cannot find globally installed
     "     modules (possible because of the prefix defined in ~/.npmrc)
     let b:ale_linters = ['mdl', 'proselint', 'textlint', 'write-good']
+    " configure coc-vimlsp extension    {{{1
+    let g:markdown_fenced_languages = ['vim', 'help']
     " }}}1
 endfunction
 

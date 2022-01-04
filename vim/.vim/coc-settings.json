@@ -1,0 +1,49 @@
+{
+
+    /** General **/
+
+
+    // leave linting to ALE
+    "diagnostic.displayByAle": true,
+
+    // customise suggestions
+    "suggest.enablePreselect": true,
+    "suggest.floatEnable": false,
+    "suggest.removeDuplicateItems": true,
+
+    // customise jump to other file
+    "coc.preferences.jumpCommand": "tab drop",
+
+    // autoupdating extensions weekly
+    "coc.preferences.extensionUpdateCheck": "weekly",
+
+
+    /** Language Servers **/
+
+
+    /* html */
+
+    "html.filetypes": [
+        "html",
+        "blade",
+        "handlebars",
+        "htmldjango"
+    ],
+    "html-css-support.enabledLanguages": [
+        "html",
+        "blade",
+        "htmldjango",
+        "javascriptreact",
+        "typescriptreact",
+        "vue"
+    ],
+
+    /* xml */
+
+    "xml.java.home": "/usr/bin/java",
+
+    /* yaml */
+
+    "yaml.validate": false
+
+}

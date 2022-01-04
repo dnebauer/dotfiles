@@ -356,7 +356,10 @@ if dn#rc#lintEngine() ==# 'ale'
 endif    " }}}3
 " bundles: completion    {{{2
 " - coc : main completion engine    {{{3
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+call dn#rc#configureCoc()
+Plug 'neoclide/coc.nvim', {
+            \ 'branch' : 'release',
+            \ 'do'     : function('dn#rc#updateLspClients')}
 " - delimitMate : completion helper closes paired syntax    {{{3
 Plug 'raimondi/delimitMate', { 'on': [] }
 augroup vrc_load_delimitmate
