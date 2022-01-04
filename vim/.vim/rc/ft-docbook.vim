@@ -7,8 +7,7 @@ function! s:DocbookSupport()
     if !exists('g:neosnippet#snippets_directory')
         let g:neosnippet#snippets_directory = []
     endif
-    let l:repo = dn#rc#vimPath('plug')
-                \ . '/repos/github.com/jhradilek/vim-snippets/snippets'
+    let l:repo = dn#rc#pluginsDir() . '/vim-snippets/snippets'
     if !count(g:neosnippet#snippets_directory, l:repo)
         call add(g:neosnippet#snippets_directory, l:repo)
     endif    " }}}1

@@ -876,9 +876,9 @@ function! dn#rc#pluginRoot(plugin) abort
     if     count(['vim-plug'], a:plugin)
         return resolve(expand('~/.vim/autoload/plug.vim'))
     elseif count(['dn-perl', 'vim-dn-perl'], a:plugin)
-        return dn#rc#pluginsDir() . '/repos/github.com/dnebauer/vim-dn-perl'
+        return dn#rc#pluginsDir() . '/vim-dn-perl'
     elseif count(['vim-perl'], a:plugin)
-        return dn#rc#pluginsDir() . '/repos/github.com/vim-perl/vim-perl'
+        return dn#rc#pluginsDir() . '/vim-perl'
     else
         echoerr "Invalid plugin name '" . a:plugin . "'"
     endif

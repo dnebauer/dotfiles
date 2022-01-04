@@ -38,8 +38,8 @@ if exists(':GenGTAGS') | let g:gen_tags#gtags_auto_gen = 1 | endif
 " -- phpctags    {{{3
 " --- easytags plugin
 if !exists('g:easytags_languages') | let g:easytags_languages = {} | endif
-let s:cmd = $HOME . '/.cache/dein/repos/github.com/vim-php/'
-            \ . 'tagbar-phpctags.vim/bin/phpctags'
+let s:cmd = dn#rc#pluginsDir()
+            \ . '/tagbar-phpctags.vim/build/phpctags-master/bin/phpctags'
 if filereadable(s:cmd)
     let g:easytags_languages.php = {'cmd' : s:cmd} 
 endif

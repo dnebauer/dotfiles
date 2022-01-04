@@ -11,9 +11,7 @@ function! s:MarkdownSupport()
     endif
     " tagbar support    {{{1
     " - from https://github.com/majutsushi/tagbar/wiki
-    let l:bin = dn#rc#pluginsDir()
-                \ . '/repos/github.com'
-                \ . '/jszakmeister/markdown2ctags/markdown2ctags.py'
+    let l:bin = dn#rc#pluginsDir() . '/markdown2ctags/markdown2ctags.py'
     if filereadable(l:bin)
         let g:tagbar_type_markdown = {
                     \ 'ctagstype'  : 'markdown',
