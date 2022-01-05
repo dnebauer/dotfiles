@@ -439,8 +439,6 @@ Plug 'lervag/vimtex', { 'for': ['tex', 'latex'] }
 "   . depends on: dnebauer/vim-dn-utils
 Plug 'dnebauer/vim-dn-latex', { 'for': ['tex', 'latex'] }
 " bundles: lua support    {{{2
-" - ftplugin : lua support    {{{3
-Plug 'xolox/vim-lua-ftplugin', { 'for': ['lua'] }
 " - manual : language support    {{{3
 Plug 'indiefun/vim-lua-manual', { 'for': ['lua'] }
 " - lua : improved lua 5.3 syntax and indentation support    {{{3
