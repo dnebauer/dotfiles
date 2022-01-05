@@ -123,61 +123,6 @@ function! dn#rc#cdToLocalDir() abort
     endif
 endfunction
 
-" dn#rc#configureAle()    {{{1
-
-""
-" @public
-" Configure the ALE linter plugin. This function is intended to be called
-" before the plugin is loaded.
-function! dn#rc#configureAle() abort
-    " leave completion for CoC    {{{2
-    let g:ale_disable_lsp = 1  " required before loading ALE
-    " global fixers    {{{2
-    let g:ale_fix_on_save = 1
-    let g:ale_fixers = {
-                \ '*': ['remove_trailing_lines', 'trim_whitespace'],
-                \ }    " }}}2
-endfunction
-
-" dn#rc#configureCoc()    {{{1
-
-""
-" @public
-" Configure the CoC (Conqueror of Completion) plugin. This function is
-" intended to be called before the plugin is loaded.
-function! dn#rc#configureCoc() abort
-    " extensions to install    {{{2
-    " - on initialisation CoC will try to install any
-    "   listed extension not already installed
-    " - extension names indicate associated file type except for:
-    "   eslint = javascript, jedi = python, texlab = latex
-    let g:coc_global_extensions = [
-                \ 'coc-css',
-                \ 'coc-eslint',
-                \ 'coc-git',
-                \ 'coc-go',
-                \ 'coc-html',
-                \ 'coc-html-css-support',
-                \ 'coc-java',
-                \ 'coc-jedi',
-                \ 'coc-json',
-                \ 'coc-perl',
-                \ 'coc-rls',
-                \ 'coc-sh',
-                \ 'coc-sumneko-lua',
-                \ 'coc-texlab',
-                \ 'coc-toml',
-                \ 'coc-vimlsp',
-                \ 'coc-xml',
-                \ 'coc-yaml',
-                \ ]
-    " global fixers    {{{2
-    let g:ale_fix_on_save = 1
-    let g:ale_fixers = {
-                \ '*': ['remove_trailing_lines', 'trim_whitespace'],
-                \ }    " }}}2
-endfunction
-
 " dn#rc#configureDenite()    {{{1
 
 ""
