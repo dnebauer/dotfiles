@@ -99,11 +99,21 @@ endif
 " Terminal    {{{1
 " - used for interactive terminal programs
 if exists('*termopen')
+    " - in nvim attempt to emulate vim's ability to run interactive shell
+    "   commands with `:! <cmd>`
+    " - basic strategy taken from reddit topic comment:
+    "   https://www.reddit.com/r/neovim/comments/j4jhmm/comment/g7kh6s7/
     command! -nargs=+ -complete=file T
-                \ tab new | setlocal nonumber nolist noswapfile bufhidden=wipe |
+                \ tab new | 
+                \ setlocal nonumber nolist noswapfile bufhidden=wipe |
                 \ call termopen([<f-args>]) |
                 \ startinsert
-    cabbrev ! T
+    " - original cabbrev command was `:cabbrev ! T`
+    " - it replaced the first '!' anywhere in the command line
+    " - current cabbrev command only replaces '!' in first position
+    " - this usage of cabbrev is taken from Vim Tip 1285:
+    "   https://vim.fandom.com/wiki/Replace_a_builtin_command_using_cabbrev
+    cabbrev ! <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'T' : '!')<CR>
 endif
 
 " Outline viewer (<F8>)    {{{1
