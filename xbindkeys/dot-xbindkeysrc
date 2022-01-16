@@ -104,6 +104,11 @@
 "pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ -5%"
   XF86AudioLowerVolume
 
+# Toggle mute/unmute
+# [XF86AudioMute]
+"pactl set-sink-mute @DEFAULT_SINK@ toggle"
+  XF86AudioMute
+
 # KRunner
 # [Alt-Space]
 "krunner"

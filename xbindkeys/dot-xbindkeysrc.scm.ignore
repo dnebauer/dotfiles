@@ -228,6 +228,11 @@
 (xbindkey '(XF86AudioLowerVolume)
     "pactl set-sink-mute @DEFAULT_SINK@ false ; pactl set-sink-volume @DEFAULT_SINK@ -5%")
 
+;; Toggle mute/unmute
+;; [XF86AudioMute]
+(xbindkey '(XF86AudioMute)
+    "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+
 ;; KRunner
 ;; [Alt-Space]
 (xbindkey '(mod1 space)
