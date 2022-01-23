@@ -396,6 +396,8 @@ if executable('git')
 endif
 " - fugitive : git integration    {{{3
 if executable('git')
+    " disable global maps in plugin (see |fugitive-global-maps|)
+    let g:fugitive_no_maps = 1
     Plug 'tpope/vim-fugitive'
 endif
 " bundles: docbook support    {{{2
