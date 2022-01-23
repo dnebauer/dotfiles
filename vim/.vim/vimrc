@@ -216,6 +216,10 @@ Plug 'machakann/vim-highlightedyank'
 if dn#rc#isVim() && !has('patch-8.0.1394')
     map y <Plug>(highlightedyank)
 endif
+" - cutlass : delete without affecting yank    {{{3
+Plug 'svermeulen/vim-cutlass'
+" - vim-yoink : maintain history of yanks    {{{3
+Plug 'svermeulen/vim-yoink'
 " bundles: templates    {{{2
 " - template : file templates    {{{3
 Plug 'hotoo/template.vim'

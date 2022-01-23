@@ -20,8 +20,20 @@ set clipboard=unnamed,unnamedplus
 if dn#rc#isVim() && !has('unnamedplus')
     set clipboard-=unnamedplus
 endif
-" Toggle paste : F2    {{{1
-set pastetoggle=<F2>
+
+" Yank behaviour    {{{1
+" - let vim-cutlass and vim-yoink play nice together
+let g:yoinkIncludeDeleteOperations = 1
+" - ]y, [y : traverse yank history
+nmap [y <plug>(YoinkRotateBack)
+nmap ]y <plug>(YoinkRotateForward)
+
+" Paste behaviour    {{{1
+" - <C-=> : toggle (un)formatted after paste
+nmap <c-=> <plug>(YoinkPostPasteToggleFormat)
+" - preserve cursor position during paste
+nmap y <plug>(YoinkYankPreserveCursorPosition)
+xmap y <plug>(YoinkYankPreserveCursorPosition)
 
 " Undo    {{{1
 nnoremap <Leader>u :GundoToggle<CR>
@@ -53,9 +65,6 @@ xnoremap <expr> v mode() ==# 'v' ? "\<C-V>"
 
 " Treat all numerals as decimal    {{{1
 set nrformats=
-" Handle neovim paste behaviour    {{{1
-" :nnoremap p axx<Esc>i<CR><Esc>k:put<CR>kJhxxJxx
-" :nnoremap P ixx<Esc>i<CR><Esc>k:put<CR>kJhxxJxx
-" see undojoin    }}}1
+" }}}1
 
 " vim:foldmethod=marker:
