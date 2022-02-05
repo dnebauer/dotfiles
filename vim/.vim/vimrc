@@ -55,7 +55,7 @@ augroup END
 call dn#rc#pluginCmdsClear()
 " specify root plugin directory    {{{2
 call plug#begin(dn#rc#pluginsDir())
-" plugin dependencies    {{{2
+" plugin precedence    {{{2
 " - the vim-plug plugin manager does not handle dependencies so they must be
 "   managed manually
 " - what follows is a dependency chart
@@ -74,6 +74,10 @@ call plug#begin(dn#rc#pluginsDir())
 "     A} > {C
 "     B}   {D
 "   where both plugin C and plugin D depend on both plugin A and plugin B
+" - there are also cases where plugins must be loaded in a specific order
+"   to prevent one from interfering with another, e.g., overriding mappings,
+"   and these are indicated with the Ā symbol (from latin ante = before):
+"   X Ā Y
 " ************************************************************************
 " dnebauer/vim-dn-utils > {dnebauer/vim-dn-print-dialog
 "                         {dnebauer/vim-dn-docbk   
@@ -100,6 +104,8 @@ call plug#begin(dn#rc#pluginsDir())
 " tyru/open-browser.vim > kannokanno/previm
 " 
 " vim-airline/vim-airline > vim-airline/vim-airline-themes
+"
+" vim-sneak Ā vim-cutlass (due to mapping conflict with s|S)
 " ************************************************************************
 " bundles: utilities    {{{2
 " - dn-utils : general utilities    {{{3
@@ -210,16 +216,24 @@ endif
 if dn#rc#isVim() && v:version >= 800
     Plug 'roxma/nvim-yarp'
 endif
-" bundles: cut and paste    {{{2
-" - highlightedyank : highlight yanked text    {{{3
-Plug 'machakann/vim-highlightedyank'
-if dn#rc#isVim() && !has('patch-8.0.1394')
-    map y <Plug>(highlightedyank)
-endif
-" - cutlass : delete without affecting yank    {{{3
-Plug 'svermeulen/vim-cutlass'
-" - vim-yoink : maintain history of yanks    {{{3
-Plug 'svermeulen/vim-yoink'
+" bundles: keyboard navigation    {{{2
+" - hardmode : restrict navigation keys    {{{3
+Plug 'wikitopian/hardmode', { 'on': ['HardMode', 'EasyMode'] }
+" - matchit : jump around matched structures    {{{3
+Plug 'vim-scripts/matchit.zip'
+" - sneak : two-character motion plugin    {{{3
+Plug 'justinmk/vim-sneak'
+" - vim-textobj-user : mechanism for defining text objects    {{{3
+"   . required by: kana/vim-textobj-entire, reedes/vim-textobj-sentence
+Plug 'kana/vim-textobj-user'
+" - vim-textobj-sentence : improve sentence text object/motion    {{{3
+"   . depends on: kana/vim-textobj-user
+Plug 'reedes/vim-textobj-sentence'
+" - vim-textobj-entire : text objects for whole buffer    {{{3
+"   . depends on: kana/vim-textobj-user
+Plug 'kana/vim-textobj-entire'
+" - vim-lastplace : reopen files at last edit position    {{{3
+Plug 'farmergreg/vim-lastplace'
 " bundles: templates    {{{2
 " - template : file templates    {{{3
 Plug 'hotoo/template.vim'
@@ -294,24 +308,6 @@ Plug 'reedes/vim-wordy', {
 Plug 'Ron89/thesaurus_query.vim'
 " - abolish : word replace and format variable names    {{{3
 Plug 'tpope/vim-abolish', { 'on': ['Abolish', 'Subvert'] }
-" bundles: keyboard navigation    {{{2
-" - hardmode : restrict navigation keys    {{{3
-Plug 'wikitopian/hardmode', { 'on': ['HardMode', 'EasyMode'] }
-" - matchit : jump around matched structures    {{{3
-Plug 'vim-scripts/matchit.zip'
-" - sneak : two-character motion plugin    {{{3
-Plug 'justinmk/vim-sneak'
-" - vim-textobj-user : mechanism for defining text objects    {{{3
-"   . required by: kana/vim-textobj-entire, reedes/vim-textobj-sentence
-Plug 'kana/vim-textobj-user'
-" - vim-textobj-sentence : improve sentence text object/motion    {{{3
-"   . depends on: kana/vim-textobj-user
-Plug 'reedes/vim-textobj-sentence'
-" - vim-textobj-entire : text objects for whole buffer    {{{3
-"   . depends on: kana/vim-textobj-user
-Plug 'kana/vim-textobj-entire'
-" - vim-lastplace : reopen files at last edit position    {{{3
-Plug 'farmergreg/vim-lastplace'
 " bundles: ui    {{{2
 " - airline : status line    {{{3
 "   . required by: vim-airline/vim-airline-themes
@@ -404,6 +400,20 @@ if executable('git')
     let g:fugitive_no_maps = 1
     Plug 'tpope/vim-fugitive'
 endif
+" bundles: cut and paste    {{{2
+" - highlightedyank : highlight yanked text    {{{3
+Plug 'machakann/vim-highlightedyank'
+if dn#rc#isVim() && !has('patch-8.0.1394')
+    map y <Plug>(highlightedyank)
+endif
+" - cutlass : delete without affecting yank    {{{3
+"   . WARNING: overrides c,cc,C,s,S,d,dd,D,x,X keys unless already remapped,
+"              so load as late as possible in plugin sequence to give other
+"              plugins a chance to load first; example: vim-sneak overrides
+"              s and S
+Plug 'svermeulen/vim-cutlass'
+" - vim-yoink : maintain history of yanks    {{{3
+Plug 'svermeulen/vim-yoink'
 " bundles: docbook support    {{{2
 " - snippets : docbook5 snippets    {{{3
 Plug 'jhradilek/vim-snippets', { 'for': ['docbk'] }

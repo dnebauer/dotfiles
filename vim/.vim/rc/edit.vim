@@ -24,9 +24,14 @@ endif
 " Yank behaviour    {{{1
 " - let vim-cutlass and vim-yoink play nice together
 let g:yoinkIncludeDeleteOperations = 1
-" - ]y, [y : traverse yank history
+" - traverse yank history with ]y, [y
 nmap [y <plug>(YoinkRotateBack)
 nmap ]y <plug>(YoinkRotateForward)
+" - cut with x, xx, X
+nnoremap x d
+xnoremap x d
+nnoremap xx dd
+nnoremap X D
 
 " Paste behaviour    {{{1
 " - <C-=> : toggle (un)formatted after paste
