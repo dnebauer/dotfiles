@@ -47,11 +47,11 @@ passwordeval   secret-tool lookup isp vodien
 ## bigpond ##
 #############
 
-account       bigpond
-host          mail.bigpond.com
-user          davidnebauer3@bigpond.com
-from          davidnebauer3@bigpond.com
-passwordeval  secret-tool lookup isp bigpond
+#account       bigpond
+#host          mail.bigpond.com
+#user          davidnebauer3@bigpond.com
+#from          davidnebauer3@bigpond.com
+#passwordeval  secret-tool lookup isp bigpond
 
 ###########
 ## gmail ##

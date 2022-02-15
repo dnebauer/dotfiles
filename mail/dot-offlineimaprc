@@ -3,7 +3,8 @@
 # offlineimap configuration file
 
 [general]
-accounts = vodien,bigpond
+accounts = vodien
+#accounts = vodien,bigpond
 #accounts = austdomains,bigpond
 #accounts = hotkey,bigpond,gmail
 #accounts = austdomains
@@ -68,17 +69,17 @@ remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'vodie
 #remoteuser = david@nebauer.id.au
 #remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'vodien']).strip()
 
-[Repository bigpond-local]
-type = Maildir
-localfolders = ~/.local/mail/maildirs/bigpond
-
-[Repository bigpond-remote]
-type = IMAP
-sslcacertfile = /etc/ssl/certs/ca-certificates.crt
-remotehost = mail.bigpond.com
-remoteuser = davidnebauer3@bigpond.com
-nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
-remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'bigpond']).strip()
+#[Repository bigpond-local]
+#type = Maildir
+#localfolders = ~/.local/mail/maildirs/bigpond
+#
+#[Repository bigpond-remote]
+#type = IMAP
+#sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+#remotehost = mail.bigpond.com
+#remoteuser = davidnebauer3@bigpond.com
+#nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
+#remotepasseval = subprocess.check_output(['secret-tool', 'lookup', 'isp', 'bigpond']).strip()
 
 #[Repository gmail-local]
 #type = Maildir

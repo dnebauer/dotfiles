@@ -50,25 +50,25 @@
             "signature_default_on": "false",
             "signature_attach": "false",
             "select_query": ""
-        },
-        "bigpond": {
-            "name": "David Nebauer",
-            "email": "davidnebauer3@bigpond.com",
-            "gpgkey": "",
-            "always_gpg_sign": "false",
-            "sendmail": "msmtpq --account=bigpond -t",
-            "default": "false",
-            "save_sent": "true",
-            "save_sent_to": "\/home\/david\/.local\/mail\/\/maildirs\/bigpond\/Sent\/cur\/",
-            "additional_sent_tags": "sent",
-            "save_drafts_to": "\/home\/david\/.local\/mail\/\/maildirs\/bigpond\/Drafts\/cur\/",
-            "signature_separate": "false",
-            "signature_file": "",
-            "signature_file_markdown": "",
-            "signature_default_on": "false",
-            "signature_attach": "false",
-            "select_query": ""
         }
+        //"bigpond": {
+        //    "name": "David Nebauer",
+        //    "email": "davidnebauer3@bigpond.com",
+        //    "gpgkey": "",
+        //    "always_gpg_sign": "false",
+        //    "sendmail": "msmtpq --account=bigpond -t",
+        //    "default": "false",
+        //    "save_sent": "true",
+        //    "save_sent_to": "\/home\/david\/.local\/mail\/\/maildirs\/bigpond\/Sent\/cur\/",
+        //    "additional_sent_tags": "sent",
+        //    "save_drafts_to": "\/home\/david\/.local\/mail\/\/maildirs\/bigpond\/Drafts\/cur\/",
+        //    "signature_separate": "false",
+        //    "signature_file": "",
+        //    "signature_file_markdown": "",
+        //    "signature_default_on": "false",
+        //    "signature_attach": "false",
+        //    "select_query": ""
+        //}
         //"austdomains": {
         //    "name": "David Nebauer",
         //    "email": "david@nebauer.id.au",
@@ -86,7 +86,7 @@
         //    "signature_default_on": "false",
         //    "signature_attach": "false",
         //    "select_query": ""
-        //},
+        //}
         //"hotkey": {
         //    "name": "David Nebauer",
         //    "email": "davidnebauer@hotkey.net.au",
