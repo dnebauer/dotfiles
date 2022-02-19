@@ -40,7 +40,17 @@
 
     /* xml */
 
-    "xml.java.home": "/usr/bin/java",
+    // (a) follow "/usr/bin/java" symbolic links to real path
+    // (b) track back up path to parent of first "bin" subdirectory
+    // in this case:
+    //   /usr/bin/java
+    //          ↓   (a)
+    //   /etc/alternatives/java
+    //          ↓   (a)
+    //   /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+    //          ↓   (b)
+    //   /usr/lib/jvm/java-11-openjdk-amd64
+    "xml.java.home": "/usr/lib/jvm/java-11-openjdk-amd64",
 
     /* yaml */
 
