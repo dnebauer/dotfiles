@@ -144,6 +144,10 @@ bindkey -M viins '^[[3~' vi-delete-char
 #   default: display function help
 bindkey -M viins '^Xh' _complete_help
 
+# Remap keys    {{{1
+# Shift+Space = no-break space    {{{2
+setxkbmap -option nbsp:level2
+
 # Mimetype support    {{{1
 autoload -Uz zsh-mime-setup
 zsh-mime-setup
