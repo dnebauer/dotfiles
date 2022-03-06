@@ -64,7 +64,7 @@ function! s:MarkdownSupport()
     let g:pandoc#command#templates_file = dn#rc#vimPath('home')
                 \ . '/vim-pandoc-templates'
     let g:pandoc#compiler#command = 'pander'
-    # - hashes at end as well as start of headings
+    " - hashes at end as well as start of headings
     let g:pandoc#keyboard#sections#header_style = 2
     " improve sentence text object    {{{1
     call textobj#sentence#init()
