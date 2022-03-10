@@ -3,6 +3,7 @@
 scriptencoding utf8  " required for C-Space mapping
 
 " Clipboard    {{{1
+" - which X11 clipboard(s) to use    {{{2
 " - PRIMARY X11 selection
 "   . vim visual selection (y,d,p,c,s,x, middle mouse button)
 "   . used in writing "* register
