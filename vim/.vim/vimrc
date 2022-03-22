@@ -175,6 +175,11 @@ Plug 'vim-scripts/DeleteTrailingWhitespace'
 Plug 'chrisbra/unicode.vim'
 " - multiple-cursors : multiple selections    {{{3
 Plug 'terryma/vim-multiple-cursors'
+" - loremipsum : generate text    {{{3
+if dn#rc#isNvim()
+    Plug 'derektata/lorem.nvim'
+endif
+Plug 'vim-scripts/loremipsum'
 " bundles: encryption    {{{2
 " - gnupg : transparently edit gpg-encrypted files    {{{3
 Plug 'jamessan/vim-gnupg'

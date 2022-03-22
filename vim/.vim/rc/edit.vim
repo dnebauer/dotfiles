@@ -71,6 +71,14 @@ xnoremap <expr> v mode() ==# 'v' ? "\<C-V>"
 
 " Treat all numerals as decimal    {{{1
 set nrformats=
+
+" Lorem ipsum generator    {{{1
+" - taken from https://github.com/derektata/lorem.nvim
+if dn#rc#isNvim()
+lua <<
+require'lorem-nvim'.setup()
+.
+endif
 " }}}1
 
 " vim:foldmethod=marker:
