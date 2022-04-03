@@ -3,9 +3,6 @@
 " Backspace    {{{1
 " - set behaviour
 set backspace=indent,eol,start
-" - additional page up key [N,V] : <Backspace>
-nnoremap <BS> <PageUp>
-vnoremap <BS> <PageUp>
 
 " Space    {{{1
 " - additional page down key [N,V] : <Space>

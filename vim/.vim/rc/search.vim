@@ -3,12 +3,8 @@
 " Highlighting matches    {{{1
 " - highlight all current matches
 set hlsearch
-" - don't highlight previous matches initially (deprecated in nvim)
-if dn#rc#isVim()
-    set highlight=ln
-endif
-" - turn off match highlighing [N] : \<Space><Space>
-nnoremap <silent> <Leader><Space><Space> :nohlsearch<CR>
+" - turn off match highlighting [N] : <BS>
+nnoremap <silent> <BS> :nohlsearch<CR>
 
 " Case sensitivity    {{{1
 " - case insensitive matching if all lowercase
