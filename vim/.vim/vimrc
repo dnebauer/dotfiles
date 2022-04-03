@@ -86,8 +86,6 @@ call plug#begin(dn#rc#pluginsDir())
 "                         {dnebauer/vim-dn-md-utils
 "                         {dnebauer/vim-dn-perl    
 " 
-" honza/vim-snippets > shougo/neosnippet.vim
-" 
 " kana/vim-textobj-user > {kana/vim-textobj-entire
 "                         {reedes/vim-textobj-sentence
 " 
@@ -288,13 +286,6 @@ Plug 'dnebauer/vim-dn-print-dialog', { 'on':  ['PrintDialog'] }
 " bundles: calendar    {{{2
 " - calendar : display calendar    {{{3
 Plug 'mattn/calendar-vim', { 'on': ['Calendar', 'CalendarH', 'CalendarT'] }
-" bundles: snippets    {{{2
-" - snippets : snippet library    {{{3
-"   . required by: shougo/neosnippet.vim
-Plug 'honza/vim-snippets'
-" - neosnippet : snippet engine    {{{3
-"   . depends on: honza/vim-snippets
-Plug 'shougo/neosnippet.vim'
 " bundles: formatting    {{{2
 " - tabular : align text    {{{3
 Plug 'godlygeek/tabular', {
@@ -420,8 +411,6 @@ Plug 'svermeulen/vim-cutlass'
 " - vim-yoink : maintain history of yanks    {{{3
 Plug 'svermeulen/vim-yoink'
 " bundles: docbook support    {{{2
-" - snippets : docbook5 snippets    {{{3
-Plug 'jhradilek/vim-snippets', { 'for': ['docbk'] }
 " - docbk : docbook5 support    {{{3
 Plug 'jhradilek/vim-docbk', { 'for': ['docbk'] }
 " - dn-docbk : docbook5 support    {{{3
