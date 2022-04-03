@@ -1,5 +1,7 @@
 " Vim configuration: user interface
 
+scriptencoding utf-8
+
 " Basic settings    {{{1
 " - minimum number of lines visible above/below cursor
 set scrolloff=3
@@ -46,13 +48,14 @@ set updatetime=250
 let g:gitgutter_max_signs = 2000
 
 " Non-visible characters    {{{1
-" - does not work!
 " - ‹-› = U+2039-U+203a, single [left|right]-pointing angle quotation mark
 "    ★  = U+2605, black star
 "    »  = U+00bb, right-pointing double angle quotation mark
 "    «  = U+00ab, left-pointing double angle quotation mark
 "    •  = U+2022, bullet
+" - could also do: let &listchars = "tab:\u2039-\u203a,trail:\u2605,..."
 set listchars=tab:‹-›,trail:★,extends:»,precedes:«,nbsp:•
+set list
 
 " GUI options    {{{1
 " - a,A = visual selection globally available for pasting,
