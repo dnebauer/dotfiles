@@ -52,7 +52,7 @@ localfolders = ~/.local/mail/maildirs/vodien
 [Repository vodien-remote-secure]
 type = IMAP
 sslcacertfile = /etc/ssl/certs/ca-certificates.crt
-remotehost = web205.vodien.com.au
+remotehost = mail.nebauer.id.au
 port = 993
 starttls = yes
 nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
