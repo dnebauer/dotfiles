@@ -63,29 +63,29 @@ _USAGE
 #   return: nil
 #   notes:  set variables [  ]
 processConfigFiles () {
-	# set variables
-	local conf name val
-	local system_conf
+    # set variables
+    local conf name val
+    local system_conf
     system_conf="$( dnNormalisePath "${1}" )"
-	local local_conf
+    local local_conf
     local_conf="$( dnNormalisePath "${2}" )"
-	# process config files
-	for conf in "${system_conf}" "${local_conf}" ; do
-		if [ -r "${conf}" ] ; then
-			while read name val ; do
-				if [ -n "${val}" ] ; then
-					# remove enclosing quotes if present
-					val="$( dnStripEnclosingQuotes "${val}" )"
-					# load vars depending on name
-					case ${name} in
-					'key' ) key="${val}";;
-					'key' ) key="${val}";;
-					'key' ) key="${val}";;
-					esac
-				fi
-			done < "${conf}"
-		fi
-	done
+    # process config files
+    for conf in "${system_conf}" "${local_conf}" ; do
+        if [ -r "${conf}" ] ; then
+            while read name val ; do
+                if [ -n "${val}" ] ; then
+                    # remove enclosing quotes if present
+                    val="$( dnStripEnclosingQuotes "${val}" )"
+                    # load vars depending on name
+                    case ${name} in
+                    'key' ) key="${val}";;
+                    'key' ) key="${val}";;
+                    'key' ) key="${val}";;
+                    esac
+                fi
+            done < "${conf}"
+        fi
+    done
 }
 # Process command line options
 #   params: all command line parameters
@@ -94,7 +94,7 @@ processConfigFiles () {
 #   note:   after execution variable ARGS contains
 #           remaining command line args (after options removed)
 processOptions () {
-	# read the command line options
+    # read the command line options
     local OPTIONS="$(                             \
         getopt                                    \
             --options hvdx:                       \
@@ -107,17 +107,17 @@ processOptions () {
         exit 1
     }
     eval set -- "${OPTIONS}"
-	while true ; do
-		case "${1}" in
+    while true ; do
+        case "${1}" in
         -x | --xoption ) varx="${2}"    ; shift 2 ;;
         -h | --help    ) displayUsage   ; exit 0  ;;
         -v | --verbose ) set -o verbose ; shift 1 ;;
         -d | --debug   ) set -o xtrace  ; shift 1 ;;
         --             ) shift ; break ;;
         *              ) break ;;
-		esac
-	done
-	ARGS="${@}"  # remaining arguments
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
 }
 # Join items
 #   params: 1  - delimiter
@@ -159,8 +159,8 @@ processOptions "${@}"
 #[ $# -eq 0 ] && dnFailScript "No wibble supplied"
 # Check value of option-set variable
 #case ${var} in
-#	val ) var2="val2";;
-#	*   ) dnFailScript "'${val}' is an inappropriate wibble";;
+#    val ) var2="val2";;
+#    *   ) dnFailScript "'${val}' is an inappropriate wibble";;
 #esac
 # Check for option-set variable
 #[ -z "${var}" ] && dnFailScript "You did not specify a wibble"
