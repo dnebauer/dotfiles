@@ -34,7 +34,9 @@ param_pad="$( dnRightPad "$( dnStrLen "${usage} ${dn_self}" )" )"
 parameters=" [-v] [-d]"  # **
 #parameters="${parameters}\n${param_pad}"
 #parameters="${parameters} ..."
-required_tools=()
+required_tools=(
+    getopt
+)
 unset param_pad msg
 
 
