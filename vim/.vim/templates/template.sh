@@ -31,7 +31,7 @@ local_conf="${HOME}/.${dn_self}rc"
 usage="Usage:"
 # shellcheck disable=SC2034
 param_pad="$( dnRightPad "$( dnStrLen "${usage} ${dn_self}" )" )"
-parameters=""  # **
+parameters=" [-v] [-d]"  # **
 #parameters="${parameters}\n${param_pad}"
 #parameters="${parameters} ..."
 required_tools=()
@@ -53,7 +53,11 @@ ${dn_self}: <BRIEF>
 ${usage} ${dn_self} ${parameters}
        ${dn_self} -h
 
-Options: -x OPT   = 
+Options: -x OPT  = 
+         -v      = print input lines after command expansion
+                   (equivalent to 'set -o verbose')
+         -d      = print input lines as they are read
+                   (equivalent to 'set -o xtrace')
 _USAGE
 }
 # Process configuration files
