@@ -123,13 +123,9 @@ exec_always --no-startup-id xrandr                \
                               --left-of HDMI-A-0
 
 # wallpaper    {{{2
-# - 'xrandr --listmonitors' shows monitor 0 is big HDMI-A-0 (3440x1440)
-#   and 1 is small DVD-D-0 (1920x1080)
-# - if feh is given multiple images it assigns them in monitor number order,
-#   e.g., first to DVD-D-0 and then to HDMI-A-0
-feh --no-fehbg --bg-scale                               \
-    "$(shuf -en1 ~/.config/i3/wallpapers/1920x1080/*)"  \
-    "$(shuf -en1 ~/.config/i3/wallpapers/3440x1440/*)"
+#
+# - handled by custom script that assigns random image to each monitor
+exec --no-startup-id i3-background-set
 
 # screenlock    {{{2
 #
