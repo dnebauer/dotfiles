@@ -151,25 +151,25 @@ exec --no-startup-id nm-applet
 # - use pactl to adjust volume in PulseAudio
 
 set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioRaiseVolume exec --no-startup-id \
-    pactl set-sink-mute @DEFAULT_SINK@ false &&   \
-    pactl set-sink-volume @DEFAULT_SINK@ +5% &&  \
+bindsym XF86AudioRaiseVolume exec --no-startup-id     \
+    pactl set-sink-mute @DEFAULT_SINK@ false &&       \
+    pactl set-sink-volume @DEFAULT_SINK@ +5% &&       \
     $refresh_i3status
-bindsym XF86AudioLowerVolume exec --no-startup-id \
-    pactl set-sink-mute @DEFAULT_SINK@ false &&   \
-    pactl set-sink-volume @DEFAULT_SINK@ -5% &&  \
+bindsym XF86AudioLowerVolume exec --no-startup-id     \
+    pactl set-sink-mute @DEFAULT_SINK@ false &&       \
+    pactl set-sink-volume @DEFAULT_SINK@ -5% &&       \
     $refresh_i3status
-bindsym XF86AudioMute exec --no-startup-id       \
-    pactl set-sink-mute @DEFAULT_SINK@ toggle && \
+bindsym XF86AudioMute exec --no-startup-id            \
+    pactl set-sink-mute @DEFAULT_SINK@ toggle &&      \
     $refresh_i3status
-bindsym XF86AudioMicMute exec --no-startup-id        \
-    pactl set-source-mute @DEFAULT_SOURCE@ toggle && \
+bindsym XF86AudioMicMute exec --no-startup-id         \
+    pactl set-source-mute @DEFAULT_SOURCE@ toggle &&  \
     $refresh_i3status
 
 # - set volume to 20% on startup
 
-exec_always --no-startup-id \
-    pactl set-sink-mute @DEFAULT_SINK@ false &&   \
+exec_always --no-startup-id                      \
+    pactl set-sink-mute @DEFAULT_SINK@ false &&  \
     pactl set-sink-volume @DEFAULT_SINK@ 25% &&  \
     $refresh_i3status
 
@@ -190,6 +190,10 @@ exec --no-startup-id radiotray-ng
 set $kdeconnect "/usr/lib/x86_64-linux-gnu/libexec/kdeconnectd"
 exec --no-startup-id $kdeconnect
 #dex /usr/share/applications/org.kde.kdeconnect.nonplasma.desktop
+
+# task switcher    {{{2
+
+exec --no-startup-id alttab
 
 # fading effects    {{{2
 #
@@ -320,6 +324,18 @@ mode "$mode_ss_window" {
 
 bindsym F1 exec --no-startup-id dn-load-clipboard
 
+# display shortcuts    {{{2
+
+set $Shortcuts $HOME/.config/i3/help/shortcuts.html
+bindsym F2 exec --no-startup-id       \
+    zenity                            \
+        --text-info                   \
+        --html                        \
+        --filename=$Shortcuts         \
+        --title="Keyboard Shortcuts"  \
+        --width=1000                  \
+        --height=1000
+
 # tellico    {{{2
 
 bindsym F3 exec --no-startup-id tellico
@@ -384,11 +400,11 @@ mouse_warping none
 # - this is disrupted by redefining $mod+h to the vim-like 'focus left'
 # - instead use this mode
 
-bindsym $mod+s mode "mode_split"
+bindsym $mod+s mode "$mode_split"
 
 set $mode_split Split: [h]orizontal, [v]ertical
 
-mode "mode_split" {
+mode "$mode_split" {
     bindsym h           split h
     bindsym v           split v
 
@@ -403,11 +419,11 @@ bindsym $mod+f fullscreen toggle
 
 # change container layout {stacked,tabbed,toggle split}    {{{2
 
-bindsym $mod+y mode "mode_layout"
+bindsym $mod+y mode "$mode_layout"
 
 set $mode_layout Container layout: [s]tacked, [t]abbed, to[g]gle split
 
-mode "mode_layout" {
+mode "$mode_layout" {
 
     bindsym $s          layout stacking
     bindsym $t          layout tabbed
@@ -461,13 +477,13 @@ bindsym $mod+a focus parent
 
 ####bindsym $mod+d focus child
 
-# move the currently focused window to the scratchpad    {{{2
-
-bindsym $mod+Shift+minus move scratchpad
-
 # cycle through workspaces    {{{2
 bindsym $mod+Ctrl+h workspace prev
 bindsym $mod+Ctrl+l workspace next
+
+# move the currently focused window to the scratchpad    {{{2
+
+bindsym $mod+Shift+minus move scratchpad
 
 # show, cycle through or hide focussed scratchpad window    {{{2
 #
@@ -548,12 +564,12 @@ bindsym $mod+Shift+0 move container to workspace number $ws10
 #
 # - you can also use the mouse for that
 
-bindsym $mod+r mode "mode_resize"
+bindsym $mod+r mode "$mode_resize"
 
 set $mode_resize Resize: \
 [h|l] shrink|grow width, [j|k] shrink|grow height
 
-mode "mode_resize" {
+mode "$mode_resize" {
     # these bindings trigger as soon as you enter the resize mode
 
     bindsym $left       resize shrink width 10 px or 10 ppt
@@ -701,14 +717,25 @@ bar {
 
 
 # assigning to workspaces
+#
 # * "for_window <criteria> <command>" applies all the time
 # * "assign <criteria> <command>" applies only to initial mapping
 # * use xprop to get class and instance:
 #   - returns "WM_CLASS(STRING) = "<instance>", "<class>"
 # * can assign to specific screen (output), e.g., "assign <criteria> primary"
 # * assign workspace to screen by "workspace X output LVDS1" or
-#   "workpace "2:vim" output VGA1
-# 
+#   "workplace "2:vim" output VGA1
+
+# calling qutebrowser
+# * qutebrowser \
+#       --target window \
+#       --set window.title_format "Mail" \
+#       --restore i3_SESSION
+# * qutebrowser \
+#       --target window \
+#       --set window.title_format "Mail" \
+#       url1 url2 ...
+
 # }}}1
 
 # vim:foldmethod=marker:
