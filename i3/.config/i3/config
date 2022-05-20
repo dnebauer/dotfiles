@@ -53,7 +53,8 @@
 
 set $mod Mod4
 set $alt Mod1
-set $term konsole
+#set $term konsole
+set $term alacritty
 
 # colours    {{{2
 #
@@ -125,7 +126,7 @@ exec_always --no-startup-id xrandr                \
 # wallpaper    {{{2
 #
 # - handled by custom script that assigns random image to each monitor
-exec --no-startup-id i3-background-set
+exec --no-startup-id ~/.config/i3/bin/i3-background-set
 
 # screenlock    {{{2
 #
@@ -279,7 +280,7 @@ mode "$mode_screenshot" {
     bindsym $mod+r mode "default"
 }
 
-set $Screenshot $HOME/.local/bin/i3-screenshot
+set $Screenshot $HOME/.config/i3/bin/i3-screenshot
 
 mode "$mode_ss_desktop" {
     bindsym --release c exec --no-startup-id $Screenshot -c -d
@@ -519,9 +520,9 @@ for_window [all] title_window_icon padding 3px
 # - we later configure key bindings for them
 # - use variables to avoid repeating the names in multiple places
 
-set $ws_terms "1: terms"
-set $ws_mail "2: "
-set $ws_web "3: web"
+set $ws_terms "1: terms"
+set $ws_mail "2: mail"
+set $ws_web "3: web"
 set $ws4 "4"
 set $ws5 "5"
 set $ws6 "6"
@@ -692,25 +693,25 @@ include ~/.config/i3/config.d/*.conf
 
 # status line    {{{2
 #
-bar {
-    status_command i3blocks
-    position top
-    font pango:Hack, FontAwesome 11
-
-    colors {
-        separator #081419
-        background #253941
-        #statusline #839496
-        #                  border   background  text
-        focused_workspace  #fdf6e3  #6c71c4     #fdf6e3
-        active_workspace   #fdf6e3  #6c71c4     #fdf6e3
-        inactive_workspace #002b36  #586e75     #002b36
-        urgent_workspace   #d33682  #d33682     #fdf6e3
-
-        statusline         $white
-        separator          $transparent
-    }
-}
+#bar {
+#    status_command i3blocks
+#    position top
+#    font pango:Hack, FontAwesome 11
+#
+#    colors {
+#        separator #081419
+#        background #253941
+#        #statusline #839496
+#        #                  border   background  text
+#        focused_workspace  #fdf6e3  #6c71c4     #fdf6e3
+#        active_workspace   #fdf6e3  #6c71c4     #fdf6e3
+#        inactive_workspace #002b36  #586e75     #002b36
+#        urgent_workspace   #d33682  #d33682     #fdf6e3
+#
+#        statusline         $white
+#        separator          $transparent
+#    }
+#}
 
 
 # NOTES    {{{1
