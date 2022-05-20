@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+
+# File: launch.sh
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: launch polybar
+# Created: 2022-05-20
+
+
+# ERROR HANDLING
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+
+# VARIABLES
+
+self="$(basename "$0")"
+required_tools=(
+    getopt
+)
+
+
+# PROCEDURES
+
+# Show usage
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${dn_self}: launch polybar
+
+Kills any existing instances of polybar and launches a fresh
+instance.
+
+Usage: $self [-v] [-d]
+       ${dn_self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# Process command line options
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                     \
+        getopt                            \
+            --options hvd                 \
+            --long    help,verbose,debug  \
+            --name    "${BASH_SOURCE[0]}" \
+            -- "${@}"                     \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# Join items
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}
+
+
+# MAIN
+
+# Check for required tools
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || dnFailScript "Can't run without: $(joinBy ', ' "${missing[@]}")"
+unset missing tools required_tools
+
+# Process command line options
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# Kill existing instances
+#killall -q polybar
+polybar-msg cmd quit
+while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
+
+# Launch polybar
+echo "---" | tee -a /tmp/polybar-main.log
+polybar main 2>&1 | tee -a /tmp/polybar1.log & disown
+
+# vim:foldmethod=marker:

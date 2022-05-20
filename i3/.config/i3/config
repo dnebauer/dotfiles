@@ -696,6 +696,7 @@ include ~/.config/i3/config.d/*.conf
 
 # status line    {{{2
 #
+exec_always --no-startup-id ~/.config/polybar/launch.sh
 #bar {
 #    status_command i3blocks
 #    position top
