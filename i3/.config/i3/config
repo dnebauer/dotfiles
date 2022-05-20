@@ -193,6 +193,9 @@ exec --no-startup-id $kdeconnect
 #dex /usr/share/applications/org.kde.kdeconnect.nonplasma.desktop
 
 # task switcher    {{{2
+#
+# -w 1 = EWMH-compatible window manager
+# -d 1 = show windows from all desktops
 
 exec --no-startup-id alttab -w 1 -d 1
 
