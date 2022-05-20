@@ -194,7 +194,7 @@ exec --no-startup-id $kdeconnect
 
 # task switcher    {{{2
 
-exec --no-startup-id alttab
+exec --no-startup-id alttab -w 1 -d 1
 
 # fading effects    {{{2
 #
