@@ -458,7 +458,6 @@ no_focus [window_role="pop-up"]
 for_window [class="plasmashell"] floating enable
 for_window [title="Desktop — Plasma"] kill, floating enable, border none
 no_focus [class="plasmashell" window_type="notification"]
-no_focus [class="plasmashell" window_type="on_screen_display"]
 
 # toggle tiling/floating    {{{2
 
