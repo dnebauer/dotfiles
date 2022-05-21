@@ -58,29 +58,33 @@ set $term alacritty
 
 # colours    {{{2
 #
-# - get color from XResource config - variable_name XResource fallback
+# - get color from XResource config
 
-set_from_resource $darkred     color1      #d75f5f
-set_from_resource $red         color9      #d75f5f
-set_from_resource $darkgreen   color2      #87AF87
-set_from_resource $green       color10     #87AF87
-set_from_resource $darkyellow  color3      #ffd75f
-set_from_resource $yellow      color11     #ffd75f
-set_from_resource $darkblue    color4      #87afd7
-set_from_resource $blue        color12     #87afd7
-set_from_resource $darkmagenta color5      #afafd7
-set_from_resource $magenta     color13     #afafd7
-set_from_resource $darkcyan    color6      #afd7ff
-set_from_resource $cyan        color14     #afd7ff
-set_from_resource $darkwhite   color7      #4E4E4E
-set_from_resource $white       color15     #ffffff
-set_from_resource $black       color0      #303030
-set_from_resource $darkblack   color8      #444444
-set_from_resource $foreground  foreground  #C6C6C6
-set_from_resource $background  background  #1C1C1C
-set_from_resource $cursorColor cursorColor #C6C6C6
-set $trueblack   #000000
-set $transparent #00000000
+#                 variable     XResource   fallback
+set_from_resource $DarkRed     color1      #8b0000
+set_from_resource $Red         color9      #ff0000
+set_from_resource $DarkGreen   color2      #006400
+set_from_resource $Green       color10     #008000
+set_from_resource $DarkYellow  color3      #ffff00
+set_from_resource $Yellow      color11     #ffffe0
+set_from_resource $DarkBlue    color4      #00008b
+set_from_resource $Blue        color12     #0000ff
+set_from_resource $DarkMagenta color5      #8b008b
+set_from_resource $Magenta     color13     #ff00ff
+set_from_resource $DarkCyan    color6      #008b8b
+set_from_resource $Cyan        color14     #00ffff
+set_from_resource $LightGrey   color7      #d3d3d3
+set_from_resource $White       color15     #ffffff
+set_from_resource $Black       color0      #000000
+set_from_resource $DarkGrey    color8      #a9a9a9
+set_from_resource $Foreground  foreground  #c6c6c6
+set_from_resource $Background  background  #1c1c1c
+set_from_resource $CursorColor cursorColor #c6c6c6
+
+set $Trueblack   #000000
+# translucency: extra first 2 digits are transparency
+# - 00=transparent, FF=opaque
+set $Transparent #00000000
 
 
 # FONT FOR WINDOW TITLES    {{{1
