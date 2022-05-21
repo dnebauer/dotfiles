@@ -123,11 +123,6 @@ exec_always --no-startup-id xrandr                \
                               --rotate normal     \
                               --left-of HDMI-A-0
 
-# wallpaper    {{{2
-#
-# - handled by custom script that assigns random image to each monitor
-exec --no-startup-id ~/.config/i3/bin/i3-background-set
-
 # screenlock    {{{2
 #
 # - xss-lock grabs a logind suspend inhibit lock and will use i3lock to
@@ -694,29 +689,16 @@ mode "$mode_system" {
 
 include ~/.config/i3/config.d/*.conf
 
+# set wallpaper    {{{2
+#
+# - place near end because if near start will occasionally get
+#   monitors around the wrong way
+# - handled by custom script that assigns random image to each monitor
+exec --no-startup-id ~/.config/i3/bin/i3-background-set
+
 # status line    {{{2
 #
-exec_always --no-startup-id ~/.config/polybar/launch.sh
-#bar {
-#    status_command i3blocks
-#    position top
-#    font pango:Hack, FontAwesome 11
-#
-#    colors {
-#        separator #081419
-#        background #253941
-#        #statusline #839496
-#        #                  border   background  text
-#        focused_workspace  #fdf6e3  #6c71c4     #fdf6e3
-#        active_workspace   #fdf6e3  #6c71c4     #fdf6e3
-#        inactive_workspace #002b36  #586e75     #002b36
-#        urgent_workspace   #d33682  #d33682     #fdf6e3
-#
-#        statusline         $white
-#        separator          $transparent
-#    }
-#}
-
+exec_always --no-startup-id ~/.config/polybar/launch
 
 # NOTES    {{{1
 
