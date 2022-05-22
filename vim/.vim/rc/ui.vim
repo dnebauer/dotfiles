@@ -174,6 +174,11 @@ let g:airline_symbols.branch   = ''
 let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr   = ''
 " - display all buffers when only one is open
-let g:airline#extensions#tabline#enabled = 1    " }}}1
+let g:airline#extensions#tabline#enabled = 1
+
+" Window title    {{{1
+set titlestring=
+set title
+" }}}1
 
 " vim:foldmethod=marker:
