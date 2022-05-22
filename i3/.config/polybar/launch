@@ -118,11 +118,26 @@ polybar-msg cmd quit || true
 while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
 
 # Launch polybar on each monitor
+# - do primary monitor first so it reliably shows the tray
+# - whichever bar loads first captures the tray
 if type "xrandr"; then
-    for monitor in $(xrandr --query | grep ' connected' | cut -d' ' -f1); do
-        echo "========================================"
-        echo "MONITOR=$monitor polybar --reload main &"
-        echo "----------------------------------------"
+    PRIMARY=$(xrandr --query |\
+        grep ' connected'    |\
+        grep 'primary'       |\
+        cut -d' ' -f1\
+    )
+    OTHERS=$(xrandr --query  |\
+        grep ' connected'    |\
+        grep -v 'primary'    |\
+        cut -d' ' -f1\
+    )
+
+    # launch on primary monitor
+    MONITOR=$PRIMARY polybar --reload main &
+    sleep 1
+
+    # launch on all other monitors
+    for monitor in $OTHERS ; do
         MONITOR=$monitor polybar --reload main &
     done
 else
