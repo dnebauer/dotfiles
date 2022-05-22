@@ -198,6 +198,10 @@ exec --no-startup-id $kdeconnect
 
 exec --no-startup-id alttab -w 1 -d 1
 
+# automount removable media    {{{2
+
+exec --no-startup-id udiskie &
+
 # fading effects    {{{2
 #
 # - use a compositor
@@ -456,6 +460,8 @@ for_window [class="GtkFileChooserDialog"] sticky enable
 
 for_window [class="smplayer" instance="smplayer"] floating enable
 for_window [class="calibre" instance="calibre-ebook-viewer"] floating enable
+for_window [class="dolphin" instance="dolphin"] floating enable
+
 
 no_focus [window_role="pop-up"]
 
