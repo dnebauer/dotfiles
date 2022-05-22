@@ -85,6 +85,7 @@ set $Trueblack   #000000
 # translucency: extra first 2 digits are transparency
 # - 00=transparent, FF=opaque
 set $Transparent #00000000
+# }}}2
 
 
 # FONT FOR WINDOW TITLES    {{{1
@@ -210,6 +211,7 @@ exec --no-startup-id udiskie &
 
 set $picom_start "pkill picom; sleep 1; picom -b"
 exec_always --no-startup-id $picom_start
+# }}}2
 
 
 # APPLICATION LAUNCHING    {{{1
@@ -346,6 +348,7 @@ bindsym F2 exec --no-startup-id       \
 # tellico    {{{2
 
 bindsym F3 exec --no-startup-id tellico
+# }}}2
 
 
 # MOVEMENT KEYS    {{{1
@@ -371,6 +374,7 @@ bindsym $mod+Up focus up
 
 bindsym $mod+$right focus right
 bindsym $mod+Right focus right
+# }}}2
 
 
 # CONTROL LAYOUT    {{{1
@@ -653,6 +657,7 @@ mode "$mode_gaps_outer" {
 # kill focused window    {{{2
 
 bindsym $mod+Shift+q kill
+# }}}2
 
 
 # MANAGE I3WM    {{{1
@@ -711,6 +716,8 @@ exec --no-startup-id ~/.config/i3/bin/i3-background-set
 # status line    {{{2
 #
 exec_always --no-startup-id ~/.config/polybar/launch
+# }}}2
+
 
 # NOTES    {{{1
 
