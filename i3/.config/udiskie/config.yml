@@ -39,6 +39,51 @@ program_options:
   # [string|list] Set command to be executed on any device event.
   # This is specified like `password_prompt`.
 
+device_config:
+
+  # List of device option rules. Each item can match any combination of device
+  # attributes. Additionally, it defines the resulting action (see below). Any
+  # rule can contain multiple filters (AND) and multiple actions. Only the
+  # first matching rule that defines a given action is used. The rules defined
+  # here are simply prepended to the builtin device rules, so that it is
+  # possible to completely overwrite the defaults by specifying a catch-all
+  # rule (i.e. a rule without device attributes).
+
+  # Ignore mounted debian distro iso images
+
+  - device_file: /dev/loop0
+    ignore: true
+  - device_file: /dev/loop1
+    ignore: true
+  - device_file: /dev/loop2
+    ignore: true
+  - device_file: /dev/loop3
+    ignore: true
+  - device_file: /dev/loop4
+    ignore: true
+  - device_file: /dev/loop5
+    ignore: true
+  - device_file: /dev/loop6
+    ignore: true
+  - device_file: /dev/loop7
+    ignore: true
+  - device_file: /dev/loop8
+    ignore: true
+  - device_file: /dev/loop9
+    ignore: true
+  - device_file: /dev/loop10
+    ignore: true
+  - device_file: /dev/loop11
+    ignore: true
+  - device_file: /dev/loop12
+    ignore: true
+  - device_file: /dev/loop13
+    ignore: true
+  - device_file: /dev/loop14
+    ignore: true
+  - device_file: /dev/loop15
+    ignore: true
+
 notifications:
 
   # Customize which notifications are shown for how long. Possible
