@@ -482,9 +482,7 @@ if command -v ugrep >/dev/null ; then
         alias $cmd="$cmd_alias $ugrep_hidden $ugrep_filter"
     done
     unset ugrep_aliases ugrep_hidden ugrep_filter element cmd cmd_alias
-fi
-# qutebrowser to use webengine backend    {{{1
-alias qutebrowser='qutebrowser --backend webengine'    # }}}1
+fi    # }}}1
 
 # Initial apps
 
