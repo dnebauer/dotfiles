@@ -1,0 +1,49 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1024,
+       "width": 1916,
+       "x": 2,
+       "y": 54
+    },
+    "marks": [],
+    "name": "launcher_tiddlywiki — Konsole",
+    "percent": 0.5,
+    "swallows": [
+       {
+          "class": "^konsole$",
+          "instance": "^konsole$",
+          "title": "^launcher_tiddlywiki — Konsole$"
+       }
+    ],
+    "type": "con"
+}
+
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1384,
+       "width": 1143,
+       "x": 3642,
+       "y": 54
+    },
+    "marks": [
+       "w"
+    ],
+    "name": "Auxiliary Memory — for David's brain - qutebrowser",
+    "percent": 0.5,
+    "swallows": [
+       {
+          "class": "^qutebrowser$",
+          "instance": "^qutebrowser$",
+          "title": "^qutebrowser/wiki$"
+       }
+    ],
+    "type": "con"
+}
+

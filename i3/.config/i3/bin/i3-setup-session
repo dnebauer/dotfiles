@@ -1,0 +1,247 @@
+#!/usr/bin/env bash
+
+# File: i3-setup-session
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: set up initial i3 session
+# Created: 2022-05-25
+
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+required_tools=(
+    getopt
+    sleep
+    i3-msg
+)
+# trial and error showed that any app post-launch delay < 1 second caused
+# problems for qutebrowser windows resetting their titles, independently of the
+# delay before the titling itself (even if there is no reasonable explanation
+# for that!)
+delay_post_launch=1
+debug=false
+
+# PROCEDURES
+
+# Show usage    {{{1
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: app launcher called during i3 startup
+
+This script is called by the i3 config file during startup
+to launch applications. The main purpose for using this
+script rather than internal i3 commands is to control the
+window role assigned to some apps. This enables them to be
+"swallowed" by preset layouts.
+
+It is essential that this script is consistent with any
+applied layouts and with the i3 config file. This includes,
+but is not limited to, consistency with workspace names.
+
+Usage: ${self} [-v] [-d]
+       ${self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# Process command line options    {{{1
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                             \
+        getopt                                    \
+            --options hvdx:                       \
+            --long    xoption:,help,verbose,debug \
+            --name    "${BASH_SOURCE[0]}"         \
+            -- "${@}"                             \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -x | --xoption ) varx="${2}"    ; shift 2 ;;
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# Join items    {{{1
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}    # }}}1
+
+# MAIN
+
+# Check for required tools    {{{1
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || dnFailScript "Can't run without: $(joinBy ', ' "${missing[@]}")"
+unset missing tools required_tools
+
+# Process command line options    {{{1
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# Assign workspaces to monitors    {{{1
+# - this must be done in the i3 setup file
+# - there appears to be no way to construct the workspace command in shell
+#   script using i3-msg without i3 interpreting the workspace name as being
+#   everything following the token 'workspace'
+# - for posterity, what follows is the final attempt at setting workspace 1:
+##i3-msg workspace '1:term' output $primary_monitor
+# - this was an earlier attempt (expand to include other workspaces and the
+#   secondary monitor:
+##primary_workspaces=(1:term)
+##for workspace in "${primary_workspaces[@]}" ; do
+##    i3-msg workspace "$workspace" output $primary_monitor
+##done
+
+# Apply layouts to workspaces    {{{1
+if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 1' ; fi
+i3-msg 'workspace 1:term; append_layout ~/.config/i3/sessions/workspace_1.json'
+if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 2' ; fi
+i3-msg 'workspace 2:mail; append_layout ~/.config/i3/sessions/workspace_2.json'
+if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 3' ; fi
+i3-msg 'workspace 3:chrome; append_layout ~/.config/i3/sessions/workspace_3.json'
+if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 4' ; fi
+i3-msg 'workspace 4:qute; append_layout ~/.config/i3/sessions/workspace_4.json'
+if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 5' ; fi
+i3-msg 'workspace 5:wiki; append_layout ~/.config/i3/sessions/workspace_5.json'
+
+# Launch apps    {{{1
+
+# nvim-qt
+if $debug ; then echo 'i3 session setup' 'Launching nvim-qt' ; fi
+nvim-qt &
+sleep $delay_post_launch
+
+# astroid
+if $debug ; then echo 'i3 session setup' 'Launching astroid' ; fi
+astroid-launcher &
+sleep $delay_post_launch
+
+# qutebrowser (mail: gmail, primus)
+if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/mail' ; fi
+qutebrowser --set window.title_format "qutebrowser/mail" --restore mail &
+sleep $delay_post_launch
+
+# google-chrome
+if $debug ; then echo 'i3 session setup' 'Launching google chrome' ; fi
+google-chrome &
+sleep $delay_post_launch
+
+# qutebrowser (porn)
+if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/porn' ; fi
+qutebrowser --set window.title_format "qutebrowser/porn" --restore porn &
+sleep $delay_post_launch
+
+# qutebrowser (music)
+if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/music' ; fi
+qutebrowser --set window.title_format "qutebrowser/music" --restore music &
+sleep $delay_post_launch
+
+# qutebrowser (vim)
+if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/vim' ; fi
+qutebrowser --set window.title_format "qutebrowser/vim" --restore vim &
+sleep $delay_post_launch
+
+# qutebrowser (games)
+if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/games' ; fi
+qutebrowser --set window.title_format "qutebrowser/games" --restore games &
+sleep $delay_post_launch
+
+# tiddlywiki
+if $debug ; then echo 'i3 session setup' 'Launching tiddlywiki' ; fi
+konsole \
+    --hide-menubar \
+    --hide-tabbar \
+    -p tabtitle=launcher_tiddlywiki \
+    -e "tiddlywiki $HOME/data/misc/auxiliary-memory --listen port=10744" &
+sleep $delay_post_launch
+
+# qutebrowser (wiki)
+if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/wiki' ; fi
+qutebrowser --set window.title_format "qutebrowser/wiki" --restore wiki &
+sleep $delay_post_launch
+
+# alacritty/tmux
+if $debug ; then echo 'i3 session setup' 'Launching alacritty running tmux' ; fi
+alacritty \
+    --class 'AlacrittyTmux,AlacrittyTmux' \
+    --title 'AlacrittyTmux' \
+    --command tmux &
+sleep $delay_post_launch
+
+# Reset title of qutebrowser windows    {{{1
+# - it appears all qutebrowser instances must finish loading in order for the
+#   'set' command to execute correctly
+# - it seems an actively loading qutebrowser window interferes with xdotool
+#   typing its keys, and it is unpredictable which keys are received by the
+#   window and which are 'lost'
+# - trial and error showed that 30 seconds is sufficient for the computer and
+#   internet speeds in use at the time this script was written
+steps=(30:10 20:10 10:5 5:5)
+for step in "${steps[@]}" ; do
+    remaining=$(cut -d: -f1 <<<$step)
+    delay=$(cut -d: -f2 <<<$step)
+    notify-send \
+        'i3-setup-session' \
+        "Waiting $remaining seconds before resetting qutebrowser titles"
+    sleep $delay
+done
+title='{perc}{current_title}{title_sep}qutebrowser'
+cmd="set window.title_format $title"
+window_ids=($(xdotool search --class qutebrowser))
+for window_id in "${window_ids[@]}" ; do
+    xdotool windowactivate --sync $window_id
+    xdotool key --window $window_id --clearmodifiers colon
+    xdotool type --window $window_id --clearmodifiers "$cmd"
+    xdotool key --window $window_id --clearmodifiers Return
+done
+
+# Notify completion    {{{1
+notify-send 'i3-setup-session' 'Session setup complete'
+# }}}1
+
+# vim:foldmethod=marker:

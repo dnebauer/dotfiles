@@ -465,6 +465,7 @@ for_window [class="GtkFileChooserDialog"] sticky enable
 for_window [class="smplayer" instance="smplayer"] floating enable
 for_window [class="calibre" instance="calibre-ebook-viewer"] floating enable
 for_window [class="dolphin" instance="dolphin"] floating enable
+for_window [class="mpv" instance="gl"] floating enable
 
 
 no_focus [window_role="pop-up"]
@@ -534,11 +535,11 @@ for_window [all] title_window_icon padding 3px
 # - we later configure key bindings for them
 # - use variables to avoid repeating the names in multiple places
 
-set $ws_terms "1: terms"
-set $ws_mail "2: mail"
-set $ws_web "3: web"
-set $ws4 "4"
-set $ws5 "5"
+set $ws_terms "1:terms"
+set $ws_mail "2:mail"
+set $ws_chrome "3:chrome"
+set $ws_qute "4:qute"
+set $ws_wiki "5:wiki"
 set $ws6 "6"
 set $ws7 "7"
 set $ws8 "8"
@@ -549,9 +550,9 @@ set $ws10 "10"
 
 bindsym $mod+1 workspace number $ws_terms
 bindsym $mod+2 workspace number $ws_mail
-bindsym $mod+3 workspace number $ws_web
-bindsym $mod+4 workspace number $ws4
-bindsym $mod+5 workspace number $ws5
+bindsym $mod+3 workspace number $ws_chrome
+bindsym $mod+4 workspace number $ws_qute
+bindsym $mod+5 workspace number $ws_wiki
 bindsym $mod+6 workspace number $ws6
 bindsym $mod+7 workspace number $ws7
 bindsym $mod+8 workspace number $ws8
@@ -566,9 +567,9 @@ focus_follows_mouse no
 
 bindsym $mod+Shift+1 move container to workspace number $ws_terms
 bindsym $mod+Shift+2 move container to workspace number $ws_mail
-bindsym $mod+Shift+3 move container to workspace number $ws_web
-bindsym $mod+Shift+4 move container to workspace number $ws4
-bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+3 move container to workspace number $ws_chrome
+bindsym $mod+Shift+4 move container to workspace number $ws_qute
+bindsym $mod+Shift+5 move container to workspace number $ws_wiki
 bindsym $mod+Shift+6 move container to workspace number $ws6
 bindsym $mod+Shift+7 move container to workspace number $ws7
 bindsym $mod+Shift+8 move container to workspace number $ws8
@@ -708,40 +709,45 @@ include ~/.config/i3/config.d/*.conf
 
 # set wallpaper    {{{2
 #
-# - place near end because if near start will occasionally get
-#   monitors around the wrong way
+# - reset screens with xrandr (they can be changed by i3)
+
+exec_always --no-startup-id xrandr                \
+    --output DisplayPort-0  --off                 \
+    --output DisplayPort-1  --off                 \
+    --output HDMI-A-0         --primary           \
+                              --mode 3440x1440    \
+                              --pos 1920x0        \
+                              --rotate normal     \
+    --output HDMI-A-1       --off                 \
+    --output DVI-D-0          --mode 1920x1080    \
+                              --pos 0x180         \
+                              --rotate normal     \
+                              --left-of HDMI-A-0
+
 # - handled by custom script that assigns random image to each monitor
 exec --no-startup-id ~/.config/i3/bin/i3-background-set
-
-# status line    {{{2
-#
-exec_always --no-startup-id ~/.config/polybar/launch
 # }}}2
 
+# SETUP SESSION    {{{1
 
-# NOTES    {{{1
+# Most of setup is delegated to a shell script.
+# Only the workspace monitor allocation is kept here because a strange bug
+# prevents it being done via i3-msg (see script for details).
+set $primary_monitor primary
+set $secondary_monitor DVI-D-0
+workspace "1:term"   output $primary_monitor
+workspace "2:mail"   output $secondary_monitor
+workspace "3:chrome" output $secondary_monitor
+workspace "4:qute"   output $primary_monitor
+workspace "5:wiki"   output $secondary_monitor
 
+exec ~/.config/i3/bin/i3-setup-session
 
-# assigning to workspaces
-#
-# * "for_window <criteria> <command>" applies all the time
-# * "assign <criteria> <command>" applies only to initial mapping
-# * use xprop to get class and instance:
-#   - returns "WM_CLASS(STRING) = "<instance>", "<class>"
-# * can assign to specific screen (output), e.g., "assign <criteria> primary"
-# * assign workspace to screen by "workspace X output LVDS1" or
-#   "workplace "2:vim" output VGA1
+exec_always --no-startup-id ~/.config/polybar/launch
 
-# calling qutebrowser
-# * qutebrowser \
-#       --target window \
-#       --set window.title_format "Mail" \
-#       --restore i3_SESSION
-# * qutebrowser \
-#       --target window \
-#       --set window.title_format "Mail" \
-#       url1 url2 ...
-
+# Would like to return to workspace 1 at end of setup but the command keeps
+# causing an i3 error
+##workspace number 1:term
 # }}}1
 
 # vim:foldmethod=marker:
