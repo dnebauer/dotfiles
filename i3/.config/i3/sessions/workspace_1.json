@@ -9,7 +9,9 @@
        "x": 0,
        "y": 0
     },
-    "marks": [],
+    "marks": [
+      "t"
+    ],
     "name": "AlacrittyTmux",
     "percent": 0.75,
     "swallows": [

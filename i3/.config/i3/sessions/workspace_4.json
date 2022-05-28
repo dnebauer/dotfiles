@@ -18,7 +18,9 @@
                "x": 3396,
                "y": 54
             },
-            "marks": [],
+            "marks": [
+              "g"
+            ],
             "name": "Games",
             "percent": 0.25,
             "swallows": [
