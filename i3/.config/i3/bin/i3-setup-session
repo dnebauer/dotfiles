@@ -32,6 +32,7 @@ required_tools=(
 # delay before the titling itself (even if there is no reasonable explanation
 # for that!)
 delay_post_launch=1
+delay_app_loading=30
 debug=false
 
 # PROCEDURES
@@ -148,6 +149,12 @@ if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 4' ; fi
 i3-msg 'workspace 4:qute; append_layout ~/.config/i3/sessions/workspace_4.json'
 if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 5' ; fi
 i3-msg 'workspace 5:wiki; append_layout ~/.config/i3/sessions/workspace_5.json'
+# layouts define the following marks:
+# - workspace 1: t=term, v=vim
+# - workspace 2: m=astroid/mail
+# - workspace 3: c=chrome
+# - workspace 4: g=games
+# - workspace 5: w=wiki
 
 # Launch apps    {{{1
 
@@ -213,23 +220,26 @@ alacritty \
     --command tmux &
 sleep $delay_post_launch
 
-# Reset title of qutebrowser windows    {{{1
+# Post-launch tasks    {{{1
+# - some tasks cannot be performed until the relevant app has finished loading
+# - trial and error showed that 30 seconds is sufficient for the computer and
+#   internet speeds in use at the time this script was written
+while [[ $delay_app_loading -gt 0 ]] ; do
+    dunstify \
+        --replace=101 \
+        "$self" \
+        "Giving apps $delay_app_loading seconds to load"
+    let "delay_app_loading--"
+    sleep 1
+done
+dunstify --close=101
+
+# Reset title of qutebrowser windows    {{{2
 # - it appears all qutebrowser instances must finish loading in order for the
 #   'set' command to execute correctly
 # - it seems an actively loading qutebrowser window interferes with xdotool
 #   typing its keys, and it is unpredictable which keys are received by the
 #   window and which are 'lost'
-# - trial and error showed that 30 seconds is sufficient for the computer and
-#   internet speeds in use at the time this script was written
-steps=(30:10 20:10 10:5 5:5)
-for step in "${steps[@]}" ; do
-    remaining=$(cut -d: -f1 <<<$step)
-    delay=$(cut -d: -f2 <<<$step)
-    notify-send \
-        'i3-setup-session' \
-        "Waiting $remaining seconds before resetting qutebrowser titles"
-    sleep $delay
-done
 title='{perc}{current_title}{title_sep}qutebrowser'
 cmd="set window.title_format $title"
 window_ids=($(xdotool search --class qutebrowser))
@@ -240,8 +250,14 @@ for window_id in "${window_ids[@]}" ; do
     xdotool key --window $window_id --clearmodifiers Return
 done
 
+# Focus astroid in mail workspace    {{{2
+i3-msg [class="Astroid" instance="astroid"] focus
+
+# Focus terminal in workspace 1
+i3-msg [class="AlacrittyTmux" instance="AlacrittyTmux"] focus
+
 # Notify completion    {{{1
-notify-send 'i3-setup-session' 'Session setup complete'
+dunstify "$self" 'Session setup complete'
 # }}}1
 
 # vim:foldmethod=marker:
