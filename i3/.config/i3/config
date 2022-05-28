@@ -193,10 +193,10 @@ exec --no-startup-id $kdeconnect
 
 # task switcher    {{{2
 #
-# -w 1 = EWMH-compatible window manager
-# -d 1 = show windows from all desktops
-
-exec --no-startup-id alttab -w 1 -d 1
+# - same script runs as both server and client
+set $Switcher ~/.config/i3/bin/i3-focus-last
+exec --no-startup-id $Switcher
+bindsym $alt+Tab exec --no-startup-id $Switcher --switch
 
 # automount removable media    {{{2
 
@@ -534,16 +534,16 @@ for_window [all] title_window_icon padding 3px
 # - we later configure key bindings for them
 # - use variables to avoid repeating the names in multiple places
 
-set $ws_terms "1:terms"
-set $ws_mail "2:mail"
+set $ws_terms  "1:terms"
+set $ws_mail   "2:mail"
 set $ws_chrome "3:chrome"
-set $ws_qute "4:qute"
-set $ws_wiki "5:wiki"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
-set $ws9 "9"
-set $ws10 "10"
+set $ws_qute   "4:qute"
+set $ws_wiki   "5:wiki"
+set $ws6       "6:ws6"
+set $ws7       "7:ws7"
+set $ws8       "8:ws8"
+set $ws9       "9:ws9"
+set $ws10      "10:ws10"
 
 # switching between workspaces    {{{2
 

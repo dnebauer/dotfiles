@@ -34,6 +34,7 @@ required_tools=(
 delay_post_launch=1
 delay_app_loading=30
 debug=false
+# }}}1
 
 # PROCEDURES
 
@@ -139,15 +140,15 @@ processOptions "${@}"
 ##done
 
 # Apply layouts to workspaces    {{{1
-if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 1' ; fi
+if $debug ; then echo 'Appending layout to workspace 1' ; fi
 i3-msg 'workspace 1:term; append_layout ~/.config/i3/sessions/workspace_1.json'
-if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 2' ; fi
+if $debug ; then echo 'Appending layout to workspace 2' ; fi
 i3-msg 'workspace 2:mail; append_layout ~/.config/i3/sessions/workspace_2.json'
-if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 3' ; fi
+if $debug ; then echo 'Appending layout to workspace 3' ; fi
 i3-msg 'workspace 3:chrome; append_layout ~/.config/i3/sessions/workspace_3.json'
-if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 4' ; fi
+if $debug ; then echo 'Appending layout to workspace 4' ; fi
 i3-msg 'workspace 4:qute; append_layout ~/.config/i3/sessions/workspace_4.json'
-if $debug ; then echo 'i3 session setup' 'Appending layout to workspace 5' ; fi
+if $debug ; then echo 'Appending layout to workspace 5' ; fi
 i3-msg 'workspace 5:wiki; append_layout ~/.config/i3/sessions/workspace_5.json'
 # layouts define the following marks:
 # - workspace 1: t=term, v=vim
@@ -159,61 +160,63 @@ i3-msg 'workspace 5:wiki; append_layout ~/.config/i3/sessions/workspace_5.json'
 # Launch apps    {{{1
 
 # nvim-qt
-if $debug ; then echo 'i3 session setup' 'Launching nvim-qt' ; fi
+if $debug ; then echo 'Launching nvim-qt' ; fi
 nvim-qt &
 sleep $delay_post_launch
 
 # astroid
-if $debug ; then echo 'i3 session setup' 'Launching astroid' ; fi
+if $debug ; then echo 'Launching astroid' ; fi
 astroid-launcher &
 sleep $delay_post_launch
 
 # qutebrowser (mail: gmail, primus)
-if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/mail' ; fi
+if $debug ; then echo 'Launching qutebrowser/mail' ; fi
 qutebrowser --set window.title_format "qutebrowser/mail" --restore mail &
 sleep $delay_post_launch
 
 # google-chrome
-if $debug ; then echo 'i3 session setup' 'Launching google chrome' ; fi
+if $debug ; then echo 'Launching google chrome' ; fi
 google-chrome &
 sleep $delay_post_launch
 
 # qutebrowser (porn)
-if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/porn' ; fi
+if $debug ; then echo 'Launching qutebrowser/porn' ; fi
 qutebrowser --set window.title_format "qutebrowser/porn" --restore porn &
 sleep $delay_post_launch
 
 # qutebrowser (music)
-if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/music' ; fi
+if $debug ; then echo 'Launching qutebrowser/music' ; fi
 qutebrowser --set window.title_format "qutebrowser/music" --restore music &
 sleep $delay_post_launch
 
 # qutebrowser (vim)
-if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/vim' ; fi
+if $debug ; then echo 'Launching qutebrowser/vim' ; fi
 qutebrowser --set window.title_format "qutebrowser/vim" --restore vim &
 sleep $delay_post_launch
 
 # qutebrowser (games)
-if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/games' ; fi
+if $debug ; then echo 'Launching qutebrowser/games' ; fi
 qutebrowser --set window.title_format "qutebrowser/games" --restore games &
 sleep $delay_post_launch
 
 # tiddlywiki
-if $debug ; then echo 'i3 session setup' 'Launching tiddlywiki' ; fi
+if $debug ; then echo 'Launching tiddlywiki' ; fi
+plugin_path="/usr/local/share/tiddlywiki/plugins"
 konsole \
     --hide-menubar \
     --hide-tabbar \
     -p tabtitle=launcher_tiddlywiki \
+    -p environment="TIDDLYWIKI_PLUGIN_PATH=$plugin_path" \
     -e "tiddlywiki $HOME/data/misc/auxiliary-memory --listen port=10744" &
 sleep $delay_post_launch
 
 # qutebrowser (wiki)
-if $debug ; then echo 'i3 session setup' 'Launching qutebrowser/wiki' ; fi
+if $debug ; then echo 'Launching qutebrowser/wiki' ; fi
 qutebrowser --set window.title_format "qutebrowser/wiki" --restore wiki &
 sleep $delay_post_launch
 
 # alacritty/tmux
-if $debug ; then echo 'i3 session setup' 'Launching alacritty running tmux' ; fi
+if $debug ; then echo 'Launching alacritty running tmux' ; fi
 alacritty \
     --class 'AlacrittyTmux,AlacrittyTmux' \
     --title 'AlacrittyTmux' \
@@ -240,6 +243,7 @@ dunstify --close=101
 # - it seems an actively loading qutebrowser window interferes with xdotool
 #   typing its keys, and it is unpredictable which keys are received by the
 #   window and which are 'lost'
+if $debug ; then echo 'Resetting qutebrowser window titles' ; fi
 title='{perc}{current_title}{title_sep}qutebrowser'
 cmd="set window.title_format $title"
 window_ids=($(xdotool search --class qutebrowser))
@@ -251,15 +255,19 @@ for window_id in "${window_ids[@]}" ; do
 done
 
 # Focus astroid in mail workspace    {{{2
+if $debug ; then echo 'Focussing astroid' ; fi
 i3-msg [class="Astroid" instance="astroid"] focus
 
-# Focus terminal in workspace 1
+# Focus terminal in workspace 1    {{{2
+if $debug ; then echo 'Focussing main terminal' ; fi
 i3-msg [class="AlacrittyTmux" instance="AlacrittyTmux"] focus
 
 # Launch status bar    {{{1
+if $debug ; then echo 'Launching polybar' ; fi
 ~/.config/polybar/launch
 
 # Notify completion    {{{1
+if $debug ; then echo 'Session setup complete' ; fi
 dunstify "$self" 'Session setup complete'
 # }}}1
 
