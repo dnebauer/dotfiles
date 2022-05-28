@@ -744,10 +744,6 @@ workspace "5:wiki"   output $secondary_monitor
 exec ~/.config/i3/bin/i3-setup-session
 
 exec_always --no-startup-id ~/.config/polybar/launch
-
-# Would like to return to workspace 1 at end of setup but the command keeps
-# causing an i3 error
-##workspace number 1:term
 # }}}1
 
 # vim:foldmethod=marker:
