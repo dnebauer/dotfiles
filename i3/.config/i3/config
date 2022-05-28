@@ -742,8 +742,6 @@ workspace "4:qute"   output $primary_monitor
 workspace "5:wiki"   output $secondary_monitor
 
 exec ~/.config/i3/bin/i3-setup-session
-
-exec_always --no-startup-id ~/.config/polybar/launch
 # }}}1
 
 # vim:foldmethod=marker:

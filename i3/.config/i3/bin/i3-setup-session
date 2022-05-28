@@ -256,6 +256,9 @@ i3-msg [class="Astroid" instance="astroid"] focus
 # Focus terminal in workspace 1
 i3-msg [class="AlacrittyTmux" instance="AlacrittyTmux"] focus
 
+# Launch status bar    {{{1
+~/.config/polybar/launch
+
 # Notify completion    {{{1
 dunstify "$self" 'Session setup complete'
 # }}}1
