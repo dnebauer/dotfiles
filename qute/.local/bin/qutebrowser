@@ -66,7 +66,12 @@ done
 # user:
 if ! $basedir_specified; then
     basedir=$XDG_RUNTIME_DIR/qutebrowser/$session
-    set -- --basedir "$basedir" "$@" '--restore' "$session"
+    session_file=$basedir/data/sessions/$session.yml
+    if test -f "$session_file" ; then
+        set -- --basedir "$basedir" "$@" '--restore' "$session"
+    else
+        set -- --basedir "$basedir" "$@"
+    fi
     mkdir -p \
         "$basedir" \
         "$XDG_CONFIG_HOME/qutebrowser" \
