@@ -36,76 +36,76 @@
 
 # SHORTCUT SUMMARY    {{{1
 
-$alt+Tab              task switcher
-$mod+$down            move focus down
-$mod+$left            move focus left
-$mod+$right           move focus right
-$mod+$up              move focus up
-$mod+1                goto workspace 1
-$mod+2                goto workspace 2
-$mod+3                goto workspace 3
-$mod+4                goto workspace 4
-$mod+5                goto workspace 5
-$mod+6                goto workspace 6
-$mod+7                goto workspace 7
-$mod+8                goto workspace 8
-$mod+9                goto workspace 9
-$mod+0                goto workspace 10
-$mod+Ctrl+h           workspace prev
-$mod+Ctrl+l           workspace next
-$mod+Down             move focus down
-$mod+KP_Enter         open terminal
-$mod+Left             move focus left
-$mod+Pause            mode: system
-$mod+Print            mode: screenshot
-$mod+Return           open terminal
-$mod+Right            move focus right
-$mod+Shift+$down      move container down
-$mod+Shift+$left      move container left
-$mod+Shift+$right     move container right
-$mod+Shift+$up        move container up
-$mod+Shift+1          move container to workspace 1
-$mod+Shift+2          move container to workspace 2
-$mod+Shift+3          move container to workspace 3
-$mod+Shift+4          move container to workspace 4
-$mod+Shift+5          move container to workspace 5
-$mod+Shift+6          move container to workspace 6
-$mod+Shift+7          move container to workspace 7
-$mod+Shift+8          move container to workspace 8
-$mod+Shift+9          move container to workspace 9
-$mod+Shift+0          move container to workspace 10
-$mod+Shift+Down       move container down
-$mod+Shift+Left       move container left
-$mod+Shift+Right      move container right
-$mod+Shift+Up         move container up
-$mod+Shift+c          reload config file
-$mod+Shift+d          app launcher
-$mod+Shift+e          exit i3/X session
-$mod+Shift+g          mode: gaps
-$mod+Shift+minus      move scratchpad
-$mod+Shift+p          launch polybar
-$mod+Shift+q          kill window
-$mod+Shift+r          restart i3 in place
-$mod+Shift+space      floating toggle
-$mod+Up               move focus up
-$mod+a                focus parent
-$mod+d                app/command launcher
-$mod+f                fullscreen toggle
-$mod+g                goto mark
-$mod+m                set mark
-$mod+minus            scratchpad show
-$mod+o                mode: launcher
-$mod+r                mode: resize
-$mod+s                mode: split
-$mod+space            toggle focus mode
-$mod+y                mode: layout
-F1                    clipboard loader
-F2                    help page
-F3                    tellico
-XF86AudioLowerVolume  volume-5%
-XF86AudioMicMute      mic mute
-XF86AudioMute         mute
-XF86AudioRaiseVolume  volume+5%
+# $alt+Tab              task switcher
+# $mod+$down            move focus down
+# $mod+$left            move focus left
+# $mod+$right           move focus right
+# $mod+$up              move focus up
+# $mod+1                goto workspace 1
+# $mod+2                goto workspace 2
+# $mod+3                goto workspace 3
+# $mod+4                goto workspace 4
+# $mod+5                goto workspace 5
+# $mod+6                goto workspace 6
+# $mod+7                goto workspace 7
+# $mod+8                goto workspace 8
+# $mod+9                goto workspace 9
+# $mod+0                goto workspace 10
+# $mod+Ctrl+h           workspace prev
+# $mod+Ctrl+l           workspace next
+# $mod+Down             move focus down
+# $mod+KP_Enter         open terminal
+# $mod+Left             move focus left
+# $mod+Pause            mode: system
+# $mod+Print            mode: screenshot
+# $mod+Return           open terminal
+# $mod+Right            move focus right
+# $mod+Shift+$down      move container down
+# $mod+Shift+$left      move container left
+# $mod+Shift+$right     move container right
+# $mod+Shift+$up        move container up
+# $mod+Shift+1          move container to workspace 1
+# $mod+Shift+2          move container to workspace 2
+# $mod+Shift+3          move container to workspace 3
+# $mod+Shift+4          move container to workspace 4
+# $mod+Shift+5          move container to workspace 5
+# $mod+Shift+6          move container to workspace 6
+# $mod+Shift+7          move container to workspace 7
+# $mod+Shift+8          move container to workspace 8
+# $mod+Shift+9          move container to workspace 9
+# $mod+Shift+0          move container to workspace 10
+# $mod+Shift+Down       move container down
+# $mod+Shift+Left       move container left
+# $mod+Shift+Right      move container right
+# $mod+Shift+Up         move container up
+# $mod+Shift+c          reload config file
+# $mod+Shift+d          app launcher
+# $mod+Shift+e          exit i3/X session
+# $mod+Shift+g          mode: gaps
+# $mod+Shift+minus      move scratchpad
+# $mod+Shift+p          launch polybar
+# $mod+Shift+q          kill window
+# $mod+Shift+r          restart i3 in place
+# $mod+Shift+space      floating toggle
+# $mod+Up               move focus up
+# $mod+a                focus parent
+# $mod+d                app/command launcher
+# $mod+f                fullscreen toggle
+# $mod+g                goto mark
+# $mod+m                set mark
+# $mod+minus            scratchpad show
+# $mod+o                mode: launcher
+# $mod+r                mode: resize
+# $mod+s                mode: split
+# $mod+space            toggle focus mode
+# $mod+y                mode: layout
+# F1                    clipboard loader
+# F2                    help page
+# F3                    tellico
+# XF86AudioLowerVolume  volume-5%
+# XF86AudioMicMute      mic mute
+# XF86AudioMute         mute
+# XF86AudioRaiseVolume  volume+5%
 
 
 # COMMAND TO DISPLAY SHORTCUTS IN CONSOLE    {{{1
@@ -255,8 +255,30 @@ exec --no-startup-id dropbox start -i
 exec --no-startup-id oneko -time 70000 -bg red -position -30+20
 
 # radiotray-ng    {{{2
-
+#
+# - runs as daemon in system tray
 exec --no-startup-id radiotray-ng
+
+# - can control via dbus
+# - plays the last played station
+# - use mouse on tray icon to select different station
+
+set $rtng_dbus ~/.config/i3/bin/i3-rtng-dbus
+
+set $mode_radiotray Radiotray NG: [p]lay/pause, [s]top, [q]uit
+
+bindsym $mod+t mode "$mode_radiotray"
+
+mode "$mode_radiotray" {
+    bindsym p             exec --no-startup-id $rtng_dbus play
+    bindsym s             exec --no-startup-id $rtng_dbus stop
+    bindsym q             exec --no-startup-id $rtng_dbus quit
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
 
 # kdeconnect    {{{2
 
