@@ -675,6 +675,10 @@ bindsym $mod+Shift+q kill
 
 # MANAGE I3WM    {{{1
 
+# reload status bar    {{{2
+
+bindsym $mod+Shift+p exec ~/.config/polybar/launch
+
 # reload the configuration file    {{{2
 
 bindsym $mod+Shift+c reload
