@@ -474,7 +474,7 @@ for_window [class="calibre" instance="calibre-ebook-viewer"] floating enable
 for_window [class="dolphin" instance="dolphin"] floating enable
 for_window [class="mpv" instance="gl"] floating enable
 for_window [class="Zathura" instance="org.pwmt.zathura"] floating enable, \
-           resize set 1000 1200
+           resize set 1000 1200, move up 250
 
 no_focus [window_role="pop-up"]
 
