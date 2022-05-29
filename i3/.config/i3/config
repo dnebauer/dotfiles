@@ -98,6 +98,7 @@
 # $mod+r                mode: resize
 # $mod+s                mode: split
 # $mod+space            toggle focus mode
+# $mod+t                radiotray-ng controls
 # $mod+y                mode: layout
 # F1                    clipboard loader
 # F2                    help page
