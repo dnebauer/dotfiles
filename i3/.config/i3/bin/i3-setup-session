@@ -109,6 +109,23 @@ function joinBy () {
     local f=$1
     shift
     printf %s "$f" "${@/#/$d}"
+}
+# Send qutebrowser command    {{{1
+#   params: 1 - window id
+#           2 - command
+#   prints: nil
+#   return: nil
+function qbCommand () {
+    # extract parameters
+    local id cmd
+    id=$1
+    cmd="$2"
+
+    # send command to nominated qutebrowser instance
+    xdotool windowactivate --sync $id
+    xdotool key  --window $id --clearmodifiers colon
+    xdotool type --window $id --clearmodifiers "$cmd"
+    xdotool key  --window $id --clearmodifiers Return
 }    # }}}1
 
 # MAIN
@@ -251,15 +268,9 @@ elif [[ ${#wiki_ids[@]} -gt 1 ]] ; then
         "Whoah! Detected ${#wiki_ids[@]} qutebrowsers showing tiddlywiki"
 else
     wiki_id="${wiki_ids[0]}"
-    xdotool windowactivate --sync $wiki_id
-    xdotool key --window $wiki_id --clearmodifiers colon
-    xdotool type --window $wiki_id --clearmodifiers "tab-focus 1"
-    xdotool key --window $wiki_id --clearmodifiers Return
+    qbCommand "$wiki_id" "tab-focus 1"
     sleep $delay_app_loading
-    xdotool windowactivate --sync $wiki_id
-    xdotool key --window $wiki_id --clearmodifiers colon
-    xdotool type --window $wiki_id --clearmodifiers "reload"
-    xdotool key --window $wiki_id --clearmodifiers Return
+    qbCommand "$wiki_id" "reload"
     sleep 3
 fi
 
@@ -278,10 +289,7 @@ if [[ ${#window_ids[@]} -eq 0 ]] ; then
         'Cannot locate any qutebrowsers to retitle'
 else
     for window_id in "${window_ids[@]}" ; do
-        xdotool windowactivate --sync $window_id
-        xdotool key --window $window_id --clearmodifiers colon
-        xdotool type --window $window_id --clearmodifiers "$cmd"
-        xdotool key --window $window_id --clearmodifiers Return
+        qbCommand "$window_id" "$cmd"
     done
 fi
 
