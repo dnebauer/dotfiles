@@ -689,7 +689,7 @@ bindsym $mod+Shift+r restart
 # exit i3 (log out of X session)    {{{2
 bindsym $mod+Shift+e mode "$mode_exit"
 
-set $mode_exit Confirm (e)xit
+set $mode_exit Repeat key combination to exit
 
 mode "$mode_exit" {
     bindsym $mod+Shift+e exec i3-msg exit
