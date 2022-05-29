@@ -224,21 +224,23 @@ set $mode_launcher Launch: \
 bindsym $mod+o mode "$mode_launcher"
 
 mode "$mode_launcher" {
-    bindsym a           exec astroid-launcher
-    bindsym c           exec google-chrome
-    bindsym q           exec qutebrowser
-    bindsym s           exec syncthing-launcher
-    bindsym t           exec mybrain
+    bindsym a             exec astroid-launcher
+    bindsym c             exec google-chrome
+    bindsym q             exec qutebrowser
+    bindsym s             exec syncthing-launcher
+    bindsym t             exec mybrain
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 
 # start a terminal    {{{2
 
 ####bindsym $mod+Return exec i3-sensible-terminal
 bindsym $mod+Return exec $term
+bindsym $mod+KP_Enter exec $term
 
 # start program launcher    {{{2
 #
@@ -277,14 +279,15 @@ set $mode_ss_screen  Screen: [c]lipboard, [f]ile, [b]oth
 set $mode_ss_window  Window: [c]lipboard, [f]ile, [b]oth
 
 mode "$mode_screenshot" {
-    bindsym d      mode "$mode_ss_desktop"
-    bindsym r      mode "$mode_ss_region"
-    bindsym s      mode "$mode_ss_screen"
-    bindsym w      mode "$mode_ss_window"
+    bindsym d        mode "$mode_ss_desktop"
+    bindsym r        mode "$mode_ss_region"
+    bindsym s        mode "$mode_ss_screen"
+    bindsym w        mode "$mode_ss_window"
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 
 set $Screenshot $HOME/.config/i3/bin/i3-screenshot
@@ -294,36 +297,40 @@ mode "$mode_ss_desktop" {
     bindsym --release f exec --no-startup-id $Screenshot -f -d
     bindsym --release b exec --no-startup-id $Screenshot -b -d
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_region" {
     bindsym --release c exec --no-startup-id $Screenshot -c -r
     bindsym --release f exec --no-startup-id $Screenshot -f -r
     bindsym --release b exec --no-startup-id $Screenshot -b -r
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_screen" {
     bindsym --release c exec --no-startup-id $Screenshot -c -s
     bindsym --release f exec --no-startup-id $Screenshot -f -s
     bindsym --release b exec --no-startup-id $Screenshot -b -s
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_window" {
     bindsym --release c exec --no-startup-id $Screenshot -c -w
     bindsym --release f exec --no-startup-id $Screenshot -f -w
     bindsym --release b exec --no-startup-id $Screenshot -b -w
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 
 # clipboard loader    {{{2
@@ -373,7 +380,6 @@ bindsym $mod+Up focus up
 
 bindsym $mod+$right focus right
 bindsym $mod+Right focus right
-# }}}2
 
 
 # CONTROL LAYOUT    {{{1
@@ -415,12 +421,13 @@ bindsym $mod+s mode "$mode_split"
 set $mode_split Split: [h]orizontal, [v]ertical
 
 mode "$mode_split" {
-    bindsym h           split h
-    bindsym v           split v
+    bindsym h             split h
+    bindsym v             split v
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 
 # enter fullscreen mode for the focused container    {{{2
@@ -435,13 +442,14 @@ set $mode_layout Container layout: [s]tacked, [t]abbed, to[g]gle split
 
 mode "$mode_layout" {
 
-    bindsym $s          layout stacking
-    bindsym $t          layout tabbed
-    bindsym $g          layout toggle split
+    bindsym $s            layout stacking
+    bindsym $t            layout tabbed
+    bindsym $g            layout toggle split
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 
 # floating windows    {{{2
@@ -587,21 +595,22 @@ set $mode_resize Resize: \
 mode "$mode_resize" {
     # these bindings trigger as soon as you enter the resize mode
 
-    bindsym $left       resize shrink width 5 px or 5 ppt
-    bindsym Left        resize shrink width 5 px or 5 ppt
+    bindsym $left         resize shrink width 5 px or 5 ppt
+    bindsym Left          resize shrink width 5 px or 5 ppt
 
-    bindsym $down       resize shrink height 5 px or 5 ppt
-    bindsym Down        resize shrink height 5 px or 5 ppt
+    bindsym $down         resize shrink height 5 px or 5 ppt
+    bindsym Down          resize shrink height 5 px or 5 ppt
 
-    bindsym $up         resize grow height 5 px or 5 ppt
-    bindsym Up          resize grow height 5 px or 5 ppt
+    bindsym $up           resize grow height 5 px or 5 ppt
+    bindsym Up            resize grow height 5 px or 5 ppt
 
-    bindsym $right      resize grow width 5 px or 5 ppt
-    bindsym Right       resize grow width 5 px or 5 ppt
+    bindsym $right        resize grow width 5 px or 5 ppt
+    bindsym Right         resize grow width 5 px or 5 ppt
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 
 # resize gaps    {{{2
@@ -621,37 +630,41 @@ set $mode_gaps_inner Inner Gaps: \
 [+|-|0] (local), Shift + [+|-|0] (global)
 
 mode "$mode_gaps" {
-    bindsym o      mode "$mode_gaps_outer"
-    bindsym i      mode "$mode_gaps_inner"
+    bindsym o        mode "$mode_gaps_outer"
+    bindsym i        mode "$mode_gaps_inner"
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 mode "$mode_gaps_inner" {
-    bindsym plus        gaps inner current plus 5
-    bindsym minus       gaps inner current minus 5
-    bindsym 0           gaps inner current set 0
+    bindsym plus          gaps inner current plus 5
+    bindsym minus         gaps inner current minus 5
+    bindsym 0             gaps inner current set 0
 
-    bindsym Shift+plus  gaps inner all plus 5
-    bindsym Shift+minus gaps inner all minus 5
-    bindsym Shift+0     gaps inner all set 0
+    bindsym Shift+plus    gaps inner all plus 5
+    bindsym Shift+minus   gaps inner all minus 5
+    bindsym Shift+0       gaps inner all set 0
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 mode "$mode_gaps_outer" {
-    bindsym plus        gaps outer current plus 5
-    bindsym minus       gaps outer current minus 5
-    bindsym 0           gaps outer current set 0
+    bindsym plus          gaps outer current plus 5
+    bindsym minus         gaps outer current minus 5
+    bindsym 0             gaps outer current set 0
 
-    bindsym Shift+plus  gaps outer all plus 5
-    bindsym Shift+minus gaps outer all minus 5
-    bindsym Shift+0     gaps outer all set 0
+    bindsym Shift+plus    gaps outer all plus 5
+    bindsym Shift+minus   gaps outer all minus 5
+    bindsym Shift+0       gaps outer all set 0
 
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 
 # kill focused window    {{{2
@@ -687,23 +700,23 @@ set $mode_system System: \
 [l]ock, [e] logout, [s]uspend, [h]ibernate, [r]eboot, \
 [Shift+s] shutdown
 mode "$mode_system" {
-    bindsym l       exec --no-startup-id \
-                    $Locker, mode "default"
-    bindsym e       exec --no-startup-id \
-                    i3-msg exit, mode "default"
-    bindsym s       exec --no-startup-id \
-                    $Locker && systemctl suspend, mode "default"
-    bindsym h       exec --no-startup-id \
-                    $Locker && systemctl hibernate, mode "default"
-    bindsym r       exec --no-startup-id \
-                    systemctl reboot, mode "default"
-    bindsym Shift+s exec --no-startup-id \
-                    systemctl poweroff -i, mode "default"
+    bindsym l             exec --no-startup-id \
+                          $Locker, mode "default"
+    bindsym e             exec --no-startup-id \
+                          i3-msg exit, mode "default"
+    bindsym s             exec --no-startup-id \
+                          $Locker && systemctl suspend, mode "default"
+    bindsym h             exec --no-startup-id \
+                          $Locker && systemctl hibernate, mode "default"
+    bindsym r             exec --no-startup-id \
+                          systemctl reboot, mode "default"
+    bindsym Shift+s       exec --no-startup-id \
+                          systemctl poweroff -i, mode "default"
 
-    # back to normal: Enter, Escape or $mod+r
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-    bindsym $mod+r mode "default"
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
 }
 
 # include other config files    {{{2
