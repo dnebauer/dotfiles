@@ -22,6 +22,7 @@ set -o pipefail
 # VARIABLES    {{{1
 
 self="$(basename "$0")"
+dlg_title='i3 session setup'
 required_tools=(
     getopt
     sleep
@@ -230,12 +231,37 @@ sleep $delay_post_launch
 while [[ $delay_app_loading -gt 0 ]] ; do
     dunstify \
         --replace=101 \
-        "$self" \
+        "$dlg_title" \
         "Giving apps $delay_app_loading seconds to load"
     let "delay_app_loading--"
     sleep 1
 done
 dunstify --close=101
+
+# Reload wiki qutebrowser tab    {{{2
+# - if it loaded before the tiddlywiki server finished loading then it
+#   displays a page-not-found error
+if $debug ; then echo 'Reloading wiki qutebrowser tab' ; fi
+wiki_ids=($(xdotool search --name "qutebrowser/wiki"))
+if [[ ${#wiki_ids[@]} -eq 0 ]] ; then
+    dunstify --urgency=critical "$dlg_title" \
+        'Cannot locate qutebrowser showing tiddlywiki'
+elif [[ ${#wiki_ids[@]} -gt 1 ]] ; then
+    dunstify --urgency=critical "$dlg_title" \
+        "Whoah! Detected ${#wiki_ids[@]} qutebrowsers showing tiddlywiki"
+else
+    wiki_id="${wiki_ids[0]}"
+    xdotool windowactivate --sync $wiki_id
+    xdotool key --window $wiki_id --clearmodifiers colon
+    xdotool type --window $wiki_id --clearmodifiers "tab-focus 1"
+    xdotool key --window $wiki_id --clearmodifiers Return
+    sleep $delay_app_loading
+    xdotool windowactivate --sync $wiki_id
+    xdotool key --window $wiki_id --clearmodifiers colon
+    xdotool type --window $wiki_id --clearmodifiers "reload"
+    xdotool key --window $wiki_id --clearmodifiers Return
+    sleep 3
+fi
 
 # Reset title of qutebrowser windows    {{{2
 # - it appears all qutebrowser instances must finish loading in order for the
@@ -247,12 +273,17 @@ if $debug ; then echo 'Resetting qutebrowser window titles' ; fi
 title='{perc}{current_title}{title_sep}qutebrowser'
 cmd="set window.title_format $title"
 window_ids=($(xdotool search --class qutebrowser))
-for window_id in "${window_ids[@]}" ; do
-    xdotool windowactivate --sync $window_id
-    xdotool key --window $window_id --clearmodifiers colon
-    xdotool type --window $window_id --clearmodifiers "$cmd"
-    xdotool key --window $window_id --clearmodifiers Return
-done
+if [[ ${#window_ids[@]} -eq 0 ]] ; then
+    dunstify --urgency=critical "$dlg_title" \
+        'Cannot locate any qutebrowsers to retitle'
+else
+    for window_id in "${window_ids[@]}" ; do
+        xdotool windowactivate --sync $window_id
+        xdotool key --window $window_id --clearmodifiers colon
+        xdotool type --window $window_id --clearmodifiers "$cmd"
+        xdotool key --window $window_id --clearmodifiers Return
+    done
+fi
 
 # Focus astroid in mail workspace    {{{2
 if $debug ; then echo 'Focussing astroid' ; fi
@@ -268,7 +299,7 @@ if $debug ; then echo 'Launching polybar' ; fi
 
 # Notify completion    {{{1
 if $debug ; then echo 'Session setup complete' ; fi
-dunstify "$self" 'Session setup complete'
+dunstify "$dlg_title" 'Session setup complete'
 # }}}1
 
 # vim:foldmethod=marker:
