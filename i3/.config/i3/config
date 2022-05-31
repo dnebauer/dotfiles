@@ -313,17 +313,20 @@ exec_always --no-startup-id $picom_start
 
 # custom launch mode    {{{2
 
-set $mode_launcher Launch: \
-[a]stroid [c]hrome [q]utebrowser [s]yncthing [t]iddlywiki
+set $mode_launcher Launch: [a]stroid [b]ackground [c]hrome [p]olybar \
+[q]utebrowser [s]yncthing [t]iddlywiki
 
 bindsym $mod+o mode "$mode_launcher"
 
 mode "$mode_launcher" {
-    bindsym a             exec astroid-launcher
-    bindsym c             exec google-chrome
-    bindsym q             exec qutebrowser
-    bindsym s             exec syncthing-launcher
-    bindsym t             exec mybrain
+    bindsym a             exec --no-startup-id astroid-launcher
+    bindsym b             exec --no-startup-id \
+                          ~/.config/i3/bin/i3-background-set
+    bindsym c             exec --no-startup-id google-chrome
+    bindsym q             exec --no-startup-id qutebrowser
+    bindsym p             exec --no-startup-id ~/.config/polybar/launch
+    bindsym s             exec --no-startup-id syncthing-launcher
+    bindsym t             exec --no-startup-id mybrain
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
