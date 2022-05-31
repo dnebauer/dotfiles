@@ -98,7 +98,7 @@
 # $mod+r                mode: resize
 # $mod+s                mode: split
 # $mod+space            toggle focus mode
-# $mod+t                radiotray-ng controls
+# $mod+t                mode: radiotray-ng control
 # $mod+y                mode: layout
 # F1                    clipboard loader
 # F2                    help page
@@ -290,9 +290,8 @@ exec --no-startup-id $kdeconnect
 # task switcher    {{{2
 #
 # - same script runs as both server and client
-set $Switcher ~/.config/i3/bin/i3-focus-last
-exec --no-startup-id $Switcher
-bindsym $alt+Tab exec --no-startup-id $Switcher --switch
+exec --no-startup-id systemctl --user start i3-focus-last.service
+bindsym $alt+Tab exec --no-startup-id ~/.config/i3/bin/i3-focus-last --switch
 
 # automount removable media    {{{2
 

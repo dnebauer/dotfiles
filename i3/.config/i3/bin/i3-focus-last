@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# credit: repo = https://github.com/altdesktop/i3ipc-python/
+#         file = examples/focus-last.py
+
 import os
 import socket
 import selectors
