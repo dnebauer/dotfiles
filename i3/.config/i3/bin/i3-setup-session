@@ -258,6 +258,8 @@ dunstify --close=101
 # Reload wiki qutebrowser tab    {{{2
 # - if it loaded before the tiddlywiki server finished loading then it
 #   displays a page-not-found error
+# - must do this task before qutebrowser window titles are reset because
+#   window title ('name') is used to identify specific qutebrowser window
 if $debug ; then echo 'Reloading wiki qutebrowser tab' ; fi
 wiki_ids=($(xdotool search --name "qutebrowser/wiki"))
 if [[ ${#wiki_ids[@]} -eq 0 ]] ; then
@@ -274,22 +276,29 @@ else
     sleep 3
 fi
 
-# Reset title of qutebrowser windows    {{{2
+# Change settings in all qutebrowser instances    {{{2
 # - it appears all qutebrowser instances must finish loading in order for the
 #   'set' command to execute correctly
 # - it seems an actively loading qutebrowser window interferes with xdotool
 #   typing its keys, and it is unpredictable which keys are received by the
 #   window and which are 'lost'
+# - task 1: reset title of qutebrowser windows to display active tab title
+# - task 2: reset download directory
+# -         * wrapper script causes default download directory to be
+#             /run/user/1000/qutebrowser/SESSION/download/
+#           * reset to ~/Downloads/
 if $debug ; then echo 'Resetting qutebrowser window titles' ; fi
 title='{perc}{current_title}{title_sep}qutebrowser'
-cmd="set window.title_format $title"
+cmd_reset_title="set window.title_format $title"
+cmd_reset_download_dir="set downloads.location.directory ~/Downloads"
 window_ids=($(xdotool search --class qutebrowser))
 if [[ ${#window_ids[@]} -eq 0 ]] ; then
     dunstify --urgency=critical "$dlg_title" \
         'Cannot locate any qutebrowsers to retitle'
 else
     for window_id in "${window_ids[@]}" ; do
-        qbCommand "$window_id" "$cmd"
+        qbCommand "$window_id" "$cmd_reset_title"
+        qbCommand "$window_id" "$cmd_reset_download_dir"
     done
 fi
 
