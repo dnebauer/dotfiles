@@ -158,6 +158,7 @@ set $Trueblack   #000000
 # translucency: extra first 2 digits are transparency
 # - 00=transparent, FF=opaque
 set $Transparent #00000000
+
 # }}}2
 
 
@@ -207,7 +208,9 @@ exec_always --no-startup-id xrandr                \
 #   lock the screen before suspend
 # - use 'loginctl lock-session' to lock your screen
 
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+#exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+exec --no-startup-id xss-lock --transfer-sleep-lock \
+-- i3lock --color=000000 ignore-empty-password --nofork
 
 # numlock    {{{2
 
@@ -807,7 +810,8 @@ mode "$mode_exit" {
 
 bindsym $mod+Pause mode "$mode_system"
 
-set $Locker i3lock && sleep 1
+#set $Locker i3lock && sleep 1
+set $Locker i3lock --color=000000 --ignore-empty-password && sleep 1
 
 set $mode_system System: \
 [l]ock, [e] logout, [s]uspend, [h]ibernate, [r]eboot, \
