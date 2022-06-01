@@ -274,9 +274,9 @@ set $mode_radiotray Radiotray NG: [p]lay/pause, [s]top, [q]uit
 bindsym $mod+t mode "$mode_radiotray"
 
 mode "$mode_radiotray" {
-    bindsym p             exec --no-startup-id $rtng_dbus play
-    bindsym s             exec --no-startup-id $rtng_dbus stop
-    bindsym q             exec --no-startup-id $rtng_dbus quit
+    bindsym p             exec --no-startup-id $rtng_dbus play, mode "default"
+    bindsym s             exec --no-startup-id $rtng_dbus stop, mode "default"
+    bindsym q             exec --no-startup-id $rtng_dbus quit, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -322,14 +322,21 @@ set $mode_launcher Launch: [a]stroid [b]ackground [c]hrome [p]olybar \
 bindsym $mod+o mode "$mode_launcher"
 
 mode "$mode_launcher" {
-    bindsym a             exec --no-startup-id astroid-launcher
+    bindsym a             exec --no-startup-id astroid-launcher, \
+                          mode "default"
     bindsym b             exec --no-startup-id \
-                          ~/.config/i3/bin/i3-background-set
-    bindsym c             exec --no-startup-id google-chrome
-    bindsym q             exec --no-startup-id qutebrowser
-    bindsym p             exec --no-startup-id ~/.config/polybar/launch
-    bindsym s             exec --no-startup-id syncthing-launcher
-    bindsym t             exec --no-startup-id mybrain
+                          ~/.config/i3/bin/i3-background-set, \
+                          mode "default"
+    bindsym c             exec --no-startup-id google-chrome, \
+                          mode "default"
+    bindsym q             exec --no-startup-id qutebrowser, \
+                          mode "default"
+    bindsym p             exec --no-startup-id ~/.config/polybar/launch, \
+                          mode "default"
+    bindsym s             exec --no-startup-id syncthing-launcher, \
+                          mode "default"
+    bindsym t             exec --no-startup-id mybrain, \
+                          mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -394,9 +401,9 @@ mode "$mode_screenshot" {
 set $Screenshot $HOME/.config/i3/bin/i3-screenshot
 
 mode "$mode_ss_desktop" {
-    bindsym --release c exec --no-startup-id $Screenshot -c -d
-    bindsym --release f exec --no-startup-id $Screenshot -f -d
-    bindsym --release b exec --no-startup-id $Screenshot -b -d
+    bindsym --release c exec --no-startup-id $Screenshot -c -d, mode "default"
+    bindsym --release f exec --no-startup-id $Screenshot -f -d, mode "default"
+    bindsym --release b exec --no-startup-id $Screenshot -b -d, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -404,9 +411,9 @@ mode "$mode_ss_desktop" {
     bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_region" {
-    bindsym --release c exec --no-startup-id $Screenshot -c -r
-    bindsym --release f exec --no-startup-id $Screenshot -f -r
-    bindsym --release b exec --no-startup-id $Screenshot -b -r
+    bindsym --release c exec --no-startup-id $Screenshot -c -r, mode "default"
+    bindsym --release f exec --no-startup-id $Screenshot -f -r, mode "default"
+    bindsym --release b exec --no-startup-id $Screenshot -b -r, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -414,9 +421,9 @@ mode "$mode_ss_region" {
     bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_screen" {
-    bindsym --release c exec --no-startup-id $Screenshot -c -s
-    bindsym --release f exec --no-startup-id $Screenshot -f -s
-    bindsym --release b exec --no-startup-id $Screenshot -b -s
+    bindsym --release c exec --no-startup-id $Screenshot -c -s, mode "default"
+    bindsym --release f exec --no-startup-id $Screenshot -f -s, mode "default"
+    bindsym --release b exec --no-startup-id $Screenshot -b -s, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -424,9 +431,9 @@ mode "$mode_ss_screen" {
     bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_window" {
-    bindsym --release c exec --no-startup-id $Screenshot -c -w
-    bindsym --release f exec --no-startup-id $Screenshot -f -w
-    bindsym --release b exec --no-startup-id $Screenshot -b -w
+    bindsym --release c exec --no-startup-id $Screenshot -c -w, mode "default"
+    bindsym --release f exec --no-startup-id $Screenshot -f -w, mode "default"
+    bindsym --release b exec --no-startup-id $Screenshot -b -w, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -522,8 +529,8 @@ bindsym $mod+s mode "$mode_split"
 set $mode_split Split: [h]orizontal, [v]ertical
 
 mode "$mode_split" {
-    bindsym h             split h
-    bindsym v             split v
+    bindsym h             split h, mode "default"
+    bindsym v             split v, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -543,9 +550,9 @@ set $mode_layout Container layout: [s]tacked, [t]abbed, to[g]gle split
 
 mode "$mode_layout" {
 
-    bindsym $s            layout stacking
-    bindsym $t            layout tabbed
-    bindsym $g            layout toggle split
+    bindsym $s            layout stacking,     mode "default"
+    bindsym $t            layout tabbed,       mode "default"
+    bindsym $g            layout toggle split, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
