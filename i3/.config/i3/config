@@ -208,7 +208,6 @@ exec_always --no-startup-id xrandr                \
 #   lock the screen before suspend
 # - use 'loginctl lock-session' to lock your screen
 
-#exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id xss-lock --transfer-sleep-lock \
 -- i3lock --color=000000 ignore-empty-password --nofork
 
@@ -299,6 +298,10 @@ bindsym $alt+Tab exec --no-startup-id ~/.config/i3/bin/i3-focus-last --switch
 # automount removable media    {{{2
 
 exec --no-startup-id udiskie &
+
+# handle fullscreen containers    {{{2
+
+exec --no-startup-id systemctl --user start i3-fullscreen-handler.service
 
 # fading effects    {{{2
 #
