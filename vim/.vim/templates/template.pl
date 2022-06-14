@@ -319,7 +319,7 @@ ${author}
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2017 ${author}
+Copyright (c) 2022 ${author}
 
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
