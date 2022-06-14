@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Moo;    # {{{1
+use Moo;                 # {{{1
 use strictures 2;
 use 5.006;
 use 5.022_001;
@@ -11,16 +11,16 @@ use namespace::clean;    # }}}1
 
     package Dn::Internal;
 
-    use Moo;    # {{{1
+    use Moo;             # {{{1
     use strictures 2;
     use namespace::clean -except => [ '_options_data', '_options_config' ];
     use autodie qw(open close);
-    use Carp qw(confess);
+    use Carp qw(confess croak);
     use Const::Fast;
     use English qw(-no_match_vars);
     use Function::Parameters;
     use Getopt::Long::Descriptive qw(describe_options);
-    use List::MoreUtils qw(uniq);
+    use List::SomeUtils qw(uniq);
     use MooX::HandlesVia;
     use MooX::Options protect_argv => 0;
     use Path::Tiny;
@@ -34,8 +34,8 @@ use namespace::clean;    # }}}1
     const my $TRUE  => 1;
     const my $FALSE => 0;
     Sys::Syslog::openlog( 'ident', 'user' );    # }}}1
-            # ident is prepended to every message - adapt to module
-            # user is the most commonly used facility - leave as is
+        # ident is prepended to every message - adapt to module
+        # user is the most commonly used facility - leave as is
 
     # debug
     use Data::Dumper::Simple;    # }}}1
@@ -83,7 +83,7 @@ use namespace::clean;    # }}}1
     has '_attr_2_list' => (
         is  => 'rw',
         isa => Types::Standard::ArrayRef [
-            Types::Standard::InstanceOf ['Config::Simple']
+            Types::Standard::InstanceOf ['Config::Simple'],
         ],
         lazy        => $TRUE,
         default     => sub { [] },
@@ -109,8 +109,8 @@ use namespace::clean;    # }}}1
     method _build__file_list () {
         my @matches;              # get unique file names
         for my $arg (@ARGV) { push @matches, glob "$arg"; }
-        my @unique_matches = List::MoreUtils::uniq @matches;
-        my @files = grep { -r $_ } @unique_matches;    # ignore non-files
+        my @unique_matches = List::SomeUtils::uniq @matches;
+        my @files          = grep {-r} @unique_matches;     # ignore non-files
 
         return [@files];
     }    # }}}1
@@ -146,14 +146,14 @@ use namespace::clean;    # }}}1
         }
 
         # ensure files are valid images [***EXAMPLE CHECK***]    {{{2
-        say "Verifying $count image files:";
+        say "Verifying $count image files:" or croak;
         my $progress = Term::ProgressBar::Simple->new($count);
         for my $file (@files) {
             my $image = $self->_new_image($file);
-            undef $image;      # avoid memory cache overflow
+            undef $image;    # avoid memory cache overflow
             $progress++;
         }
-        undef $progress;       # ensure final messages displayed
+        undef $progress;     # ensure final messages displayed
 
         return;
     }
@@ -170,7 +170,10 @@ use namespace::clean;    # }}}1
             'dn-show-time %o',
             [ 'help|h', 'print usage message and exit' ],
         );
-        print( $usage->text ), exit if $opt->help;
+        if ( $opt->help ) {
+            print $usage->text or croak;
+            exit;
+        }
 
         return;
     }
@@ -183,6 +186,7 @@ use namespace::clean;    # }}}1
     # return: scalar string
     #         dies on failure
     method _other () {
+                       # stub
     }    # }}}1
 
 }
@@ -272,7 +276,7 @@ Types::Common::String, Types::Path::Tiny, Types::Standard, version.
 
 wget.
 
-=head1 CONFIGURATION AND ENVIRONMENT
+=head1 CONFIGURATION
 
 =head2 Autostart
 
@@ -294,6 +298,16 @@ System-wide configuration file provides details of...
 Configuration file
 
 =back
+
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly the
+error code is that given by the system.
 
 =head1 BUGS AND LIMITATIONS
 
