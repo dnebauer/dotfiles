@@ -503,6 +503,9 @@ bindsym $mod+Right focus right
 
 
 # move focused window    {{{2
+#
+# - "ppt" is "percentage points"
+# - "50 ppt" is half the width of the screen the container is initially on
 
 bindsym $mod+Shift+$left move left 50 ppt
 bindsym $mod+Shift+Left move left
