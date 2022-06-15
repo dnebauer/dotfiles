@@ -412,10 +412,6 @@ alias ls='ls -l --almost-all --color=auto'
 alias mp3info2='mp3info2 -C autoinfo=ID3v2,ID3v1'
 # reload zshrc    {{{1
 alias reload=". ~/.zshrc && echo 'ZSH config reloaded from ~/.zshrc'"
-# dictionary and thesaurus    {{{1
-if which dict &>/dev/null ; then
-    alias thes='dict -h localhost -d moby-thesaurus'
-fi
 # ag alias    {{{1
 # - set automatically by oh-my-zsh
 # - remove alias if ag binary exists
