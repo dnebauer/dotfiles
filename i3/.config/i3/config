@@ -266,16 +266,22 @@ exec --no-startup-id radiotray-ng
 # - plays the last played station
 # - use mouse on tray icon to select different station
 
-set $rtng_dbus ~/.config/i3/bin/i3-rtng-dbus
+set $rtng_change ~/.config/i3/bin/i3-rtng-change
+set $rtng_play ~/.config/i3/bin/i3-rtng-play
+set $rtng_status ~/.config/i3/bin/i3-rtng-status
+set $rtng_stop ~/.config/i3/bin/i3-rtng-stop
 
-set $mode_radiotray Radiotray NG: [p]lay/pause, [s]top, [q]uit
+set $mode_radiotray Radiotray NG: \
+[p]lay/pause, [s]top, s[t]atus, [c]hange station, [q]uit
 
 bindsym $mod+t mode "$mode_radiotray"
 
 mode "$mode_radiotray" {
-    bindsym p             exec --no-startup-id $rtng_dbus play, mode "default"
-    bindsym s             exec --no-startup-id $rtng_dbus stop, mode "default"
-    bindsym q             exec --no-startup-id $rtng_dbus quit, mode "default"
+    bindsym c             exec --no-startup-id $rtng_change, mode "default"
+    bindsym p             exec --no-startup-id $rtng_play,   mode "default"
+    bindsym s             exec --no-startup-id $rtng_stop,   mode "default"
+    bindsym t             exec --no-startup-id $rtng_status, mode "default"
+    bindsym q             exec --no-startup-id $rtng_quit,   mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
