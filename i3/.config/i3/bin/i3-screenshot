@@ -22,11 +22,13 @@ set -o pipefail
 
 self="$(basename "$0")"
 required_tools=(
-    basename    grep           tee
-    cut         maim           xclip
-    date        notify-send    xrandr
-    feh         sed            xdotool
-    getopt      sleep          zenity
+    basename   maim          trap
+    cut        notify-send   xclip
+    date       pidof         xrandr
+    feh        ps            xdotool
+    getopt     sed           zenity
+    grep       sleep
+    kill       tee
 )
 to_clipboard=false
 to_file=false
@@ -214,7 +216,7 @@ move_image_file () {
 #  prints: error message to console if no notify daemon
 #  return: n/a
 function abort () {
-    if command -v notify-send ; then
+    if command -v notify-send &>/dev/null ; then
         notify-send                 \
             --urgency='critical'    \
             --expire-time=5000      \
@@ -225,6 +227,7 @@ function abort () {
         echo 'Screenshot capture failed' > /dev/stderr
         echo "$1" > /dev/stderr
     fi
+    exit 1
 }
 # }}}1
 
@@ -264,6 +267,34 @@ done
 
 # Pre-capture tasks    {{{1
 
+# - stop oneko if running
+oneko_cmd='oneko -time 70000 -bg red -position -30+20'
+restart_oneko=false
+if command -v oneko &>/dev/null ; then
+    oneko_path="$(command -v oneko)"
+    oneko_pids=()
+    oneko_pid=$(pidof "$oneko_path") || true
+    if [[ -n "$oneko_pid" ]] ; then
+        oneko_pids+=($oneko_pid)
+        # after i3 startup oneko has parent process '/bin/sh oneko ...'
+        while true ; do
+            ppid=$(ps -o ppid= -p $oneko_pid)
+            # result is left-padded with spaces
+            ppid="${ppid#"${ppid%%[![:space:]]*}"}"
+            if [[ $ppid > 1 ]] ; then
+                oneko_pids+=($ppid)
+                oneko_pid=$ppid
+            else
+                break
+            fi
+        done
+        restart_oneko=true
+        # kill oneko
+        kill -TERM "${oneko_pids[@]}"
+        trap "i3-msg 'exec --no-startup-id $oneko_cmd' &>/dev/null" EXIT
+    fi
+fi
+
 # - for window capture need to sleep
 if [[ $get_window = true ]] ; then
     sleep 5s
@@ -295,9 +326,15 @@ fi
 
 # Post-capture tasks    {{{1
 
-# - optionally move/rename destination file
+# - optionally move/rename destination
 if [[ $to_file = true ]] ; then
     move_image_file
+fi
+
+# - restart oneko if originally running
+if [[ $restart_oneko = true ]] ; then
+    i3-msg "exec --no-startup-id $oneko_cmd" &>/dev/null
+    trap - EXIT
 fi
 # }}}1
 
