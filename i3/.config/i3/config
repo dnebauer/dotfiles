@@ -719,17 +719,17 @@ set $mode_resize Resize: \
 mode "$mode_resize" {
     # these bindings trigger as soon as you enter the resize mode
 
-    bindsym $left         resize shrink width 50 px or 50 ppt
-    bindsym Left          resize shrink width 5 px or 5 ppt
+    bindsym $left         resize shrink width 20 px or 20 ppt
+    bindsym Left          resize shrink width 5 px
 
-    bindsym $down         resize shrink height 50 px or 50 ppt
-    bindsym Down          resize shrink height 5 px or 5 ppt
+    bindsym $down         resize shrink height 20 px or 20 ppt
+    bindsym Down          resize shrink height 5 px
 
-    bindsym $up           resize grow height 50 px or 50 ppt
-    bindsym Up            resize grow height 5 px or 5 ppt
+    bindsym $up           resize grow height 20 px or 20 ppt
+    bindsym Up            resize grow height 5 px
 
-    bindsym $right        resize grow width 50 px or 50 ppt
-    bindsym Right         resize grow width 5 px or 5 ppt
+    bindsym $right        resize grow width 20 px or 20 ppt
+    bindsym Right         resize grow width 5 px
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
