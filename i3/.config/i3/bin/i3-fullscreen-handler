@@ -380,7 +380,7 @@ strictures, Sys::Syslog, Types::Standard.
 
 =head2 Executables
 
-dunstcmd, dunstify, xset.
+dunstctl, dunstify, xset.
 
 =head1 CONFIGURATION
 
