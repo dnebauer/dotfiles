@@ -8,8 +8,6 @@ use namespace::clean;
 use JSON::MaybeXS;
 use Net::DBus;
 
-use Data::Dumper::Simple;
-
 # obtain radiotry-ng status using dbus interface and display with dunst
 
 # obtain status information
