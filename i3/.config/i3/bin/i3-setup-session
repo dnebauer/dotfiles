@@ -135,8 +135,10 @@ missing=()
 for tool in "${required_tools[@]}" ; do
     command -v "${tool}" &>/dev/null || missing+=("${tool}")
 done
-[[ ${#missing[@]} -eq 0 ]] \
-    || dnFailScript "Can't run without: $(joinBy ', ' "${missing[@]}")"
+if [[ ${#missing[@]} -ne 0 ]] ; then
+    echo "Can't run without: $(joinBy ', ' "${missing[@]}")" >/dev/stderr
+    exit 1
+fi
 unset missing tools required_tools
 
 # Process command line options    {{{1
