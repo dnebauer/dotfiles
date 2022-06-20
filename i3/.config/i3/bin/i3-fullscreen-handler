@@ -33,6 +33,7 @@ use namespace::clean;    # }}}1
     const my $FALSE          => 0;
     const my $CHECK_INTERVAL => 15;
     const my $NOTIFY_TIME    => 5;
+    const my $TIMEOUT        => 100;
     Sys::Syslog::openlog( 'i3 fullscreen handler', 'nofatal', 'user' );
 
     # main()    {{{1
@@ -52,9 +53,7 @@ use namespace::clean;    # }}}1
         while ($TRUE) {
 
             # get current fullscreen status
-            my $tree = i3->get_tree->recv;
-            my $currently_fullscreen
-                = $self->_have_fullscreen_container($tree);
+            my $currently_fullscreen = $self->_get_fullscreen_status;
 
             # handle first time through loop
             if ($first_loop) {
@@ -76,6 +75,56 @@ use namespace::clean;    # }}}1
         }
 
         return;
+    }
+
+    # _get_fullscreen_status()    {{{1
+    #
+    # does:   determine whether any container is currently fullscreen
+    # params: nil
+    # prints: nil
+    # return: boolean, dies on failure
+    method _get_fullscreen_status () {
+
+        my $currently_fullscreen;
+        my $timeout_token = 'timeout-error';
+
+        # - use 2-layer eval as recommended in Perl Cookbook recipe 16.21
+        my $eval_retval = eval {
+            local $SIG{ALRM} = sub { croak "$timeout_token" };
+            alarm $TIMEOUT;
+            my $inner_retval = eval {
+                my $tree = i3->get_tree->recv;
+                $currently_fullscreen
+                    = $self->_have_fullscreen_container($tree);
+            };
+            alarm 0;
+            if ( not defined $inner_retval ) {
+                if ($EVAL_ERROR) {
+                    if ( $EVAL_ERROR =~ /\A$timeout_token/xsm ) {
+                        croak "$timeout_token";
+                    }
+                    else { croak $EVAL_ERROR; }
+                }
+                else { croak; }
+            }
+        };
+        alarm 0;
+        if ( not defined $eval_retval ) {
+            my $msg = 'Unable to retrieve current fullscreen status';
+            if ($EVAL_ERROR) {
+                if ( $EVAL_ERROR =~ /\A$timeout_token/xsm ) {
+                    $msg .= "\nProcess timed out";
+                }
+                else { $msg .= "\n$EVAL_ERROR"; }
+            }
+            syslog( 'crit', $msg );
+            $self->_notify('Fullscreen handler', $msg, $TRUE);
+
+            # abort now (presume running as service so will be restarted)
+            croak $msg;
+        }
+
+        return $currently_fullscreen;
     }
 
     # _have_fullscreen_container($hashref)    {{{1
@@ -114,7 +163,7 @@ use namespace::clean;    # }}}1
         }
 
         # reached here if no fullscreen container found, so return false
-        return;
+        return $FALSE;
     }
 
     # _enter_fullscreen()    {{{1
@@ -130,17 +179,17 @@ use namespace::clean;    # }}}1
         syslog( 'info', 'disabling notifications and screensaver' );
 
         # notify user
-        system 'dunstify', '--replace=337', 'Detected fullscreen container',
-            'Disabling screensaver and notifications';
+        $self->_notify( 'Detected fullscreen container',
+            'Disabling screensaver and notifications' );
         sleep $NOTIFY_TIME;
 
         # turn off screensaver
-        system 'xset', 's', 'off';
-        system 'xset', '-dpms';
+        system qw(xset s off);
+        system qw(xset -dpms);
 
         # disable notifications
         # - (un)pausing dunst also (un)pauses libnotify
-        system 'dunstctl', 'set-paused', 'true';
+        system qw(dunstctl set-paused true);
 
         return;
     }
@@ -158,16 +207,35 @@ use namespace::clean;    # }}}1
         syslog( 'info', 'enabling notifications and screensaver' );
 
         # turn on screensaver
-        system 'xset', 's', 'on';
-        system 'xset', '+dpms';
+        system qw(xset s on);
+        system qw(xset +dpms);
 
         # enable notifications
         # - (un)pausing dunst also (un)pauses libnotify
-        system 'dunstctl', 'set-paused', 'false';
+        system qw(dunstctl set-paused false);
 
         # notify user
-        system 'dunstify', '--replace=337', 'No more fullscreen containers',
-            'Re-enabled screensaver and notifications';
+        $self->_notify( 'No more fullscreen containers',
+            'Re-enabled screensaver and notifications' );
+
+        return;
+    }
+
+    # _notify($title, $msg, $critical=FALSE)    {{{1
+    #
+    # does:   display message using dunstify
+    # params: 1 - title
+    #         2 - message
+    #         3 = critical [optional, boolean, default=FALSE]
+    # prints: nil
+    # return: n/a, dies on failure
+    method _notify ($title, $msg, $critical = $FALSE) {
+
+        my @cmd = ('dunstify');
+        if ($critical) { push @cmd, '--urgency=critical'; }
+        push @cmd, '--replace=337', "$title", "$msg";
+
+        system @cmd;
 
         return;
     }
@@ -297,7 +365,10 @@ by a screen notification and a message is written to the system logger.
 
 =head1 DIAGNOSTICS
 
-There are no diagnostic messages expected to be issued by this script.
+=head2 Process timed out
+
+This error occurs when an attempt to determine whether any container is
+currently fullscreen takes longer than 10 seconds.
 
 =head1 DEPENDENCIES
 
