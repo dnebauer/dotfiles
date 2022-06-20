@@ -6,33 +6,63 @@
 
 
 # REQUIRED APPLICATIONS    {{{1
-
-
-#          alttab? :: task switcher
-#           column :: convert input into columns
-#              cut :: extract part of lines (core utility)
-#           diodon :: clipboard manager
-#              dex :: execute app via desktop file
-#            dmenu :: run dialog (dependency of j4-dmenu-desktop)
-#            dunst :: notification daemon
-#           i3lock :: screen locker
-# j4-dmenu-desktop :: run dialog (desktop applications only)
-#          konsole :: terminal
-#             less :: pager
-#        nm-applet :: network manager
-#         numlockx :: control NumLock key
-#            pactl :: PulseAudio controller
-#            picom :: X11 compositor
-#       playerctl? :: media player controller
-#               pr :: text file paginator for printing (core utility)
-#             rofi :: run dialog (terminal commands and desktop apps)
-#             shuf :: randomise file list
-#            urxvt :: terminal
-#         xss-lock :: connect screen locker and saver
 #
-# Screenshot utility: basename, cut, date, feh, getopt, grep, maim,
-#                     notify-send, sed, sleep, tee, xclip, xrandr,
-#                     xdotool, zenity
+# - required either directly by this config file or by supporting scripts
+# - does not include resources (fonts, external website access, etc.)
+#   required by polybar configuration
+
+# |              tool | use                                                  |
+# |------------------:|:-----------------------------------------------------|
+# |         alacritty | terminal                                             |
+# |          basename | strip directory/suffix from filenames                |
+# |               cut | remove sections from lines                           |
+# |              date | print system date                                    |
+# |             dmenu | run dialog (dependency of j4-dmenu-desktop)          |
+# | dn-load-clipboard | load selected items into clipboard                   |
+# |           dropbox | cloud storage                                        |
+# |          dunstcmd | control dunst server                                 |
+# |          dunstify | send notification                                    |
+# |               feh | image viewer                                         |
+# |            getopt | parse script command line options                    |
+# |     google-chrome | web browser                                          |
+# |            i3-msg | send messages to i3wm                                |
+# |            i3lock | screen locker                                        |
+# |  j4-dmenu-desktop | run dialog (desktop applications only)               |
+# |        kdeconnect | syncronise between devices                           |
+# |           konsole | terminal                                             |
+# |              maim | take screenshots                                     |
+# |         nm-applet | network manager                                      |
+# |       notify-send | send notification                                    |
+# |          numlockx | control NumLock key                                  |
+# |           nvim-qt | gui editor                                           |
+# |             oneko | cursor locator                                       |
+# |             pactl | PulseAudio controller                                |
+# |              perl | perl 5 language interpreter                          |
+# |      perl modules | AnyEvent::I3, IPC::Cmd, IPC::Run, JSON::MaybeXS,     |
+# |                   | Net::DBus, sigtrap, Sys::Syslog                      |
+# |             picom | X11 compositor                                       |
+# |             pidof | find process id                                      |
+# |           polybar | status bar                                           |
+# |                ps | details of running processes                         |
+# |       qutebrowser | web browser                                          |
+# |      radiotray-ng | radio streaming app                                  |
+# |               rev | reverse lines character-wise                         |
+# |              rofi | run dialog (terminal commands and desktop apps)      |
+# |               sed | stream editor                                        |
+# |               seq | print number sequence                                |
+# |              shuf | randomise file list                                  |
+# |             sleep | pause execution                                      |
+# |         systemctl | service manager                                      |
+# |           tellico | collection management software                       |
+# |        tiddlywiki | non-linear notebook                                  |
+# |           udiskie | automount removable media                            |
+# |             urxvt | terminal                                             |
+# |             xclip | interface to system clipboard                        |
+# |           xdotool | X11 automation tool                                  |
+# |            xrandr | interface X11 RandR extension                        |
+# |              xset | set user preferences for X                           |
+# |          xss-lock | connect screen locker and saver                      |
+# |            zenity | GUI dialogs                                          |
 
 # SHORTCUT SUMMARY    {{{1
 
