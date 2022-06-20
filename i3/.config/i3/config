@@ -113,7 +113,6 @@
 # $mod+Shift+e          exit i3/X session
 # $mod+Shift+g          mode: gaps
 # $mod+Shift+minus      move scratchpad
-# $mod+Shift+p          launch polybar
 # $mod+Shift+q          kill window
 # $mod+Shift+r          restart i3 in place
 # $mod+Shift+space      floating toggle
@@ -828,10 +827,6 @@ bindsym $mod+Shift+q kill
 
 
 # MANAGE I3WM    {{{1
-
-# reload status bar    {{{2
-
-bindsym $mod+Shift+p exec ~/.config/polybar/launch
 
 # reload the configuration file    {{{2
 
