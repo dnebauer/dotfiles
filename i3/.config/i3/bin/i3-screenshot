@@ -22,13 +22,13 @@ set -o pipefail
 
 self="$(basename "$0")"
 required_tools=(
-    basename   maim          trap
-    cut        notify-send   xclip
-    date       pidof         xrandr
-    feh        ps            xdotool
-    getopt     sed           zenity
-    grep       sleep
-    kill       tee
+    basename   kill          tee
+    cut        maim          trap
+    date       notify-send   xclip
+    feh        pidof         xrandr
+    getopt     ps            xdotool
+    grep       sed           zenity
+    i3-msg     sleep
 )
 to_clipboard=false
 to_file=false
