@@ -103,10 +103,10 @@
 # F1                    clipboard loader
 # F2                    help page
 # F3                    tellico
-# XF86AudioLowerVolume  volume-5%
-# XF86AudioMicMute      mic mute
-# XF86AudioMute         mute
-# XF86AudioRaiseVolume  volume+5%
+# XF86AudioLowerVolume  volume -5%
+# XF86AudioMicMute      toggle mic mute
+# XF86AudioMute         toggle volume mute
+# XF86AudioRaiseVolume  volume +5%
 
 
 # COMMAND TO DISPLAY SHORTCUTS IN CONSOLE    {{{1
