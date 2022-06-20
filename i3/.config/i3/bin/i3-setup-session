@@ -24,9 +24,11 @@ set -o pipefail
 self="$(basename "$0")"
 dlg_title='i3 session setup'
 required_tools=(
-    getopt
-    sleep
-    i3-msg
+    astroid-launcher   qutebrowser
+    getopt             sleep
+    i3-msg             tiddlywiki
+    konsole            xdotool
+    nvim-qt
 )
 # trial and error showed that any app post-launch delay < 1 second caused
 # problems for qutebrowser windows resetting their titles, independently of the
