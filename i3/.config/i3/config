@@ -310,6 +310,7 @@ exec --no-startup-id radiotray-ng
 
 set $rtng_change ~/.config/i3/bin/i3-rtng-change
 set $rtng_play ~/.config/i3/bin/i3-rtng-play
+set $rtng_quit ~/.config/i3/bin/i3-rtng-quit
 set $rtng_status ~/.config/i3/bin/i3-rtng-status
 set $rtng_stop ~/.config/i3/bin/i3-rtng-stop
 
