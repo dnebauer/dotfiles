@@ -3,7 +3,7 @@ Description=i3-fullscreen-handler daemon
 
 [Service]
 Type=simple
-ExecStart=%h/.config/i3/bin/i3-fullscreen-handler
+ExecStart=%h/.config/i3/bin/i3-fullscreen-handler --reclaim
 Restart=always
 
 [Install]
