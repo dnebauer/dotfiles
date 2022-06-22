@@ -252,7 +252,7 @@ use namespace::clean;    # }}}1
         }
 
         # if here then command failed but 'fatal' flag not set,
-        # so return a false value (the default for 'return'
+        # so return a false value (the default for 'return')
         return;
     }
 
