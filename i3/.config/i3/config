@@ -28,6 +28,7 @@
 # |------------------:|:-----------------------------------------------------|
 # |         alacritty | terminal                                             |
 # |          basename | strip directory/suffix from filenames                |
+# |              calc | used by networkmanager_dmenu (polybar themes)        |
 # |               cut | remove sections from lines                           |
 # |              date | print system date                                    |
 # |             dmenu | run dialog (dependency of j4-dmenu-desktop)          |
@@ -57,6 +58,8 @@
 # |             pidof | find process id                                      |
 # |           polybar | status bar                                           |
 # |                ps | details of running processes                         |
+# |             pywal | used by networkmanager_dmenu (polybar themes)        |
+# |                   | (pip install)
 # |       qutebrowser | web browser                                          |
 # |      radiotray-ng | radio streaming app                                  |
 # |               rev | reverse lines character-wise                         |
