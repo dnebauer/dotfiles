@@ -711,16 +711,21 @@ for_window [all] title_window_icon padding 3px
 # - we later configure key bindings for them
 # - use variables to avoid repeating the names in multiple places
 
-set $ws1  1    # terms
-set $ws2  2    # mail
-set $ws3  3    # chrome
-set $ws4  4    # qute
-set $ws5  5    # wiki
-set $ws6  6    # ws6
-set $ws7  7    # ws7
-set $ws8  8    # ws8
-set $ws9  9    # ws9
-set $ws10 10   # ws10
+# $ws1 = terms
+set $ws1  1
+# $ws2 = mail
+set $ws2  2
+# $ws3 = chrome
+set $ws3  3
+# $ws4 = qute
+set $ws4  4
+# $ws5 = wiki
+set $ws5  5
+set $ws6  6
+set $ws7  7
+set $ws8  8
+set $ws9  9
+set $ws10 10
 
 # switching between workspaces    {{{2
 
@@ -931,11 +936,16 @@ exec --no-startup-id ~/.config/i3/bin/i3-background-set
 # prevents it being done via i3-msg (see script for details).
 set $primary_monitor primary
 set $secondary_monitor DVI-D-0
-workspace $ws1 output $primary_monitor    # terms
-workspace $ws2 output $secondary_monitor  # mail
-workspace $ws3 output $secondary_monitor  # chrome
-workspace $ws4 output $primary_monitor    # qute
-workspace $ws5 output $secondary_monitor  # wiki
+# $ws1 = terms
+workspace $ws1 output $primary_monitor
+# $ws2 = mail
+workspace $ws2 output $secondary_monitor
+# $ws3 = chrome
+workspace $ws3 output $secondary_monitor
+# $ws4 = qute
+workspace $ws4 output $primary_monitor
+# $ws5 = wiki
+workspace $ws5 output $secondary_monitor
 
 exec ~/.config/i3/bin/i3-setup-session
 # }}}1
