@@ -59,7 +59,6 @@
 # |           polybar | status bar                                           |
 # |                ps | details of running processes                         |
 # |             pywal | used by networkmanager_dmenu (polybar themes)        |
-# |                   | (pip install)
 # |       qutebrowser | web browser                                          |
 # |      radiotray-ng | radio streaming app                                  |
 # |               rev | reverse lines character-wise                         |
@@ -712,24 +711,24 @@ for_window [all] title_window_icon padding 3px
 # - we later configure key bindings for them
 # - use variables to avoid repeating the names in multiple places
 
-set $ws_terms  "1:terms"
-set $ws_mail   "2:mail"
-set $ws_chrome "3:chrome"
-set $ws_qute   "4:qute"
-set $ws_wiki   "5:wiki"
-set $ws6       "6:ws6"
-set $ws7       "7:ws7"
-set $ws8       "8:ws8"
-set $ws9       "9:ws9"
-set $ws10      "10:ws10"
+set $ws1  1    # terms
+set $ws2  2    # mail
+set $ws3  3    # chrome
+set $ws4  4    # qute
+set $ws5  5    # wiki
+set $ws6  6    # ws6
+set $ws7  7    # ws7
+set $ws8  8    # ws8
+set $ws9  9    # ws9
+set $ws10 10   # ws10
 
 # switching between workspaces    {{{2
 
-bindsym $mod+1 workspace number $ws_terms
-bindsym $mod+2 workspace number $ws_mail
-bindsym $mod+3 workspace number $ws_chrome
-bindsym $mod+4 workspace number $ws_qute
-bindsym $mod+5 workspace number $ws_wiki
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
 bindsym $mod+6 workspace number $ws6
 bindsym $mod+7 workspace number $ws7
 bindsym $mod+8 workspace number $ws8
@@ -742,11 +741,11 @@ focus_follows_mouse no
 
 # move focused container to workspace    {{{2
 
-bindsym $mod+Shift+1 move container to workspace number $ws_terms
-bindsym $mod+Shift+2 move container to workspace number $ws_mail
-bindsym $mod+Shift+3 move container to workspace number $ws_chrome
-bindsym $mod+Shift+4 move container to workspace number $ws_qute
-bindsym $mod+Shift+5 move container to workspace number $ws_wiki
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
 bindsym $mod+Shift+6 move container to workspace number $ws6
 bindsym $mod+Shift+7 move container to workspace number $ws7
 bindsym $mod+Shift+8 move container to workspace number $ws8
@@ -932,11 +931,11 @@ exec --no-startup-id ~/.config/i3/bin/i3-background-set
 # prevents it being done via i3-msg (see script for details).
 set $primary_monitor primary
 set $secondary_monitor DVI-D-0
-workspace "1:term"   output $primary_monitor
-workspace "2:mail"   output $secondary_monitor
-workspace "3:chrome" output $secondary_monitor
-workspace "4:qute"   output $primary_monitor
-workspace "5:wiki"   output $secondary_monitor
+workspace $ws1 output $primary_monitor    # terms
+workspace $ws2 output $secondary_monitor  # mail
+workspace $ws3 output $secondary_monitor  # chrome
+workspace $ws4 output $primary_monitor    # qute
+workspace $ws5 output $secondary_monitor  # wiki
 
 exec ~/.config/i3/bin/i3-setup-session
 # }}}1
