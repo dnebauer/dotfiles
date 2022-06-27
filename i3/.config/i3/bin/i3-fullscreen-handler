@@ -1,579 +1,186 @@
-#!/usr/bin/perl
-
-use Moo;                 # {{{1
-use strictures 2;
-use 5.006;
-use 5.022_001;
-use version; our $VERSION = qv('0.1');
-use namespace::clean;    # }}}1
-
-{
-
-    package Dn::Internal;
-
-    # resources    # {{{1
-    use Moo;
-    use strictures 2;
-    use namespace::clean -except => [ '_options_data', '_options_config' ];
-    use sigtrap qw(handler _handle_sigs normal-signals
-        stack-trace error-signals);
-    use AnyEvent::I3;
-    use Carp qw(croak);
-    use Const::Fast;
-    use English qw(-no_match_vars);
-    use File::Which;
-    use Function::Parameters;
-    use IPC::Cmd qw(run);
-    use IPC::Run;
-    use MooX::HandlesVia;
-    use MooX::Options protect_argv => 0;
-    use Sys::Syslog;
-    use Types::Standard;
-    use experimental 'switch';
-
-    const my $TRUE           => 1;
-    const my $FALSE          => 0;
-    const my $CHECK_INTERVAL => 15;
-    const my $NOTIFY_TIME    => 5;
-    const my $TIMEOUT        => 100;
-    const my $ID_BOUND       => 10_000;
-    Sys::Syslog::openlog( 'i3 fullscreen handler', 'nofatal', 'user' );
-    # }}}1
-
-    # options
-
-    # reclaim (-r)    {{{1
-    option 'reclaim' => (
-        is       => 'ro',
-        short    => 'r',
-        doc      => 'Reclaim space in /var after a restart',
-    );     # }}}1
-
-    # attributes
-
-    # _replace_id    {{{1
-    has '_replace_id' => (
-        is  => 'lazy',
-        isa => Types::Standard::Int,
-        doc => 'dunstify message id',
-    );
-
-    method _build__replace_id () {
-        return int rand $ID_BOUND;
-    }                              # }}}1
-
-    # methods
-
-    # main()    {{{1
-    #
-    # does:   main method
-    # params: nil
-    # prints: feedback
-    # return: n/a, dies on failure
-    method main () {
-
-        $self->_check_dependencies;
-
-        if ( $self->_restarted ) { $self->_reclaim_space; }
-
-        my $previously_fullscreen;
-        my $first_loop = $TRUE;
-
-        # infinite loop
-        while ($TRUE) {
-
-            # get current fullscreen status
-            my $currently_fullscreen = $self->_get_fullscreen_status;
-
-            # handle first time through loop
-            if ($first_loop) {
-                $previously_fullscreen = $currently_fullscreen;
-                $first_loop            = $FALSE;
-            }
-
-            # handle change in fullscreen status
-            if ( $currently_fullscreen and not $previously_fullscreen ) {
-                $self->_enter_fullscreen;
-            }
-            if ( $previously_fullscreen and not $currently_fullscreen ) {
-                $self->_leave_fullscreen;
-            }
-
-            # prepare for next pass through loop
-            $previously_fullscreen = $currently_fullscreen;
-            sleep $CHECK_INTERVAL;
-        }
-
-        return;
-    }
-
-    # _get_fullscreen_status()    {{{1
-    #
-    # does:   determine whether any container is currently fullscreen
-    # params: nil
-    # prints: nil
-    # return: boolean, dies on failure
-    method _get_fullscreen_status () {
-
-        my $currently_fullscreen;
-        my $timeout_token = 'timeout-error';
-
-        # - use 2-layer eval as recommended in Perl Cookbook recipe 16.21
-        my $eval_retval = eval {
-            local $SIG{ALRM} = sub { croak "$timeout_token" };
-            alarm $TIMEOUT;
-            my $inner_retval = eval {
-                my $tree = i3->get_tree->recv;
-                $currently_fullscreen
-                    = $self->_have_fullscreen_container($tree);
-            };
-            alarm 0;
-            if ( not defined $inner_retval ) {
-                if ($EVAL_ERROR) {
-                    if ( $EVAL_ERROR =~ /\A$timeout_token/xsm ) {
-                        croak "$timeout_token";
-                    }
-                    else { croak $EVAL_ERROR; }
-                }
-                else { croak; }
-            }
-        };
-        alarm 0;
-        if ( not defined $eval_retval ) {
-            my $msg = 'Unable to retrieve current fullscreen status';
-            if ($EVAL_ERROR) {
-                if ( $EVAL_ERROR =~ /\A$timeout_token/xsm ) {
-                    $msg .= "\nProcess timed out";
-                }
-                else { $msg .= "\n$EVAL_ERROR"; }
-            }
-            syslog( 'crit', $msg );
-            $self->_notify( 'Fullscreen handler', $msg, $TRUE );
-
-            # abort now (presume running as service so will be restarted)
-            croak $msg;
-        }
-
-        return $currently_fullscreen;
-    }
-
-    # _have_fullscreen_container($hashref)    {{{1
-    #
-    # does:   analyses hash iteratively
-    # params: 1 - hash_ref
-    # prints: nil
-    # return: boolean, whether fullscreen container found
-    method _have_fullscreen_container ($hash_ref) {
-
-        # test whether this is a fullscreen container
-        my %hash = %{$hash_ref};
-        if ( ( exists $hash{'type'} ) and ( $hash{'type'} eq 'con' ) ) {
-            if ( exists $hash{'fullscreen_mode'} ) {
-                return $TRUE if $hash{'fullscreen_mode'} == $TRUE;
-            }
-        }
-
-        # not a fullscreen container, so iterate
-        # - okay to use 'each' because loop does not modify hash
-        ## no critic (Community::Each, Freenode::Each)
-        while ( my ( $key, $value ) = each %hash ) {
-            ## use critic
-            if ( 'HASH' eq ref $value ) {
-                return $TRUE if $self->_have_fullscreen_container($value);
-            }
-            if ( 'ARRAY' eq ref $value ) {
-                my @array = @{$value};
-                for my $element (@array) {
-                    if ( 'HASH' eq ref $element ) {
-                        return $TRUE
-                            if $self->_have_fullscreen_container($element);
-                    }
-                }
-            }
-        }
-
-        # reached here if no fullscreen container found, so return false
-        return $FALSE;
-    }
-
-    # _enter_fullscreen()    {{{1
-    #
-    # does:   handle container entering fullscreen
-    # params: nil
-    # prints: nil
-    # return: n/a, dies on failure
-    method _enter_fullscreen () {
-
-        # log activity
-        syslog( 'info', 'detected fullscreen container' );
-        syslog( 'info', 'disabling notifications and screensaver' );
-
-        # notify user
-        $self->_notify( 'Detected fullscreen container',
-            'Disabling screensaver and notifications' );
-        sleep $NOTIFY_TIME;
-
-        # turn off screensaver
-        system qw(xset s off);
-        system qw(xset -dpms);
-
-        # disable notifications
-        # - (un)pausing dunst also (un)pauses libnotify
-        system qw(dunstctl set-paused true);
-
-        return;
-    }
-
-    # _leave_fullscreen()    {{{1
-    #
-    # does:   handle container leaving fullscreen
-    # params: nil
-    # prints: feedback
-    # return: n/a, dies on failure
-    method _leave_fullscreen () {
-
-        # log activity
-        syslog( 'info', 'container no longer fullscreen' );
-        syslog( 'info', 'enabling notifications and screensaver' );
-
-        # turn on screensaver
-        system qw(xset s on);
-        system qw(xset +dpms);
-
-        # enable notifications
-        # - (un)pausing dunst also (un)pauses libnotify
-        system qw(dunstctl set-paused false);
-
-        # notify user
-        $self->_notify( 'No more fullscreen containers',
-            'Re-enabled screensaver and notifications' );
-
-        return;
-    }
-
-    # _notify($title, $msg, $critical=FALSE)    {{{1
-    #
-    # does:   display message using dunstify
-    # params: 1 - title
-    #         2 - message
-    #         3 = critical [optional, boolean, default=FALSE]
-    # prints: nil
-    # return: n/a, dies on failure
-    method _notify ( $title, $msg, $critical = $FALSE ) {
-
-        my $id  = $self->_replace_id;
-        my @cmd = ('dunstify');
-        if ($critical) { push @cmd, '--urgency=critical'; }
-        push @cmd, "--replace=$id", "$title", "$msg";
-
-        system @cmd;
-
-        return;
-    }
-
-    # _check_dependencies()    {{{1
-    #
-    # does:   checks that required executables are available
-    # params: nil
-    # prints: error message if dependencies are missing
-    # return: n/a, dies with err message if missing dependencies
-    method _check_dependencies () {
-
-        # check for required tools
-        # - unable to check for /usr/sbin/logrotate
-        my @required = qw(dunstctl systemctl xset);
-        my @missing;
-        for my $tool (@required) {
-            if ( not File::Which::which $tool) {
-                push @missing, $tool;
-            }
-        }
-
-        # die if missing any required tool
-        if (@missing) {
-            my $frag = join ', ', @missing;
-            die "Fatal error: missing $frag\n";
-        }
-
-        return;
-    }
-
-    # _restarted()    {{{1
-    #
-    # does:   checks whether script has been restarted by systemd
-    # params: nil
-    # prints: error message on failure
-    # return: boolean, dies with err message on error
-    method _restarted () {
-
-        # obtain restart count from service controller
-        my @cmd = qw(systemctl --user show i3-fullscreen-handler.service
-            -p NRestarts);
-        my ( $success, $err, $full, $stdout, $stderr )
-            = IPC::Cmd::run( command => [@cmd] );
-        if ( not $success ) {
-            if   ($err) { croak "$err\n"; }
-            else        { croak; }
-        }
-
-        # - IPC::Cmd::run returns stdout as arrayref, with the underlying
-        #   array consisting of the shell output chopped into individual
-        #   string elements 4096 characters long (including newlines), so
-        #   need to join array elements to reconstruct the command output
-        my $output = join q{}, @{$stdout};
-        return if not $output;
-
-        # extract restart count
-        # - line should look like 'NRestarts=2' if has restarted
-        # - line should look like 'NRestarts=0' if has not restarted
-        my ( $key, $restarts ) = split /=/xsm, $output;
-        return if $key ne 'NRestarts';
-        return if $restarts !~ / \A \p{Number}+ \Z /xsm;
-
-        # log result
-        syslog( 'info', "detected restart (number $restarts)" );
-
-        # return boolean
-        return $restarts > 0;
-    }
-
-    # _reclaim_space()    {{{1
-    #
-    # does:   attempts to reclaim space on /var partition
-    # params: nil
-    # prints: error message on failure
-    # return: n/a, dies with err message on error
-    method _reclaim_space () {
-
-        # variables
-        const my $ROTATIONS => 3;
-        const my $TITLE     => 'Fullscreen handler';
-        my $msg = "Detected restart\nReclaiming space on /var"
-            . "\nRotating logs $ROTATIONS times";
-        my $count = 1;
-
-        # rotate logs 3 times
-        while ($TRUE) {
-
-            # notify user
-            $msg .= "\n- #$count... ";
-            $self->_notify( $TITLE, $msg );
-
-            # rotate logs
-            my @cmd = qw(sudo logrotate -f /etc/logrotate.conf);
-            my ( $success, $err, $full, $stdout, $stderr )
-                = IPC::Cmd::run( command => [@cmd] );
-            if ($success) {
-                $msg .= 'ok';
-            }
-            else {
-                $msg .= 'failed';
-                my $err_msg = 'logrotate failed';
-                if ($err) { $err_msg .= ": $err"; }
-                syslog( 'err', $err_msg );
-            }
-
-            # manage loop
-            last if $count >= $ROTATIONS;
-            $count++;
-        }
-
-        # clean downloaded deb files
-        $msg .= "\nCleaning downloaded debs\n- clean... ";
-        $self->_notify( $TITLE, $msg );
-        my @cmd = qw(sudo aptitude clean);
-        my ( $success, $err, $full, $stdout, $stderr )
-            = IPC::Cmd::run( command => [@cmd] );
-        if ($success) {
-            $msg .= 'ok';
-        }
-        else {
-            $msg .= 'failed';
-            my $err_msg = 'aptitude clean failed';
-            if ($err) { $err_msg .= ": $err"; }
-            syslog( 'err', $err_msg );
-        }
-
-        # final notification
-        $msg .= "\nSpace reclamation is complete";
-        $self->_notify( $TITLE, $msg );
-
-        return;
-    }
-
-    # _handle_sigs()    {{{1
-    #
-    # does:   handle external termination of script
-    # params: nil
-    # prints: nil
-    # return: n/a
-    method _handle_sigs () {
-
-        # close logger gracefully
-        Sys::Syslog::closelog;
-
-        # notify user
-        die "Caught a signal $OS_ERROR\n";
-        ## no critic (CodeLayout::RequireFinalSemicolon)
-    }
-    ## use critic
-    # }}}1
-}
-
-my $p = Dn::Internal->new_with_options->main;
-
-1;
-
-# POD    {{{1
-__END__
-
-=encoding utf8
-
-=head1 NAME
-
-i3-fullscreen-handler - does stuff ...
-
-=head1 USAGE
-
-B<i3-fullscreen-handler> [ I<-r> ]
-
-B<i3-fullscreen-handler -h>
-
-=head1 REQUIRED ARGUMENTS
-
-Nil.
-
-=head1 REQUIRED OPTIONS
-
-Nil.
-
-=head1 OPTIONS
-
-=over
-
-=item B<-r>  B<--reclaim>
-
-If the script has been restarted by the systemd controller, attempt to reclaim
-space on the F</var> partition by rotating system logs and cleaning downloaded
-deb package files.
-
-=item B<-h>  B<--help>
-
-Display help and exit.
-
-=back
-
-=head1 DESCRIPTION
-
-=head2 Handle fullscreen transitions
-
-A simple daemon for use with the L<i3 window manager|https://i3wm.org>. It
-periodically checks for fullscreen containers.
-
-If the script detects a change in status from no fullscreen containers to a
-fullscreen container being present, it takes the following actions:
-
-=over
-
-=item
-
-the screensaver is deactivated
-
-=item
-
-screen notifications from L<dunst|https://dunst-project.org/> and
-L<libnotify|http://www.galago-project.org/specs/notification/> daemons are
-disabled.
-
-=back
-
-If the script detects the reverse transition, from a fullscreen container being
-present to no fullscreen containers being present, it takes the following
-actions:
-
-=over
-
-=item
-
-the screensaver is activated
-
-=item
-
-screen notifications from dunst and libnotify are re-enabled.
-
-=back
-
-When a change in fullscreen container status is detected the user is notified
-by a screen notification and a message is written to the system logger.
-
-=head2 Handle crashes
-
-The author encountered a specific issue with the script crashing periodically
-due to fatal errors with the AnyEvent::I3 module, which he partly resolved by
-running the script as a systemd service; systemd would restart it whenever it
-crashed.
-
-A significant problem caused by the crashes is that each crash results in over
-S<10 GB> of error messages being dumped into the system logs. Since the F</var>
-partition was only S<46 GB> in size, this could fill up the F</var> partition
-in just a few days.
-
-There is a workaround which can be activated by using the C<-r> option. It
-causes the script to check with systemd on startup (requires C<systemctl>) to
-determine whether it has been restarted. If it has, the script rotates the
-system logs S<< (C<sudo logrotate -f /etc/logrotate.conf>) >> three times and
-deletes downloaded deb package files S<< (C<sudo aptitude clean>) >>. Note that
-C<logrotate> and C<aptitude> must be configured to be run by an ordinary user
-with C<sudo>.
-
-=head1 DIAGNOSTICS
-
-=head2 Process timed out
-
-This error occurs when an attempt to determine whether any container is
-currently fullscreen takes longer than 10 seconds.
-
-=head1 DEPENDENCIES
-
-=head2 Perl modules
-
-AnyEvent::I3, Carp, Const::Fast, English, experimental, File::Which,
-Function::Parameters, Moo, MooX::HandlesVia, MooX::Options, namespace::clean,
-IPC::Cmd, IPC::Run, strictures, Sys::Syslog, Types::Standard.
-
-=head2 Executables
-
-aptitude, dunstctl, dunstify, logrotate, systemctl, xset.
-
-=head1 CONFIGURATION
-
-There are no configuration files or variables for this script.
-
-=head1 EXIT STATUS
-
-This script is intended to run as a simple daemon. As such, it will only exit
-if it encounters an error, in which case it does so with an error status, or
-is closed by an external process, in which case that process is responsible for
-its own exit status.
-
-=head1 INCOMPATIBILITIES
-
-There are no known incompatibilities.
-
-=head1 BUGS AND LIMITATIONS
-
-Please report any bugs to the author.
-
-=head1 AUTHOR
-
-David Nebauer (david at nebauer dot org)
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright (c) 2022 David Nebauer (david at nebauer dot org)
-
-This script is free software; you can redistribute it and/or modify it under
-the same terms as Perl itself.
-
-=cut
-# vim:foldmethod=marker:
+#!/usr/bin/python3
+
+""" Monitor i3 for changes to container fullscreen mode
+
+    When a fullscreen container is detected, the screensaver and
+    notifications are disabled, and all polybars are hidden.
+
+    When the last remaining fullscreen container leave
+    fullscreen mode, the screensaver and notifications are
+    enabled, and all polybars are shown.
+"""
+
+from i3ipc import Connection, Event
+from subprocess import call
+from shutil import which
+from time import sleep
+import notify2
+import syslog
+import argparse
+
+def on_fullscreen( i3, event ):
+    """
+    A callback which is called every time a window
+    changes its fullscreen mode
+    params: i3 = i3 connection object
+            event = i3 event object
+    """
+    try :
+        mode = event.container.fullscreen_mode
+        if mode == 1 :
+            # fullscreen container detected
+            enter_fullscreen_actions(True)
+        elif mode == 0 :
+            # no fullscreen container detected
+            leave_fullscreen_actions(True)
+        else :
+            raise ValueError(f'fullscreen_mode value not 0 or 1: {mode}')
+    except Exception as err:
+        syslog.closelog()
+        SystemExit(err)
+
+def enter_fullscreen_actions(inform: bool):
+    """
+    Actions taken when entering fullscreen
+    params: inform = whether to notify user of actions
+    """
+    # log event
+    # - 'if inform' excludes startup action
+    if inform :
+        syslog.syslog(syslog.LOG_INFO, 'detected fullscreen container')
+    syslog.syslog(syslog.LOG_INFO,
+                  'disabling screensaver, notifications and polybar')
+
+    # hide polybar
+    call(['polybar-msg', 'cmd', 'hide'])
+
+    # suppress screensaver
+    call(['xset', 's', 'off'])
+    call(['xset', '-dpms'])
+
+    # notify user
+    if inform :
+        notify('Detected fullscreen container',
+               'Disabling screensaver, notifications and polybar')
+        # notification timeout is 5 seconds
+        sleep(6)
+
+    # disable notifications
+    call(['dunstctl', 'set-paused', 'true'])
+
+def leave_fullscreen_actions(inform: bool):
+    """
+    Actions taken when last fullscreen container leaves fullscreen
+    params: inform = whether to notify user of actions
+    """
+    # log event
+    # - 'if inform' excludes startup action
+    if inform :
+        syslog.syslog(syslog.LOG_INFO, 'no longer any fullscreen containers')
+    syslog.syslog(syslog.LOG_INFO,
+                  'enabling screensaver, notifications and polybar')
+
+    # show polybar
+    call(['polybar-msg', 'cmd', 'show'])
+
+    # enable screensaver
+    call(['xset', 's', 'on'])
+    call(['xset', '+dpms'])
+
+    # enable notifications
+    call(['dunstctl', 'set-paused', 'false'])
+
+    # notify user
+    if inform :
+        notify('No more fullscreen containers',
+               'Re-enabled screensaver, notifications and polybar')
+
+def notify(title: str, msg: str, crit: bool = False):
+    """
+    Display popup notification
+    params: title = popup title/summary
+            msg = popup message
+            crit = whether message is critical [optional, default=false]
+    """
+    n.set_timeout(5000)
+    urgency = notify2.URGENCY_CRITICAL if crit else notify2.URGENCY_NORMAL
+    n.set_urgency(urgency)
+    n.update(title, msg)
+    n.show()
+
+def check_tools():
+    """
+    Check for required executable programs on path
+    Dies if any required tool is missing
+    """
+    tools = ['polybar-msg', 'xset', 'dunstctl']
+    missing = []
+    for tool in tools:
+        if not which(tool):
+            missing.append(tool)
+    if missing:
+        msg = 'missing required tool(s): ' + ', '.join(missing)
+        raise RuntimeError(msg)
+
+def description():
+    """
+    Provides help text
+    """
+    return (
+    f"Monitors i3 for containers entering or leaving fullscreen\n"
+    f"mode.\n"
+    f"\n"
+    f"When a mode change is detected, if there is a fullscreen\n"
+    f"container present:\n"
+    f"* screensaver is disabled\n"
+    f"* notifications are disabled\n"
+    f"* all polybars are hidden.\n"
+    f"\n"
+    f"Conversely, if a mode change is detected and there are no\n"
+    f"fullscreen containers present:\n"
+    f"* screensaver is enabled\n"
+    f"* notifications are enabled\n"
+    f"* all polybar are shown.\n"
+    f"\n"
+    f"The notification changes affect both libnotify and dunst\n"
+    f"notification servers."
+    )
+
+# check for required tools (aborts if any missing)
+check_tools()
+
+# set up notifications
+notify2.init('i3 fullscreen handler')
+n = notify2.Notification(None)
+
+# set up system logging
+syslog.openlog('i3 fullscreen handler', logoption=syslog.LOG_PID,
+               facility=syslog.LOG_USER)
+syslog.syslog(syslog.LOG_INFO, 'script started')
+
+# set up help
+parser=argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=description()
+)
+args=parser.parse_args()
+
+# connect to the i3 window manager
+i3 = Connection()
+
+# handle initial state of containers
+if i3.get_tree().find_fullscreen():
+    syslog.syslog(syslog.LOG_INFO,
+                  'initial state: found fullscreen container')
+    enter_fullscreen_actions(False)
+else:
+    syslog.syslog(syslog.LOG_INFO,
+                  'initial state: found no fullscreen containers')
+    leave_fullscreen_actions(False)
+
+# set event handler for fullscreen events
+# - triggers on a container entering or leaving fullscreen mode
+i3.on( Event.WINDOW_FULLSCREEN_MODE, on_fullscreen )
+
+# execute main loop
+i3.main()
