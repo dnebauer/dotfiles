@@ -10,6 +10,7 @@
     enabled, and all polybars are shown.
 """
 
+# resources    {{{1
 from i3ipc import Connection, Event
 from subprocess import call
 from shutil import which
@@ -17,33 +18,53 @@ from time import sleep
 import notify2
 import syslog
 import argparse
+import signal
 
-def on_fullscreen(i3, event):
+def check_tools():    # {{{1
     """
-    A callback which is called every time a window
-    changes its fullscreen mode
-    params: i3 = i3 connection object
-            event = i3 event object
+    Check for required executable programs on path
+    Dies if any required tool is missing
     """
+    tools = ['polybar-msg', 'xset', 'dunstctl']
+    missing = []
     try:
-        mode = event.container.fullscreen_mode
-        if mode == 1:
-            # fullscreen container detected
-            enter_fullscreen_actions()
-        elif mode == 0:
-            # no fullscreen container detected
-            leave_fullscreen_actions()
-        else:
-            msg = f'fullscreen_mode value not 0 or 1: {mode}'
+        for tool in tools:
+            if not which(tool):
+                missing.append(tool)
+        if missing:
+            msg = 'missing required tool(s): ' + ', '.join(missing)
             log(msg, True)
             notify(service, msg, True)
-            raise ValueError(msg)
+            raise RuntimeError(msg)
     except Exception as err:
         syslog.closelog()
         raise err
 
+def description():    # {{{1
+    """
+    Provides help text
+    """
+    return (
+    f"Monitors i3 for containers entering or leaving fullscreen\n"
+    f"mode.\n"
+    f"\n"
+    f"When a mode change is detected, if there is a fullscreen\n"
+    f"container present:\n"
+    f"* screensaver is disabled\n"
+    f"* notifications are disabled\n"
+    f"* all polybars are hidden.\n"
+    f"\n"
+    f"Conversely, if a mode change is detected and there are no\n"
+    f"fullscreen containers present:\n"
+    f"* screensaver is enabled\n"
+    f"* notifications are enabled\n"
+    f"* all polybar are shown.\n"
+    f"\n"
+    f"The notification changes affect both libnotify and dunst\n"
+    f"notification servers."
+    )
 
-def enter_fullscreen_actions(startup: bool = False):
+def enter_fullscreen_actions(startup: bool = False):    # {{{1
     """
     Actions taken when entering fullscreen
     params: startup = whether this is the initial/startup check
@@ -71,7 +92,7 @@ def enter_fullscreen_actions(startup: bool = False):
     # disable notifications
     call(['dunstctl', 'set-paused', 'true'])
 
-def leave_fullscreen_actions(startup: bool = False):
+def leave_fullscreen_actions(startup: bool = False):    # {{{1
     """
     Actions taken when last fullscreen container leaves fullscreen
     params: startup = whether this is the initial/startup check
@@ -97,7 +118,7 @@ def leave_fullscreen_actions(startup: bool = False):
         notify('No more fullscreen containers',
                'Re-enabled screensaver, notifications and polybar')
 
-def log(msg: str, crit: bool = False):
+def log(msg: str, crit: bool = False):    # {{{1
     """
     Log system message
     params: msg = popup message
@@ -106,89 +127,97 @@ def log(msg: str, crit: bool = False):
     level = syslog.LOG_CRIT if crit else syslog.LOG_INFO
     syslog.syslog(level, msg)
 
-def notify(title: str, msg: str, crit: bool = False):
+def notify(title: str, msg: str, crit: bool = False):    # {{{1
     """
     Display popup notification
     params: title = popup title/summary
             msg = popup message
             crit = whether message is critical [optional, default=false]
     """
-    n.set_timeout(5000)
+    if not crit:
+        n.set_timeout(5000)
     urgency = notify2.URGENCY_CRITICAL if crit else notify2.URGENCY_NORMAL
     n.set_urgency(urgency)
     n.update(title, msg)
     n.show()
 
-
-def check_tools():
+def on_fullscreen(i3, event):    # {{{1
     """
-    Check for required executable programs on path
-    Dies if any required tool is missing
+    A callback which is called every time a window
+    changes its fullscreen mode
+    params: i3 = i3 connection object
+            event = i3 event object
     """
-    tools = ['polybar-msg', 'xset', 'dunstctl']
-    missing = []
     try:
-        for tool in tools:
-            if not which(tool):
-                missing.append(tool)
-        if missing:
-            msg = 'missing required tool(s): ' + ', '.join(missing)
+        mode = event.container.fullscreen_mode
+        if mode == 1:
+            # fullscreen container detected
+            enter_fullscreen_actions()
+        elif mode == 0:
+            # no fullscreen container detected
+            leave_fullscreen_actions()
+        else:
+            msg = f'fullscreen_mode value not 0 or 1: {mode}'
             log(msg, True)
             notify(service, msg, True)
-            raise RuntimeError(msg)
+            raise ValueError(msg)
     except Exception as err:
         syslog.closelog()
         raise err
 
-def description():
-    """
-    Provides help text
-    """
-    return (
-    f"Monitors i3 for containers entering or leaving fullscreen\n"
-    f"mode.\n"
-    f"\n"
-    f"When a mode change is detected, if there is a fullscreen\n"
-    f"container present:\n"
-    f"* screensaver is disabled\n"
-    f"* notifications are disabled\n"
-    f"* all polybars are hidden.\n"
-    f"\n"
-    f"Conversely, if a mode change is detected and there are no\n"
-    f"fullscreen containers present:\n"
-    f"* screensaver is enabled\n"
-    f"* notifications are enabled\n"
-    f"* all polybar are shown.\n"
-    f"\n"
-    f"The notification changes affect both libnotify and dunst\n"
-    f"notification servers."
-    )
 
-# service provided by this script
+def signal_handler(signum, stack):    # {{{1
+    """
+    Signal handler
+    params: signum = signal number
+            stack = current stack frame
+    """
+    sig_names = {1:'SIGHUP', 2:'SIGINT', 4:'SIGILL', 6: 'SIGABRT', 7:'SIGBUS',
+                 8:'SIGFPE', 11:'SIGSEGV', 14:'SIGALRM', 15:'SIGTERM'}
+    sig_name = sig_names.get(sig)
+    msg = ''
+    if sig_name is None:
+        msg = f'Received signal {signum}: terminating'
+    else:
+        msg = f'Received signal {sig_name} ({signum}): terminating'
+    log(msg, True)
+    syslog.closelog()
+    notify(service, msg, True)
+    raise InterruptedError(msg)
+
+# define service provided by this script    # {{{1
 service = 'i3 fullscreen handler'
 
-# set up notifications
-notify2.init(service)
-n = notify2.Notification(None)
-
-# check for required tools (aborts if any missing)
-check_tools()
-
-# set up system logging
-syslog.openlog(service, logoption=syslog.LOG_PID, facility=syslog.LOG_USER)
-log('script started')
-
-# set up help
+# set up help    # {{{1
 parser=argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=description()
 )
 args=parser.parse_args()
 
-# connect to the i3 window manager
+# set up signal handling    # {{{1
+catchable_sigs = [signal.SIGABRT, signal.SIGALRM, signal.SIGBUS, signal.SIGFPE,
+                  signal.SIGHUP, signal.SIGILL, signal.SIGINT, signal.SIGSEGV,
+                  signal.SIGTERM]
+for sig in catchable_sigs:
+    signal.signal(sig, signal_handler)
+
+# set up notifications    # {{{1
+notify2.init(service)
+n = notify2.Notification(None)
+
+# set up system logging    # {{{1
+syslog.openlog(service, logoption=syslog.LOG_PID, facility=syslog.LOG_USER)
+log('script started')
+
+# check for required tools    # {{{1
+# - aborts if any missing
+check_tools()
+
+# set up connection to the i3 window manager    # {{{1
 i3 = Connection()
 
-# handle initial state of containers
+# handle initial state of containers    # {{{1
 if i3.get_tree().find_fullscreen():
     log('initial state: found fullscreen container')
     enter_fullscreen_actions(True)
@@ -196,9 +225,12 @@ else:
     log('initial state: found no fullscreen containers')
     leave_fullscreen_actions(True)
 
-# set event handler for fullscreen events
+# set event handler for fullscreen events    # {{{1
 # - triggers on a container entering or leaving fullscreen mode
 i3.on(Event.WINDOW_FULLSCREEN_MODE, on_fullscreen)
 
-# execute main loop
+# execute main loop    # {{{1
 i3.main()
+# }}}1
+
+# vim:foldmethod=marker:
