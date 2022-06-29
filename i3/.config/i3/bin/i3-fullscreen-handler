@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 
-""" Monitor i3 for changes to container fullscreen mode
+# module docstring    {{{1
+''' Monitor i3 for changes to container fullscreen mode
+
+    Intended to run as a daemon. The class initialisation method
+    ('__init__') finishes by running the i3wm connection's main
+    event handling loop.
 
     When a fullscreen container is detected, the screensaver and
     notifications are disabled, all polybars are hidden, and
@@ -9,13 +14,13 @@
     When the last remaining fullscreen container leave
     fullscreen mode, the screensaver and notifications are
     enabled, all polybars are shown, and oneko is started.
-"""
+'''
 
-# resources    {{{1
+# import modules    {{{1
 from i3ipc import Connection, Event
 from shutil import which
-from subprocess import call
-from subprocess import DEVNULL
+from subprocess import call, DEVNULL
+from textwrap import dedent
 from time import sleep
 import argparse
 import notify2
@@ -23,305 +28,326 @@ import psutil
 import re
 import signal
 import syslog
-
-def active_notifications(active: bool):    # {{{1
-    """
-    show or hide notifications depending on requested state
-    params: active = bool, enable (True) or disable (False) notifications
-    """
-    if active:
-        call(['dunstctl', 'set-paused', 'false'], stdout=DEVNULL)
-    else:
-        call(['dunstctl', 'set-paused', 'true'], stdout=DEVNULL)
-
-    return
-
-def active_oneko(active: bool):    # {{{1
-    """
-    run or kill oneko depending on requested state
-    params: active = bool, run (True) or kill (False) oneko
-    """
-    if active:
-        kill_oneko()
-        cmd = ' '.join(['exec --no-startup-id oneko -time 70000',
-                       '-bg red -position -30+20'])
-        call(['i3-msg', cmd], stdout=DEVNULL)
-    else:
-        kill_oneko()
-
-    return
-
-def active_polybar(active: bool):    # {{{1
-    """
-    show or hide polybar depending on requested state
-    params: active = bool, show (True) or hide (False) polybar
-    """
-    if active:
-        call(['polybar-msg', 'cmd', 'show'], stdout=DEVNULL)
-    else:
-        call(['polybar-msg', 'cmd', 'hide'], stdout=DEVNULL)
-
-    return
-
-def active_screensaver(active: bool):    # {{{1
-    """
-    enable or disable screensaver depending on requested state
-    params: active = bool, enable (True) or disable (False) screensaver
-    """
-    if active:
-        call(['xset', 's', 'on'], stdout=DEVNULL)
-        call(['xset', '+dpms'], stdout=DEVNULL)
-    else:
-        call(['xset', 's', 'off'], stdout=DEVNULL)
-        call(['xset', '-dpms'], stdout=DEVNULL)
-
-    return
-
-def check_tools():    # {{{1
-    """
-    check for required executable programs on path
-    dies if any required tool is missing
-    """
-    tools = ['polybar-msg', 'xset', 'dunstctl', 'oneko']
-    missing = []
-    try:
-        for tool in tools:
-            if not which(tool):
-                missing.append(tool)
-        if missing:
-            msg = 'missing required tool(s): ' + ', '.join(missing)
-            log(msg, True)
-            notify(service, msg, True)
-            raise RuntimeError(msg)
-    except Exception as err:
-        syslog.closelog()
-        raise err
-
-    return
-
-def description():    # {{{1
-    """
-    provides help text
-    """
-    return (
-    f"Monitors i3 for containers entering or leaving fullscreen\n"
-    f"mode.\n"
-    f"\n"
-    f"When a mode change is detected, if there is a fullscreen\n"
-    f"container present:\n"
-    f"* screensaver is disabled\n"
-    f"* notifications are disabled\n"
-    f"* all polybars are hidden\n"
-    f"* all oneko processes are killed.\n"
-    f"\n"
-    f"Conversely, if a mode change is detected and there are no\n"
-    f"fullscreen containers present:\n"
-    f"* screensaver is enabled\n"
-    f"* notifications are enabled\n"
-    f"* all polybars are shown\n"
-    f"* oneko is started.\n"
-    f"\n"
-    f"The notification changes affect both libnotify and dunst\n"
-    f"notification servers."
-    )
-
-    return
-
-def enter_fullscreen_actions(startup: bool = False):    # {{{1
-    """
-    actions taken when entering fullscreen
-    params: startup = whether this is the initial/startup check
-                      [optional, default=False]
-    """
-    # log event
-    if not startup:
-        log('detected fullscreen container')
-    log('disabling screensaver, notifications, polybar and oneko')
-
-    # hide polybar
-    active_polybar(False)
-
-    # suppress screensaver
-    active_screensaver(False)
-
-    # kill oneko
-    active_oneko(False)
-
-    # notify user
-    if not startup:
-        notify('Detected fullscreen container',
-               'Disabling screensaver, notifications, polybar and oneko')
-        # notification timeout is 5 seconds
-        sleep(6)
-
-    # disable notifications
-    active_notifications(False)
-
-    return
-
-def kill_oneko():    # {{{1
-    """
-    kill all oneko-related processes
-    note: running oneko in i3 startup results in 2 processes
-          - one is the oneko command and the other is
-          the oneko command prefixed with '/bin/sh -c'
-    """
-    pattern = '\A(/bin/sh( )+-c( )+)?oneko'
-    for proc in psutil.process_iter():
-        cmd = ' '.join(proc.cmdline())
-        if re.match(pattern, cmd):
-            proc.send_signal(signal.SIGTERM)
-
-    return
-
-def leave_fullscreen_actions(startup: bool = False):    # {{{1
-    """
-    actions taken when last fullscreen container leaves fullscreen
-    params: startup = whether this is the initial/startup check
-                      [optional, default=False]
-    """
-    # log event
-    if not startup:
-        log('no longer any fullscreen containers')
-    log('enabling screensaver, notifications, polybar and oneko')
-
-    # show polybar
-    active_polybar(True)
-
-    # enable screensaver
-    active_screensaver(True)
-
-    # enable notifications
-    active_notifications(True)
-
-    # run oneko
-    active_oneko(True)
-
-    # notify user
-    if not startup:
-        notify('No more fullscreen containers',
-               'Re-enabled screensaver, notifications, polybar and oneko')
-
-    return
-
-def log(msg: str, crit: bool = False):    # {{{1
-    """
-    log system message
-    params: msg = popup message
-            crit = whether message is critical [optional, default=false]
-    """
-    level = syslog.LOG_CRIT if crit else syslog.LOG_INFO
-    syslog.syslog(level, msg)
-
-    return
-
-def notify(title: str, msg: str, crit: bool = False):    # {{{1
-    """
-    display popup notification
-    params: title = popup title/summary
-            msg = popup message
-            crit = whether message is critical [optional, default=false]
-    """
-    if not crit:
-        n.set_timeout(5000)
-    urgency = notify2.URGENCY_CRITICAL if crit else notify2.URGENCY_NORMAL
-    n.set_urgency(urgency)
-    n.update(title, msg)
-    n.show()
-
-    return
-
-def on_fullscreen(i3, event):    # {{{1
-    """
-    callback which is called every time a window
-    changes its fullscreen mode
-    params: i3 = i3 connection object
-            event = i3 event object
-    """
-    try:
-        mode = event.container.fullscreen_mode
-        if mode == 1:
-            # fullscreen container detected
-            enter_fullscreen_actions()
-        elif mode == 0:
-            # no fullscreen container detected
-            leave_fullscreen_actions()
-        else:
-            msg = f'fullscreen_mode value not 0 or 1: {mode}'
-            log(msg, True)
-            notify(service, msg, True)
-            raise ValueError(msg)
-    except Exception as err:
-        syslog.closelog()
-        raise err
-
-    return
-
-def signal_handler(signum, stack):    # {{{1
-    """
-    signal handler
-    params: signum = signal number
-            stack = current stack frame
-    """
-    sig_names = {1:'SIGHUP', 2:'SIGINT', 4:'SIGILL', 6: 'SIGABRT', 7:'SIGBUS',
-                 8:'SIGFPE', 11:'SIGSEGV', 14:'SIGALRM', 15:'SIGTERM'}
-    sig_name = sig_names.get(sig)
-    msg = ''
-    if sig_name is None:
-        msg = f'Received signal {signum}: terminating'
-    else:
-        msg = f'Received signal {sig_name} ({signum}): terminating'
-    log(msg, True)
-    syslog.closelog()
-    notify(service, msg, True)
-    raise InterruptedError(msg)
-
-# define service provided by this script    # {{{1
-service = 'i3 fullscreen handler'
-
-# set up help    # {{{1
-parser=argparse.ArgumentParser(
-    formatter_class=argparse.RawDescriptionHelpFormatter,
-    description=description()
-)
-args=parser.parse_args()
-
-# set up signal handling    # {{{1
-catchable_sigs = [signal.SIGABRT, signal.SIGALRM, signal.SIGBUS, signal.SIGFPE,
-                  signal.SIGHUP, signal.SIGILL, signal.SIGINT, signal.SIGSEGV,
-                  signal.SIGTERM]
-for sig in catchable_sigs:
-    signal.signal(sig, signal_handler)
-
-# set up notifications    # {{{1
-notify2.init(service)
-n = notify2.Notification(None)
-
-# set up system logging    # {{{1
-syslog.openlog(service, logoption=syslog.LOG_PID, facility=syslog.LOG_USER)
-log('script started')
-
-# check for required tools    # {{{1
-# - aborts if any missing
-check_tools()
-
-# set up connection to the i3 window manager    # {{{1
-i3 = Connection()
-
-# handle initial state of containers    # {{{1
-if i3.get_tree().find_fullscreen():
-    log('initial state: found fullscreen container')
-    enter_fullscreen_actions(True)
-else:
-    log('initial state: found no fullscreen containers')
-    leave_fullscreen_actions(True)
-
-# set event handler for fullscreen events    # {{{1
-# - triggers on a container entering or leaving fullscreen mode
-i3.on(Event.WINDOW_FULLSCREEN_MODE, on_fullscreen)
-
-# execute main loop    # {{{1
-i3.main()
 # }}}1
+
+
+class FullscreenHandler(object):
+    ''' fullscreen handler '''
+    def __init__(self):    # {{{1
+
+        ''' after initialisation starts main event loop '''
+
+        # constants
+        self.SERVICE = 'i3 fullscreen handler'
+
+        # set up signal handling
+        catchable_sigs = [signal.SIGABRT, signal.SIGALRM, signal.SIGBUS,
+                          signal.SIGFPE, signal.SIGHUP, signal.SIGILL,
+                          signal.SIGINT, signal.SIGSEGV, signal.SIGTERM]
+        for sig in catchable_sigs:
+            signal.signal(sig, self._signal_handler)
+
+        # set up notifications
+        notify2.init(self.SERVICE)
+        self._notifier = notify2.Notification(None)
+
+        # set up system logging
+        syslog.openlog(self.SERVICE, logoption=syslog.LOG_PID,
+                       facility=syslog.LOG_USER)
+        self._log('script started')
+
+        # abort if any required tools are missing
+        self._check_tools()
+
+        # set up connection to the i3 window manager
+        self._i3 = Connection()
+
+        # handle initial state of containers
+        if self._i3.get_tree().find_fullscreen():
+            self._log('initial state: found fullscreen container')
+            self._enter_fullscreen_actions(True)
+        else:
+            self._log('initial state: found no fullscreen containers')
+            self._leave_fullscreen_actions(True)
+
+        # set event handler for fullscreen events
+        # - triggers on a container entering or leaving fullscreen mode
+        self._i3.on(Event.WINDOW_FULLSCREEN_MODE, self._on_fullscreen)
+
+        # start main loop for i3wm connection to handle events
+        self._i3.main()
+
+    @staticmethod
+    def _active_notifications(active: bool):    # {{{1
+        '''
+        show or hide notifications depending on requested state
+        params: active = bool, enable (True) or disable (False) notifications
+        '''
+        if active:
+            call(['dunstctl', 'set-paused', 'false'], stdout=DEVNULL)
+        else:
+            call(['dunstctl', 'set-paused', 'true'], stdout=DEVNULL)
+
+        return
+
+    def _active_oneko(self, active: bool):    # {{{1
+        '''
+        run or kill oneko depending on requested state
+        params: active = bool, run (True) or kill (False) oneko
+        '''
+        if active:
+            self._kill_oneko()
+            cmd = ' '.join(['exec --no-startup-id oneko -time 70000',
+                           '-bg red -position -30+20'])
+            call(['i3-msg', cmd], stdout=DEVNULL)
+        else:
+            self._kill_oneko()
+
+        return
+
+    @staticmethod
+    def _active_polybar(active: bool):    # {{{1
+        '''
+        show or hide polybar depending on requested state
+        params: active = bool, show (True) or hide (False) polybar
+        '''
+        if active:
+            call(['polybar-msg', 'cmd', 'show'], stdout=DEVNULL)
+        else:
+            call(['polybar-msg', 'cmd', 'hide'], stdout=DEVNULL)
+
+        return
+
+    @staticmethod
+    def _active_screensaver(active: bool):    # {{{1
+        '''
+        enable or disable screensaver depending on requested state
+        params: active = bool, enable (True) or disable (False) screensaver
+        '''
+        if active:
+            call(['xset', 's', 'on'], stdout=DEVNULL)
+            call(['xset', '+dpms'], stdout=DEVNULL)
+        else:
+            call(['xset', 's', 'off'], stdout=DEVNULL)
+            call(['xset', '-dpms'], stdout=DEVNULL)
+
+        return
+
+    def _check_tools(self):    # {{{1
+        '''
+        check for required executable programs on path
+        dies if any required tool is missing
+        '''
+        tools = ['polybar-msg', 'xset', 'dunstctl', 'oneko']
+        missing = []
+        try:
+            for tool in tools:
+                if not which(tool):
+                    missing.append(tool)
+            if missing:
+                msg = 'missing required tool(s): ' + ', '.join(missing)
+                self._log(msg, True)
+                self._notify(self.SERVICE, msg, True)
+                raise RuntimeError(msg)
+        except Exception as err:
+            syslog.closelog()
+            raise err
+
+        return
+
+    def _enter_fullscreen_actions(self, startup: bool = False):    # {{{1
+        '''
+        actions taken when entering fullscreen
+        params: startup = whether this is the initial/startup check
+                          [optional, default=False]
+        '''
+        # log event
+        if not startup:
+            self._log('detected fullscreen container')
+        self._log('disabling screensaver, notifications, polybar and oneko')
+
+        # hide polybar
+        self._active_polybar(False)
+
+        # suppress screensaver
+        self._active_screensaver(False)
+
+        # kill oneko
+        self._active_oneko(False)
+
+        # notify user
+        if not startup:
+            self._notify('Detected fullscreen container',
+                   'Disabling screensaver, notifications, polybar and oneko')
+            # notification timeout is 5 seconds
+            sleep(6)
+
+        # disable notifications
+        self._active_notifications(False)
+
+        return
+
+    @staticmethod
+    def _kill_oneko():    # {{{1
+        '''
+        kill all oneko-related processes
+        note: running oneko in i3 startup results in 2 processes -
+              one is 'oneko ...' and the other is '/bin/sh -c oneko ...'
+        '''
+        pattern = '\A(/bin/sh( )+-c( )+)?oneko'
+        for proc in psutil.process_iter():
+            cmd = ' '.join(proc.cmdline())
+            if re.match(pattern, cmd):
+                proc.send_signal(signal.SIGTERM)
+
+        return
+
+    def _leave_fullscreen_actions(self, startup: bool = False):    # {{{1
+        '''
+        actions taken when last fullscreen container leaves fullscreen
+        params: startup = whether this is the initial/startup check
+                          [optional, default=False]
+        '''
+        # log event
+        if not startup:
+            self._log('no longer any fullscreen containers')
+        self._log('enabling screensaver, notifications, polybar and oneko')
+
+        # show polybar
+        self._active_polybar(True)
+
+        # enable screensaver
+        self._active_screensaver(True)
+
+        # enable notifications
+        self._active_notifications(True)
+
+        # run oneko
+        self._active_oneko(True)
+
+        # notify user
+        if not startup:
+            summary = 'No more fullscreen containers'
+            body = 'Re-enabled screensaver, notifications, polybar and oneko'
+            self._notify(summary, body)
+
+        return
+
+    @staticmethod
+    def _log(msg: str, crit: bool = False):    # {{{1
+        '''
+        log system message
+        params: msg = popup message
+                crit = whether message is critical [optional, default=false]
+        '''
+        level = syslog.LOG_CRIT if crit else syslog.LOG_INFO
+        syslog.syslog(level, msg)
+
+        return
+
+    def _notify(self, title: str, msg: str, crit: bool = False):    # {{{1
+        '''
+        display popup notification
+        params: title = popup title/summary
+                msg = popup message
+                crit = whether message is critical [optional, default=false]
+        '''
+        if not crit:
+            self._notifier.set_timeout(5000)
+        urgency = notify2.URGENCY_CRITICAL if crit else notify2.URGENCY_NORMAL
+        self._notifier.set_urgency(urgency)
+        self._notifier.update(title, msg)
+        self._notifier.show()
+
+        return
+
+    def _on_fullscreen(self, i3, event):    # {{{1
+        '''
+        callback which is called every time a window
+        changes its fullscreen mode
+        params: i3 = i3 connection object
+                event = i3 event object
+        '''
+        try:
+            mode = event.container.fullscreen_mode
+            if mode == 1:
+                # fullscreen container detected
+                self._enter_fullscreen_actions()
+            elif mode == 0:
+                # no fullscreen container detected
+                self._leave_fullscreen_actions()
+            else:
+                msg = f'fullscreen_mode value not 0 or 1: {mode}'
+                self._log(msg, True)
+                self._notify(self.SERVICE, msg, True)
+                raise ValueError(msg)
+        except Exception as err:
+            syslog.closelog()
+            raise err
+
+        return
+
+    def _signal_handler(self, signum, stack):    # {{{1
+        '''
+        signal handler
+        params: signum = signal number
+                stack = current stack frame
+        '''
+        sig_names = {1:'SIGHUP', 2:'SIGINT', 4:'SIGILL', 6: 'SIGABRT',
+                     7:'SIGBUS', 8:'SIGFPE', 11:'SIGSEGV', 14:'SIGALRM',
+                     15:'SIGTERM'}
+        sig_name = sig_names.get(signum)
+        msg = ''
+        if sig_name is None:
+            msg = f'Received signal {signum}: terminating'
+        else:
+            msg = f'Received signal {sig_name} ({signum}): terminating'
+        self._log(msg, True)
+        syslog.closelog()
+        self._notify(self.SERVICE, msg, True)
+        raise InterruptedError(msg)
+        # }}}1
+
+
+def usage():    # {{{1
+    ''' print help if requested '''
+    description = dedent('''\
+        Monitors i3 for containers entering or leaving fullscreen
+        mode.
+
+        When a mode change is detected, if there is a fullscreen
+        container present:
+        * screensaver is disabled
+        * notifications are disabled
+        * all polybars are hidden
+        * all oneko processes are killed.
+
+        Conversely, if a mode change is detected and there are no
+        fullscreen containers present:
+        * screensaver is enabled
+        * notifications are enabled
+        * all polybars are shown
+        * oneko is started.
+
+        The notification changes affect both libnotify and dunst
+        notification servers.
+    ''')
+    argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=description
+    ).parse_args()
+
+    return
+
+
+def main():    # {{{1
+    ''' script execution starts here '''
+    usage()
+    handler = FullscreenHandler()
+    # }}}1
+
+
+if __name__ == '__main__':
+    main()
 
 # vim:foldmethod=marker:
