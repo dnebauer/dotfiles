@@ -9,7 +9,9 @@
        "x": 57,
        "y": 60
     },
-    "marks": [],
+    "marks": [
+       "a"
+    ],
     "name": "QuteBrowser — Mail",
     "percent": 0.5,
     "swallows": [
