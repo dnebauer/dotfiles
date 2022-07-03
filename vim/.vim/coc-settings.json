@@ -54,6 +54,7 @@
 
     /* yaml */
 
-    "yaml.validate": false
+    "yaml.validate": false,
+    "Lua.telemetry.enable": false
 
 }
