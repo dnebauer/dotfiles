@@ -245,6 +245,11 @@ alacritty \
     --command tmux &
 sleep $delay_post_launch
 
+# Ensure dunst is available    {{{1
+while ! systemctl --user --quiet is-active dunst ; do
+    if $debug ; then echo 'Waiting until the dunst service is available' ; fi
+    sleep 1
+done
 # Post-launch tasks    {{{1
 # - some tasks cannot be performed until the relevant app has finished loading
 # - trial and error showed that 30 seconds is sufficient for the computer and
