@@ -51,6 +51,7 @@
 # |           nvim-qt | gui editor                                           |
 # |             oneko | cursor locator                                       |
 # |             pactl | PulseAudio controller                                |
+# |        parcellite | clipboard manager                                    |
 # |              perl | perl 5 language interpreter                          |
 # |      perl modules | AnyEvent::I3, IPC::Cmd, IPC::Run, JSON::MaybeXS,     |
 # |                   | Net::DBus, sigtrap, Sys::Syslog                      |
@@ -301,14 +302,19 @@ exec --no-startup-id dropbox start -i
 
 exec --no-startup-id oneko -time 70000 -bg red -position -30+20
 
+# parcellite    {{{2
+#
+# - clipboard manager
+
+exec --no-startup-id parcellite &
+
 # radiotray-ng    {{{2
 #
 # - runs as daemon in system tray
+
 exec --no-startup-id radiotray-ng
 
-# - can control via dbus
-# - plays the last played station
-# - use mouse on tray icon to select different station
+# - can control via dbus and custom mode
 
 set $rtng_change ~/.config/i3/bin/i3-rtng-change
 set $rtng_play ~/.config/i3/bin/i3-rtng-play
