@@ -464,7 +464,7 @@ bindsym $mod+KP_Enter exec $term
 # - rofi selects and runs/opens terminal commands
 #   and applications with .desktop files
 ## application/command line launcher
-bindsym $mod+d exec "rofi -modi drun,run -show drun"
+bindsym $mod+d exec "rofi -modi drun,run -show drun -monitor primary"
 #
 # - there also is {i3,j4}-dmenu-desktop
 # - it selects and opens only applications with .desktop files
