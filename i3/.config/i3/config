@@ -24,11 +24,14 @@
 # - does not include resources (fonts, external website access, etc.)
 #   required by polybar configuration
 
+
 # |              tool | use                                                  |
 # |------------------:|:-----------------------------------------------------|
 # |         alacritty | terminal                                             |
+# |               awk | extract shortcut help from this config file          |
 # |          basename | strip directory/suffix from filenames                |
 # |              calc | used by networkmanager_dmenu (polybar themes)        |
+# |            column | format command output                                |
 # |               cut | remove sections from lines                           |
 # |              date | print system date                                    |
 # |             dmenu | run dialog (dependency of j4-dmenu-desktop)          |
@@ -45,6 +48,7 @@
 # |        kdeconnect | syncronise between devices                           |
 # |           konsole | terminal                                             |
 # |              maim | take screenshots                                     |
+# |           mapfile | load bash array with command output                  |
 # |         nm-applet | network manager                                      |
 # |       notify-send | send notification                                    |
 # |          numlockx | control NumLock key                                  |
@@ -80,7 +84,26 @@
 # |          xss-lock | connect screen locker and saver                      |
 # |            zenity | GUI dialogs                                          |
 
+
 # SHORTCUT SUMMARY    {{{1
+
+
+# Bindsym formatting to enable help extraction
+
+# - for i3 key bindings:
+#   . precede 'bindsym' line with summary line starting with '## '
+#   . example:
+#       ## Close window
+#       bindsym $mod+Shift+q kill
+# - for non-i3 key bindings:
+#   . add dummy declaration line starting with '#@ '
+#   . precede declaration line with summary line starting with '## '
+#   . example:
+#       ## Display clipboard history
+#       #@ Ctrl+Alt+h
+
+
+# Shortcut listing
 
 # $alt+Tab              task switcher
 # $mod+$down            move focus down
@@ -145,6 +168,9 @@
 # $mod+space            toggle focus mode
 # $mod+t                mode: radiotray-ng control
 # $mod+y                mode: layout
+# Ctrl+$alt+h           display clipboard history
+# Ctrl+space            close topmost notification
+# Ctrl+Shift+space      close all notifications
 # F1                    clipboard loader
 # F2                    help page
 # F3                    tellico
@@ -157,12 +183,9 @@
 # COMMAND TO DISPLAY SHORTCUTS IN CONSOLE    {{{1
 
 
-#### grep '^bind' ~/.config/i3/config | \
-####     cut -d' ' -f 2-              | \
-####     sed 's/ /    /'                | \
-####     column -ts $'    '             | \
-####     pr -1 -w 145 -t              | \
-####     less
+####awk '($1=="bindsym"||$1=="#@")&&last{print $2,"\t",last}{last=""}   \
+####    $1=="##"{for(i=2;i<=NF;i++)last=last" "$i}' ~/.config/i3/config \
+####    | column -ts $'\t' | less
 
 
 # GLOBAL VARIABLES    {{{1
@@ -253,8 +276,8 @@ exec_always --no-startup-id xrandr                \
 #   lock the screen before suspend
 # - use 'loginctl lock-session' to lock your screen
 
-exec --no-startup-id xss-lock --transfer-sleep-lock \
--- i3lock --color=000000 ignore-empty-password --nofork
+exec --no-startup-id xss-lock --transfer-sleep-lock -- \
+     i3lock --color=000000 ignore-empty-password --nofork
 
 # numlock    {{{2
 
@@ -272,17 +295,21 @@ exec --no-startup-id nm-applet
 # - use pactl to adjust volume in PulseAudio
 
 set $refresh_i3status killall -SIGUSR1 i3status
+## raise audio volume
 bindsym XF86AudioRaiseVolume exec --no-startup-id     \
     pactl set-sink-mute @DEFAULT_SINK@ false &&       \
     pactl set-sink-volume @DEFAULT_SINK@ +5% &&       \
     $refresh_i3status
+## lower audio volume
 bindsym XF86AudioLowerVolume exec --no-startup-id     \
     pactl set-sink-mute @DEFAULT_SINK@ false &&       \
     pactl set-sink-volume @DEFAULT_SINK@ -5% &&       \
     $refresh_i3status
+## toggle audio mute
 bindsym XF86AudioMute exec --no-startup-id            \
     pactl set-sink-mute @DEFAULT_SINK@ toggle &&      \
     $refresh_i3status
+## toggle microphone mute
 bindsym XF86AudioMicMute exec --no-startup-id         \
     pactl set-source-mute @DEFAULT_SOURCE@ toggle &&  \
     $refresh_i3status
@@ -298,6 +325,17 @@ exec_always --no-startup-id                      \
 
 exec --no-startup-id dropbox start -i
 
+# dunst    {{{2
+# 
+# - is started automatically
+# - default dunst shortcuts for closing notifications stopped working
+# - reimplement them here
+
+## close topmost displayed notification
+bindsym Ctrl+space exec dunstctl close
+## close all displayed notifications
+bindsym Ctrl+Shift+space exec dunstctl close-all
+
 # oneko    {{{2
 
 exec --no-startup-id oneko -time 70000 -bg red -position -30+20
@@ -305,8 +343,12 @@ exec --no-startup-id oneko -time 70000 -bg red -position -30+20
 # parcellite    {{{2
 #
 # - clipboard manager
+# - provides shortcuts, including to display clipboard history
 
 exec --no-startup-id parcellite &
+
+## display clipboard history
+#@ Ctrl+$alt+h
 
 # radiotray-ng    {{{2
 #
@@ -325,6 +367,7 @@ set $rtng_stop ~/.config/i3/bin/i3-rtng-stop
 set $mode_radiotray Radiotray NG: \
 [p]lay/pause, [s]top, s[t]atus, [c]hange station, [q]uit
 
+## radiotray mode
 bindsym $mod+t mode "$mode_radiotray"
 
 mode "$mode_radiotray" {
@@ -349,7 +392,10 @@ exec --no-startup-id $kdeconnect
 # task switcher    {{{2
 #
 # - same script runs as both server and client
+
 exec --no-startup-id systemctl --user start i3-focus-last.service
+
+## switch tasks
 bindsym $alt+Tab exec --no-startup-id ~/.config/i3/bin/i3-focus-last --switch
 
 # automount removable media    {{{2
@@ -379,6 +425,7 @@ exec_always --no-startup-id $picom_start
 set $mode_launcher Launch: [a]stroid [b]ackground [c]hrome [p]olybar \
 [q]utebrowser [s]yncthing [t]iddlywiki
 
+## launch mode
 bindsym $mod+o mode "$mode_launcher"
 
 mode "$mode_launcher" {
@@ -406,23 +453,23 @@ mode "$mode_launcher" {
 
 # start a terminal    {{{2
 
-####bindsym $mod+Return exec i3-sensible-terminal
+## open terminal
 bindsym $mod+Return exec $term
+## open terminal
 bindsym $mod+KP_Enter exec $term
 
 # start program launcher    {{{2
 #
-# - dmenu is the classic utility for this
-####bindsym $mod+d exec --no-startup-id dmenu_run
-#
 # - a more modern dmenu replacement is rofi
 # - rofi selects and runs/opens terminal commands
 #   and applications with .desktop files
+## application/command line launcher
 bindsym $mod+d exec "rofi -modi drun,run -show drun"
 #
 # - there also is {i3,j4}-dmenu-desktop
 # - it selects and opens only applications with .desktop files
-####bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+####bindsym $mod+Shift+d exec --no-startup-id i3-dmenu-desktop
+## application launcher
 bindsym $mod+Shift+d exec --no-startup-id \
     j4-dmenu-desktop --dmenu="dmenu -i -p 'Select application to run'" \
                      --term="urxvt"
@@ -437,6 +484,7 @@ bindsym $mod+Shift+d exec --no-startup-id \
 # TODO: user suggestion that using 'sleep .5' in script pre-capture
 #       means '--release' is no longer needed in binding
 
+## screenshot mode
 bindsym $mod+Print mode "$mode_screenshot"
 
 set $mode_screenshot Capture method: \
@@ -505,22 +553,17 @@ mode "$mode_ss_window" {
 #
 # - need to ensure this is a floating window
 
+## clipboard loader
 bindsym F1 exec --no-startup-id dn-load-clipboard
 
 # display shortcuts    {{{2
 
-set $Shortcuts $HOME/.config/i3/help/shortcuts.html
-bindsym F2 exec --no-startup-id       \
-    zenity                            \
-        --text-info                   \
-        --html                        \
-        --filename=$Shortcuts         \
-        --title="Keyboard Shortcuts"  \
-        --width=1000                  \
-        --height=1000
+## shortcut help
+bindsym F2 exec --no-startup-id ~/.config/i3/bin/i3-help
 
 # tellico    {{{2
 
+## tellico collection manager
 bindsym F3 exec --no-startup-id tellico
 # }}}2
 
@@ -537,16 +580,24 @@ set $right l
 
 # change focus    {{{2
 
+## focus left
 bindsym $mod+$left focus left
+## focus left
 bindsym $mod+Left focus left
 
+## focus down
 bindsym $mod+$down focus down
+## focus down
 bindsym $mod+Down focus down
 
+## focus up
 bindsym $mod+$up focus up
+## focus up
 bindsym $mod+Up focus up
 
+## focus right
 bindsym $mod+$right focus right
+## focus right
 bindsym $mod+Right focus right
 
 
@@ -558,16 +609,24 @@ bindsym $mod+Right focus right
 # - "ppt" is "percentage points"
 # - "33 ppt" is ⅓ the width of the screen the container is initially on
 
+## move window left (large)
 bindsym $mod+Shift+$left move left 33 ppt
+## move window left (small)
 bindsym $mod+Shift+Left move left
 
+## move window down (large)
 bindsym $mod+Shift+$down move down 33 ppt
+## move window down (small)
 bindsym $mod+Shift+Down move down
 
+## move window up (large)
 bindsym $mod+Shift+$up move up 33 ppt
+## move window up (small)
 bindsym $mod+Shift+Up move up
 
+## move window right (large)
 bindsym $mod+Shift+$right move right 33 ppt
+## move window right (small)
 bindsym $mod+Shift+Right move right
 
 # use Mouse+$mod to drag floating windows    {{{2
@@ -587,6 +646,7 @@ mouse_warping none
 # - this is disrupted by redefining $mod+h to the vim-like 'focus left'
 # - instead use this mode
 
+## split mode
 bindsym $mod+s mode "$mode_split"
 
 set $mode_split Split: [h]orizontal, [v]ertical
@@ -603,10 +663,12 @@ mode "$mode_split" {
 
 # enter fullscreen mode for the focused container    {{{2
 
+## toggle fullscreen
 bindsym $mod+f fullscreen toggle
 
 # change container layout {stacked,tabbed,toggle split}    {{{2
 
+## layout mode
 bindsym $mod+y mode "$mode_layout"
 
 set $mode_layout Container layout: [s]tacked, [t]abbed, to[g]gle split
@@ -661,14 +723,17 @@ no_focus [class="plasmashell" window_type="notification"]
 
 # toggle tiling/floating    {{{2
 
+## toggle floating
 bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling/floating windows    {{{2
 
+## toggle tiling/floating focus
 bindsym $mod+space focus mode_toggle
 
 # focus the parent container    {{{2
 
+## focus parent
 bindsym $mod+a focus parent
 
 # focus the child container    {{{2
@@ -676,11 +741,14 @@ bindsym $mod+a focus parent
 ####bindsym $mod+d focus child
 
 # cycle through workspaces    {{{2
+## cycle through workspaces backwards
 bindsym $mod+Ctrl+h workspace prev
+## cycle through workspaces forwards
 bindsym $mod+Ctrl+l workspace next
 
 # move the currently focused window to the scratchpad    {{{2
 
+## move to scratchpad
 bindsym $mod+Shift+minus move scratchpad
 
 # show, cycle through or hide focussed scratchpad window    {{{2
@@ -690,16 +758,19 @@ bindsym $mod+Shift+minus move scratchpad
 # - if there are multiple scratchpad windows,
 #   this command cycles through them
 
+## show scratchpad
 bindsym $mod+minus scratchpad show
 
 # use window marks    {{{2
 #
 # - mark focussed window with user-supplied 1-character mark
 
+## set window mark
 bindsym $mod+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
 
 # - goto requested mark
 
+# Goto window mark
 bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 
 # window title format    {{{2
@@ -717,15 +788,10 @@ for_window [all] title_window_icon padding 3px
 # - we later configure key bindings for them
 # - use variables to avoid repeating the names in multiple places
 
-# $ws1 = terms
 set $ws1  1
-# $ws2 = mail
 set $ws2  2
-# $ws3 = chrome
 set $ws3  3
-# $ws4 = qute
 set $ws4  4
-# $ws5 = wiki
 set $ws5  5
 set $ws6  6
 set $ws7  7
@@ -735,15 +801,25 @@ set $ws10 10
 
 # switching between workspaces    {{{2
 
+## switch to workspace 1
 bindsym $mod+1 workspace number $ws1
+## switch to workspace 2
 bindsym $mod+2 workspace number $ws2
+## switch to workspace 3
 bindsym $mod+3 workspace number $ws3
+## switch to workspace 4
 bindsym $mod+4 workspace number $ws4
+## switch to workspace 5
 bindsym $mod+5 workspace number $ws5
+## switch to workspace 6
 bindsym $mod+6 workspace number $ws6
+## switch to workspace 7
 bindsym $mod+7 workspace number $ws7
+## switch to workspace 8
 bindsym $mod+8 workspace number $ws8
+## switch to workspace 9
 bindsym $mod+9 workspace number $ws9
+## switch to workspace 0
 bindsym $mod+0 workspace number $ws10
 
 workspace_auto_back_and_forth yes
@@ -752,21 +828,32 @@ focus_follows_mouse no
 
 # move focused container to workspace    {{{2
 
+## move to workspace 1
 bindsym $mod+Shift+1 move container to workspace number $ws1
+## move to workspace 2
 bindsym $mod+Shift+2 move container to workspace number $ws2
+## move to workspace 3
 bindsym $mod+Shift+3 move container to workspace number $ws3
+## move to workspace 4
 bindsym $mod+Shift+4 move container to workspace number $ws4
+## move to workspace 5
 bindsym $mod+Shift+5 move container to workspace number $ws5
+## move to workspace 6
 bindsym $mod+Shift+6 move container to workspace number $ws6
+## move to workspace 7
 bindsym $mod+Shift+7 move container to workspace number $ws7
+## move to workspace 8
 bindsym $mod+Shift+8 move container to workspace number $ws8
+## move to workspace 9
 bindsym $mod+Shift+9 move container to workspace number $ws9
+## move to workspace 0
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
 # resize focused window    {{{2
 #
 # - you can also use the mouse for that
 
+# Resize mode
 bindsym $mod+r mode "$mode_resize"
 
 set $mode_resize Resize: \
@@ -801,6 +888,7 @@ mode "$mode_resize" {
 #   in current workspace
 # - press Shift with '+'. '-' or '0' to make changes to all workspaces
 
+## gaps mode
 bindsym $mod+Shift+g mode "$mode_gaps"
 
 set $mode_gaps Gaps: [o]uter, [i]nner
@@ -849,6 +937,7 @@ mode "$mode_gaps_outer" {
 
 # kill focused window    {{{2
 
+## kill window
 bindsym $mod+Shift+q kill
 # }}}2
 
@@ -857,6 +946,7 @@ bindsym $mod+Shift+q kill
 
 # reload the configuration file    {{{2
 
+## reload i3 configuration
 bindsym $mod+Shift+c reload
 
 # restart i3 inplace    {{{2
@@ -864,9 +954,11 @@ bindsym $mod+Shift+c reload
 # - preserves your layout/session
 # - can be used to upgrade i3
 
+## restart i3 in place
 bindsym $mod+Shift+r restart
 
 # exit i3 (log out of X session)    {{{2
+## exit mode
 bindsym $mod+Shift+e mode "$mode_exit"
 
 set $mode_exit Repeat key combination to exit
@@ -882,6 +974,7 @@ mode "$mode_exit" {
 
 # system control    {{{2
 
+## system control mode
 bindsym $mod+Pause mode "$mode_system"
 
 #set $Locker i3lock && sleep 1
