@@ -228,7 +228,7 @@ use namespace::clean;    # }}}1
     # params: 1 - command [string or arrayref]
     # prints: error message if dies
     # return: output (stdout) of command, dies on failure
-    method _run_cmd ($cmd) {
+    method _run_cmd ( $cmd) {
 
         # run command
         my ( $success, $err, $full, $stdout, $stderr )
@@ -270,7 +270,7 @@ use namespace::clean;    # }}}1
             "--width=$WIDTH",
         );
         push @cmd, @{$items};
-        my $pick = $self->_run_cmd( [@cmd] );
+        my $pick = $self->_run_cmd( [@cmd]);
 
         # 'pick' is undefined if user cancelled menu
         if ( not defined $pick ) { return; }
