@@ -166,13 +166,13 @@ mapfile                                             \
                 gsub("\\$down","j",$0);             \
                 gsub("\\$up","k",$0);               \
                 gsub("\\$right","l",$0);            \
-                # output binding and summary help,  \
-                # tab-separated                     \
+                # output binding and previous-line  \
+                # summary help, tab-separated       \
                 print $2,"\t",last                  \
             }                                       \
-            # reset previous line variable <last>   \
+            # reset previous-line variable <last>   \
             {last=""}                               \
-            # set previous line variable (<last>)   \
+            # set previous-line variable <last>     \
             # if it is a shortcut summary           \
             $1=="##" {                              \
                 for(i=2;i<=NF;i++)last=last" "$i    \
