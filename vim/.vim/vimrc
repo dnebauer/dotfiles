@@ -91,9 +91,9 @@ call plug#begin(dn#rc#pluginsDir())
 "
 " mattn/webapi-vim > christoomey/vim-quicklink
 "
-" shougo/neomru.vim       } > shougo/denite.nvim  > {iyuuya/denite-ale
-" shougo/neoinclude.vim   }                         {chemzqm/denite-extra
-" roxma/nvim-yarp         }                         {ozelentok/denite-gtags
+" shougo/neomru.vim       } > shougo/denite.nvim  > {chemzqm/denite-extra}
+" shougo/neoinclude.vim   }                         {ozelentok/denite-gtags}
+" roxma/nvim-yarp         }
 " roxma/vim-hug-neovim-rpc}
 "
 " tpope/vim-repeat > {tpope/vim-unimpaired
@@ -197,10 +197,6 @@ Plug 'chemzqm/denite-extra'
 " - global : denite helper - global/gtags    {{{3
 if executable('global') && executable('gtags')
     Plug 'ozelentok/denite-gtags'
-endif
-" - ale : denite helper - ale errors/warnings    {{{3
-if dn#rc#lintEngine() ==# 'ale'
-    Plug 'iyuuya/denite-ale'
 endif
 " - neoinclude : completion framework helper    {{{3
 "   . used by: shougo/denite.nvim
