@@ -37,9 +37,9 @@ declare -A resolution=(     \
     [HDMI-A-0]="3440x1440"  \
 )
 # - directories containing wallpapers of given resolutions
-declare -A dir=(                                               \
-    [1920x1080]="/home/david/.config/i3/wallpapers/1920x1080"  \
-    [3440x1440]="/home/david/.config/i3/wallpapers/3440x1440"  \
+declare -A dir=(                                            \
+    [1920x1080]="/home/david/.config/wallpapers/1920x1080"  \
+    [3440x1440]="/home/david/.config/wallpapers/3440x1440"  \
 )
 # }}}1
 
@@ -59,9 +59,9 @@ This script relies on the following hardware setup:
 * 1 monitor is named DVD-D-0 with resolution 1920x1080
 * 1 monitor is named HDMI-A-0 with resolution 3440x1440
 * wallpapers sized 1920x1080 are located in
-  ~/.config/i3/wallpapers/1920x1080
+  ~/.config/wallpapers/1920x1080
 * wallpapers sized 3440x1440 are located in
-  ~/.config/i3/wallpapers/3440x1440.
+  ~/.config/wallpapers/3440x1440.
 
 The utilities 'feh' and 'shuf' are used to assign a random
 wallpaper to each monitor from the appropriate wallpaper
