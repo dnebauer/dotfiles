@@ -57,12 +57,14 @@
 # |             pactl | PulseAudio controller                                |
 # |        parcellite | clipboard manager                                    |
 # |              perl | perl 5 language interpreter                          |
-# |      perl modules | AnyEvent::I3, IPC::Cmd, IPC::Run, JSON::MaybeXS,     |
-# |                   | Net::DBus, sigtrap, Sys::Syslog                      |
+# |      perl modules | IPC::Cmd, IPC::Run, JSON::MaybeXS, Net::DBus         |
 # |             picom | X11 compositor                                       |
 # |             pidof | find process id                                      |
 # |           polybar | status bar                                           |
 # |                ps | details of running processes                         |
+# |    python modules | argparse, i3ipc, notify2, os, psutil, re, selectors, |
+# |                   | shutil, signal, socket, subprocess, sys, syslog,     |
+# |                   | tempfile, textwrap, threading, time                  |
 # |             pywal | used by networkmanager_dmenu (polybar themes)        |
 # |       qutebrowser | web browser                                          |
 # |      radiotray-ng | radio streaming app                                  |
@@ -82,6 +84,8 @@
 # |            xrandr | interface X11 RandR extension                        |
 # |              xset | set user preferences for X                           |
 # |          xss-lock | connect screen locker and saver                      |
+# |          xwininfo | window information utility for X                     |
+# |             xprop | display window properties in X                       |
 # |            zenity | GUI dialogs                                          |
 
 
@@ -277,7 +281,7 @@ exec_always --no-startup-id xrandr                \
 # - use 'loginctl lock-session' to lock your screen
 
 exec --no-startup-id xss-lock --transfer-sleep-lock -- \
-     i3lock --color=000000 ignore-empty-password --nofork
+     i3lock --color=000000 --ignore-empty-password --nofork
 
 # numlock    {{{2
 
