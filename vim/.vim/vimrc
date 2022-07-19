@@ -80,27 +80,27 @@ call plug#begin(dn#rc#pluginsDir())
 "   X Ā Y
 " ************************************************************************
 " dnebauer/vim-dn-utils > {dnebauer/vim-dn-print-dialog
-"                         {dnebauer/vim-dn-docbk   
-"                         {dnebauer/vim-dn-latex   
-"                         {dnebauer/vim-dn-lua     
+"                         {dnebauer/vim-dn-docbk
+"                         {dnebauer/vim-dn-latex
+"                         {dnebauer/vim-dn-lua
 "                         {dnebauer/vim-dn-md-utils
-"                         {dnebauer/vim-dn-perl    
-" 
+"                         {dnebauer/vim-dn-perl
+"
 " kana/vim-textobj-user > {kana/vim-textobj-entire
 "                         {reedes/vim-textobj-sentence
-" 
+"
 " mattn/webapi-vim > christoomey/vim-quicklink
-" 
+"
 " shougo/neomru.vim       } > shougo/denite.nvim  > {iyuuya/denite-ale
 " shougo/neoinclude.vim   }                         {chemzqm/denite-extra
 " roxma/nvim-yarp         }                         {ozelentok/denite-gtags
 " roxma/vim-hug-neovim-rpc}
-" 
+"
 " tpope/vim-repeat > {tpope/vim-unimpaired
 "                    {tpope/vim-surround
-" 
+"
 " tyru/open-browser.vim > kannokanno/previm
-" 
+"
 " vim-airline/vim-airline > vim-airline/vim-airline-themes
 "
 " vim-sneak Ā vim-cutlass (due to mapping conflict with s|S)
