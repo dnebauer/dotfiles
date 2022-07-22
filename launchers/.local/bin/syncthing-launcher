@@ -37,13 +37,9 @@ parameters='[-v] [-d] [-s]'
 #    expected is the command to execute within the terminal
 # 3. The browser client is automatically opened in the default browser.
 # - terminal in which to launch syncthing server
-terminal='konsole'
-# - terminal options
-#   '-qwindowtitle' 'launcher_syncthing'
+terminal='alacritty'
 terminal_opts_template_array=(
-    '--hide-menubar'
-    '--hide-tabbar'
-    '-p' 'tabtitle=launcher_syncthing'
+    '-t' 'launcher_syncthing'
     '-e'
 )
 terminal_opts_template="${terminal_opts_template_array[*]}"
@@ -113,7 +109,7 @@ _USAGE
 #   note:   after execution variable ARGS contains
 #           remaining command line args (after options removed)
 process_options () {
-	# read the command line options
+    # read the command line options
     local OPTIONS="$(                            \
         getopt                                   \
             --options hvds                       \
@@ -126,17 +122,17 @@ process_options () {
         exit 1
     }
     eval set -- "${OPTIONS}"
-	while true ; do
-		case "${1}" in
+    while true ; do
+        case "${1}" in
         -s | --showcmd ) show_cmd=true  ; shift 1 ;;
         -h | --help    ) display_usage  ; exit 0  ;;
         -v | --verbose ) set -o verbose ; shift 1 ;;
         -d | --debug   ) set -o xtrace  ; shift 1 ;;
         --             ) shift ; break ;;
         *              ) break ;;
-		esac
-	done
-	ARGS="${@}"  # remaining arguments
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
 }
 
 # join_by() -> void    {{{1
@@ -244,8 +240,8 @@ fi
 unset -v connected_to_terminal  grep_matcher  server
 
 # start server in terminal    {{{1
-$show_cmd && echo "$terminal_cmd \"$server_cmd\" &"
-$terminal_cmd "$server_cmd" &
+$show_cmd && echo "$terminal_cmd $server_cmd &"
+$terminal_cmd $server_cmd &
 unset -v server_cmd  show_cmd  terminal_cmd
 # }}}1
 
