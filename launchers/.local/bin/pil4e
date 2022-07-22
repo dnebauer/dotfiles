@@ -44,14 +44,12 @@ site_name='Programming in Lua (Fourth edition)'
 # - location in which to start server
 site_dir="$HOME/data/computing/languages/lua/programming-lua-4th-ed/html"
 # - terminal in which to launch html server
-terminal='konsole'
+terminal='alacritty'
 # - terminal options
 #   '-qwindowtitle' 'launcher_pil4e'
 terminal_opts_template_array=(
-    '--hide-menubar'
-    '--hide-tabbar'
-    '-p' 'tabtitle=launcher_pil4e'
-    '--workdir' '%SITE_DIR%'
+    '-t' 'launcher_pil4e'
+    '--working-directory' '%SITE_DIR%'
     '-e'
 )
 terminal_opts_template="${terminal_opts_template_array[*]}"
@@ -152,7 +150,7 @@ _USAGE
 #   note:   after execution variable ARGS contains
 #           remaining command line args (after options removed)
 process_options () {
-	# read the command line options
+    # read the command line options
     local OPTIONS="$(                            \
         getopt                                   \
             --options hvds                       \
@@ -165,17 +163,17 @@ process_options () {
         exit 1
     }
     eval set -- "${OPTIONS}"
-	while true ; do
-		case "${1}" in
+    while true ; do
+        case "${1}" in
         -s | --showcmd ) show_cmd=true  ; shift 1 ;;
         -h | --help    ) display_usage  ; exit 0  ;;
         -v | --verbose ) set -o verbose ; shift 1 ;;
         -d | --debug   ) set -o xtrace  ; shift 1 ;;
         --             ) shift ; break ;;
         *              ) break ;;
-		esac
-	done
-	ARGS="${@}"  # remaining arguments
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
 }
 
 # join_by() -> void    {{{1
@@ -351,8 +349,8 @@ fi
 unset -v grep_matcher
 
 # start server in terminal    {{{1
-$show_cmd && echo "$terminal_cmd \"$server_cmd\" &"
-$terminal_cmd "$server_cmd" &
+$show_cmd && echo "$terminal_cmd $server_cmd &"
+$terminal_cmd $server_cmd &
 fb_wait_for_server_start
 unset -v browser  connected_to_terminal  server  server_cmd  terminal_cmd
 
