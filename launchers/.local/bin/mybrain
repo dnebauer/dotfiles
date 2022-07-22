@@ -38,14 +38,10 @@ parameters='[-v] [-d] [-s]'
 # 3. The command used to launch the client is:
 #        ${client_cmd} > /dev/null 2>&1 &
 # - terminal in which to launch wiki server
-terminal='konsole'
-# - command to invoke terminal
-#       '-qwindowtitle' 'launcher_tiddlywiki'
+terminal='alacritty'
 terminal_cmd_array=(
-    'konsole'
-        '--hide-menubar'
-        '--hide-tabbar'
-        '-p' 'tabtitle=launcher_tiddlywiki'
+    'alacritty'
+        '-t' 'launcher_tiddlywiki'
         '-e'
 )
 terminal_cmd="${terminal_cmd_array[*]}"
@@ -140,7 +136,7 @@ _USAGE
 #   note:   after execution variable ARGS contains
 #           remaining command line args (after options removed)
 process_options () {
-	# read the command line options
+    # read the command line options
     local OPTIONS="$(                            \
         getopt                                   \
             --options hvds                       \
@@ -153,17 +149,17 @@ process_options () {
         exit 1
     }
     eval set -- "${OPTIONS}"
-	while true ; do
-		case "${1}" in
+    while true ; do
+        case "${1}" in
         -s | --showcmd ) show_cmd=true  ; shift 1 ;;
         -h | --help    ) display_usage  ; exit 0  ;;
         -v | --verbose ) set -o verbose ; shift 1 ;;
         -d | --debug   ) set -o xtrace  ; shift 1 ;;
         --             ) shift ; break ;;
         *              ) break ;;
-		esac
-	done
-	ARGS="${@}"  # remaining arguments
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
 }
 
 # join_by() -> void    {{{1
@@ -341,8 +337,8 @@ done
 unset -v grep_matchers
 
 # start server in terminal    {{{1
-$show_cmd && echo "$terminal_cmd \"$server_cmd\" &"
-$terminal_cmd "$server_cmd" &
+$show_cmd && echo "$terminal_cmd $server_cmd &"
+$terminal_cmd $server_cmd &
 fb_wait_for_server_start
 unset -v browser  connected_to_terminal  server  server_cmd  terminal_cmd
 
