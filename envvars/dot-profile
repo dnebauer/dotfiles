@@ -29,5 +29,5 @@ fi
 # set monitor variables
 # - synchronise with ~/.config/environment.d/50-outputs.conf and
 #   ~/.config/sway/env
-export MY_PRIMARY_OUTPUT=HDMI-A-0
-export MY_SECONDARY_OUTPUT=DVD-D-0
+export MY_PRIMARY_OUTPUT=HDMI-A-1
+export MY_SECONDARY_OUTPUT=DVD-D-1
