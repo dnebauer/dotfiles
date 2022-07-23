@@ -146,7 +146,20 @@ bindkey -M viins '^Xh' _complete_help
 
 # Remap keys    {{{1
 # Shift+Space = no-break space    {{{2
-setxkbmap -option nbsp:level2
+display_server='x11'
+if [[ -n "$XDG_SESSION_TYPE" ]] ; then
+    if [[ 'wayland' = "$XDG_SESSION_TYPE" ]] ; then
+        display_server='wayland'
+    fi
+else
+    if command -v loginctl &>/dev/null && [[ -n "$XDG_SESSION_ID" ]] ; then
+        output="$(loginctl show-session "$XDG_SESSION_ID" -p Type --value)"
+        if [[ 'wayland' = "$output" ]] ; then
+            display_server='wayland'
+        fi
+    fi
+fi
+[[ 'x11' = "$display_server" ]] && setxkbmap -option nbsp:level2
 
 # Mimetype support    {{{1
 autoload -Uz zsh-mime-setup
