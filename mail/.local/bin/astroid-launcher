@@ -40,13 +40,9 @@ cache="${HOME}/.cache/astroid/offlineimap-last-full-sync"
 # - log file
 log="$HOME/.local/mail/log/astroid.log"
 # - terminal in which to launch mail program
-terminal='konsole'
-# - terminal options
-#   '-qwindowtitle' 'launcher_astroid'
+terminal='alacritty'
 terminal_opts_template_array=(
-    '--hide-menubar'
-    '--hide-tabbar'
-    '-p' 'tabtitle=launcher_astroid'
+    '-t' 'launcher_astroid'
     '-e'
 )
 terminal_opts_template="${terminal_opts_template_array[*]}"
@@ -262,7 +258,7 @@ fi
 
 # start mailer in terminal    {{{1
 $show_cmd && echo "$terminal_cmd \"$mailer_cmd\" &"
-$terminal_cmd "$mailer_cmd" &
+$terminal_cmd $mailer_cmd &
 unset -v mailer_cmd  show_cmd  terminal_cmd
 # }}}1
 
