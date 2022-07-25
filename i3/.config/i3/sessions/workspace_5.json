@@ -10,13 +10,13 @@
        "y": 54
     },
     "marks": [],
-    "name": "launcher_tiddlywiki — Konsole",
+    "name": "launcher_tiddlywiki",
     "percent": 0.25,
     "swallows": [
        {
-          "class": "^konsole$",
-          "instance": "^konsole$",
-          "title": "^launcher_tiddlywiki — Konsole$"
+          "class": "^Alacritty$",
+          "instance": "^Alacritty$",
+          "title": "^launcher_tiddlywiki"
        }
     ],
     "type": "con"

@@ -224,12 +224,10 @@ sleep $delay_post_launch
 # tiddlywiki
 if $debug ; then echo 'Launching tiddlywiki' ; fi
 plugin_path="/usr/local/share/tiddlywiki/plugins"
-konsole \
-    --hide-menubar \
-    --hide-tabbar \
-    -p tabtitle=launcher_tiddlywiki \
-    -p environment="TIDDLYWIKI_PLUGIN_PATH=$plugin_path" \
-    -e "tiddlywiki $HOME/data/misc/auxiliary-memory --listen port=10744" &
+alacritty \
+    -t launcher_tiddlywiki \
+    -o env.TIDDLYWIKI_PLUGIN_PATH=$plugin_path \
+    -e tiddlywiki $HOME/data/misc/auxiliary-memory --listen port=10744 &
 sleep $delay_post_launch
 
 # qutebrowser (wiki)
