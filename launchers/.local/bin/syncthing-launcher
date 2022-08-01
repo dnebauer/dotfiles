@@ -158,7 +158,7 @@ function join_by () {
 function determine_terminal_connection {
     # on KDE Plasma 5 the '-t -p' test used below does not work,
     # so as temporary workaround brute force a false result
-    if [[ "$DESKTOP_SESSION" = 'plasma' ]] ; then
+    if [[ "${XDG_CURRENT_DESKTOP:-}" = 'KDE' ]] ; then
         connected_to_terminal=false
         return
     fi
@@ -166,7 +166,7 @@ function determine_terminal_connection {
     # '-t 0' means stdin is open and refers to a terminal
     # '-p /dev/stdin' means stdin exists and is a pipe (socket)
     local interactive=false fd=0
-    [[ -t "$fd" || -p /dev/stdin ]] && interactive=true 
+    [[ -t "$fd" || -p /dev/stdin ]] && interactive=true
     # set connection flag
     connected_to_terminal=$interactive
 }
