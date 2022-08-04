@@ -5,7 +5,25 @@ use 5.006;
 use 5.022_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
+use IPC::Cmd qw(can_run run);
 use Net::DBus;
+
+# check for required tools
+IPC::Cmd::can_run('pactl') or die "Cannot run without 'pactl'\n";
+
+# adjust volume
+sub run_cmd {
+    my $cmd    = shift;
+    my @output = IPC::Cmd::run( command => $cmd );
+    return;
+}
+my $vol = '25%';
+## no critic (RequireInterpolationOfMetachars)
+my @unmute  = ( 'pactl', 'set-sink-mute',   '@DEFAULT_SINK@', 'false' );
+my @set_vol = ( 'pactl', 'set-sink-volume', '@DEFAULT_SINK@', $vol );
+## use critic
+run_cmd( [@unmute] );
+run_cmd( [@set_vol] );
 
 # play/pause using radiotry-ng dbus interface
 my $bus     = Net::DBus->session;
@@ -45,6 +63,8 @@ Nil.
 Uses the Radiotray-NG DBus interface to play the last station if none is
 currently playing, or pause the current station if one is currently playing.
 
+Sets the volume to 25% using C<pactl>.
+
 =head1 DIAGNOSTICS
 
 No failure modes are currently documented.
@@ -53,7 +73,7 @@ No failure modes are currently documented.
 
 =head2 Perl modules
 
-namespace::clean, Net::DBus, strictures, version.
+namespace::clean, IPC::Cmd, Net::DBus, strictures, version.
 
 =head1 CONFIGURATION
 

@@ -115,6 +115,9 @@ use namespace::clean;    # }}}1
         # select group and station
         $self->_select_station;
 
+        # set volume to 25%
+        $self->_set_volume;
+
         # play selected station
         $self->_play_station;
 
@@ -129,12 +132,10 @@ use namespace::clean;    # }}}1
     # return: n/a, dies on failure
     method _check_tools () {
 
-        # tools: zenity
-        my @tools = qw(zenity);
+        # tools: pactl, zenity
+        my @tools = qw(pactl zenity);
         for my $tool (@tools) {
-            if ( not IPC::Cmd::can_run($tool) ) {
-                die "Cannot run without $tool\n";
-            }
+            IPC::Cmd::can_run($tool) or die "Cannot run without $tool\n";
         }
 
         return;
@@ -309,6 +310,26 @@ use namespace::clean;    # }}}1
                 last;
             }
         }
+
+        return;
+    }
+
+    # _set_volume()    {{{1
+    #
+    # does:   unmute volume and set to 25%
+    # params: nil
+    # prints: error message if fails
+    # return: n/a, dies on failure
+    method _set_volume () {
+        my $vol = '25%';
+
+        # prevent PerlCritic thinking @DEFAULT_SINK@ is a list
+        ## no critic (RequireInterpolationOfMetachars)
+        my @unmute  = ( 'pactl', 'set-sink-mute', '@DEFAULT_SINK@', 'false' );
+        my @set_vol = ( 'pactl', 'set-sink-volume', '@DEFAULT_SINK@', $vol );
+        ## use critic
+        $self->_run_cmd( [@unmute] );
+        $self->_run_cmd( [@set_vol] );
 
         return;
     };    # }}}1
