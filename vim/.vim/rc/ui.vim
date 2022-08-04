@@ -82,7 +82,16 @@ endif
 " - useful utilities for determining fonts: xfontsel, xlsfonts
 " - guifont: any spaces after commas must be escaped
 "            cannot use quotes around font name
-if has('gui_running')
+"            can replace space with underscore
+if exists('g:neovide')
+    " can replace spaces in font names with underscores
+    " to see font listing use ':set guifont=*'
+    set guifont=FiraCode_Nerd_Font_Mono,IBM_Plex_Mono,Hack,Noto_Color_Emoji:h12
+    " do not forward super key combination to neovide
+    let g:neovide_input_use_logo=v:false
+    " set to true unless cursor has 'visual issues'
+    let g:neovide_cursor_antialiasing=v:true
+elseif has('gui_running')
     if dn#rc#os() ==# 'unix'
         set guifont=Andale\ Mono\ 18,
                     \\ FreeMono\ 16,

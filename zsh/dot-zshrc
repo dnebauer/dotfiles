@@ -321,6 +321,7 @@ else
 fi
 export USE_EDITOR="$EDITOR"
 export VISUAL="$EDITOR"
+export NEOVIDE_MULTIGRID=1
 # urls    {{{2
 # - github account    {{{3
 export GITURL='https://github.com/dnebauer'
