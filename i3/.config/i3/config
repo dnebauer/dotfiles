@@ -330,7 +330,7 @@ exec_always --no-startup-id                      \
 exec --no-startup-id dropbox start -i
 
 # dunst    {{{2
-# 
+#
 # - is started automatically
 # - default dunst shortcuts for closing notifications stopped working
 # - reimplement them here
@@ -1058,7 +1058,7 @@ workspace $ws4 output $primary_monitor
 # $ws5 = wiki
 workspace $ws5 output $secondary_monitor
 
-exec ~/.config/i3/bin/i3-setup-session
+exec ~/.config/i3/bin/i3-setup-session --log
 # }}}1
 
 # vim:foldmethod=marker:
