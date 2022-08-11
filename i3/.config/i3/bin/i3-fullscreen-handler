@@ -23,6 +23,7 @@
 '''
 
 # import modules    {{{1
+import os
 import argparse
 import re
 from shutil import which
@@ -157,6 +158,11 @@ class FullscreenHandler():
         check for required executable programs on path
         dies if any required tool is missing
         '''
+        # oneko is in /usr/games
+        # default path during service startup does not include /usr/games
+        # so add /usr/games to current path
+        games_path = os.path.abspath(os.path.join(os.sep, 'usr', 'games'))
+        os.environ["PATH"] += os.pathsep + games_path
         tools = ['polybar-msg', 'xset', 'dunstctl', 'oneko']
         missing = []
         try:
