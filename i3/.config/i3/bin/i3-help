@@ -186,11 +186,12 @@ mapfile                                             \
 printf '%s\n' "${items[@]}"                \
 | column --separator $'\t'                 \
          --table                           \
-| rofi -dmenu                              \
-       -monitor 'primary'                  \
+| rofi -monitor 'primary'                  \
        -theme-str '#window{width:20%;}'    \
        -theme-str '#window{y-offset:40;}'  \
-       -theme-str '#listview{lines:30;}'
+       -theme-str '#listview{lines:30;}'   \
+       -dmenu                              \
+       -i
 # }}}1
 
 # vim:foldmethod=marker:
