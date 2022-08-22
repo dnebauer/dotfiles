@@ -34,7 +34,6 @@
 # |            column | format command output                                |
 # |               cut | remove sections from lines                           |
 # |              date | print system date                                    |
-# |             dmenu | run dialog (dependency of j4-dmenu-desktop)          |
 # | dn-load-clipboard | load selected items into clipboard                   |
 # |           dropbox | cloud storage                                        |
 # |          dunstcmd | control dunst server                                 |
@@ -44,7 +43,6 @@
 # |     google-chrome | web browser                                          |
 # |            i3-msg | send messages to i3wm                                |
 # |            i3lock | screen locker                                        |
-# |  j4-dmenu-desktop | run dialog (desktop applications only)               |
 # |        kdeconnect | syncronise between devices                           |
 # |           konsole | terminal                                             |
 # |              maim | take screenshots                                     |
@@ -78,7 +76,6 @@
 # |           tellico | collection management software                       |
 # |        tiddlywiki | non-linear notebook                                  |
 # |           udiskie | automount removable media                            |
-# |             urxvt | terminal                                             |
 # |             xclip | interface to system clipboard                        |
 # |           xdotool | X11 automation tool                                  |
 # |            xrandr | interface X11 RandR extension                        |
@@ -477,14 +474,6 @@ bindsym $mod+KP_Enter exec $term
 #   and applications with .desktop files
 ## application/command line launcher
 bindsym $mod+d exec "rofi -modi drun,run -show drun -monitor primary"
-#
-# - there also is {i3,j4}-dmenu-desktop
-# - it selects and opens only applications with .desktop files
-####bindsym $mod+Shift+d exec --no-startup-id i3-dmenu-desktop
-## application launcher
-bindsym $mod+Shift+d exec --no-startup-id \
-    j4-dmenu-desktop --dmenu="dmenu -i -p 'Select application to run'" \
-                     --term="urxvt"
 
 # screenshots    {{{2
 #
@@ -611,6 +600,9 @@ bindsym $mod+Up focus up
 bindsym $mod+$right focus right
 ## focus right
 bindsym $mod+Right focus right
+
+## select app to focus
+bindsym $mod+Shift+d exec --no-startup-id ~/.config/i3/bin/i3-focus-app
 
 
 # CONTROL LAYOUT    {{{1
