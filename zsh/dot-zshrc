@@ -226,17 +226,6 @@ for COLOR in RED GREEN YELLOW BLUE MAGENTA CYAN BLACK WHITE; do
 done
 eval export RESET='$reset_color'
 
-# Editor    {{{1
-# prefer nvim and nvim-qt    {{{2
-# - temporarily disable due to nvim bug in which events are not triggering
-#   associated autocmds (https://github.com/neovim/neovim/issues/11279) 
-# - now re-enabled but watch for reoccurrence of the problem
-if type nvim > /dev/null 2>&1; then
-    alias vim='nvim'
-fi
-if type nvim-qt > /dev/null 2>&1; then
-    alias gvim='nvim-qt'
-fi
 
 # Variables    {{{1
 # paths    {{{2
@@ -317,14 +306,29 @@ tw_plugins='/usr/local/share/tiddlywiki/plugins'  # user-installed
 tw_plugins='/usr/local/lib/node_modules/tiddlywiki/plugins'  # official
 [[ -d "$tw_plugins" ]] && tiddlywiki_plugin_path+=("$tw_plugins")
 unset tw_plugins
-# editor    {{{2
-if type nvim > /dev/null 2>&1; then
-    export EDITOR='nvim'
-else
-    export EDITOR='vim'
-fi
+
+# editors    {{{2
+# - terminal editor    {{{3
+term_editors=(nvim vim vi)
+for term_editor in "${term_editors[@]}" ; do
+    if type "$term_editor" > /dev/null 2>&1; then
+        export EDITOR="$term_editor"
+        alias vim="$term_editor"
+        break
+    fi
+done
+unset term_editor term_editors
 export USE_EDITOR="$EDITOR"
-export VISUAL="$EDITOR"
+# - visual/gui editor    {{{3
+gui_editors=(neovide vim-qt "$EDITOR")
+for gui_editor in "${gui_editors[@]}" ; do
+    if type "$gui_editor" > /dev/null 2>&1; then
+        export VISUAL="$gui_editor"
+        alias gvim="$gui_editor"
+        break
+    fi
+done
+unset gui_editor gui_editors
 export NEOVIDE_MULTIGRID=1
 # urls    {{{2
 # - github account    {{{3
