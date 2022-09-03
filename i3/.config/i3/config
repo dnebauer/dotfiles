@@ -359,11 +359,11 @@ exec --no-startup-id radiotray-ng
 
 # - can control via dbus and custom mode
 
-set $rtng_change ~/.config/i3/bin/i3-rtng-change
-set $rtng_play ~/.config/i3/bin/i3-rtng-play
-set $rtng_quit ~/.config/i3/bin/i3-rtng-quit
-set $rtng_status ~/.config/i3/bin/i3-rtng-status
-set $rtng_stop ~/.config/i3/bin/i3-rtng-stop
+set $rtng_change ~/.local/bin/i3-my-rtng-change
+set $rtng_play ~/.local/bin/i3-my-rtng-play
+set $rtng_quit ~/.local/bin/i3-my-rtng-quit
+set $rtng_status ~/.local/bin/i3-my-rtng-status
+set $rtng_stop ~/.local/bin/i3-my-rtng-stop
 
 set $mode_radiotray Radiotray NG: \
 [p]lay/pause, [s]top, s[t]atus, [c]hange station, [q]uit
@@ -384,6 +384,12 @@ mode "$mode_radiotray" {
     bindsym $mod+r   mode "default"
 }
 
+# syncthingtray    {{{2
+#
+# - runs as daemon in system tray
+
+exec --no-startup-id syncthingtray --wait
+
 # kdeconnect    {{{2
 
 set $kdeconnect "/usr/lib/x86_64-linux-gnu/libexec/kdeconnectd"
@@ -394,10 +400,10 @@ exec --no-startup-id $kdeconnect
 #
 # - same script runs as both server and client
 
-exec --no-startup-id systemctl --user start i3-focus-last.service
+exec --no-startup-id systemctl --user start i3-my-focus-last.service
 
 ## switch tasks
-bindsym $alt+Tab exec --no-startup-id ~/.config/i3/bin/i3-focus-last --switch
+bindsym $alt+Tab exec --no-startup-id ~/.local/bin/i3-my-focus-last --switch
 
 # automount removable media    {{{2
 
@@ -405,7 +411,7 @@ exec --no-startup-id udiskie &
 
 # handle fullscreen containers    {{{2
 
-exec --no-startup-id systemctl --user start i3-fullscreen-handler.service
+exec --no-startup-id systemctl --user start i3-my-fullscreen-handler.service
 
 # fading effects    {{{2
 #
@@ -437,22 +443,20 @@ set $mode_launcher Launch: [a]stroid [b]ackground [c]hrome [p]olybar \
 ## launch mode
 bindsym $mod+o mode "$mode_launcher"
 
+set $run_astroid ~/.local/bin/astroid-launcher
+set $run_background ~/.local/bin/i3-my-background-set
+set $run_polybar ~/.config/polybar/launch
+set $run_syncthing ~/.local/bin/syncthing-launcher
+set $run_mybrain ~/.local/bin/mybrain
+
 mode "$mode_launcher" {
-    bindsym a             exec --no-startup-id astroid-launcher, \
-                          mode "default"
-    bindsym b             exec --no-startup-id \
-                          ~/.config/i3/bin/i3-background-set, \
-                          mode "default"
-    bindsym c             exec --no-startup-id google-chrome, \
-                          mode "default"
-    bindsym q             exec --no-startup-id qutebrowser, \
-                          mode "default"
-    bindsym p             exec --no-startup-id ~/.config/polybar/launch, \
-                          mode "default"
-    bindsym s             exec --no-startup-id syncthing-launcher, \
-                          mode "default"
-    bindsym t             exec --no-startup-id mybrain, \
-                          mode "default"
+    bindsym a             exec --no-startup-id $run_astroid, mode "default"
+    bindsym b             exec --no-startup-id $run_background, mode "default"
+    bindsym c             exec --no-startup-id google-chrome, mode "default"
+    bindsym q             exec --no-startup-id qutebrowser, mode "default"
+    bindsym p             exec --no-startup-id $run_polybar, mode "default"
+    bindsym s             exec --no-startup-id $run_syncthing, mode "default"
+    bindsym t             exec --no-startup-id $run_mybrain, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -507,7 +511,7 @@ mode "$mode_screenshot" {
     bindsym $mod+r   mode "default"
 }
 
-set $Screenshot $HOME/.config/i3/bin/i3-screenshot
+set $Screenshot ~/.local/bin/i3-my-screenshot
 
 mode "$mode_ss_desktop" {
     bindsym --release c exec --no-startup-id $Screenshot -c -d, mode "default"
@@ -560,7 +564,7 @@ bindsym F1 exec --no-startup-id dn-load-clipboard
 # display shortcuts    {{{2
 
 ## shortcut help
-bindsym F2 exec --no-startup-id ~/.config/i3/bin/i3-help
+bindsym F2 exec --no-startup-id ~/.local/bin/i3-my-help
 
 # tellico    {{{2
 
@@ -602,7 +606,7 @@ bindsym $mod+$right focus right
 bindsym $mod+Right focus right
 
 ## select app to focus
-bindsym $mod+Shift+d exec --no-startup-id ~/.config/i3/bin/i3-focus-app
+bindsym $mod+Shift+d exec --no-startup-id ~/.local/bin/i3-my-focus-app
 
 
 # CONTROL LAYOUT    {{{1
@@ -985,8 +989,7 @@ bindsym $mod+Pause mode "$mode_system"
 set $Locker i3lock --color=000000 --ignore-empty-password && sleep 1
 
 set $mode_system System: \
-[l]ock, [e] logout, [s]uspend, [h]ibernate, [r]eboot, \
-[Shift+s] shutdown
+[l]ock, [e] logout, [s]uspend, [h]ibernate, [r]eboot, [Shift+s] shutdown
 mode "$mode_system" {
     bindsym l             exec --no-startup-id \
                           $Locker, mode "default"
@@ -1029,7 +1032,7 @@ exec_always --no-startup-id xrandr                \
                               --left-of HDMI-A-0
 
 # - handled by custom script that assigns random image to each monitor
-exec --no-startup-id ~/.config/i3/bin/i3-background-set
+exec --no-startup-id ~/.local/bin/i3-my-background-set
 # }}}2
 
 # SETUP SESSION    {{{1
@@ -1049,8 +1052,14 @@ workspace $ws3 output $secondary_monitor
 workspace $ws4 output $primary_monitor
 # $ws5 = wiki
 workspace $ws5 output $secondary_monitor
+## $ws6 = sync
+#workspace $ws6 output $secondary_monitor
 
-exec ~/.config/i3/bin/i3-setup-session --log
+exec --no-startup-id ~/.config/polybar/launch
+
+#exec --no-startup-id logger --priority 'user.info' --tag 'i3-TRACK' 'about to launch session setup script'
+exec --no-startup-id ~/.local/bin/i3-my-session-setup --log
+#exec --no-startup-id logger --priority 'user.info' --tag 'i3-TRACK' 'just launched session setup script'
 # }}}1
 
 # vim:foldmethod=marker:
