@@ -717,6 +717,7 @@ for_window [class="gwenview" instance="gwenview"] floating enable
 for_window [class="mpv" instance="gl"] floating enable
 for_window [class="okular" instance="okular"] floating enable
 for_window [class="smplayer" instance="smplayer"] floating enable
+for_window [class="Yad" instance="yad"] floating enable
 for_window [class="Zathura" instance="org.pwmt.zathura"] floating enable, \
            resize set 1000 1200, move up 250
 
