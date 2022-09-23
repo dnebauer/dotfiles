@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+
+# File: i3-my-help
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: Create and display i3 shortcut help
+# Created: 2022-07-12
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+# }}}2
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+parameters=" [-v] [-d]"
+required_tools=(
+    awk
+    basename
+    column
+    getopt
+    mapfile
+    rofi
+)
+i3_config="$HOME/.config/i3/config"
+# }}}1
+
+# PROCEDURES
+
+# Show usage    {{{1
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: extract and display i3 shortcuts
+
+Extracts shortcut information from the i3 config file
+~/.config/i3/config.
+
+Both i3 and non-i3 shortcuts are supported.
+
+Specific formatting is required and is best illustrated
+with examples.
+
+Example i3 binding:
+    ## Close window
+    bindsym \$mod+Shift+q kill
+
+Note that the 'bindsym' line is preceded by a summary
+line starting with '## '.
+
+Example non-i3 key binding:
+    ## Display clipboard history
+    #@ Ctrl+Alt+h
+
+Note that:
+* a dummy declaration line is used
+* the declaration line starts with '#@ '
+* the declaration line is preceded by a summary line
+  starting with '## '
+
+The extracted shortcut information is displayed in a rofi
+menu that can be searched.
+
+Usage: ${self} ${parameters}
+       ${self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# Process command line options    {{{1
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                      \
+        getopt                             \
+            --options hvd:                 \
+            --long    help,verbose,debug   \
+            --name    "${BASH_SOURCE[0]}"  \
+            -- "${@}"                      \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# Join items    {{{1
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}    # }}}1
+
+# MAIN
+
+# Checks    {{{1
+# - for required tools
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+if [[ ${#missing[@]} -ne 0 ]] ; then
+    echo "Can't run without: $(joinBy ', ' "${missing[@]}")" > /dev/stderr
+    exit 1
+fi
+unset missing tools required_tools
+# - for i3 config file
+if [[ ! -f "$i3_config" ]] && [[ ! -h "$i3_config" ]] ; then
+    echo "Can't locate i3 config file: $i3_config" > /dev/stderr
+    exit 1
+fi
+
+# Process command line options    {{{1
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# Extract i3 shortcuts    {{{1
+# - for i3 shortcuts $1==bindsym
+# - for non-i3 shortcuts $1==#@
+# - load into 'items' array
+mapfile                                             \
+    -t items                                        \
+    <<<"$(                                          \
+        awk                                         \
+        '                                           \
+            # process line if it begins with        \
+            # <bindsym> or <#@>, and previous       \
+            # line started with <##>                \
+            # (binding summary)                     \
+            ($1=="bindsym" || $1=="#@") && last {   \
+                # replace variables with values     \
+                gsub("\\$mod","Super",$0);          \
+                gsub("\\$alt","Alt",$0);            \
+                gsub("\\$left","h",$0);             \
+                gsub("\\$down","j",$0);             \
+                gsub("\\$up","k",$0);               \
+                gsub("\\$right","l",$0);            \
+                # output binding and previous-line  \
+                # summary help, tab-separated       \
+                print $2,"\t",last                  \
+            }                                       \
+            # reset previous-line variable <last>   \
+            {last=""}                               \
+            # set previous-line variable <last>     \
+            # if it is a shortcut summary           \
+            $1=="##" {                              \
+                for(i=2;i<=NF;i++)last=last" "$i    \
+            }                                       \
+        ' "$i3_config"                              \
+    )"
+
+# Display combined shortcuts    {{{1
+# - column: tab-separated input, table output
+# - rofi: read from stdin, resize/reposition dialog
+printf '%s\n' "${items[@]}"                \
+| column --separator $'\t'                 \
+         --table                           \
+| rofi -monitor 'primary'                  \
+       -theme-str '#window{width:20%;}'    \
+       -theme-str '#window{y-offset:40;}'  \
+       -theme-str '#listview{lines:30;}'   \
+       -dmenu                              \
+       -i
+# }}}1
+
+# vim:foldmethod=marker:

@@ -28,27 +28,26 @@
 # |              tool | use                                                  |
 # |------------------:|:-----------------------------------------------------|
 # |         alacritty | terminal                                             |
-# |               awk | extract shortcut help from this config file          |
-# |          basename | strip directory/suffix from filenames                |
+# |          basename | strip directory/suffix from script filenames         |
+# |                bc | calculator                                           |
 # |              calc | used by networkmanager_dmenu (polybar themes)        |
 # |            column | format command output                                |
 # |               cut | remove sections from lines                           |
 # |              date | print system date                                    |
 # | dn-load-clipboard | load selected items into clipboard                   |
 # |           dropbox | cloud storage                                        |
-# |          dunstcmd | control dunst server                                 |
-# |          dunstify | send notification                                    |
 # |               feh | image viewer                                         |
 # |            getopt | parse script command line options                    |
 # |     google-chrome | web browser                                          |
+# |              grep | search file contents for matches                     |
 # |            i3-msg | send messages to i3wm                                |
 # |            i3lock | screen locker                                        |
 # |        kdeconnect | syncronise between devices                           |
-# |           konsole | terminal                                             |
 # |              maim | take screenshots                                     |
 # |           mapfile | load bash array with command output                  |
+# |            mkfifo | make named pipes                                     |
+# |            mktemp | create temporary files                               |
 # |         nm-applet | network manager                                      |
-# |       notify-send | send notification                                    |
 # |          numlockx | control NumLock key                                  |
 # |           nvim-qt | gui editor                                           |
 # |             oneko | cursor locator                                       |
@@ -83,7 +82,7 @@
 # |          xss-lock | connect screen locker and saver                      |
 # |          xwininfo | window information utility for X                     |
 # |             xprop | display window properties in X                       |
-# |            zenity | GUI dialogs                                          |
+# |               yad | gui dialogs                                          |
 
 
 # SHORTCUT SUMMARY    {{{1
@@ -179,14 +178,6 @@
 # XF86AudioMicMute      toggle mic mute
 # XF86AudioMute         toggle volume mute
 # XF86AudioRaiseVolume  volume +5%
-
-
-# COMMAND TO DISPLAY SHORTCUTS IN CONSOLE    {{{1
-
-
-####awk '($1=="bindsym"||$1=="#@")&&last{print $2,"\t",last}{last=""}   \
-####    $1=="##"{for(i=2;i<=NF;i++)last=last" "$i}' ~/.config/i3/config \
-####    | column -ts $'\t' | less
 
 
 # GLOBAL VARIABLES    {{{1
@@ -1058,9 +1049,7 @@ workspace $ws5 output $secondary_monitor
 
 exec --no-startup-id ~/.config/polybar/launch
 
-#exec --no-startup-id logger --priority 'user.info' --tag 'i3-TRACK' 'about to launch session setup script'
-exec --no-startup-id ~/.local/bin/i3-my-session-setup --log
-#exec --no-startup-id logger --priority 'user.info' --tag 'i3-TRACK' 'just launched session setup script'
+exec --no-startup-id ~/.local/bin/i3-my-session-setup
 # }}}1
 
 # vim:foldmethod=marker:

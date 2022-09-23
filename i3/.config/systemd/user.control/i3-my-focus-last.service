@@ -1,9 +1,9 @@
 [Unit]
-Description=i3-focus-last daemon
+Description=i3-my-focus-last daemon
 
 [Service]
 Type=simple
-ExecStart=%h/.config/i3/bin/i3-focus-last
+ExecStart=%h/.local/bin/i3-my-focus-last
 Restart=always
 
 [Install]

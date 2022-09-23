@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-# File: i3-get-window-criteria
+# File: i3-my-get-window-criteria
 # Author: David Nebauer (david at nebauer dot org)
 # Purpose: get window criteria for use with i3 config commands
 # Created: 2022-05-11
+# Credit: jottr/i3-get-window-criteria (https://gist.github.com/jottr/8645010)
 
 
 # ERROR HANDLING

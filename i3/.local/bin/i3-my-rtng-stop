@@ -1,0 +1,87 @@
+#!/usr/bin/perl
+
+use strictures 2;
+use 5.006;
+use 5.022_001;
+use version; our $VERSION = qv('0.1');
+use namespace::clean;
+use Net::DBus;
+
+# stop play using radiotry-ng dbus interface
+my $bus     = Net::DBus->session;
+my $service = $bus->get_service('com.github.radiotray_ng');
+my $rtng    = $service->get_object('/com/github/radiotray_ng');
+$rtng->stop;
+
+1;
+
+# POD    {{{1
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+i3-my-rtng-stop - stop Radiotray-NG
+
+=head1 USAGE
+
+B<i3-my-rtng-stop>
+
+=head1 REQUIRED ARGUMENTS
+
+Nil.
+
+=head1 REQUIRED OPTIONS
+
+Nil.
+
+=head1 OPTIONS
+
+Nil.
+
+=head1 DESCRIPTION
+
+Uses the Radiotray-NG DBus interface to stop any currently playing station.
+
+=head1 DIAGNOSTICS
+
+No failure modes are currently documented.
+
+=head1 DEPENDENCIES
+
+=head2 Perl modules
+
+namespace::clean, Net::DBus, strictures, version.
+
+=head1 CONFIGURATION
+
+There are no configuration options for this script.
+
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly the
+error code is that given by the system.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs to the author.
+
+=head1 AUTHOR
+
+David Nebauer (david at nebauer dot org)
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (c) 2022 David Nebauer (david at nebauer dot org)
+
+This script is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut
+# vim:foldmethod=marker:

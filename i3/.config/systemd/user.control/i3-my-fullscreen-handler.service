@@ -1,0 +1,10 @@
+[Unit]
+Description=i3-my-fullscreen-handler daemon
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/i3-my-fullscreen-handler
+Restart=always
+
+[Install]
+WantedBy=default.target
