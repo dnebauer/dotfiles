@@ -1,0 +1,41 @@
+# delete mail
+
+# folders: Trash
+#
+# keys: <delete>, d
+#
+# actions:
+# - deletes current or selected messages
+
+macro index,pager d "\
+<enter-command>echo 'Deleting selected message(s)...'<enter>\
+<tag-prefix><purge-message>\
+<sync-mailbox>\
+" \
+'delete current or tagged message(s) from Trash'
+
+macro index,pager <delete> "\
+<enter-command>echo 'Deleting selected message(s)...'<enter>\
+<tag-prefix><purge-message>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+" \
+'delete current or tagged message(s) from Trash'
+
+# ----------------------------------------------------------
+
+# notmuch search
+
+# folders: Trash
+#
+# keys: s
+#
+# actions:
+# - open notmuch search field specific for this folder
+
+macro index,pager s '\
+<vfolder-from-query>folder:personal/INBOX.Trash and \
+' \
+'generate virtual folder from query of Trash'
+
+# vim: ft=neomuttrc

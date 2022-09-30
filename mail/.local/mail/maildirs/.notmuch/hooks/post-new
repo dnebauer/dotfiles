@@ -1,19 +1,232 @@
 #!/usr/bin/env bash
 
-# ~/.local/mail/maildirs/.notmuch/hooks/post-new
+# File: ~/.local/mail/maildirs/.notmuch/hooks/post-new
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: notmuch hook script: post-new
+# Created: 2022-09-17
 
-# notmuch hook script: post-new
 
-# prepare the desktop notification messages
-NEWCOUNT=$(notmuch count tag:new)
-SUMMARY="Email: $NEWCOUNT new message"
-[ $NEWCOUNT -gt 1 ] && SUMMARY="${SUMMARY}"'s'
-[ $NEWCOUNT -gt 0 ] && DETAIL="$(notmuch search --output=summary --format=json tag:new | sed -e 's/.*authors": "//;s/|[^"]*"/"/;s/", "subject": "/ : /;s/".*//')"
+# ERROR HANDLING    {{{1
 
-# tag changes:
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+
+# VARIABLES    {{{1
+
+self="$(basename $0)"
+parameters=" [-v] [-d]"
+required_tools=(
+    logger
+    notify-send
+    sed
+)
+declare -A flag_values=(
+    [use_icon]=1     # default=false
+    [has_display]=1  # default=false
+)
+mail_icon='/usr/share/doc/neomutt/logo/neomutt.svg'
+offlineimaprc="$HOME/.offlineimaprc"
+full_sync_interval=$((2 * 60 * 60))  # 2 hours, in seconds
+cache_dir="$HOME/.cache/offlineimap"
+cache_fp="$cache_dir/last-full-sync"
+log_file="$HOME/.local/mail/log/offlineimap.log"
+delay=10000  # milliseconds
+
+# flags
+
+use_icon () { flag 'use_icon' "$@"; return $?; }
+has_display () { flag 'has_display' "$@"; return $?; }
+# }}}1
+
+
+# PROCEDURES
+
+# abortScript($msg)    {{{1
+#   params: $msg - abort message
+#   prints: nil
+#   return: nil
+abortScript () {
+    local body subject
+    subject='Offlineimap mail fetch FAILED'
+    body="${1:-}"
+    if has_display ; then
+        if use_icon ; then
+            notify-send --icon="$mail_icon"   \
+                        --expire-time=$delay  \
+                        "$subject"            \
+                        "$body"
+        else
+            notify-send --expire-time=$delay  \
+                        "$subject"            \
+                        "$body"
+        fi
+    fi
+    echo "Offlineimap mail fetch failed: $body"
+    exit 1
+}
+# displayNotification($subject, $body)    {{{1
+#   params: $msg - abort message
+#   prints: nil
+#   return: nil
+displayNotification () {
+    local body subject
+    subject="${1:-}"
+    body="${2:-}"
+    if has_display ; then
+        if use_icon ; then
+            notify-send --icon="$mail_icon" "$subject" "$body"
+        else
+            notify-send "$subject" "$body"
+        fi
+    fi
+    echo "$self: $subject: $body"
+    exit 1
+}
+# displayUsage()    {{{1
+#   intent: display script usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: hook script running after notmuch new
+
+A hook script to run after a 'notmuch new' command.
+
+It performs the following tasks:
+
+* count new emails
+* extract summary of new emails
+* add 'old-email-address' tag to new emails not sent to the
+  primary email address
+* add 'inbox' and 'unread' tags to new emails
+* remove 'new' tag
+* write summary of new emails to the system log
+* display summary of new emails in a system notification.
+
+USAGE: ${self} ${parameters}
+       ${self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# flag($name[, $value])    {{{1
+#   intent: flag getter/setter
+#   params: $name  - flag name, also key in 'flag_values' associative array
+#           $value - new flag value, boolean {'true','false'} [optional]
+#   prints: nil
+#   return: setter=nil, getter=boolean flag value
+flag () {
+    case $# in
+    1) return ${flag_values[$1]} ;;
+    2) [[ "$2" = 'true' ]] && flag_values[$1]=0 || true;
+       [[ "$2" = 'false' ]] && flag_values[$1]=1 || true ;;
+    *) echo "Bad param count: $#" > /dev/stderr; exit 2 ;;
+    esac
+}
+# joinBy($delim, $item1[, $item2[, ...]])    {{{1
+#   intent: join items with given delimiter
+#   params: $delim - delimiter
+#           $itemX - items to be joined
+#   prints: string containing joined items
+#   return: nil
+joinBy () {
+    local delim first_item
+    delim="${1:-}"
+    shift
+    first_item="${1:-}"
+    shift
+    printf %s "$first_item" "${@/#/$delim}"
+}
+# processOptions(@opts)    {{{1
+#   intent: process command line options
+#   params: @opts - all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                     \
+        getopt                            \
+            --options hvd                 \
+            --long    help,verbose,debug  \
+            --name    "${BASH_SOURCE[0]}" \
+            -- "${@}"                     \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# }}}1
+
+
+# MAIN
+
+# check for required tools    {{{1
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "$tool" &>/dev/null || missing+=("$tool")
+done
+[[ ${#missing[@]} -eq 0 ]] || {
+    echo "Can't run without: $(joinBy ', ' "${missing[@]}")" >/dev/stderr
+    exit 1
+}
+unset missing tools required_tools
+
+# process command line options    {{{1
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# set boolean values    {{{1
+[[ "x$DISPLAY" != "x" ]] && has_display 'true'
+[[ -e "$mail_icon" ]] && use_icon 'true'
+
+# prepare message summary    {{{1
+newcount=$(notmuch count tag:new) \
+    || abortScript 'Unable to count new emails'
+[[ $newcount -gt 0 ]] || exit 0
+summary="Email: $newcount new message"
+[[ $newcount -gt 1 ]] && summary+='s'
+body="$(                                                    \
+    notmuch search --output=summary --format=json tag:new | \
+    sed -e 's/.*authors": "//'                            | \
+    sed -e 's/|[^"]*"/"/'                                 | \
+    sed -e 's/", "subject": "/ : /'                       | \
+    sed -e 's/".*//'                                        \
+)" || abortScript 'Unable to extract summary of new emails'
+
+# retag new emails    {{{1
 # - add 'old-to-address' tag if not sent to david@nebauer.id.au
 # - remove 'old-to-address' tag if sent via a listgroup
+# - tags 'inbox' and 'unread' added automatically because
+#   config setting 'new.tags' = 'unread;inbox;new;'
 # - remove the 'new' tag once we're finished here
+{
 notmuch tag --batch <<EOF
     +old-to-address -- tag:new and not to:david@nebauer.id.au
     -old-to-address -- tag:new and to:ntg-context@ntg.nl
@@ -21,28 +234,19 @@ notmuch tag --batch <<EOF
     -old-to-address -- tag:new and to:perlweekly@perlweekly.com
     -new            -- tag:new
 EOF
+} || abortScript 'Unable to retag new emails'
 
-# log outcome
-command -v logger && logger -t notmuch "$SUMMARY -- $DETAIL"
+# log outcome    {{{1
+##logger -t notmuch "$summary -- $body" \
+##    || abortScript 'Unable to write to system log'
 
-# display desktop notification message
-USE_POPUP='false'
-command -v notify-send &>/dev/null && USE_POPUP='true'
-DELAY=10000  # milliseconds
-MAILICON='/usr/share/astroid/ui/icons/astroid.svg'
-USE_ICON='false'
-[ -e "$MAILICON" ] && USE_ICON='true'
-# - it is a fatal error to not have DISPLAY -- when Astroid starts,
-#   it should add DISPLAY to systemd --user's environment
-if [ "$USE_POPUP" = 'true' ] && [ "x$DISPLAY" != "x" ] ; then
-    if [ "$NEWCOUNT" -gt 0 ] ; then
-        if [ "$USE_ICON" = 'true' ] ; then
-            notify-send -t "$DELAY" -i "$MAILICON" "$SUMMARY" "$DETAIL"
-        else
-            notify-send -t "$DELAY" "$SUMMARY" "$DETAIL"
-        fi
-    fi
-fi
+# display desktop notification    {{{1
+displayNotification "$subject" "$body" \
+    || abortScript 'Unable to display notification'
 
-# force exit with success, otherwise notmuch will fail out
+# force exit with success    {{{1
+# - otherwise notmuch will fail out
 exit 0
+# }}}1
+
+# vim:foldmethod=marker:

@@ -1,0 +1,15 @@
+# notmuch search
+
+# folders: Spam
+#
+# keys: s
+#
+# actions:
+# - open notmuch search field specific for this folder
+
+macro index,pager s '\
+<vfolder-from-query>folder:personal/INBOX.Spam and \
+' \
+'generate virtual folder from query of Spam'
+
+# vim: ft=neomuttrc

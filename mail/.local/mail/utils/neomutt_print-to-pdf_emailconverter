@@ -1,0 +1,310 @@
+#! /usr/bin/env python3
+# pylint: disable=invalid-name
+
+# module docstring    {{{1
+""" script to save email as pdf
+
+This script was designed for use with neomutt's
+"print_command" variable:
+
+```neomuttrc
+set print_command = "/path/to/this/script"
+unset print_decode
+```
+
+Note: do not background this script in the print_command
+value because it sends considerable output to the terminal,
+and because experience shows it causes the print process to
+hang indefinitely, which also hangs neomutt.
+
+This script reads an email from stdin, converts it to a pdf
+file, and saves it to disk.
+
+The pdf conversion relies on Nick Russler's EML to PDF
+converter[^1] which provides a java jarfile called
+'emailconverter-X.Y.Z-all.jar', where X, Y and Z specify the
+current version. This script expects the symlink
+'~/.local/share/java/emailconverter-all.jar' to point to
+this java jar file. As described in the setup instructions
+for emailconverter, the conversion utility wkhtmltopdf[^2]
+must be findable on the system path.
+
+[^1]: https://github.com/nickrussler/eml-to-pdf-converter
+[^2]: https://github.com/wkhtmltopdf/wkhtmltopdf
+
+The steps taken to generate the pdf output file are:
+
+* Save the piped email to an eml file in a temporary
+  directory
+* Perform conversion to pdf (which by default creates a pdf
+  file in the same directory with the same basename)
+* Get save destination of pdf file from user
+* Copy converted pdf file to save destination.
+
+The two script values most likely to need customising by
+users are the location of the 'emailconverter-all.jar'
+symlink and the default save directory. Look below for the
+'save_dir' and 'converter' variables in the initialisation
+method ('__init__') of class 'SaveAsPdf'.
+
+The default save directory is $HOME/Downloads if present,
+otherwise $HOME.
+
+The script values most likely to need customising by users
+are the default save directory and keyring configuration.
+These can be changed in the 'constants' section below.
+
+Copyright: David Nebauer, 2020-09-22
+License: GPL-3+
+"""
+
+# import    {{{1
+
+import sys
+import os
+import os.path
+import logging as log
+import re
+import subprocess
+import textwrap
+import argparse
+import tempfile
+import shutil
+import glob
+import types
+import atexit
+import email
+import tkinter
+import tkinter.filedialog
+
+class SaveAsPdf():    # {{{1
+    # class docstring    {{{2
+    """ save current email as pdf
+
+    assumes:
+    * email is supplied via stdin
+    * wkhtmltopdf is on system path
+
+    usage:
+
+    savepdf = SaveAsPdf()
+    atexit.register(savepdf.cleanup)
+    savepdf.process_args()
+    savepdf.check_requirements()
+    savepdf.write_eml_file()
+    savepdf.convert_email()
+    savepdf.save_converted_files()
+    """
+
+    def __init__(self):    # {{{2
+        """ initialise variables """
+        # variables that may need to be configured by user
+        # - save_dir
+        save_dir = (
+            os.path.join(os.environ['HOME'], 'Downloads')
+            if os.path.isdir(os.path.join(os.environ['HOME'], 'Downloads'))
+            else os.environ['HOME']
+        )
+        # - converter
+        home_dir = os.environ['HOME']
+        converter = (
+            os.path.join(
+                home_dir, '.local', 'share', 'java', 'emailconverter-all.jar'
+            )
+        )
+
+        # file/dir attributes
+        base = 'email'  # basename for eml and pdf files
+        tmp_dir = tempfile.mkdtemp()
+        temps = {
+            'dir': tmp_dir,
+            'email': os.path.join(tmp_dir, 'email'),
+            'attachments': os.path.join(tmp_dir, 'attachments'),
+            'eml': os.path.join(tmp_dir, 'email', base + '.eml'),
+            'pdf': os.path.join(tmp_dir, 'email', base + '.pdf'),
+        }
+        os.mkdir(temps['email'])
+        os.mkdir(temps['attachments'])
+        self._tmp = types.SimpleNamespace(**temps)
+        self._base = base
+        self._converter = converter
+        self._save_dir = save_dir
+
+        #configure logging
+        log.basicConfig(format='%(message)s')
+
+    @staticmethod
+    def _abort(msg):    # {{{2
+        """ display error and exit """
+        log.error(msg)
+        sys.exit(msg)
+
+    def _copy_file(self, source, target, err):    # {{{2
+        """ copy file
+        * requires creation of non-zero-sized target file for success
+        """
+        if not os.path.isfile(source):
+            self._abort(f"Source file '{source}' does not exist")
+        try:
+            shutil.copyfile(source, target)
+        except shutil.SameFileError:
+            self._abort('Save filepath is same as source filepath')
+        except OSError as copy_err:
+            self._abort(f"Save error: {str(copy_err)}")
+        if (not os.path.isfile(target)) or (os.path.getsize(target) == 0):
+            self._abort(err)
+
+    def _save_file(self, source_fp, title):    # {{{2
+        """ save file to save directory """
+        initialfile = os.path.basename(source_fp)
+        ftype = os.path.splitext(initialfile)[1].lstrip('.')
+        filetypes = ((ftype + ' files', '*.' + ftype), ('all files', '*'))
+        default_ext = '.' + ftype
+        tkinter.Tk().withdraw()
+        opts = {'initialdir': self._save_dir, 'initialfile': initialfile,
+                'filetypes': filetypes, 'defaultextension': default_ext,
+                'title': title}
+        save_fp = tkinter.filedialog.asksaveasfilename(**opts)
+        if save_fp:  # user entered/selected filepath
+            self._copy_file(source_fp, save_fp,
+                            'Unable to save file to destination')
+            save_dir, save_file = os.path.split(save_fp)
+            print(f"Saved file '{save_file}' to '{save_dir}'")
+        else:  # user cancelled
+            print(f"File '{initialfile}' not saved")
+
+    @staticmethod
+    def process_args():    # {{{2
+        """ print help if requested """
+        description = textwrap.dedent('''\
+        script to save email as pdf
+
+        This script was designed for use with neomutt's
+        "print_command" variable:
+
+        ```neomuttrc
+        set print_command = "/path/to/this/script"
+        unset print_decode
+        ```
+
+        This script reads an email from stdin, converts it to a pdf
+        file, and saves it to disk.
+
+        The pdf conversion relies on Nick Russler's EML to PDF
+        converter[^1] which provides a java jarfile called
+        'emailconverter-X.Y.Z-all.jar', where X, Y and Z specify the
+        release version. This script expects the symlink
+        '~/.local/share/java/emailconverter-all.jar' to point to
+        this java jar file. As described in the setup instructions
+        for emailconverter, the conversion utility wkhtmltopdf[^2]
+        must be findable on the system path.
+
+        [^1]: https://github.com/nickrussler/eml-to-pdf-converter
+        [^2]: https://github.com/wkhtmltopdf/wkhtmltopdf
+
+        The default save directory is $HOME/Downloads if present,
+        otherwise $HOME.
+        ''')
+        argparse.ArgumentParser(formatter_class=argparse.
+                                RawDescriptionHelpFormatter,
+                                description=description
+        ).parse_args()
+
+    def check_requirements(self):    # {{{2
+        """ check for requirements
+        * emailconverter is available
+        * wkhtmltopdf is available
+        """
+        if not os.path.islink(self._converter):
+            self._abort(f"Cannot locate: {self._converter}")
+        if shutil.which('wkhtmltopdf') is None:
+            self._abort('Cannot locate: wkhtmltopdf')
+
+    def write_eml_file(self):    # {{{2
+        """ save eml file to temporary directory
+        * save stdin to temporary eml file
+        * extract email subject
+        * derive new file name from email subject
+        * rename temporary eml file
+        """
+        # save stdin to temporary file
+        if sys.stdin.isatty():
+            self._abort('No data has been piped into script')
+        with os.fdopen(sys.stdin.fileno(), 'rb') as input_file,\
+                open(self._tmp.eml, 'wb') as output_file:
+            shutil.copyfileobj(input_file, output_file)
+        # get email subject
+        subject = ''
+        with open(self._tmp.eml, 'rb') as eml_fh:
+            message = email.message_from_binary_file(eml_fh)
+        candidate_subject = message.get('subject')
+        # change filename to subject-derived value if have subject
+        if candidate_subject is not None:
+            subject = candidate_subject.strip()
+            subject = subject[:20]  # truncate long subject lines
+            # replace non-word chars with dashes, remove duplicate dashes
+            new_base = re.sub(r'(-)\1+', '\\1',
+                          re.sub(r'[^A-Za-z0-9_-]', '-', subject))
+            # lower case, truncate to 20 chars, remove lead/trail dashes
+            new_base = new_base.lower()[:20].strip('-')
+            new_eml = os.path.join(self._tmp.email, new_base + '.eml')
+            os.rename(self._tmp.eml, new_eml)
+            self._tmp.eml = new_eml
+            self._base = new_base
+
+    def convert_email(self):    # {{{2
+        """ convert eml to pdf
+        * default behaviour of converter is to create a pdf
+          output file in the same directory as the eml
+          source file and having the same basename as the
+          eml source
+        """
+        self._tmp.pdf = os.path.join(self._tmp.email, self._base + '.pdf')
+        cmd = [
+            'java', '-jar', self._converter,
+                '--output-filepath', self._tmp.pdf,
+                '--extract-attachments',
+                '--extract-attachments-directory', self._tmp.attachments,
+                self._tmp.eml
+        ]
+        subprocess.call(cmd)
+        if ((not os.path.isfile(self._tmp.pdf))
+                or (os.path.getsize(self._tmp.pdf) == 0)):
+            self._abort('EML to PDF conversion failed')
+
+    def save_converted_files(self):    # {{{2
+        """ copy converted pdf file to save location """
+        # save email
+        self._save_file(self._tmp.pdf, 'Save email as')
+        # save attachments
+        attachments_glob = os.path.join(self._tmp.attachments, '*')
+        attachments = glob.glob(attachments_glob)
+        if not attachments:
+            return
+        count = len(attachments)
+        for index, filepath in enumerate(attachments, start=1):
+            self._save_file(filepath, f"Save attachment ({index}/{count})")
+
+    def cleanup(self):    # {{{2
+        """ take only photographs and leave only footprints """
+        # remove temporary directory
+        if self._tmp.dir is not None and os.path.isdir(self._tmp.dir):
+            shutil.rmtree(self._tmp.dir, ignore_errors=True)
+# }}}1
+
+
+def main():
+    """ script execution starts here """
+    savepdf = SaveAsPdf()
+    atexit.register(savepdf.cleanup)
+    savepdf.process_args()
+    savepdf.check_requirements()
+    savepdf.write_eml_file()
+    savepdf.convert_email()
+    savepdf.save_converted_files()
+
+
+if __name__ == '__main__':
+    main()
+
+# vim:fdm=marker:

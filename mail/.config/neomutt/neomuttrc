@@ -1,0 +1,376 @@
+#
+# Local configuration file for NeoMutt
+#
+
+# WARNINGS:
+# * if enclosing a value containing a $variable, enclose with double-quotes
+#   (as doing so with single-quotes does not appear to work)
+
+# Custom variables
+
+set my_name = 'David Nebauer'
+set my_email = 'david@nebauer.id.au'
+set my_maildir = $HOME/.local/mail/maildirs
+set my_account = personal
+set my_mailbox = $my_maildir/$my_account
+set my_cfgdir = $HOME/.config/neomutt
+set my_cfgdir_d = $my_cfgdir/neomuttrc.d
+set my_config = $my_cfgdir/neomuttrc
+set my_utils = $HOME/.local/mail/utils
+set my_nvim_args = $my_utils/neomutt_nvim-args.vim
+set my_print_pdf = $my_utils/neomutt_print-to-pdf
+set my_signature = $my_cfgdir_d/signature
+set my_download_dir = $HOME/Downloads
+set my_cache = $HOME/.cache/neomutt
+set my_header_cache = $my_cache/cache-headers
+set my_message_cache = $my_cache/cache-messages
+set my_poll_script = $HOME/.local/bin/my-get-mail
+set my_msmtpq = $HOME/.local/bin/msmtpq
+
+macro generic,index,browser,pager \\R "\
+<enter-command>unhook *<enter>\
+<enter-command>source $my_config<enter>\
+<enter-command>echo 'Reloaded $my_config'<enter>\
+"    'clear hooks and reload configuration'
+
+# Hooks
+
+folder-hook '.' \
+    "source $my_utils/neomutt_folder-hook_all"
+folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX" \
+    "source $my_utils/neomutt_folder-hook_inbox"
+folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Archive" \
+    "source $my_utils/neomutt_folder-hook_archive"
+folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Sent" \
+    "source $my_utils/neomutt_folder-hook_sent"
+folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Drafts" \
+    "source $my_utils/neomutt_folder-hook_drafts"
+folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Spam" \
+    "source $my_utils/neomutt_folder-hook_spam"
+folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Junk" \
+    "source $my_utils/neomutt_folder-hook_junk"
+folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Trash" \
+    "source $my_utils/neomutt_folder-hook_trash"
+
+# Moving
+
+bind attach,browser,index  g   noop
+bind attach,browser,index  gg  first-entry
+bind attach,browser,index  G   last-entry
+bind pager                 g   noop
+bind pager                 gg  top
+bind pager                 G   bottom
+bind pager                 k   previous-line
+bind pager                 j   next-line
+
+# Sidebar
+
+set sidebar_visible
+set mail_check_stats
+set sidebar_format = '%D%?F? [%F]?%* %?N?%N/?%S'
+bind index,pager <right> sidebar-next
+bind index,pager <left> sidebar-prev
+bind index,pager <space> sidebar-open
+set mail_check_stats
+set sort_browser = unsorted
+
+# Mailboxes (standard)
+
+set folder = $my_mailbox
+set record = +INBOX.Sent
+set trash = +INBOX.Trash
+set postponed = +INBOX.Drafts
+set spool_file = +INBOX
+
+# Mailboxes (virtual)
+
+set nm_default_url = 'notmuch:///home/david/.local/mail/maildirs'
+# - cannot use 'folder', must use 'nm_default_url'
+set vfolder_format = '%6n(%6N) %f'
+set maildir_check_cur
+set nm_query_type = threads
+set nm_record    # add sent messages to notmuch database
+# - adjust tags of sent messages added to notmuch database
+set nm_record_tags = "-inbox,+archive,+sent"
+set sort = date
+set sort_aux = last-date-received
+set spool_file = 'Inbox'
+# - if 'spool_file' is set then setting 'virtual_spool_file' to
+#   either 'yes' or 'no' has no effect
+# - if 'spool_file' is not set Inbox defaults to /var/mail/david,
+#   as per mail command
+unmailboxes *
+unvirtual-mailboxes *
+virtual-mailboxes \
+  'Inbox'   "notmuch://?query=folder:$my_account/INBOX" \
+  'Archive' "notmuch://?query=folder:$my_account/INBOX.Archive" \
+  'Sent'    "notmuch://?query=folder:$my_account/INBOX.Sent" \
+  'Drafts'  "notmuch://?query=folder:$my_account/INBOX.Drafts" \
+  'Spam'    "notmuch://?query=folder:$my_account/INBOX.Spam" \
+  'Junk'    "notmuch://?query=folder:$my_account/INBOX.Junk" \
+  'Trash'   "notmuch://?query=folder:$my_account/INBOX.Trash"
+
+# Manage Mailboxes
+
+# - change mailbox
+bind index,pager c noop
+macro index,pager ci '<change-vfolder>Inbox<enter>'   'open Inbox'
+macro index,pager ca '<change-vfolder>Archive<enter>' 'open Archive'
+macro index,pager cs '<change-vfolder>Sent<enter>'    'open Sent'
+macro index,pager cd '<change-vfolder>Drafts<enter>'  'open Drafts'
+macro index,pager cm '<change-vfolder>Spam<enter>'    'open Spam'
+macro index,pager cj '<change-vfolder>Junk<enter>'    'open Junk'
+macro index,pager ct '<change-vfolder>Trash<enter>'   'open Trash'
+macro index,pager cf '<change-vfolder>?'              'open mailbox...'
+bind  index cc change-vfolder
+# - search maildir
+#   . folder-specific searching is set in folder-hooks
+bind index,pager X vfolder-from-query
+# - threads
+bind index,pager + entire-thread
+bind index za  collapse-thread
+bind index zA  collapse-all  # missing :folddisable/foldenable
+# - select messages
+macro index <insert> "\
+<enter-command>push t<enter>\
+"    'select/tag current message'
+macro index \ca "\
+<tag-pattern>~A<enter>\
+"    'select/tag all messages'
+macro index \cu "\
+<untag-pattern>~A<enter>\
+"    'unselect/untag all messages'
+# - add labels
+bind index,pager y noop
+bind index,pager yy modify-labels
+macro index,pager yd "\
+<enter-command>echo \
+'Adding [development] tag to selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+development<enter>\
+<enter-command>set resolve<enter>\
+"    'add label: development'
+macro index,pager yf "\
+<enter-command>echo 'Adding [financial] tag to selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+financial<enter>\
+<enter-command>set resolve<enter>\
+"    'add label: financial'
+macro index,pager yl "\
+<enter-command>echo 'Adding [later] tag to selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+later<enter>\
+<enter-command>set resolve<enter>\
+"    'add label: later'
+macro index,pager yo "\
+<enter-command>echo 'Adding [order] tag to selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+order<enter>\
+<enter-command>set resolve<enter>\
+"    'add label: order'
+macro index,pager yp "\
+<enter-command>echo 'Adding [personal] tag to selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+personal<enter>\
+<enter-command>set resolve<enter>\
+"    'add label: personal'
+macro index,pager yu "\
+<enter-command>echo 'Adding [usnion] tag to selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+union<enter>\
+<enter-command>set resolve<enter>\
+"    'add label: union'
+macro index,pager yv "\
+<enter-command>echo 'Adding [vault] tag to selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+vault<enter>\
+<enter-command>set resolve<enter>\
+"    'add label: vault'
+# - archive message
+macro index,pager a "\
+<enter-command>echo 'Archiving selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><clear-flag>N\
+<tag-prefix><modify-labels>\
+-inbox +archive -draft -spam -trash -sent -unread -new -junk<enter>\
+<enter-command>set resolve<enter>\
+<tag-prefix><save-message>+INBOX.Archive<enter>\
+<sync-mailbox>\
+"    'move mail to Archive'
+# - move messages to other mailboxes
+bind index M noop
+macro index,pager MI "\
+<enter-command>echo 'Moving selected message(s) to Inbox...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><clear-flag>N\
+<tag-prefix><modify-labels>\
++inbox -archive -draft -spam -trash -sent -unread -junk<enter>\
+<enter-command>set resolve<enter>\
+<tag-prefix><save-message>+INBOX<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'move mail to Inbox'
+macro index,pager MD "\
+<enter-command>echo 'Moving selected message(s) to Drafts...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><clear-flag>N\
+<tag-prefix><modify-labels>\
+-inbox -archive +draft -spam -trash -sent -unread -junk<enter>\
+<enter-command>set resolve<enter>\
+<tag-prefix><save-message>+INBOX.Drafts<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'move mail to Drafts'
+macro index,pager MJ "\
+<enter-command>echo 'Moving selected message(s) to Spam...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><clear-flag>N\
+<tag-prefix><modify-labels>\
+-inbox -archive -draft +spam -trash -sent -unread -junk<enter>\
+<enter-command>set resolve<enter>\
+<tag-prefix><save-message>+INBOX.Spam<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'move mail to Spam'
+macro index,pager MS "\
+<enter-command>echo 'Moving selected message(s) to Sent...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><clear-flag>N\
+<tag-prefix><modify-labels>\
+-inbox -archive -draft -spam -trash +sent -unread -junk<enter>\
+<enter-command>set resolve<enter>\
+<tag-prefix><save-message>+INBOX.Sent<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'move mail to Sent'
+# - show log messages
+bind index,pager MM show-log-messages
+# - delete messages
+#   . set in folder-hooks
+bind index <tab> sync-mailbox
+timeout-hook 'exec sync-mailbox'
+startup-hook 'exec sync-mailbox'
+shutdown-hook 'exec sync-mailbox'
+bind index <return> display-message
+set delete = yes
+unset confirm_append
+
+# Mail Settings
+
+set real_name = $my_name
+alias me $my_name <$my_email>
+set from = $my_email
+set use_from
+set user_agent
+set mbox_type = Maildir
+
+# Get Mail
+
+macro index P "\
+<shell-escape>$my_poll_script<enter>\
+<change-vfolder>Inbox<enter>\
+"    'run offlineimap to fetch mail'
+
+# View Mail
+
+auto_view text/html
+alternative_order text/plain text/html
+macro attach 'V' "\
+<pipe-entry>iconv -c --to-code=UTF8 > $my_cache/mail.html<enter>\
+<shell-escape>$BROWSER $my_cache/mail.html<enter>\
+"    'open message in default browser'
+set mbox = +INBOX.Archive
+set move
+set attach_save_dir = $my_download_dir
+unset mark_old                       # unread/new is good enough for me
+macro index,pager \cb "\
+<pipe-message> urlscan<Enter>\
+"    'call urlscan to extract URLs out of a message'
+macro attach,compose \cb "\
+<pipe-entry> urlscan<Enter>\
+"    'call urlscan to extract URLs out of a message'
+set print_command = $my_print_pdf   # conversion by zamzar.com
+unset print_decode
+set header_cache = $my_header_cache
+set message_cachedir = $my_message_cache
+# - save all attachments
+macro pager S "\
+<pipe-message>\
+ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
+<enter-command>echo 'Attachments saved to $my_download_dir'<enter>\
+"    'Save all non-text attachments using ripmime'
+unset prompt_after
+
+# Compose Mail
+
+set editor = "nvim -S '$my_nvim_args' +/^$/+1 '+startinsert!'"
+set text_flowed
+# - convert markdown to html
+# - macro solution from NeoMutt Guide (https://neomutt.org/guide),
+#   Chapter 5.2 'Composing Multipart Alternative Emails'
+macro compose Y "\
+<first-entry><enter-command>set wait_key=no<enter>\
+<pipe-entry>pandoc -o $my_cache/text-alternative.html<enter>\
+<attach-file>$my_cache/text-alternative.html<enter>\
+<toggle-unlink><toggle-disposition>\
+<tag-entry><first-entry><tag-entry><group-alternatives>\
+<enter-command>set wait_key=yes<enter><send-message>\
+"    "send the message as 'multipart/alternative'"
+# - email headers
+set edit_headers                     # show headers when composing
+ignore *                             # [un]ignore is not honoured
+unignore From: To: CC: BCC: Subject:
+unhdr_order *                        # [un]hdr_order is not honoured
+hdr_order From: Subject: To: Cc: Bcc:
+set query_command = "echo '' && notmuch address from:%s"
+# - first line of results is presumed to be header, so is trimmed
+# - the 'echo' command is a workaround for this
+bind editor <Tab> complete-query
+bind editor \ct complete
+set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
+set signature = $my_signature
+set fast_reply                       # skip to compose when replying
+set forward_format = 'Fwd: %s'       # format of subject when forwarding
+set reply_to                         # reply to Reply to: field
+set include                          # include message in replies
+set forward_quote                    # include message in forwards
+unset sig_dashes                     # no dashes before sig
+set ispell = 'apsell -e -c'
+
+# Send Mail
+
+set sendmail = "$my_msmtpq"
+set sendmail_wait = 0  # waits forever for msmtpq to finish, <0 to background
+set envelope_from_address
+set abort_noattach = ask-yes
+
+# Customise Interface
+
+# - index format
+#   . email date-time is defined by '%<[365d .. [%F]>' sequence
+#     - is a conditional date sequence
+#       (see https://neomutt.org/feature/cond-date)
+#     - test      date range       format string   example
+#       -----------------------------------------------------
+#       %[1d      today            %[%R]           12:34
+#       %[7d      last 7 days      %[%a-%d]        Thu-12
+#       %[365d    last 365 days    %[%b-%d]        Dec-10
+#       ―         older            %[%F]           2015-06-27
+#   . number of MIME attachments is defined by '%X? .. & .. ?' sequence
+#     - is a conditional construct
+#     - it breaks down as:
+#       '%X?%X📎&   ?' breaks down as:
+#        %X?           # if number is non-zero
+#           %X📎       # then display number followed by paperclip character
+#                      #   (U+1F4CE, which shows here as '📎')
+#               &   ?  # else display 3 spaces, which is equivalent to:
+#                      #   1 digit + U+1F4CE (which is as wide as 2 characters)
+set index_format = '%4C %Z %?X?%X📎&   ? \
+%<[365d?%<[7d?%<[1d?%[%R]&%[%a-%d]>&%[%b-%d]>&%[%F]> \
+%-20.20L (%?l?%4l&%4c?) [%g] %s'
+# - colours
+source $my_cfgdir_d/colours.rc
+# - show mini-index
+#   . warning: neither pager- nor index-bound macros work with this active
+#set pager_index_lines = 8
+set timeout = 0

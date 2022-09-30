@@ -1,0 +1,272 @@
+#!/usr/bin/env bash
+
+# File: my-get-mail
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: check for and download email
+# Created: 2022-09-14
+
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+
+# VARIABLES    {{{1
+
+self="$(basename $0)"
+parameters=" [-v] [-d]"
+required_tools=(
+    awk
+    cat
+    getopt
+    grep
+    msmtpq
+    notify-send
+    offlineimap
+    pgrep
+    ping
+    wc
+)
+declare -A flag_values=(
+    [use_icon]=1
+    [has_display]=1
+    [synced_ok]=0
+)
+mail_icon='/usr/share/doc/neomutt/logo/neomutt.svg'
+offlineimaprc="$HOME/.offlineimaprc"
+full_sync_interval=$((2 * 60 * 60))  # 2 hours, in seconds
+cache_dir="$HOME/.cache/offlineimap"
+cache_fp="$cache_dir/last-full-sync"
+log_file="$HOME/.local/mail/log/offlineimap.log"
+piddir="${XDG_RUNTIME_DIR:-~/.local/var/run}/$self"
+pidfile="${piddir}/$self.pid"
+
+# flags
+
+use_icon () { flag 'use_icon' "$@"; return $?; }
+has_display () { flag 'has_display' "$@"; return $?; }
+synced_ok () { flag 'synced_ok' "$@"; return $?; }
+# }}}1
+
+
+# PROCEDURES
+
+# abortScript($msg)    {{{1
+#   params: $msg - abort message
+#   prints: nil
+#   return: nil
+abortScript () {
+    local body subject
+    subject='Offlineimap mail fetch FAILED'
+    body="${1:-}"
+    if has_display ; then
+        if use_icon ; then
+            notify-send --icon="$mail_icon" \
+                        --urgency='critical' \
+                        "$subject" \
+                        "$body"
+        else
+            notify-send --urgency='critical' \
+                        "$subject" \
+                        "$body"
+        fi
+    fi
+    echo "$self: offlineimap mail fetch failed: $body"
+    exit 1
+}
+# displayUsage()    {{{1
+#   intent: display script usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: check for and download emails
+
+Runs offlineimap to fetch emails. A quick synchronisation is
+performed if a full synchronisation has been performed in
+the previous 2 hours, otherwise a full synchronisation is
+performed.
+
+Note: the time of the last full synchronisation is stored in
+'$cache_fp'.
+
+Offlineimap is run only if all remote mail servers defined
+in the offlineimap configuration file are reachable. (Remote
+mail servers are defined by 'remotehost' keys.)
+
+Fatal errors result in an abort message being written to the
+console and displayed in a system notification.
+
+USAGE: ${self} ${parameters}
+       ${self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# flag($name, [$value])    {{{1
+#   intent: flag getter/setter
+#   params: $name  - flag name, also key in 'flag_values' associative array
+#           $value - new flag value, boolean {'true','false'} [optional]
+#   prints: nil
+#   return: setter=nil, getter=boolean flag value
+flag () {
+    case $# in
+    1) return ${flag_values[$1]} ;;
+    2) [[ "$2" = 'true' ]] && flag_values[$1]=0 || true;
+       [[ "$2" = 'false' ]] && flag_values[$1]=1 || true ;;
+    *) echo "$self: bad param count: $#" > /dev/stderr; exit 2 ;;
+    esac
+}
+# joinBy($delim, $item1[, $item2[, ...]])    {{{1
+#   intent: join items with given delimiter
+#   params: $delim - delimiter
+#           $itemX - items to be joined
+#   prints: string containing joined items
+#   return: nil
+joinBy () {
+    local delim first_item
+    delim="${1:-}"
+    shift
+    first_item="${1:-}"
+    shift
+    printf %s "$first_item" "${@/#/$delim}"
+}
+# processOptions(@opts)    {{{1
+#   intent: process command line options
+#   params: @opts - all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                     \
+        getopt                            \
+            --options hvd                 \
+            --long    help,verbose,debug  \
+            --name    "${BASH_SOURCE[0]}" \
+            -- "${@}"                     \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo '$self: invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# }}}1
+
+
+# MAIN
+
+# check for required tools    {{{1
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "$tool" &>/dev/null || missing+=("$tool")
+done
+[[ ${#missing[@]} -eq 0 ]] || {
+    msg="$self: can't run without: $(joinBy ', ' "${missing[@]}")"
+    echo "$msg" >/dev/stderr
+    exit 1
+}
+unset missing tools required_tools
+
+# process command line options    {{{1
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# set boolean values    {{{1
+[[ "x$DISPLAY" != "x" ]] && has_display 'true'
+[[ -e "$mail_icon" ]] && use_icon 'true'
+
+# abort if script is already running    {{{1
+if ! mkdir "$piddir" 2>/dev/null; then
+    sleep 3  # give the other process time to write its pid
+    if [[ -f "$pidfile" ]]; then
+        # is process actually still running under this pid
+        oldpid="$(cat "$pidfile")"
+        result="$(ps -ef | grep $oldpid | grep $self || true)"
+        [[ -n "$result" ]] \
+            && abortScript "$self is already running (PID=$oldpid)"
+    fi
+fi
+pid="$(ps -ef | grep $self | head -n1 | awk '{print $2;}')"
+echo "$pid" > "$pidfile"  # update pid file
+trap "[[ -f \"$pidfile\" ]] && rm -rf \"$piddir\"" EXIT
+unset oldpid pid piddir pidfile result
+
+# abort if offlineimap is already running    {{{1
+pgrep -x offlineimap &>/dev/null \
+    && abortScript 'Offlineimap is already running'
+
+# flush queued mail    {{{1
+num_queue=$(msmtpq --q-mgmt -d | grep "num" | wc -l || true)
+if [[ $num_queue -gt 0 ]] ; then
+    msg="$self: flushing $num_queue queued message"
+    [[ $num_queue -gt 1 ]] && msg+='s'
+    echo "$msg"
+    msmtpq --q-mgmt -r
+fi
+unset msg num_queue
+
+# check that mail servers are reachable    {{{1
+[[ -e "$offlineimaprc" ]] \
+    || abortScript "Cannot locate offlineimap config file: $offlineimaprc"
+mail_servers=($(cat "$offlineimaprc" | grep "^remotehost" | awk '{print $3}'))
+missing=()
+for server in "${mail_servers[@]}" ; do
+    echo "$self: checking for mail server $server"
+    ping -c1 "$server" &>/dev/null || missing+=("$server")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || abortScript "Unable to reach: $(joinBy ', ' "${missing[@]}")"
+unset mail_servers missing
+
+# get time since last full sync    {{{1
+[[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
+[[ -d "$cache_dir" ]] || abortscript "Unable to create cache file: $cache_dir"
+if [ -f "$cache_fp" ]; then
+    time_of_last_full_sync="$(cat "$cache_fp")"
+else
+    time_of_last_full_sync=0
+fi
+time_now=$(date +%s)
+time_since_last_full_sync=$((time_now - time_of_last_full_sync))
+unset cache_dir time_of_last_full_sync
+
+# fetch new mail with offlineimap    {{{1
+if [[ $time_since_last_full_sync -gt $full_sync_interval ]] ; then
+    echo "$self: full offlineimap sync"
+    offlineimap -o -u quiet -l "$log_file" || synced_ok 'false'
+    echo -n "$time_now" > "$cache_fp"
+else
+    echo "$self: quick offlineimap sync"
+    offlineimap -o -q -u quiet -l "$log_file" || synced_ok 'false'
+fi
+synced_ok || abortscript "See offlineimap log: $log_file"
+unset cache_fp full_sync_interval log_file time_now time_since_last_full_sync
+# }}}1
+
+# vim:foldmethod=marker:

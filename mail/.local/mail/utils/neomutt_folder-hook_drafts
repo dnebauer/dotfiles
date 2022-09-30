@@ -1,0 +1,15 @@
+# notmuch search
+
+# folders: Drafts
+#
+# keys: s
+#
+# actions:
+# - open notmuch search field specific for this folder
+
+macro index,pager s '\
+<vfolder-from-query>folder:personal/INBOX.Drafts and \
+' \
+'generate virtual folder from query of Drafts'
+
+# vim: ft=neomuttrc

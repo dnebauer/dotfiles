@@ -1,0 +1,15 @@
+# notmuch search
+
+# folders: Archive
+#
+# keys: s
+#
+# actions:
+# - open notmuch search field specific for this folder
+
+macro index,pager s '\
+<vfolder-from-query>folder:personal/INBOX.Archive and \
+' \
+'generate virtual folder from query of Archive'
+
+# vim: ft=neomuttrc

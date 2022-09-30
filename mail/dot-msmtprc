@@ -26,9 +26,9 @@ logfile         ~/.local/mail/log/msmtp.log
 
 ######################### ACCOUNTS #########################
 
-#################
+############
 ## vodien ##
-#################
+############
 
 account        vodien
 ## Secure SSL/TLS Settings (*** DO NOT WORK ***)

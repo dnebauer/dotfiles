@@ -1,0 +1,48 @@
+# trash mail
+
+# folders: all except Trash
+#
+# keys: <delete>, d
+#
+# actions:
+# - moves current or selected messages to trash
+# - tags current or selected messages as trash
+
+macro index,pager d "\
+<enter-command>echo 'Trashing selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><clear-flag>N\
+<tag-prefix><modify-labels>+trash<enter>\
+<enter-command>set resolve<enter>\
+<tag-prefix><save-message>+INBOX.Trash<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+" \
+'trash current or tagged message(s)'
+
+macro index,pager <delete> "\
+<enter-command>echo 'Trashing selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><clear-flag>N\
+<tag-prefix><modify-labels>+trash<enter>\
+<enter-command>set resolve<enter>\
+<tag-prefix><save-message>+INBOX.Trash<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+" \
+'trash current or tagged message(s)'
+
+# ---------------------------------------------------------
+
+# notmuch search
+
+# folders: all
+#
+# keys: \\ (as fallback)
+#
+# actions:
+# - open notmuch search field
+
+bind index s vfolder-from-query
+
+# vim: ft=neomuttrc

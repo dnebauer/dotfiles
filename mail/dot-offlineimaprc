@@ -11,7 +11,9 @@ accounts = vodien
 #accounts = bigpond
 ui = ttyui
 pythonfile = /home/david/.local/mail/utils/offlineimap.py
-maxsyncaccounts = 5
+maxsyncaccounts = 1
+maxconnections = 1
+singlethreadperfolder = yes
 
 
 ##
@@ -22,10 +24,11 @@ maxsyncaccounts = 5
 [Account vodien]
 localrepository = vodien-local
 remoterepository = vodien-remote-secure
+postsynchook = notmuch new
 
-[Account bigpond]
-localrepository = bigpond-local
-remoterepository = bigpond-remote
+#[Account bigpond]
+#localrepository = bigpond-local
+#remoterepository = bigpond-remote
 
 #[Account gmail]
 #localrepository = gmail-local
@@ -47,7 +50,7 @@ remoterepository = bigpond-remote
 
 [Repository vodien-local]
 type = Maildir
-localfolders = ~/.local/mail/maildirs/vodien
+localfolders = ~/.local/mail/maildirs/personal
 
 [Repository vodien-remote-secure]
 type = IMAP
