@@ -27,18 +27,18 @@ dlg_title='i3 session setup'
 # at startup i3 uses path that does not contain ~/.local/bin
 # - these tools can be found on base system path
 required_system_tools=(
-    'alacritty'    'getopt'    'mktemp'     'tmux'
-    'bc'           'i3-msg'    'nvim-qt'    'trap'
-    'date'         'logger'    'printf'     'xdotool'
-    'exec'         'mkfifo'    'sleep'      'yad'
+    'alacritty'    'i3-msg'     'nvim-qt'    'xdotool'
+    'bc'           'logger'     'printf'     'yad'
+    'date'         'mkfifo'     'sleep'
+    'exec'         'mktemp'     'tmux'
+    'getopt'       'neomutt'    'trap'
 )
 # - these tools have to be searched for in specified locations
 #   . note especially the local qutebrowser wrapper which is
 #     vital for proper i3 startup
-astroid_launcher="$HOME/.local/bin/astroid-launcher"
 qutebrowser="$HOME/.local/bin/qutebrowser"
 tiddlywiki="$HOME/.local/bin/tiddlywiki"
-required_local_tools=("$astroid_launcher" "$qutebrowser" "$tiddlywiki")
+required_local_tools=("$qutebrowser" "$tiddlywiki")
 # trial and error showed that any app post-launch delay < 1 second caused
 # problems for qutebrowser windows resetting their titles, independently of the
 # delay before the titling itself (even if there is no reasonable explanation
@@ -96,7 +96,7 @@ function applyLayout2 () {
     local layout_file ; layout_file='~/.config/i3/sessions/workspace_2.json'
     i3-msg "workspace 2:mail; append_layout $layout_file"
 
-    # layout defines the following mark: m=astroid/mail
+    # layout defines the following mark: m=alacritty/neomutt
 
     # logging
     if test ${?} -ne 0 ; then log "**FAILED ${task}" 'err' ; fi
@@ -289,28 +289,6 @@ function joinBy () {
     shift
     printf %s "$f" "${@/#/$d}"
 }
-# launchAstroid()    {{{1
-#   intent: launch astroid mail client
-#   params: nil
-#   prints: nil
-#   return: nil
-function launchAstroid () {
-    # logging
-    local tmr ; tmr="$(timer)"
-    local task ; task='launching astroid mail client'
-    log "Begin ${task}"
-    notifyMessage 'Launching astroid mail client...'
-
-    # launch astroid
-    $astroid_launcher &
-    sleep $delay_post_launch
-
-    # logging
-    if test ${?} -ne 0 ; then log "**FAILED ${task}" 'err' ; fi
-    log "  Finished ${task}"
-    local elapsed ; elapsed="$(timer "${tmr}")"
-    log "  Elapsed time ${elapsed}"
-}
 # launchGoogleChrome()    {{{1
 #   intent: launch google chrome
 #   params: nil
@@ -325,6 +303,36 @@ function launchGoogleChrome () {
 
     # launch google chrome
     google-chrome &
+    sleep $delay_post_launch
+
+    # logging
+    if test ${?} -ne 0 ; then log "**FAILED ${task}" 'err' ; fi
+    log "  Finished ${task}"
+    local elapsed ; elapsed="$(timer "${tmr}")"
+    log "  Elapsed time ${elapsed}"
+}
+# launchNeomutt()    {{{1
+#   intent: launch neomutt mail client
+#   params: nil
+#   prints: nil
+#   return: nil
+function launchNeomutt () {
+    # logging
+    local tmr ; tmr="$(timer)"
+    local task ; task='launching neomutt mail client'
+    log "Begin ${task}"
+    notifyMessage 'Launching neomutt mail client...'
+
+    # launch neomutt
+    alacritty \
+        --class 'AlacrittyNeomuttREADONLY,AlacrittyNeomuttREADONLY' \
+        --title AlacrittyNeomuttREADONLY \
+        --command neomutt -R &
+    sleep $delay_post_launch
+    alacritty \
+        --class 'AlacrittyNeomutt,AlacrittyNeomutt' \
+        --title AlacrittyNeomutt \
+        --command neomutt &
     sleep $delay_post_launch
 
     # logging
@@ -504,9 +512,10 @@ function launchTiddlywiki () {
     # launch tiddlywiki
     plugin_path='/usr/local/share/tiddlywiki/plugins'
     alacritty \
-        -t launcher_tiddlywiki \
-        -o env.TIDDLYWIKI_PLUGIN_PATH=$plugin_path \
-        -e $tiddlywiki $HOME/data/misc/auxiliary-memory --listen port=10744 &
+        --title launcher_tiddlywiki \
+        --option env.TIDDLYWIKI_PLUGIN_PATH=$plugin_path \
+        --command $tiddlywiki $HOME/data/misc/auxiliary-memory \
+                              --listen port=10744 &
     sleep $delay_post_launch
 
     # logging
@@ -877,8 +886,8 @@ function setInitialContainerFocus () {
     log "Begin ${task}"
     notifyMessage 'Setting initial container focus...'
 
-    # focus on astroid in workspace 2:mail
-    i3-msg [class='Astroid' instance='astroid'] focus
+    # focus on neomutt in workspace 2:mail
+    i3-msg [class='AlacrittyNeomutt' instance='AlacrittyNeomutt'] focus
 
     # focus on terminal in workspace 1:term
     i3-msg [class='AlacrittyTmux' instance='AlacrittyTmux'] focus
@@ -952,7 +961,7 @@ notifyDisplay
 assignWorkspaces            # actually done in i3 config file (see function)
 applyLayouts
 launchNvimGui
-launchAstroid
+launchNeomutt
 launchQutebrowserWebmail
 launchGoogleChrome
 launchQutebrowserPorn
