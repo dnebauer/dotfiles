@@ -407,4 +407,6 @@ source $my_cfgdir_d/colours.rc
 #set pager_index_lines = 8
 set timeout = 0
 
+push <show-version>
+
 # vim: ft=neomuttrc fdm=marker
