@@ -8,6 +8,10 @@
 # appear to work)
 ############################################################
 
+# Start with clean slate
+
+#source neomuttrc.d/undo-all.rc
+
 # Custom variables
 
 set my_name = 'David Nebauer'
