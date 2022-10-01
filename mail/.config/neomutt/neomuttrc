@@ -27,7 +27,9 @@ set my_message_cache = $my_cache/cache-messages
 set my_poll_script = $HOME/.local/bin/my-get-mail
 set my_msmtpq = $HOME/.local/bin/msmtpq
 
-macro generic,index,browser,pager \\R "\
+# Reload configuration (ctrl+r)
+
+macro generic,index,browser,pager \cr "\
 <enter-command>unhook *<enter>\
 <enter-command>source $my_config<enter>\
 <enter-command>echo 'Reloaded $my_config'<enter>\
@@ -54,9 +56,11 @@ folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Trash" \
 
 # Moving
 
+bind attach,browser,index  gg  noop
 bind attach,browser,index  g   noop
 bind attach,browser,index  gg  first-entry
 bind attach,browser,index  G   last-entry
+bind pager                 gg  noop
 bind pager                 g   noop
 bind pager                 gg  top
 bind pager                 G   bottom
@@ -113,6 +117,15 @@ virtual-mailboxes \
 # Manage Mailboxes
 
 # - change mailbox
+bind index,pager ca noop
+bind index cc noop
+bind index,pager cd noop
+bind index,pager cf noop
+bind index,pager ci noop
+bind index,pager cj noop
+bind index,pager cm noop
+bind index,pager cs noop
+bind index,pager ct noop
 bind index,pager c noop
 macro index,pager ci '<change-vfolder>Inbox<enter>'   'open Inbox'
 macro index,pager ca '<change-vfolder>Archive<enter>' 'open Archive'
@@ -141,6 +154,14 @@ macro index \cu "\
 <untag-pattern>~A<enter>\
 "    'unselect/untag all messages'
 # - add labels
+bind index,pager yd noop
+bind index,pager yf noop
+bind index,pager yl noop
+bind index,pager yo noop
+bind index,pager yp noop
+bind index,pager yu noop
+bind index,pager yv noop
+bind index,pager yy noop
 bind index,pager y noop
 bind index,pager yy modify-labels
 macro index,pager yd "\
@@ -198,6 +219,11 @@ macro index,pager a "\
 <sync-mailbox>\
 "    'move mail to Archive'
 # - move messages to other mailboxes
+bind index,pager MD noop
+bind index,pager MI noop
+bind index,pager MJ noop
+bind index,pager MM noop
+bind index,pager MS noop
 bind index M noop
 macro index,pager MI "\
 <enter-command>echo 'Moving selected message(s) to Inbox...'<enter>\
