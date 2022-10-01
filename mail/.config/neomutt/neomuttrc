@@ -2,9 +2,11 @@
 # Local configuration file for NeoMutt
 #
 
-# WARNINGS:
-# * if enclosing a value containing a $variable, enclose with double-quotes
-#   (as doing so with single-quotes does not appear to work)
+############################################################
+# if enclosing a value containing a $variable, enclose with
+# double-quotes (as doing so with single-quotes does not
+# appear to work)
+############################################################
 
 # Custom variables
 
@@ -400,3 +402,5 @@ source $my_cfgdir_d/colours.rc
 #   . warning: neither pager- nor index-bound macros work with this active
 #set pager_index_lines = 8
 set timeout = 0
+
+# vim: ft=neomuttrc fdm=marker
