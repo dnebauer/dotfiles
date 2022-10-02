@@ -4,8 +4,8 @@ function! s:MailSupport()
     " re-flow text support    {{{1
     " set parameters to be consistent with re-flowing content
     " e.g., in astroid setting mail>format_flowed=true
-    setlocal textwidth=72 
-    setlocal formatoptions+=q 
+    setlocal textwidth=72
+    setlocal formatoptions+=q
     setlocal comments+=nb:>
     " rewrap paragraph using <M-q>, i.e., Alt-q    {{{1
     " - linux terminal key codes for <M-q> not recognised by vim
@@ -16,7 +16,7 @@ function! s:MailSupport()
     if has('unix')
         try
             execute "set <M-q>=\<Esc>q"
-		catch /^Vim\%((\a\+)\)\=:E518:/  " Unknown option: <M-q>=q
+        catch /^Vim\%((\a\+)\)\=:E518:/  " Unknown option: <M-q>=q
         endtry
     endif
     nnoremap <silent> <M-q> {gq}<Bar>:echo "Rewrapped paragraph"<CR>
