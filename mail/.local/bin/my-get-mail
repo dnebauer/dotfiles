@@ -5,7 +5,6 @@
 # Purpose: check for and download email
 # Created: 2022-09-14
 
-
 # ERROR HANDLING    {{{1
 
 # Exit on error. Append "|| true" if you expect an error.
@@ -24,43 +23,41 @@ set -o pipefail
 
 self="$(basename $0)"
 parameters=" [-v] [-d]"
-required_tools=(
-    awk
-    cat
-    getopt
-    grep
-    msmtpq
-    notify-send
-    offlineimap
-    pgrep
-    ping
-    wc
+# tools on the system path
+required_system_tools=(
+    awk       grep           pgrep
+    cat       notify-send    ping
+    getopt    offlineimap    wc
 )
-declare -A flag_values=(
-    [use_icon]=1
-    [has_display]=1
-    [synced_ok]=0
-)
+# local tools specified by absolute path
+msmtpq="$HOME/.local/bin/msmtpq"
+required_local_tools=("$msmtpq")
 mail_icon='/usr/share/doc/neomutt/logo/neomutt.svg'
 offlineimaprc="$HOME/.offlineimaprc"
 full_sync_interval=$((2 * 60 * 60))  # 2 hours, in seconds
 cache_dir="$HOME/.cache/offlineimap"
 cache_fp="$cache_dir/last-full-sync"
 log_file="$HOME/.local/mail/log/offlineimap.log"
+ps_grep='bash /home/david/.local/bin/my-get-mail-daemon'
 piddir="${XDG_RUNTIME_DIR:-~/.local/var/run}/$self"
 pidfile="${piddir}/$self.pid"
 
 # flags
 
+declare -A flag_values=(
+    [use_icon]=1
+    [has_display]=1
+    [synced_ok]=0
+)
 use_icon () { flag 'use_icon' "$@"; return $?; }
 has_display () { flag 'has_display' "$@"; return $?; }
 synced_ok () { flag 'synced_ok' "$@"; return $?; }
 # }}}1
 
-
 # PROCEDURES
 
 # abortScript($msg)    {{{1
+#   abort script with notification error message
 #   params: $msg - abort message
 #   prints: nil
 #   return: nil
@@ -82,6 +79,30 @@ abortScript () {
     fi
     echo "$self: offlineimap mail fetch failed: $body"
     exit 1
+}
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+function checkPrereqs () {
+    local missing tool
+    missing=()
+    # these tools can be found on the base system path
+    for tool in "${required_system_tools[@]}" ; do
+        command -v "$tool" &>/dev/null || missing+=("$tool")
+    done
+    # these tools are specified by absolute path
+    for tool in "${required_local_tools[@]}" ; do
+        [[ -x "$tool" ]] || missing+=("$tool")
+    done
+    if [[ ${#missing[@]} -ne 0 ]] ; then
+        local msg ; msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+        echo "$msg" 1>&2
+        logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
+        exit 1
+    fi
+    unset missing tools required_tools
 }
 # displayUsage()    {{{1
 #   intent: display script usage information
@@ -107,6 +128,30 @@ mail servers are defined by 'remotehost' keys.)
 Fatal errors result in an abort message being written to the
 console and displayed in a system notification.
 
+Known errors are:
+  $self is already running (PID=<pid>)
+    * another instance of $self has been detected
+  Unexpected deletion of pid locking directory: <dirpath>
+    * this is usually due to another instance of $self
+      interfering with this instance: it deletes the pid
+      directory as part of its exit cleanup in between this
+      instance creating the directory and writing to it
+  Offlineimap is already running
+    * an instance of offlineimap is already running
+  Cannot locate offlineimap config file: <filepath>
+    * unable to locate the specified configuration file
+  Unable to reach: <servers>
+    * list of mail servers defined in offlineimap
+      configuration file that cannot be reached by the
+      'ping' command
+    * this can indicate a transient condition or total lack
+      of internet access
+  Unable to create cache directory: <dirpath>
+    * the operating system is unable to create the specified
+      directory
+  See offlineimap log: <filepath>
+    * offlineimap exited with an error status
+
 USAGE: ${self} ${parameters}
        ${self} -h
 
@@ -127,7 +172,7 @@ flag () {
     1) return ${flag_values[$1]} ;;
     2) [[ "$2" = 'true' ]] && flag_values[$1]=0 || true;
        [[ "$2" = 'false' ]] && flag_values[$1]=1 || true ;;
-    *) echo "$self: bad param count: $#" > /dev/stderr; exit 2 ;;
+    *) echo "$self: bad param count: $#" 1>&2; exit 2 ;;
     esac
 }
 # joinBy($delim, $item1[, $item2[, ...]])    {{{1
@@ -174,28 +219,14 @@ processOptions () {
         *              ) break ;;
         esac
     done
-    ARGS="${@}"  # remaining arguments
+    ARGS=("${@}")  # remaining arguments
 }
 # }}}1
 
-
 # MAIN
 
-# check for required tools    {{{1
-missing=()
-for tool in "${required_tools[@]}" ; do
-    command -v "$tool" &>/dev/null || missing+=("$tool")
-done
-[[ ${#missing[@]} -eq 0 ]] || {
-    msg="$self: can't run without: $(joinBy ', ' "${missing[@]}")"
-    echo "$msg" >/dev/stderr
-    exit 1
-}
-unset missing tools required_tools
-
-# process command line options    {{{1
-# - results in $ARGS holding remaining non-option command line arguments
-processOptions "${@}"
+checkPrereqs
+processOptions "${@}"  # leaves ${ARGS[@]} holding positional arguments
 
 # set boolean values    {{{1
 [[ "x$DISPLAY" != "x" ]] && has_display 'true'
@@ -207,12 +238,14 @@ if ! mkdir "$piddir" 2>/dev/null; then
     if [[ -f "$pidfile" ]]; then
         # is process actually still running under this pid
         oldpid="$(cat "$pidfile")"
-        result="$(ps -ef | grep $oldpid | grep $self || true)"
+        result="$(ps -ef | grep "$oldpid" | grep "$ps_grep" || true)"
         [[ -n "$result" ]] \
             && abortScript "$self is already running (PID=$oldpid)"
     fi
 fi
-pid="$(ps -ef | grep $self | head -n1 | awk '{print $2;}')"
+pid="$(ps -ef | grep "$ps_grep" | head -n1 | awk '{print $2;}')"
+[[ -d "$piddir" ]] \
+    || abortScript "Unexpected deletion of pid locking directory: $piddir"
 echo "$pid" > "$pidfile"  # update pid file
 trap "[[ -f \"$pidfile\" ]] && rm -rf \"$piddir\"" EXIT
 unset oldpid pid piddir pidfile result
@@ -222,12 +255,12 @@ pgrep -x offlineimap &>/dev/null \
     && abortScript 'Offlineimap is already running'
 
 # flush queued mail    {{{1
-num_queue=$(msmtpq --q-mgmt -d | grep "num" | wc -l || true)
+num_queue=$("$msmtpq" --q-mgmt -d | grep "num" | wc -l || true)
 if [[ $num_queue -gt 0 ]] ; then
     msg="$self: flushing $num_queue queued message"
     [[ $num_queue -gt 1 ]] && msg+='s'
     echo "$msg"
-    msmtpq --q-mgmt -r
+    "$msmtpq" --q-mgmt -r
 fi
 unset msg num_queue
 
@@ -246,7 +279,8 @@ unset mail_servers missing
 
 # get time since last full sync    {{{1
 [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
-[[ -d "$cache_dir" ]] || abortscript "Unable to create cache file: $cache_dir"
+[[ -d "$cache_dir" ]] \
+    || abortscript "Unable to create cache directory: $cache_dir"
 if [ -f "$cache_fp" ]; then
     time_of_last_full_sync="$(cat "$cache_fp")"
 else

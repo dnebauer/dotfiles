@@ -404,6 +404,10 @@ exec --no-startup-id udiskie &
 
 exec --no-startup-id systemctl --user start i3-my-fullscreen-handler.service
 
+# check mail periodically    {{{2
+
+exec --no-startup-id systemctl --user start my-get-mail.service
+
 # fading effects    {{{2
 #
 # - use a compositor
