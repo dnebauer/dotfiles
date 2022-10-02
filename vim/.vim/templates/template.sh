@@ -5,8 +5,7 @@
 # Purpose: 
 # Created: ${date}
 
-
-# ERROR HANDLING
+# ERROR HANDLING    {{{1
 
 # Exit on error. Append "|| true" if you expect an error.
 set -o errexit
@@ -19,7 +18,7 @@ set -o pipefail
 # Turn on traces, useful while debugging but commented out by default
 # set -o xtrace
 
-# VARIABLES
+# VARIABLES    {{{1
 
 msg="Loading libraries" ; echo -ne "\\033[1;37;41m${msg}\\033[0m"
 source "@libexec_dir@/libdncommon-bash/liball"  # supplies functions
@@ -34,15 +33,45 @@ param_pad="$( dnRightPad "$( dnStrLen "${usage} ${dn_self}" )" )"
 parameters=" [-v] [-d]"  # **
 #parameters="${parameters}\n${param_pad}"
 #parameters="${parameters} ..."
-required_tools=(
+# required tools findable on system path
+required_system_tools=(
     getopt
 )
+# required tools specified by full path
+required_local_tools=()
 unset param_pad msg
-
+# }}}1
 
 # PROCEDURES
 
-# Show usage
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+function checkPrereqs () {
+    local missing tool
+    missing=()
+    # these tools can be found on the base system path
+    for tool in "${required_system_tools[@]}" ; do
+        command -v "$tool" &>/dev/null || missing+=("$tool")
+    done
+    # these tools are specified by absolute path
+    for tool in "${required_local_tools[@]}" ; do
+        [[ -x "$tool" ]] || missing+=("$tool")
+    done
+    if [[ ${#missing[@]} -ne 0 ]] ; then
+        local msg ; msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+        echo "$msg" >/dev/stderr
+        # cannot use 'log' function here:
+        # - options have not yet been processed
+        logger --priority "user.err" --tag "$dn_self" "$msg"
+        exit 1
+    fi
+    unset required_system_tools required_local_tools
+}
+# displayUsage()    {{{1
+#   intent: display usage information
 #   params: nil
 #   prints: nil
 #   return: nil
@@ -62,9 +91,10 @@ Options: -x OPT  =
                    (equivalent to 'set -o xtrace')
 _USAGE
 }
-# Process configuration files
-#   params: 1 - global config filepath (optional)
-#           2 - local config filepath (optional)
+# processConfigFiles([global_fp[, local_fp]])    {{{1
+#   intent: process configuration files
+#   params: global_fp - global config filepath (optional)
+#           local_fp  - local config filepath (optional)
 #   prints: nil
 #   return: nil
 #   notes:  set variables [  ]
@@ -92,12 +122,14 @@ processConfigFiles () {
             done < "${conf}"
         fi
     done
+    unset system_conf local_conf msg
 }
-# Process command line options
-#   params: all command line parameters
+# processOptions([@options])    {{{1
+#   intent: process all command line options
+#   params: @options - all command line parameters
 #   prints: feedback
 #   return: nil
-#   note:   after execution variable ARGS contains
+#   note:   after execution variable @ARGS contains
 #           remaining command line args (after options removed)
 processOptions () {
     # read the command line options
@@ -123,44 +155,39 @@ processOptions () {
         *              ) break ;;
         esac
     done
-    ARGS="${@}"  # remaining arguments
+    ARGS=("${@}")  # remaining arguments
 }
-# Join items
-#   params: 1  - delimiter
-#           2+ - items to be joined
+# joinBy($delim, @items)    {{{1
+#   intent: join all items using delimiter
+#   params: delim - delimiter
+#           items - items to be joined
 #   prints: string containing joined items
 #   return: nil
 function joinBy () {
-    local d=$1
+    local delimiter first_item
+    delimiter="${1:-}"
     shift
-    local f=$1
+    first_item="${1:-}"
     shift
-    printf %s "$f" "${@/#/$d}"
+    printf %b%s "$first_item" "${@/#/$delimiter}"
 }
-
+# }}}1
 
 # MAIN
 
-# Check for required tools
-missing=()
-for tool in "${required_tools[@]}" ; do
-    command -v "${tool}" &>/dev/null || missing+=("${tool}")
-done
-[[ ${#missing[@]} -eq 0 ]] \
-    || dnFailScript "Can't run without: $(joinBy ', ' "${missing[@]}")"
-unset missing tools required_tools
+# check for required tools    {{{1
+checkPrereqs
 
-# Process configuration files
+# process configuration files    {{{1
 msg="Reading configuration files" ; echo -ne "$( dnRedReverseText "${msg}" )"
 processConfigFiles "${system_conf}" "${local_conf}"
 dnEraseText "${msg}"
 unset system_conf local_conf msg
 
-# Process command line options
-# - results in $ARGS holding remaining non-option command line arguments
-processOptions "${@}"
+# process command line options    {{{1
+processOptions "${@}"  # leaves ${ARGS[@]} holding positional arguments
 
-# Check arguments
+# check arguments    {{{1
 # Check that argument supplied
 #[ $# -eq 0 ] && dnFailScript "No wibble supplied"
 # Check value of option-set variable
@@ -171,7 +198,8 @@ processOptions "${@}"
 # Check for option-set variable
 #[ -z "${var}" ] && dnFailScript "You did not specify a wibble"
 
-# Informational message
+# informational message    {{{1
 dnInfo "${dn_self} is running..."
+# }}}1
 
 # vim:foldmethod=marker:
