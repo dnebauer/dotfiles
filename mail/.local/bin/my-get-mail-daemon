@@ -5,7 +5,6 @@
 # Purpose: check for and download email
 # Created: 2022-10-02
 
-
 # ERROR HANDLING    {{{1
 
 # Exit on error. Append "|| true" if you expect an error.
@@ -24,15 +23,27 @@ set -o pipefail
 
 self="$(basename $0)"
 parameters=" [-v] [-d]"
-check_interval='10m'
-required_system_tools=(logger sleep)
+check_interval='10m'  # delay between checks for mail
+startup_delay='3m'    # delay while internet becomes reachable
+required_system_tools=(logger sleep)   # find on system path
 my_get_mail="$HOME/.local/bin/my-get-mail"
-required_local_tools=("$my_get_mail")
+required_local_tools=("$my_get_mail")  # find by absolute path
 # }}}1
-
 
 # PROCEDURES
 
+# checkMailLoop()    {{{1
+#   intent: infinite loop that periodically checks mail
+#   params: nil
+#   prints: feedback
+#   return: nil
+checkMailLoop () {
+    while true ; do
+        # do not terminate if my_get_mail script fails
+        "$my_get_mail" || true
+        sleep "$check_interval"
+    done
+}
 # checkPrereqs()    {{{1
 #   intent: check for required tools
 #   params: nil
@@ -41,7 +52,7 @@ required_local_tools=("$my_get_mail")
 function checkPrereqs () {
     local missing tool
     missing=()
-    # these tools can be found on the base system path
+    # these tools can be found on the system path
     for tool in "${required_system_tools[@]}" ; do
         command -v "$tool" &>/dev/null || missing+=("$tool")
     done
@@ -51,10 +62,18 @@ function checkPrereqs () {
     done
     if [[ ${#missing[@]} -ne 0 ]] ; then
         local msg ; msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
-        echo "$msg" >/dev/stderr
+        echo "$msg" 1>&2
         logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
         exit 1
     fi
+}
+# delayStart()    {{{1
+#   intent: delay mail checking until internet is reachable
+#   params: nil
+#   prints: feedback
+#   return: nil
+delayStart () {
+    sleep "$startup_delay"
 }
 # displayUsage()    {{{1
 #   intent: display script usage information
@@ -67,6 +86,11 @@ ${self}: periodically check for email
 
 Runs the $my_get_mail
 script periodically (interval = $check_interval).
+
+The script pauses $startup_delay before beginning its
+periodic mail checking. This is to cater for the situation
+where it is run at system startup and allows time for the
+internet to become reachable.
 
 USAGE: ${self} ${parameters}
        ${self} -h
@@ -123,25 +147,13 @@ processOptions () {
     done
     ARGS=("${@}")  # remaining arguments
 }
-# checkMailLoop()    {{{1
-#   intent: infinite loop that periodically checks mail
-#   params: nil
-#   prints: feedback
-#   return: nil
-checkMailLoop () {
-    while true ; do
-        # do not terminate if my_get_mail script fails
-        "$my_get_mail" || true
-        sleep "$check_interval"
-    done
-}
 # }}}1
-
 
 # MAIN
 
 checkPrereqs
 processOptions
-checkMailLoop
+delayStart     # allows time for the internet to become reachable
+checkMailLoop  # begin infinite loop of periodic checking for mail
 
 # vim:foldmethod=marker:
