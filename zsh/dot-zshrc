@@ -244,21 +244,12 @@ typeset -U LUA_PATH lua_path
 lua_path+=('/usr/share/lua/lib/?.lua')       #} modules installed via user-
 lua_path+=('/usr/share/lua/lib/?/init.lua')  #} built debian packages
 lua_path+=(';')  # so LUA_PATH ends with ';;', meaning append default path
-# - base MANPATH    {{{3
-#   . do not use 'export -T' or 'typeset -U' as manpath and MANPATH
-#     are linked by default, and doing so manually actually disrupts
-#     the link between them
-unset manpath
-local_man="$HOME/.local/share/man"
-[[ -d "$local_man" ]] && manpath+=($local_man)
-unset local_man
 # - executables (local)    {{{3
 local_bin="$HOME/.local/bin"
 [[ -d "$local_bin" ]] && path=("$local_bin" $path)
 unset local_bin
 # - npm-installed apps    {{{3
 #   . in ~/.npmrc is configured with prefix of ~/.local
-#   . uses ~/.local/share/man as set for manpath above
 if [[ -v node_path ]] ; then
     export -T NODE_PATH node_path
     typeset -U NODE_PATH node_path
@@ -292,10 +283,6 @@ export PERL_LOCAL_LIB_ROOT=\
 export PERL_MB_OPT="--install_base \"$perl5_root\""
 export PERL_MM_OPT="INSTALL_BASE=$perl5_root"
 unset perl5_root
-#   . man pages
-perl5_man="$HOME/perl5/man"
-[[ -d "$perl5_man" ]] && manpath+=("$perl5_man")
-unset perl5_man
 # - tiddlywiki    {{{3
 if [[ ! -v tiddlywiki_plugin_path ]] ; then
     export -T TIDDLYWIKI_PLUGIN_PATH tiddlywiki_plugin_path
