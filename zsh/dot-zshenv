@@ -1,0 +1,67 @@
+## if booting to console
+#if [[ -z "$DISPLAY" && "$TTY" == '/dev/tty1' ]] ; then
+#
+#    # select window manager
+#    MY_WINDOW_MANAGER="$(/home/david/.local/bin/wmpicker)"
+#
+#    # winmanager-agnostic
+#    export TIDDLYWIKI_PLUGIN_PATH=/usr/local/share/tiddlywiki/plugins
+#
+#    # winmanager-specific
+#    case $MY_WINDOW_MANAGER in
+#    sway )
+#        export QT_QPA_PLATFORMTHEME=qt5ct
+#        export GRIM_DEFAULT_DIR=/home/david/Downloads/
+#        export _JAVA_AWT_WM_NONREPARENTING=1
+#        export MOZ_ENABLE_WAYLAND=1
+#        export QT_AUTO_SCREEN_SCALE_FACTOR=1
+#        export QT_QPA_PLATFORM=wayland
+#        export QT_QPA_PLATFORMTHEME=qt5ct
+#        export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+#        export GDK_BACKEND=wayland
+#        export XDG_CURRENT_DESKTOP=sway
+#        export MY_PRIMARY_OUTPUT=HDMI-A-1
+#        export MY_SECONDARY_OUTPUT=DVD-D-1
+#        ;;
+#    i3 | i3-with-shmlog )
+#        export MY_PRIMARY_OUTPUT=HDMI-A-0
+#        export MY_SECONDARY_OUTPUT=DVD-D-0
+#        ;;
+#    * )
+#        # no default action
+#        ;;
+#    esac
+#else  # booting to display manager
+#    # winmanager-agnostic
+#    export TIDDLYWIKI_PLUGIN_PATH=/usr/local/share/tiddlywiki/plugins
+#
+#    # manually set window manager
+#    # - valid values from Exec values in desktop files in
+#    #   /usr/share/{xsessions,wayland-sessions}
+#    MY_WINDOW_MANAGER='i3-with-shmlog'
+#
+#    # winmanager-specific
+#    case $MY_WINDOW_MANAGER in
+#    sway )
+#        export QT_QPA_PLATFORMTHEME=qt5ct
+#        export GRIM_DEFAULT_DIR=/home/david/Downloads/
+#        export _JAVA_AWT_WM_NONREPARENTING=1
+#        export MOZ_ENABLE_WAYLAND=1
+#        export QT_AUTO_SCREEN_SCALE_FACTOR=1
+#        export QT_QPA_PLATFORM=wayland
+#        export QT_QPA_PLATFORMTHEME=qt5ct
+#        export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+#        export GDK_BACKEND=wayland
+#        export XDG_CURRENT_DESKTOP=sway
+#        export MY_PRIMARY_OUTPUT=HDMI-A-1
+#        export MY_SECONDARY_OUTPUT=DVD-D-1
+#        ;;
+#    i3 | i3-with-shmlog )
+#        export MY_PRIMARY_OUTPUT=HDMI-A-0
+#        export MY_SECONDARY_OUTPUT=DVD-D-0
+#        ;;
+#    * )
+#        # no default action
+#        ;;
+#    esac
+#fi

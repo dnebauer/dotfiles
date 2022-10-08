@@ -1,0 +1,40 @@
+# only run in login shell
+if [[ -z "$DISPLAY" && "$TTY" == '/dev/tty1' ]] ; then
+
+    # winmanager-agnostic
+    unset TIDDLYWIKI_PLUGIN_PATH
+
+    # winmanager-specific
+    case $MY_WINDOW_MANAGER in
+    sway )
+        unset QT_QPA_PLATFORMTHEME
+        unset GRIM_DEFAULT_DIR
+        unset _JAVA_AWT_WM_NONREPARENTING
+        unset MOZ_ENABLE_WAYLAND
+        unset QT_AUTO_SCREEN_SCALE_FACTOR
+        unset QT_QPA_PLATFORM
+        unset QT_QPA_PLATFORMTHEME
+        unset QT_WAYLAND_DISABLE_WINDOWDECORATION
+        unset GDK_BACKEND
+        unset XDG_CURRENT_DESKTOP
+        unset MY_PRIMARY_OUTPUT
+        unset MY_SECONDARY_OUTPUT
+        ;;
+    i3 | i3-with-shm )
+        # stop services
+        for SERVICE in i3-focus-last i3-fullscreen-handler ; do
+            if systemctl --user --quiet is-active ${SERVICE}.service ; then
+                systemctl --user stop $SERVICE.service
+            fi
+        done
+        # unset session variables
+        unset MY_PRIMARY_OUTPUT
+        unset MY_SECONDARY_OUTPUT
+        ;;
+    * )
+        # no default action
+        ;;
+    esac
+
+    unset MY_WINDOW_MANAGER
+fi

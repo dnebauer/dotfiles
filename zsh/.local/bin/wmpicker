@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+declare -a known_wms
+declare -a avail_wms
+
+known_wms=(
+    awesome
+    bspwm
+    dwm
+    gnome-session
+    gnome-session-classic
+    i3
+    i3-with-shmlog
+    openbox-session
+    startplasma-x11
+    startxfce4
+    sway
+    xmonad
+    xterm
+)
+avail_wms=()
+for wm in "${known_wms[@]}"; do
+    command -v "$wm" &>/dev/null && avail_wms+=("$wm")
+done
+
+if command -v 'fzf' &>/dev/null ; then
+    fzf --reverse --inline-info --cycle < <(printf '%s\n' "${avail_wms[@]}")
+else
+    PS3="choose a number between 1 and ${#avail_wms[@]}: "
+    select wm in "${avail_wms[@]}"; do
+        echo "$wm"
+        break
+    done
+fi
