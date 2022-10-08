@@ -1,53 +1,12 @@
-application/vnd.sun.xml.writer;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.writer.global;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.writer;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.writer-global;/home/david/.openoffice/1.0.2/soffice %s
-application/x-starwriter;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.writer.template;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.calc;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.calc;/home/david/.openoffice/1.0.2/soffice %s
-application/x-starcalc;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.calc.template;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.impress;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.impress;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.impress-packed;/home/david/.openoffice/1.0.2/soffice %s
-application/x-starimpress;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.impress.template;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.draw;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.draw;/home/david/.openoffice/1.0.2/soffice %s
-application/x-stardraw;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.draw.template;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.math;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.math;/home/david/.openoffice/1.0.2/soffice %s
-application/x-starmath;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.writer;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.writer.global;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.writer;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.writer-global;/home/david/.openoffice/1.0.2/soffice %s
-application/x-starwriter;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.writer.template;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.calc;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.calc;/home/david/.openoffice/1.0.2/soffice %s
-application/x-starcalc;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.calc.template;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.impress;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.impress;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.impress-packed;/home/david/.openoffice/1.0.2/soffice %s
-application/x-starimpress;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.impress.template;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.draw;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.draw;/home/david/.openoffice/1.0.2/soffice %s
-application/x-stardraw;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.draw.template;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.sun.xml.math;/home/david/.openoffice/1.0.2/soffice %s
-application/vnd.stardivision.math;/home/david/.openoffice/1.0.2/soffice %s
-application/x-starmath;/home/david/.openoffice/1.0.2/soffice %s
-# Java Web Start
-application/x-java-jnlp-file; /home/david/data/evaluation/j2re1.4.2_08/javaws/javaws %s
-# Play audio files in GUI player so can terminate if need to
+# Java
+
+application/x-java-jnlp-file; /home/david/data/evaluation/j2re1.4.2_08/javaws/javaws %s; description="Java Web Start"
+
+# Audio
+
 audio/x-musepack-mpc; /usr/bin/smplayer -close-at-end '%s'; description="Mpc audio"
-# 	musepack compression audio file
-# 	(mime-type defined in ~/.mime.types file)
+# - musepack compression audio file
+# - mime-type defined in ~/.mime.types file)
 audio/mpeg; /usr/bin/smplayer -close-at-end '%s'; description="Mpeg Audio"
 audio/x-flac; /usr/bin/vlc --play-and-exit '%s'; description="FLAC Audio"
 audio/flac; /usr/bin/vlc --play-and-exit '%s'; description="FLAC Audio"
@@ -55,22 +14,20 @@ audio/ac3; /usr/bin/smplayer -close-at-end '%s'; description="AC-3 Audio"
 audio/mp4; /usr/bin/smplayer -close-at-end '%s'; description="Mpeg-4 Audio"
 audio/x-ms-wma; /usr/bin/smplayer -close-at-end '%s'; description="Windows Media Audio"
 audio/x-ogg; /usr/bin/smplayer -close-at-end '%s'; description="Ogg Audio"
-# Play video in GUI player
+
+# Video
+
 video/mp4; /usr/bin/smplayer -close-at-end '%s'; description="Mpeg Video"
+
 # PDF
-# - xpdf is currently broken (2014-01)
-#application/pdf; /usr/bin/xpdf '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
-#application/x-pdf; /usr/bin/xpdf '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
-#application/pdf; /usr/bin/xpdf '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
-#application/x-pdf; /usr/bin/xpdf '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
+
 application/pdf; /usr/bin/okular '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
 application/x-pdf; /usr/bin/okular '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
 application/pdf; /usr/bin/okular '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
 application/x-pdf; /usr/bin/okular '%s'; test=test "$DISPLAY" != ""; description="Portable Document Format"; nametemplate=%s.pdf
-# RTF
-text/rtf; /usr/bin/ted '%s' &>/dev/null; description="Rich Text Format";
-nametemplate=%s.rtf
-# images
+
+# Images
+
 # BUG #1: Gwenview using temporary directories
 # - following package update on 2013-05-25 a bug was detected opening image files
 #   from Midnight Commander (mc)
@@ -122,3 +79,9 @@ image/x-portable-graymap; gwenview "%s"; test=test -n "$DISPLAY"
 image/x-portable-pixmap; gwenview "%s"; test=test -n "$DISPLAY"
 image/x-xbitmap; gwenview "%s"; test=test -n "$DISPLAY"
 image/x-xpixmap; gwenview "%s"; test=test -n "$DISPLAY"
+
+# HTML
+
+text/html; qutebrowser %s && sleep 5;      test=test -n "$DISPLAY"; nametemplate=%s.html; needsterminal
+text/html; w3m -I %{charset} -T text/html; nametemplate=%s.html; copiousoutput
+text/html; lynx -dump %s;                  nametemplate=%s.html; copiousoutput
