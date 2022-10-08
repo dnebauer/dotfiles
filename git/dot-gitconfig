@@ -23,3 +23,5 @@
 	submodule = log
 [pull]
 	rebase = merges
+[core]
+	editor = nvim
