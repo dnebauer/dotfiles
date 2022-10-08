@@ -1,0 +1,10 @@
+[Unit]
+Description=my-get-mail
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/my-get-mail-daemon
+Restart=always
+
+[Install]
+WantedBy=default.target

@@ -7,20 +7,62 @@
 # actions:
 # - deletes current or selected messages
 
-macro index,pager d "\
+macro index d "\
 <enter-command>echo 'Deleting selected message(s)...'<enter>\
 <tag-prefix><purge-message>\
 <sync-mailbox>\
-" \
-'delete current or tagged message(s) from Trash'
+"    'delete current or tagged message(s) from Trash'
 
-macro index,pager <delete> "\
+macro pager d "\
+<enter-command>echo 'Deleting message...'<enter>\
+<purge-message>\
+<sync-mailbox>\
+"    'delete from Trash'
+
+macro index <delete> "\
 <enter-command>echo 'Deleting selected message(s)...'<enter>\
 <tag-prefix><purge-message>\
+<sync-mailbox>\
+"    'delete current or tagged message(s) from Trash'
+
+macro pager <delete> "\
+<enter-command>echo 'Deleting message...'<enter>\
+<purge-message>\
+<sync-mailbox>\
+"    'delete from Trash'
+
+# ---------------------------------------------------------
+
+# untrash/undelete mail
+
+# folders: Trash
+#
+# keys: u
+#
+# actions:
+# - remove trash label
+# - add archive label
+# - move to archive
+
+macro index u "\
+<enter-command>echo 'Untrashing selected message(s)...'<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+archive -trash<enter>\
+<enter-command>set resolve<enter>\
+<tag-prefix><save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
-" \
-'delete current or tagged message(s) from Trash'
+"    'untrash current or tagged message(s)'
+
+macro pager u "\
+<enter-command>echo 'Untrashing message...'<enter>\
+<enter-command>unset resolve<enter>\
+<modify-labels>+archive -trash<enter>\
+<enter-command>set resolve<enter>\
+<save-message>+INBOX.Archive<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'untrash message'
 
 # ----------------------------------------------------------
 

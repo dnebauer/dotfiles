@@ -8,7 +8,7 @@
 # - moves current or selected messages to trash
 # - tags current or selected messages as trash
 
-macro index,pager d "\
+macro index d "\
 <enter-command>echo 'Trashing selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -17,10 +17,20 @@ macro index,pager d "\
 <tag-prefix><save-message>+INBOX.Trash<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
-" \
-'trash current or tagged message(s)'
+"    'trash current or tagged message(s)'
 
-macro index,pager <delete> "\
+macro pager d "\
+<enter-command>echo 'Trashing message...'<enter>\
+<enter-command>unset resolve<enter>\
+<clear-flag>N\
+<modify-labels>+trash<enter>\
+<enter-command>set resolve<enter>\
+<save-message>+INBOX.Trash<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'trash message'
+
+macro index <delete> "\
 <enter-command>echo 'Trashing selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -29,8 +39,31 @@ macro index,pager <delete> "\
 <tag-prefix><save-message>+INBOX.Trash<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
-" \
-'trash current or tagged message(s)'
+"    'trash current or tagged message(s)'
+
+macro pager <delete> "\
+<enter-command>echo 'Trashing message...'<enter>\
+<enter-command>unset resolve<enter>\
+<clear-flag>N\
+<modify-labels>+trash<enter>\
+<enter-command>set resolve<enter>\
+<save-message>+INBOX.Trash<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'trash message'
+
+# ---------------------------------------------------------
+
+# reset undelete-message function binding
+
+# folders: all except Trash
+#
+# keys: u
+#
+# actions:
+# - bind undelete-message to u
+
+bind index,pager u undelete-message
 
 # ---------------------------------------------------------
 

@@ -22,6 +22,7 @@ set my_mailbox = $my_maildir/$my_account
 set my_cfgdir = $HOME/.config/neomutt
 set my_cfgdir_d = $my_cfgdir/neomuttrc.d
 set my_config = $my_cfgdir/neomuttrc
+set my_mailcap = $my_cfgdir/mailcap
 set my_utils = $HOME/.local/mail/utils
 set my_nvim_args = $my_utils/neomutt_nvim-args.vim
 set my_print_pdf = $my_utils/neomutt_print-to-pdf
@@ -169,52 +170,83 @@ bind index,pager yu noop
 bind index,pager yv noop
 bind index,pager yy noop
 bind index,pager y noop
-bind index,pager yy modify-labels
-macro index,pager yd "\
+macro index yy "\
+<tag-prefix><modify-labels>\
+"    'modify (notmuch/imap) tags'
+bind pager yy modify-labels
+macro index yd "\
 <enter-command>echo \
 'Adding [development] tag to selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+development<enter>\
 <enter-command>set resolve<enter>\
 "    'add label: development'
-macro index,pager yf "\
+macro pager yd "\
+<enter-command>echo 'Adding [development] tag to message...'<enter>\
+<modify-labels>+development<enter>\
+"    'add label: development'
+macro index yf "\
 <enter-command>echo 'Adding [financial] tag to selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+financial<enter>\
 <enter-command>set resolve<enter>\
 "    'add label: financial'
-macro index,pager yl "\
+macro pager yf "\
+<enter-command>echo 'Adding [financial] tag to message...'<enter>\
+<modify-labels>+financial<enter>\
+"    'add label: financial'
+macro index yl "\
 <enter-command>echo 'Adding [later] tag to selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+later<enter>\
 <enter-command>set resolve<enter>\
 "    'add label: later'
-macro index,pager yo "\
+macro pager yl "\
+<enter-command>echo 'Adding [later] tag to message...'<enter>\
+<modify-labels>+later<enter>\
+"    'add label: later'
+macro index yo "\
 <enter-command>echo 'Adding [order] tag to selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+order<enter>\
 <enter-command>set resolve<enter>\
 "    'add label: order'
-macro index,pager yp "\
+macro pager yo "\
+<enter-command>echo 'Adding [order] tag to message...'<enter>\
+<modify-labels>+order<enter>\
+"    'add label: order'
+macro index yp "\
 <enter-command>echo 'Adding [personal] tag to selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+personal<enter>\
 <enter-command>set resolve<enter>\
 "    'add label: personal'
-macro index,pager yu "\
-<enter-command>echo 'Adding [usnion] tag to selected message(s)...'<enter>\
+macro pager yp "\
+<enter-command>echo 'Adding [personal] tag to message...'<enter>\
+<modify-labels>+personal<enter>\
+"    'add label: personal'
+macro index yu "\
+<enter-command>echo 'Adding [union] tag to selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+union<enter>\
 <enter-command>set resolve<enter>\
 "    'add label: union'
-macro index,pager yv "\
+macro pager yu "\
+<enter-command>echo 'Adding [union] tag to message...'<enter>\
+<modify-labels>+union<enter>\
+"    'add label: union'
+macro index yv "\
 <enter-command>echo 'Adding [vault] tag to selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+vault<enter>\
 <enter-command>set resolve<enter>\
 "    'add label: vault'
+macro pager yv "\
+<enter-command>echo 'Adding [vault] tag to message...'<enter>\
+<modify-labels>+vault<enter>\
+"    'add label: vault'
 # - archive message
-macro index,pager a "\
+macro index a "\
 <enter-command>echo 'Archiving selected message(s)...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -223,7 +255,15 @@ macro index,pager a "\
 <enter-command>set resolve<enter>\
 <tag-prefix><save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
-"    'move mail to Archive'
+"    'move to Archive'
+macro pager a "\
+<enter-command>echo 'Archiving message...'<enter>\
+<clear-flag>N\
+<modify-labels>\
+-inbox +archive -draft -spam -trash -sent -unread -new -junk<enter>\
+<save-message>+INBOX.Archive<enter>\
+<sync-mailbox>\
+"    'move to Archive'
 # - move messages to other mailboxes
 bind index,pager MD noop
 bind index,pager MI noop
@@ -231,7 +271,7 @@ bind index,pager MJ noop
 bind index,pager MM noop
 bind index,pager MS noop
 bind index M noop
-macro index,pager MI "\
+macro index MI "\
 <enter-command>echo 'Moving selected message(s) to Inbox...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -242,7 +282,18 @@ macro index,pager MI "\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move mail to Inbox'
-macro index,pager MD "\
+macro pager MI "\
+<enter-command>echo 'Moving to Inbox...'<enter>\
+<enter-command>unset resolve<enter>\
+<clear-flag>N\
+<modify-labels>\
++inbox -archive -draft -spam -trash -sent -unread -junk<enter>\
+<enter-command>set resolve<enter>\
+<save-message>+INBOX<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'move to Inbox'
+macro index MD "\
 <enter-command>echo 'Moving selected message(s) to Drafts...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -253,7 +304,18 @@ macro index,pager MD "\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move mail to Drafts'
-macro index,pager MJ "\
+macro pager MD "\
+<enter-command>echo 'Moving to Drafts...'<enter>\
+<enter-command>unset resolve<enter>\
+<clear-flag>N\
+<modify-labels>\
+-inbox -archive +draft -spam -trash -sent -unread -junk<enter>\
+<enter-command>set resolve<enter>\
+<save-message>+INBOX.Drafts<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'move to Drafts'
+macro index MJ "\
 <enter-command>echo 'Moving selected message(s) to Spam...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -264,7 +326,18 @@ macro index,pager MJ "\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move mail to Spam'
-macro index,pager MS "\
+macro pager MJ "\
+<enter-command>echo 'Moving to Spam...'<enter>\
+<enter-command>unset resolve<enter>\
+<clear-flag>N\
+<modify-labels>\
+-inbox -archive -draft +spam -trash -sent -unread -junk<enter>\
+<enter-command>set resolve<enter>\
+<save-message>+INBOX.Spam<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'move to Spam'
+macro index MS "\
 <enter-command>echo 'Moving selected message(s) to Sent...'<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -275,10 +348,23 @@ macro index,pager MS "\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move mail to Sent'
+macro pager MS "\
+<enter-command>echo 'Moving to Sent...'<enter>\
+<enter-command>unset resolve<enter>\
+<clear-flag>N\
+<modify-labels>\
+-inbox -archive -draft -spam -trash +sent -unread -junk<enter>\
+<enter-command>set resolve<enter>\
+<save-message>+INBOX.Sent<enter>\
+<sync-mailbox>\
+<change-vfolder>^<enter>\
+"    'move to Sent'
 # - show log messages
 bind index,pager MM show-log-messages
-# - delete messages
-#   . set in folder-hooks
+# - delete/undelete messages: set in folder-hooks
+macro index W "\
+<tag-prefix><clear-flag>\
+"    'clear a status flag from messages(s)'
 bind index <tab> sync-mailbox
 timeout-hook 'exec sync-mailbox'
 startup-hook 'exec sync-mailbox'
@@ -325,6 +411,9 @@ set print_command = $my_print_pdf   # conversion by zamzar.com
 unset print_decode
 set header_cache = $my_header_cache
 set message_cachedir = $my_message_cache
+set pager_context=3
+set tilde
+set pager_stop
 # - save all attachments
 macro pager S "\
 <pipe-message>\
@@ -332,6 +421,16 @@ ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
 <enter-command>echo 'Attachments saved to $my_download_dir'<enter>\
 "    'Save all non-text attachments using ripmime'
 unset prompt_after
+unauto_view *
+auto_view text/html \
+          application/postscript \
+          application/x-gunzip \
+          application/x-tar-gz \
+          application/octet-stream
+unalternative_order *
+alternative_order text/html \
+                  text/plain \
+                  text
 
 # Compose Mail
 
@@ -361,18 +460,20 @@ bind editor <Tab> complete-query
 bind editor \ct complete
 set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
 set signature = $my_signature
+set attribution="* %n <%a> [%{%Y-%m-%d %H:%M:%S %Z}]:\n"
+set mime_forward = ask-no
 set fast_reply                       # skip to compose when replying
 set forward_format = 'Fwd: %s'       # format of subject when forwarding
 set reply_to                         # reply to Reply to: field
 set include                          # include message in replies
 set forward_quote                    # include message in forwards
 unset sig_dashes                     # no dashes before sig
-set ispell = 'apsell -e -c'
+set ispell = 'aspell -e -c'
 
 # Send Mail
 
 set sendmail = "$my_msmtpq"
-set sendmail_wait = 0  # waits forever for msmtpq to finish, <0 to background
+set sendmail_wait = -1  # background sending, 0 waits forever to finish
 set envelope_from_address
 set abort_noattach = ask-yes
 
