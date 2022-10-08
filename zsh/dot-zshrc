@@ -317,6 +317,9 @@ for gui_editor in "${gui_editors[@]}" ; do
 done
 unset gui_editor gui_editors
 export NEOVIDE_MULTIGRID=1
+# browser    {{{2
+# - BROWSER variable used by sensible-browser if present
+export BROWSER='browser.sh'
 # urls    {{{2
 # - github account    {{{3
 export GITURL='https://github.com/dnebauer'
