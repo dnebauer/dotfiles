@@ -1,0 +1,51 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 600,
+       "width": 800,
+       "x": 0,
+       "y": 0
+    },
+    "marks": [
+      "t"
+    ],
+    "name": "AlacrittyTmux",
+    "percent": 0.75,
+    "swallows": [
+       {
+        "class": "^AlacrittyTmux$",
+        "instance": "^AlacrittyTmux$",
+        "title": "^AlacrittyTmux$"
+       }
+    ],
+    "type": "con"
+}
+
+{
+    "border": "normal",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1384,
+       "width": 1716,
+       "x": 3642,
+       "y": 54
+    },
+    "marks": [
+       "v"
+    ],
+    "name": "[No Name] - NVIM — Neovim",
+    "percent": 0.25,
+    "swallows": [
+       {
+        "class": "^nvim\\-qt$",
+        "instance": "^nvim\\-qt$",
+        "title": "^\\[No\\ Name\\]\\ \\-\\ NVIM\\ \\—\\ Neovim$"
+       }
+    ],
+    "type": "con"
+}
+

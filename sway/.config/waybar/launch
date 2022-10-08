@@ -1,0 +1,208 @@
+#!/bin/bash
+###!/usr/bin/env bash
+
+# File: launch.sh
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: launch polybar on each monitor
+# Created: 2022-05-20
+
+
+# ERROR HANDLING
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+
+# VARIABLES
+
+self="$(basename "$0")"
+required_tools=(
+    getopt
+    xdo
+    xdotool
+)
+primary=''
+others=()
+dummy_wids=()
+
+
+# PROCEDURES
+
+# Show usage
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${dn_self}: launch polybar
+
+Kills any existing instances of polybar and launches a fresh
+instance.
+
+Usage: $self [-v] [-d]
+       ${dn_self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# Process command line options
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                     \
+        getopt                            \
+            --options hvd                 \
+            --long    help,verbose,debug  \
+            --name    "${BASH_SOURCE[0]}" \
+            -- "${@}"                     \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# Join items
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}
+# Get monitor names as per xrandr
+#   params: nil
+#   prints: nil
+#   return: nil
+function setMonitorNames () {
+    primary=$(xrandr --query |\
+        grep ' connected'    |\
+        grep 'primary'       |\
+        cut -d' ' -f1\
+    )
+    others=$(xrandr --query  |\
+        grep ' connected'    |\
+        grep -v 'primary'    |\
+        cut -d' ' -f1\
+    )
+}
+# Launch bar on each monitor
+#   params: 1 - bar
+#   prints: nil
+#   return: nil
+function launchBars () {
+
+    local bar="${1}"
+
+    # launch on primary monitor
+    MONITOR=$primary polybar --reload "$bar" &
+    sleep 1
+
+    # launch on all other monitors
+    for monitor in $others ; do
+        MONITOR=$monitor polybar --reload "$bar" &
+    done
+    sleep 1
+}
+# Launch dummy bar on each monitor
+#   params: nil
+#   prints: nil
+#   return: nil
+function launchDummyBars () {
+    launchBars 'dummy'
+}
+# Get window ids (wids) of dummy bars
+#   params: nil
+#   prints: nil
+#   return: nil
+function getDummyWids () {
+    dummy_wids=($(xdotool search --all --class 'Polybar'))
+}
+# Launch main bar on each monitor
+#   params: nil
+#   prints: nil
+#   return: nil
+function launchMainBars () {
+    launchBars 'main'
+}
+# Lower dummy bars below main bars
+#   params: nil
+#   prints: nil
+#   return: nil
+function lowerDummyBars () {
+    for wid in "${dummy_wids[@]}" ; do
+        xdo lower $wid
+    done
+}
+
+
+# MAIN
+
+# Check for required tools
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || dnFailScript "Can't run without: $(joinBy ', ' "${missing[@]}")"
+unset missing tools required_tools
+
+# Process command line options
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# Kill existing instances
+# - exits with error if no running instance to send msg to
+#killall -q polybar
+polybar-msg cmd quit || true
+while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
+
+# Launch polybar on each monitor
+# - do primary monitor first so it reliably shows the tray
+# - whichever bar loads first captures the tray
+# - as per polybar wiki (https://github.com/polybar/polybar/wiki/,
+#   see "Known Issues) set "override-direct = true", but it is then necessary
+#   to use a dummy bar of the same size with "override-direct = false" so that
+#   i3 reserves space for it, but make sure to lower the dummy bar under the
+#   main bar with "xdo" (as discussed in polybar chat at
+#   https://gitter.im/polybar/polybar?at=5e78cdf74fa834644901efba)
+if type "xrandr"; then
+    setMonitorNames
+    launchDummyBars
+    getDummyWids
+    launchMainBars
+    lowerDummyBars
+else
+    polybar --reload main &
+fi
+
+# vim:foldmethod=marker:

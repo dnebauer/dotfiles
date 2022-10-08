@@ -1,0 +1,331 @@
+#!/usr/bin/env bash
+
+# File: i3-setup-session
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: set up initial i3 session
+# Created: 2022-05-25
+
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+dlg_title='i3 session setup'
+required_tools=(
+    astroid-launcher   qutebrowser
+    getopt             sleep
+    i3-msg             tiddlywiki
+    konsole            xdotool
+    nvim-qt
+)
+# trial and error showed that any app post-launch delay < 1 second caused
+# problems for qutebrowser windows resetting their titles, independently of the
+# delay before the titling itself (even if there is no reasonable explanation
+# for that!)
+delay_post_launch=1
+delay_app_loading=30
+debug=false
+# }}}1
+
+# PROCEDURES
+
+# Show usage    {{{1
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: app launcher called during i3 startup
+
+This script is called by the i3 config file during startup
+to launch applications. The main purpose for using this
+script rather than internal i3 commands is to control the
+window role assigned to some apps. This enables them to be
+"swallowed" by preset layouts.
+
+It is essential that this script is consistent with any
+applied layouts and with the i3 config file. This includes,
+but is not limited to, consistency with workspace names.
+
+Usage: ${self} [-v] [-d]
+       ${self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# Process command line options    {{{1
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                             \
+        getopt                                    \
+            --options hvdx:                       \
+            --long    xoption:,help,verbose,debug \
+            --name    "${BASH_SOURCE[0]}"         \
+            -- "${@}"                             \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -x | --xoption ) varx="${2}"    ; shift 2 ;;
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# Join items    {{{1
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}
+# Send qutebrowser command    {{{1
+#   params: 1 - window id
+#           2 - command
+#   prints: nil
+#   return: nil
+function qbCommand () {
+    # extract parameters
+    local id cmd
+    id=$1
+    cmd="$2"
+
+    # send command to nominated qutebrowser instance
+    xdotool windowactivate --sync $id
+    xdotool key  --window $id --clearmodifiers colon
+    xdotool type --window $id --clearmodifiers "$cmd"
+    xdotool key  --window $id --clearmodifiers Return
+}    # }}}1
+
+# MAIN
+
+# Check for required tools    {{{1
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+if [[ ${#missing[@]} -ne 0 ]] ; then
+    echo "Can't run without: $(joinBy ', ' "${missing[@]}")" >/dev/stderr
+    exit 1
+fi
+unset missing tools required_tools
+
+# Process command line options    {{{1
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# Assign workspaces to monitors    {{{1
+# - this must be done in the i3 setup file
+# - there appears to be no way to construct the workspace command in shell
+#   script using i3-msg without i3 interpreting the workspace name as being
+#   everything following the token 'workspace'
+# - for posterity, what follows is the final attempt at setting workspace 1:
+##i3-msg workspace '1:term' output $primary_monitor
+# - this was an earlier attempt (expand to include other workspaces and the
+#   secondary monitor:
+##primary_workspaces=(1:term)
+##for workspace in "${primary_workspaces[@]}" ; do
+##    i3-msg workspace "$workspace" output $primary_monitor
+##done
+
+# Apply layouts to workspaces    {{{1
+if $debug ; then echo 'Appending layout to workspace 1' ; fi
+i3-msg 'workspace 1:term; append_layout ~/.config/i3/sessions/workspace_1.json'
+if $debug ; then echo 'Appending layout to workspace 2' ; fi
+i3-msg 'workspace 2:mail; append_layout ~/.config/i3/sessions/workspace_2.json'
+if $debug ; then echo 'Appending layout to workspace 3' ; fi
+i3-msg 'workspace 3:chrome; append_layout ~/.config/i3/sessions/workspace_3.json'
+if $debug ; then echo 'Appending layout to workspace 4' ; fi
+i3-msg 'workspace 4:qute; append_layout ~/.config/i3/sessions/workspace_4.json'
+if $debug ; then echo 'Appending layout to workspace 5' ; fi
+i3-msg 'workspace 5:wiki; append_layout ~/.config/i3/sessions/workspace_5.json'
+# layouts define the following marks:
+# - workspace 1: t=term, v=vim
+# - workspace 2: m=astroid/mail
+# - workspace 3: c=chrome
+# - workspace 4: g=games
+# - workspace 5: w=wiki
+
+# Launch apps    {{{1
+
+# nvim-qt
+if $debug ; then echo 'Launching nvim-qt' ; fi
+nvim-qt &
+sleep $delay_post_launch
+
+# astroid
+if $debug ; then echo 'Launching astroid' ; fi
+astroid-launcher &
+sleep $delay_post_launch
+
+# qutebrowser (mail: gmail, primus)
+if $debug ; then echo 'Launching qutebrowser/mail' ; fi
+qutebrowser --set window.title_format "qutebrowser/mail" --restore mail &
+sleep $delay_post_launch
+
+# google-chrome
+if $debug ; then echo 'Launching google chrome' ; fi
+google-chrome &
+sleep $delay_post_launch
+
+# qutebrowser (porn)
+if $debug ; then echo 'Launching qutebrowser/porn' ; fi
+qutebrowser --set window.title_format "qutebrowser/porn" --restore porn &
+sleep $delay_post_launch
+
+# qutebrowser (music)
+if $debug ; then echo 'Launching qutebrowser/music' ; fi
+qutebrowser --set window.title_format "qutebrowser/music" --restore music &
+sleep $delay_post_launch
+
+# qutebrowser (vim)
+if $debug ; then echo 'Launching qutebrowser/vim' ; fi
+qutebrowser --set window.title_format "qutebrowser/vim" --restore vim &
+sleep $delay_post_launch
+
+# qutebrowser (games)
+if $debug ; then echo 'Launching qutebrowser/games' ; fi
+qutebrowser --set window.title_format "qutebrowser/games" --restore games &
+sleep $delay_post_launch
+
+# tiddlywiki
+if $debug ; then echo 'Launching tiddlywiki' ; fi
+plugin_path="/usr/local/share/tiddlywiki/plugins"
+konsole \
+    --hide-menubar \
+    --hide-tabbar \
+    -p tabtitle=launcher_tiddlywiki \
+    -p environment="TIDDLYWIKI_PLUGIN_PATH=$plugin_path" \
+    -e "tiddlywiki $HOME/data/misc/auxiliary-memory --listen port=10744" &
+sleep $delay_post_launch
+
+# qutebrowser (wiki)
+if $debug ; then echo 'Launching qutebrowser/wiki' ; fi
+qutebrowser --set window.title_format "qutebrowser/wiki" --restore wiki &
+sleep $delay_post_launch
+
+# alacritty/tmux
+if $debug ; then echo 'Launching alacritty running tmux' ; fi
+alacritty \
+    --class 'AlacrittyTmux,AlacrittyTmux' \
+    --title 'AlacrittyTmux' \
+    --command tmux &
+sleep $delay_post_launch
+
+# Ensure dunst is available    {{{1
+while ! systemctl --user --quiet is-active dunst ; do
+    if $debug ; then echo 'Waiting until the dunst service is available' ; fi
+    sleep 1
+done
+# Post-launch tasks    {{{1
+# - some tasks cannot be performed until the relevant app has finished loading
+# - trial and error showed that 30 seconds is sufficient for the computer and
+#   internet speeds in use at the time this script was written
+while [[ $delay_app_loading -gt 0 ]] ; do
+    dunstify \
+        --replace=101 \
+        "$dlg_title" \
+        "Giving apps $delay_app_loading seconds to load"
+    let "delay_app_loading--"
+    sleep 1
+done
+dunstify --close=101
+
+# Reload wiki qutebrowser tab    {{{2
+# - if it loaded before the tiddlywiki server finished loading then it
+#   displays a page-not-found error
+# - must do this task before qutebrowser window titles are reset because
+#   window title ('name') is used to identify specific qutebrowser window
+if $debug ; then echo 'Reloading wiki qutebrowser tab' ; fi
+wiki_ids=($(xdotool search --name "qutebrowser/wiki"))
+if [[ ${#wiki_ids[@]} -eq 0 ]] ; then
+    dunstify --urgency=critical "$dlg_title" \
+        'Cannot locate qutebrowser showing tiddlywiki'
+elif [[ ${#wiki_ids[@]} -gt 1 ]] ; then
+    dunstify --urgency=critical "$dlg_title" \
+        "Whoah! Detected ${#wiki_ids[@]} qutebrowsers showing tiddlywiki"
+else
+    wiki_id="${wiki_ids[0]}"
+    qbCommand "$wiki_id" "tab-focus 1"
+    sleep $delay_app_loading
+    qbCommand "$wiki_id" "reload"
+    sleep 3
+fi
+
+# Change settings in all qutebrowser instances    {{{2
+# - it appears all qutebrowser instances must finish loading in order for the
+#   'set' command to execute correctly
+# - it seems an actively loading qutebrowser window interferes with xdotool
+#   typing its keys, and it is unpredictable which keys are received by the
+#   window and which are 'lost'
+# - task 1: reset title of qutebrowser windows to display active tab title
+# - task 2: reset download directory
+# -         * wrapper script causes default download directory to be
+#             /run/user/1000/qutebrowser/SESSION/download/
+#           * reset to ~/Downloads/
+if $debug ; then echo 'Resetting qutebrowser window titles' ; fi
+title='{perc}{current_title}{title_sep}qutebrowser'
+cmd_reset_title="set window.title_format $title"
+cmd_reset_download_dir="set downloads.location.directory ~/Downloads"
+window_ids=($(xdotool search --class qutebrowser))
+if [[ ${#window_ids[@]} -eq 0 ]] ; then
+    dunstify --urgency=critical "$dlg_title" \
+        'Cannot locate any qutebrowsers to retitle'
+else
+    for window_id in "${window_ids[@]}" ; do
+        qbCommand "$window_id" "$cmd_reset_title"
+        qbCommand "$window_id" "$cmd_reset_download_dir"
+    done
+fi
+
+# Focus astroid in mail workspace    {{{2
+if $debug ; then echo 'Focussing astroid' ; fi
+i3-msg [class="Astroid" instance="astroid"] focus
+
+# Focus terminal in workspace 1    {{{2
+if $debug ; then echo 'Focussing main terminal' ; fi
+i3-msg [class="AlacrittyTmux" instance="AlacrittyTmux"] focus
+
+# Launch status bar    {{{1
+if $debug ; then echo 'Launching polybar' ; fi
+~/.config/polybar/launch
+
+# Notify completion    {{{1
+if $debug ; then echo 'Session setup complete' ; fi
+dunstify "$dlg_title" 'Session setup complete'
+# }}}1
+
+# vim:foldmethod=marker:

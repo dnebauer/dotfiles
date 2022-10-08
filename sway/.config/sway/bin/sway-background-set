@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+
+# File: sway-background-set
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: set random background for each monitor
+# Created: 2022-05-15
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename $0)"
+required_tools=(
+    cut
+    feh
+    getopt
+    rev
+    seq
+    shuf
+    xrandr
+)
+# hardware- and xrandr-dependent:
+# - resolutions for each monitor named by xrandr
+declare -A resolution=(     \
+    [DVI-D-0]="1920x1080"   \
+    [HDMI-A-0]="3440x1440"  \
+)
+# - directories containing wallpapers of given resolutions
+declare -A dir=(                                               \
+    [1920x1080]="/home/david/.config/sway/wallpapers/1920x1080"  \
+    [3440x1440]="/home/david/.config/sway/wallpapers/3440x1440"  \
+)
+# }}}1
+
+# PROCEDURES
+
+# displayUsage()    {{{1
+#     does: shows usage
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: set random background for each monitor
+
+This script relies on the following hardware setup:
+* 2 monitors
+* 1 monitor is named DVD-D-0 with resolution 1920x1080
+* 1 monitor is named HDMI-A-0 with resolution 3440x1440
+* wallpapers sized 1920x1080 are located in
+  ~/.config/sway/wallpapers/1920x1080
+* wallpapers sized 3440x1440 are located in
+  ~/.config/sway/wallpapers/3440x1440.
+
+The utilities 'feh' and 'shuf' are used to assign a random
+wallpaper to each monitor from the appropriate wallpaper
+directory.
+
+Usage: ${self} [-v] [-d]
+       ${self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# processOptions($opt1, ...)    {{{1
+#     does: processes command line options
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                     \
+        getopt                            \
+            --options hvd                 \
+            --long    help,verbose,debug  \
+            --name    "${BASH_SOURCE[0]}" \
+            -- "${@}"                     \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# joinBy($delimiter, $item1, ...)    {{{1
+# Join items
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}
+# abort($msg)    {{{1
+#     does: aborts script
+#   params: 1  - error message
+#   prints: error message to stderr
+#   return: nil
+function abort () {
+    echo "$1" > /dev/stderr
+    exit 1
+}
+# }}}1
+
+# MAIN
+
+# Check for required tools    {{{1
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || abort "Can't run without: $(joinBy ', ' "${missing[@]}")"
+unset missing  tools  required_tools
+
+# Process command line options    {{{1
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# Check that wallpaper directories are present    {{{1
+for wp_dir in "${dir[@]}" ; do
+    [[ -d "$wp_dir" ]] || \
+        abort "Fatal: missing required wallpaper directory: $wp_dir"
+done
+
+# Extract monitor information    {{{1
+# - load associative array with key=monitor number and value=monitor name
+declare -A monitor=()
+output="$(xrandr --listmonitors | grep -v "^Monitors: ")"
+old_IFS="$IFS"
+IFS=$'\n'
+lines=( $output )
+IFS="$old_IFS"
+for line in "${lines[@]}" ; do
+    # strip leading spaces
+    line="${line#"${line%%[![:space:]]*}"}"
+    # extract monitor number as assigned by xrandr
+    number=$(cut -d':' -f1 <<<$line)
+    # extract monitor name as assigned by xrandr
+    name="$(rev <<<$line | cut -d' ' -f1 | rev)"
+    # save extracted details
+    monitor[$number]="$name"
+done
+count=${#monitor[@]}
+[[ $count -eq 2 ]] || abort "Fatal: expected 2 monitors, got $count"
+unset lines  name  number  old_IFS  output
+
+# Get wallpaper files in monitor sequence    {{{1
+# - cheat because xrandr assigns monitor numbers sequentially from 0
+# - monitor numbers are keys in associative array 'monitor'
+# - so 'seq 0 $upper' cycles through monitor numbers in sequential order
+files=()
+upper=$(( $count - 1 ))
+for key in $(seq 0 $upper) ; do
+    # get monitor name as assigned by xrandr
+    monitor_name="${monitor[$key]}"
+    # get resolution of monitor
+    monitor_resolution="${resolution[$monitor_name]}"
+    # get directory with wallpapers of that resolution
+    monitor_dir="${dir[$monitor_resolution]}"
+    # randomly select a wallpaper file from directory
+    file="$(shuf --echo --head-count=1 "$monitor_dir"/*)"
+    # save file path
+    files+=( $file )
+done
+unset dir  file  key  monitor  monitor_dir  monitor_name
+unset monitor_resolution  resolution  upper
+
+# Set monitor backgrounds    {{{1
+# - feh assigns multiple image files to monitors in monitor number sequence
+feh --no-fehbg --bg-scale "${files[@]}"
+unset files
+# }}}1
+
+# vim:foldmethod=marker:

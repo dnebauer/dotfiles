@@ -1,0 +1,275 @@
+// ================================================================
+//
+// Waybar configuration
+//
+// Reference: https://github.com/Alexays/Waybar/wiki/Configuration
+//
+// ================================================================
+
+[{
+    // ============================================================
+    // Primary monitor
+    // ============================================================
+
+    "id": "bar-0",
+    "output": "HDMI-A-1",
+    "mode": "dock",
+    "ipc": true,
+
+    // ------------------------------------------------------------
+    // Global configuration
+    // ------------------------------------------------------------
+
+    "layer": "top",
+    "position": "top",
+    //"height": 30, // Waybar height (to be removed for auto height)
+    //"width": 1280, // Waybar width
+    //"spacing": 4, // Gaps between modules (4px)
+    "modules-left": [
+        "sway/workspaces",
+        "sway/mode"
+    ],
+    "modules-center": [],
+    "modules-right": [
+        "custom/weather",
+        "disk",
+        "disk#home",
+        "disk#usr",
+        "disk#var",
+        "pulseaudio",
+        "network",
+        "sway/language",
+        "clock",
+        "clock#clock",
+        "tray"
+    ],
+
+
+    // ------------------------------------------------------------
+    // Modules
+    // ------------------------------------------------------------
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": false,
+        //"format": "{name}: {icon}",
+        "format": "{name} {icon}",
+        "format-icons": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
+            "urgent": "",
+            "focused": "",
+            "default": ""
+        },
+        "persistent-workspaces": {
+            "1": ["HDMI-A-1"],
+            "2": ["DVD-D-1"],
+            "3": ["DVD-D-1"],
+            "4": ["HDMI-A-1"],
+            "5": ["DVD-D-1"]
+        }
+    },
+
+    "sway/mode": {
+        "format": "<span style=\"italic\">{}</span>"
+    },
+
+    "custom/weather": {
+        "exec": "/home/david/.config/waybar/scripts/openweathermap-simple",
+        "exec-if": "ping -c1 api.openweathermap.org",
+        "interval": 600
+    },
+
+    "disk": {
+        "format": "{path} {percentage_used}%",
+        "path": "/"
+    },
+
+    "disk#home": {
+        "format": "{path} {percentage_used}%",
+        "path": "/home"
+    },
+
+    "disk#usr": {
+        "format": "{path} {percentage_used}%",
+        "path": "/usr"
+    },
+
+    "disk#var": {
+        "format": "{path} {percentage_used}%",
+        "path": "/var"
+    },
+
+    "pulseaudio": {
+        "format": "🔊 {volume}%",
+        "format-muted": "🔇 muted",
+        "on-click": "pavucontrol"
+    },
+
+    "network": {
+        //"interface": "enp3s0",
+        "format-wifi": "{essid} ({signalStrength}%) ",
+        "format-ethernet": "{ipaddr}/{cidr} ",
+        "tooltip-format": "{ifname} via {gwaddr} ",
+        "format-linked": "{ifname} (No IP) ",
+        "format-disconnected": "Disconnected ⚠",
+        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+    },
+
+    "sway/language": {
+        "format": "{shortDescription}-{short}"
+    },
+
+    "clock": {
+        "interval": 60,
+        "timezone": "Australia/Darwin",
+        "format": " {:%A %Y-%m-%d}"
+    },
+
+    "clock#clock": {
+        "interval": 1,
+        "timezone": "Australia/Darwin",
+        "format": "🕑 {:%H:%M}"
+    },
+
+    "tray": {
+        "icon-size": 21,
+        "spacing": 10
+    }
+}, {
+    // ============================================================
+    // Secondary monitor
+    // ============================================================
+
+    "id": "bar-1",
+    "output": "DVD-D-1",
+    "mode": "dock",
+    "ipc": true,
+
+    // ------------------------------------------------------------
+    // Global configuration
+    // ------------------------------------------------------------
+
+    "layer": "top",
+    "position": "top",
+    //"height": 30, // Waybar height (to be removed for auto height)
+    //"width": 1280, // Waybar width
+    //"spacing": 4, // Gaps between modules (4px)
+    "modules-left": [
+        "sway/workspaces",
+        "sway/mode"
+    ],
+    "modules-right": [
+        "custom/weather",
+        "disk",
+        "disk#home",
+        "disk#usr",
+        "disk#var",
+        "pulseaudio",
+        "network",
+        "sway/language",
+        "clock",
+        "clock#clock"
+    ],
+
+
+    // ------------------------------------------------------------
+    // Modules
+    // ------------------------------------------------------------
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": false,
+        //"format": "{name}: {icon}",
+        "format": "{name} {icon}",
+        "format-icons": {
+            //"1": "",
+            //"2": "",
+            //"3": "",
+            //"4": "",
+            //"5": "",
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
+            "urgent": "",
+            "focused": "",
+            "default": ""
+        },
+        "persistent-workspaces": {
+            "1": ["HDMI-A-1"],
+            "2": ["DVD-D-1"],
+            "3": ["DVD-D-1"],
+            "4": ["HDMI-A-1"],
+            "5": ["DVD-D-1"]
+        }
+    },
+
+    "sway/mode": {
+        "format": "<span style=\"italic\">{}</span>"
+    },
+
+    "custom/weather": {
+        "exec": "/home/david/.config/waybar/scripts/openweathermap-simple",
+        "exec-if": "ping -c1 api.openweathermap.org",
+        "interval": 600
+    },
+
+    "disk": {
+        "format": "{path} {percentage_used}%",
+        "path": "/"
+    },
+
+    "disk#home": {
+        "format": "{path} {percentage_used}%",
+        "path": "/home"
+    },
+
+    "disk#usr": {
+        "format": "{path} {percentage_used}%",
+        "path": "/usr"
+    },
+
+    "disk#var": {
+        "format": "{path} {percentage_used}%",
+        "path": "/var"
+    },
+
+    "pulseaudio": {
+        "format": "🔊 {volume}%",
+        "format-muted": "🔇 muted",
+        "on-click": "pavucontrol"
+    },
+
+    "network": {
+        //"interface": "enp3s0",
+        "format-wifi": "{essid} ({signalStrength}%) ",
+        "format-ethernet": "{ipaddr}/{cidr} ",
+        "tooltip-format": "{ifname} via {gwaddr} ",
+        "format-linked": "{ifname} (No IP) ",
+        "format-disconnected": "Disconnected ⚠",
+        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+    },
+
+    "sway/language": {
+        "format": "{shortDescription}-{short}"
+    },
+
+    "clock": {
+        "interval": 60,
+        "timezone": "Australia/Darwin",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format": " {:%A %Y-%m-%d}"
+    },
+
+    "clock#clock": {
+        "interval": 1,
+        "timezone": "Australia/Darwin",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format": "🕑 {:%H:%M}"
+    }
+}]

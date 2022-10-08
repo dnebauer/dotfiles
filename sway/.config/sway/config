@@ -1,0 +1,1014 @@
+# sway config file
+
+#       _______ __   __   __  ______  __    __
+#      /       \  \ |  \ |  \|      \|  \  |  \
+#     |  ▓▓▓▓▓▓▓ ▓▓ | ▓▓ | ▓▓ \▓▓▓▓▓▓\ ▓▓  | ▓▓
+#      \▓▓    \| ▓▓ | ▓▓ | ▓▓/      ▓▓ ▓▓  | ▓▓
+#      _\▓▓▓▓▓▓\ ▓▓_/ ▓▓_/ ▓▓  ▓▓▓▓▓▓▓ ▓▓__/ ▓▓
+#     |       ▓▓\▓▓   ▓▓   ▓▓\▓▓    ▓▓\▓▓    ▓▓
+#      \▓▓▓▓▓▓▓  \▓▓▓▓▓\▓▓▓▓  \▓▓▓▓▓▓▓_\▓▓▓▓▓▓▓
+#                                    |  \__| ▓▓
+#                                     \▓▓    ▓▓
+#                                      \▓▓▓▓▓▓
+#
+#                                  ______  __
+#                                 /      \|  \
+#       _______  ______  _______ |  ▓▓▓▓▓▓\\▓▓ ______
+#      /       \/      \|       \| ▓▓_  \▓▓  \/      \
+#     |  ▓▓▓▓▓▓▓  ▓▓▓▓▓▓\ ▓▓▓▓▓▓▓\ ▓▓ \   | ▓▓  ▓▓▓▓▓▓\
+#     | ▓▓     | ▓▓  | ▓▓ ▓▓  | ▓▓ ▓▓▓▓   | ▓▓ ▓▓  | ▓▓
+#     | ▓▓_____| ▓▓__/ ▓▓ ▓▓  | ▓▓ ▓▓     | ▓▓ ▓▓__| ▓▓
+#      \▓▓     \\▓▓    ▓▓ ▓▓  | ▓▓ ▓▓     | ▓▓\▓▓    ▓▓
+#       \▓▓▓▓▓▓▓ \▓▓▓▓▓▓ \▓▓   \▓▓\▓▓      \▓▓_\▓▓▓▓▓▓▓
+#                                            |  \__| ▓▓
+#                                             \▓▓    ▓▓
+#                                              \▓▓▓▓▓▓
+#
+
+# REQUIRED APPLICATIONS    {{{1
+#
+# - required either directly by this config file or by supporting scripts
+# - does not include resources (fonts, external website access, etc.)
+#   required by polybar configuration
+
+
+# |              tool | use                                                  |
+# |------------------:|:-----------------------------------------------------|
+# |         alacritty | terminal                                             |
+# |               awk | extract shortcut help from this config file          |
+# |          basename | strip directory/suffix from filenames                |
+# |              calc | used by networkmanager_dmenu (polybar themes)        |
+# |            column | format command output                                |
+# |               cut | remove sections from lines                           |
+# |              date | print system date                                    |
+# |             dmenu | run dialog (dependency of j4-dmenu-desktop)          |
+# | dn-load-clipboard | load selected items into clipboard                   |
+# |           dropbox | cloud storage                                        |
+# |          dunstcmd | control dunst server                                 |
+# |          dunstify | send notification                                    |
+# |               feh | image viewer                                         |
+# |            getopt | parse script command line options                    |
+# |     google-chrome | web browser                                          |
+# |  j4-dmenu-desktop | run dialog (desktop applications only)               |
+# |        kdeconnect | syncronise between devices                           |
+# |           konsole | terminal                                             |
+# |              maim | take screenshots                                     |
+# |           mapfile | load bash array with command output                  |
+# |         nm-applet | network manager                                      |
+# |       notify-send | send notification                                    |
+# |          numlockx | control NumLock key                                  |
+# |           nvim-qt | gui editor                                           |
+# |             pactl | PulseAudio controller                                |
+# |        parcellite | clipboard manager                                    |
+# |              perl | perl 5 language interpreter                          |
+# |      perl modules | AnyEvent::I3, IPC::Cmd, IPC::Run, JSON::MaybeXS,     |
+# |                   | Net::DBus, sigtrap, Sys::Syslog                      |
+# |             picom | X11 compositor                                       |
+# |             pidof | find process id                                      |
+# |           polybar | status bar                                           |
+# |                ps | details of running processes                         |
+# |             pywal | used by networkmanager_dmenu (polybar themes)        |
+# |       qutebrowser | web browser                                          |
+# |      radiotray-ng | radio streaming app                                  |
+# |               rev | reverse lines character-wise                         |
+# |              rofi | run dialog (terminal commands and desktop apps)      |
+# |               sed | stream editor                                        |
+# |               seq | print number sequence                                |
+# |              shuf | randomise file list                                  |
+# |             sleep | pause execution                                      |
+# |           swaymsg | send messages to swaywm                                |
+# |          swaylock | screen locker                                        |
+# |         systemctl | service manager                                      |
+# |           tellico | collection management software                       |
+# |        tiddlywiki | non-linear notebook                                  |
+# |           udiskie | automount removable media                            |
+# |             urxvt | terminal                                             |
+# |             xclip | interface to system clipboard                        |
+# |           xdotool | X11 automation tool                                  |
+# |            xrandr | interface X11 RandR extension                        |
+# |              xset | set user preferences for X                           |
+# |          xss-lock | connect screen locker and saver                      |
+# |            zenity | GUI dialogs                                          |
+
+
+# SHORTCUT SUMMARY    {{{1
+
+
+# Bindsym formatting to enable help extraction
+
+# - for sway key bindings:
+#   . precede 'bindsym' line with summary line starting with '## '
+#   . example:
+#       ## Close window
+#       bindsym $mod+Shift+q kill
+# - for non-sway key bindings:
+#   . add dummy declaration line starting with '#@ '
+#   . precede declaration line with summary line starting with '## '
+#   . example:
+#       ## Display clipboard history
+#       #@ Ctrl+Alt+h
+
+
+# Shortcut listing
+
+# $alt+Tab              task switcher
+# $mod+$down            move focus down
+# $mod+$left            move focus left
+# $mod+$right           move focus right
+# $mod+$up              move focus up
+# $mod+1                goto workspace 1
+# $mod+2                goto workspace 2
+# $mod+3                goto workspace 3
+# $mod+4                goto workspace 4
+# $mod+5                goto workspace 5
+# $mod+6                goto workspace 6
+# $mod+7                goto workspace 7
+# $mod+8                goto workspace 8
+# $mod+9                goto workspace 9
+# $mod+0                goto workspace 10
+# $mod+Ctrl+h           workspace prev
+# $mod+Ctrl+l           workspace next
+# $mod+Down             move focus down
+# $mod+KP_Enter         open terminal
+# $mod+Left             move focus left
+# $mod+Pause            mode: system
+# $mod+Print            mode: screenshot
+# $mod+Return           open terminal
+# $mod+Right            move focus right
+# $mod+Shift+$down      move container down
+# $mod+Shift+$left      move container left
+# $mod+Shift+$right     move container right
+# $mod+Shift+$up        move container up
+# $mod+Shift+1          move container to workspace 1
+# $mod+Shift+2          move container to workspace 2
+# $mod+Shift+3          move container to workspace 3
+# $mod+Shift+4          move container to workspace 4
+# $mod+Shift+5          move container to workspace 5
+# $mod+Shift+6          move container to workspace 6
+# $mod+Shift+7          move container to workspace 7
+# $mod+Shift+8          move container to workspace 8
+# $mod+Shift+9          move container to workspace 9
+# $mod+Shift+0          move container to workspace 10
+# $mod+Shift+Down       move container down
+# $mod+Shift+Left       move container left
+# $mod+Shift+Right      move container right
+# $mod+Shift+Up         move container up
+# $mod+Shift+c          reload config file
+# $mod+Shift+d          app launcher
+# $mod+Shift+e          exit sway/X session
+# $mod+Shift+g          mode: gaps
+# $mod+Shift+minus      move scratchpad
+# $mod+Shift+q          kill window
+# $mod+Shift+r          restart sway in place
+# $mod+Shift+space      floating toggle
+# $mod+Up               move focus up
+# $mod+a                focus parent
+# $mod+d                app/command launcher
+# $mod+f                fullscreen toggle
+# $mod+g                goto mark
+# $mod+m                set mark
+# $mod+minus            scratchpad show
+# $mod+o                mode: launcher
+# $mod+r                mode: resize
+# $mod+s                mode: split
+# $mod+space            toggle focus mode
+# $mod+t                mode: radiotray-ng control
+# $mod+y                mode: layout
+# Ctrl+$alt+h           display clipboard history
+# Ctrl+space            close topmost notification
+# Ctrl+Shift+space      close all notifications
+# F1                    clipboard loader
+# F2                    help page
+# F3                    tellico
+# XF86AudioLowerVolume  volume -5%
+# XF86AudioMicMute      toggle mic mute
+# XF86AudioMute         toggle volume mute
+# XF86AudioRaiseVolume  volume +5%
+
+
+# COMMAND TO DISPLAY SHORTCUTS IN CONSOLE    {{{1
+
+
+####awk '($1=="bindsym"||$1=="#@")&&last{print $2,"\t",last}{last=""}   \
+####    $1=="##"{for(i=2;i<=NF;i++)last=last" "$i}' ~/.config/sway/config \
+####    | column -ts $'\t' | less
+
+
+# GLOBAL VARIABLES    {{{1
+
+
+# modifiers    {{{2
+#
+# - Mod1=<Alt>
+# - Mod4=<Super>
+
+set $mod Mod4
+set $alt Mod1
+
+# applications    {{{2
+set $term alacritty
+
+# colours    {{{2
+
+set $DarkRed     #8b0000
+set $Red         #ff0000
+set $DarkGreen   #006400
+set $Green       #008000
+set $DarkYellow  #ffff00
+set $Yellow      #ffffe0
+set $DarkBlue    #00008b
+set $Blue        #0000ff
+set $DarkMagenta #8b008b
+set $Magenta     #ff00ff
+set $DarkCyan    #008b8b
+set $Cyan        #00ffff
+set $LightGrey   #d3d3d3
+set $White       #ffffff
+set $Black       #000000
+set $DarkGrey    #a9a9a9
+set $Foreground  #c6c6c6
+set $Background  #1c1c1c
+set $CursorColor #c6c6c6
+
+set $Trueblack   #000000
+# translucency: extra first 2 digits are transparency
+# - 00=transparent, FF=opaque
+set $Transparent #00000000
+
+# outputs    {{{2
+set $monitor1 HDMI-A-1
+set $monitor2 DVD-D-1
+# }}}2
+
+
+# FONT FOR WINDOW TITLES    {{{1
+
+
+# Will also be used by the bar unless a different font is used
+# in the bar {} block below.
+
+####font pango:monospace 8
+
+# This font is widely installed, provides lots of unicode glyphs,
+# right-to-left text rendering and scalability on retina/hidpi displays
+# (thanks to pango)
+
+####font pango:DejaVu Sans Mono 8
+
+# Example font settings from https://i3wm.org/docs/userguide.html:
+
+####font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
+####font pango:DejaVu Sans Mono 10
+font pango:DejaVu Sans Mono
+####font pango:Terminus 11px
+
+
+# AUTOSTART APPLICATIONS    {{{1
+
+
+# configure monitors    {{{2
+
+# - set position
+output  DVI-D-1   pos 0 0     res 1920x1080
+output  HDMI-A-1  pos 1920 0  res 3440x1440
+
+# - set wallpaper
+output DVI-D-1 background \
+    $(shuf --echo --head-count=1 ~/.config/wallpapers/1920x1080/*) fit
+output HDMI-A-1 background \
+    $(shuf --echo --head-count=1 ~/.config/wallpapers/3440x1440/*) fit
+
+# - focus on large monitor
+exec swaymsg focus output HDMI-A-1
+
+# configure keyboard    {{{2
+
+input "type:keyboard" {
+      xkb_model  pc104
+     xkb_layout  au,us
+    xkb_numlock  enabled
+    xkb_options  caps:swapescape,nbsp:level2
+}
+
+# screenlock    {{{2
+#
+# - lock screen after 300 seconds of inactivity
+# - then turn off the displays after another 300 seconds
+# - turn the screens back on when resumed
+# - also locks the screen before the computer goes to sleep
+exec swayidle -w \
+    timeout 300  'swaylock -f -c 000000' \
+    timeout 600  'swaymsg "output * dpms off"' \
+    resume       'swaymsg "output * dpms on"' \
+    before-sleep 'swaylock -f -c 000000'
+
+# network    {{{2
+#
+# - NetworkManager is popular way to manage wireless networks on Linux
+# - nm-applet is a desktop environment-independent system tray GUI for it
+
+exec nm-applet --indicator
+
+# volume control    {{{2
+#
+# - use pactl to adjust volume in PulseAudio
+
+## raise audio volume
+bindsym XF86AudioRaiseVolume exec \
+    pactl set-sink-mute @DEFAULT_SINK@ false && \
+    pactl set-sink-volume @DEFAULT_SINK@ +5%
+## lower audio volume
+bindsym XF86AudioLowerVolume exec \
+    pactl set-sink-mute @DEFAULT_SINK@ false && \
+    pactl set-sink-volume @DEFAULT_SINK@ -5%
+## toggle audio mute
+bindsym XF86AudioMute exec \
+    pactl set-sink-mute @DEFAULT_SINK@ toggle
+## toggle microphone mute
+bindsym XF86AudioMicMute exec \
+    pactl set-source-mute @DEFAULT_SOURCE@ toggle
+
+# - set volume to 25% on startup
+
+exec_always \
+    pactl set-sink-mute @DEFAULT_SINK@ false && \
+    pactl set-sink-volume @DEFAULT_SINK@ 25%
+
+# dropbox    {{{2
+
+exec dropbox start -i
+
+# dunst    {{{2
+#
+# - is started automatically
+# - default dunst shortcuts for closing notifications stopped working
+# - reimplement them here
+
+## close topmost displayed notification
+bindsym Ctrl+space exec dunstctl close
+## close all displayed notifications
+bindsym Ctrl+Shift+space exec dunstctl close-all
+
+# clipman    {{{2
+#
+# - clipboard manager
+
+exec wl-paste --type text --watch clipman store
+bindsym Ctrl+$alt+h exec clipman pick
+
+# radiotray-ng    {{{2
+#
+# - runs as daemon in system tray
+
+exec radiotray-ng
+
+# - can control via dbus and custom mode
+
+set $rtng_change ~/.config/i3/bin/i3-rtng-change
+set $rtng_play ~/.config/i3/bin/i3-rtng-play
+set $rtng_quit ~/.config/i3/bin/i3-rtng-quit
+set $rtng_status ~/.config/i3/bin/i3-rtng-status
+set $rtng_stop ~/.config/i3/bin/i3-rtng-stop
+
+set $mode_radiotray Radiotray NG: \
+[p]lay/pause, [s]top, s[t]atus, [c]hange station, [q]uit
+
+## radiotray mode
+bindsym $mod+t mode "$mode_radiotray"
+
+mode "$mode_radiotray" {
+    bindsym c             exec $rtng_change, mode "default"
+    bindsym p             exec $rtng_play,   mode "default"
+    bindsym s             exec $rtng_stop,   mode "default"
+    bindsym t             exec $rtng_status, mode "default"
+    bindsym q             exec $rtng_quit,   mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+# kdeconnect    {{{2
+
+set $kdeconnect "/usr/lib/x86_64-linux-gnu/libexec/kdeconnectd"
+exec $kdeconnect
+#dex /usr/share/applications/org.kde.kdeconnect.nonplasma.desktop
+
+# task switcher    {{{2
+#
+# - same script runs as both server and client
+
+exec systemctl --user start sway-focus-last.service
+
+## switch tasks
+bindsym $alt+Tab exec ~/.config/sway/bin/sway-focus-last --switch
+
+# automount removable media    {{{2
+
+exec udiskie &
+
+# handle fullscreen containers    {{{2
+
+exec systemctl --user start sway-fullscreen-handler.service
+# }}}2
+
+
+# APPLICATION LAUNCHING    {{{1
+
+
+# custom launch mode    {{{2
+
+set $mode_launcher Launch: [a]stroid [c]hrome \
+[q]utebrowser [s]yncthing [t]iddlywiki [w]aybar
+
+## launch mode
+bindsym $mod+o mode "$mode_launcher"
+
+mode "$mode_launcher" {
+    bindsym a             exec astroid-launcher, mode "default"
+    bindsym c             exec google-chrome, mode "default"
+    bindsym q             exec qutebrowser, mode "default"
+    bindsym s             exec syncthing-launcher, mode "default"
+    bindsym t             exec mybrain, mode "default"
+    bindsym w             exec waybar, mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+# start a terminal    {{{2
+
+## open terminal
+bindsym $mod+Return exec $term
+## open terminal
+bindsym $mod+KP_Enter exec $term
+
+# start program launcher    {{{2
+#
+# - a more modern dmenu replacement is rofi
+# - rofi selects and runs/opens terminal commands
+#   and applications with .desktop files
+## application/command line launcher
+set $launch_menu wofi --show drun,run --monitor HDMI-A-1
+bindsym $mod+d exec $launch_menu
+
+# screenshots    {{{2
+#
+# - press $mod+PrtSc to enter the screenshot mode
+# - choose 'd', 'r', 's' or 'w' to set capture method
+#   (d=desktop, r-region, s=screen and w=window)
+# - then press 'c', 'f' or 'b' to set image destination
+#   (c=clipboard, f=file, b=both)
+# TODO: user suggestion that using 'sleep .5' in script pre-capture
+#       means '--release' is no longer needed in binding
+
+## screenshot mode
+bindsym $mod+Print mode "$mode_screenshot"
+
+set $mode_screenshot Capture method: \
+[d]esktop, [r]egion, [s]creen, [w]indow
+set $mode_ss_desktop Desktop: [c]lipboard, [f]ile, [b]oth
+set $mode_ss_region  Region: [c]lipboard, [f]ile, [b]oth
+set $mode_ss_screen  Screen: [c]lipboard, [f]ile, [b]oth
+set $mode_ss_window  Window: [c]lipboard, [f]ile, [b]oth
+
+mode "$mode_screenshot" {
+    bindsym d        mode "$mode_ss_desktop"
+    bindsym r        mode "$mode_ss_region"
+    bindsym s        mode "$mode_ss_screen"
+    bindsym w        mode "$mode_ss_window"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+set $Screenshot $HOME/.config/sway/bin/sway-screenshot
+
+mode "$mode_ss_desktop" {
+    bindsym --release c exec $Screenshot -c -d, mode "default"
+    bindsym --release f exec $Screenshot -f -d, mode "default"
+    bindsym --release b exec $Screenshot -b -d, mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+mode "$mode_ss_region" {
+    bindsym --release c exec $Screenshot -c -r, mode "default"
+    bindsym --release f exec $Screenshot -f -r, mode "default"
+    bindsym --release b exec $Screenshot -b -r, mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+mode "$mode_ss_screen" {
+    bindsym --release c exec $Screenshot -c -s, mode "default"
+    bindsym --release f exec $Screenshot -f -s, mode "default"
+    bindsym --release b exec $Screenshot -b -s, mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+mode "$mode_ss_window" {
+    bindsym --release c exec $Screenshot -c -w, mode "default"
+    bindsym --release f exec $Screenshot -f -w, mode "default"
+    bindsym --release b exec $Screenshot -b -w, mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+# clipboard loader    {{{2
+#
+# - need to ensure this is a floating window
+
+## clipboard loader
+bindsym F1 exec dn-load-clipboard
+
+# display shortcuts    {{{2
+
+## shortcut help
+bindsym F2 exec ~/.config/i3/bin/i3-help
+
+# tellico    {{{2
+
+## tellico collection manager
+bindsym F3 exec tellico
+# }}}2
+
+
+# MOVEMENT KEYS    {{{1
+
+
+# direction keys for focus, movement, and resize    {{{2
+
+set $up k
+set $down j
+set $left h
+set $right l
+
+# change focus    {{{2
+
+## focus left
+bindsym $mod+$left focus left
+## focus left
+bindsym $mod+Left focus left
+
+## focus down
+bindsym $mod+$down focus down
+## focus down
+bindsym $mod+Down focus down
+
+## focus up
+bindsym $mod+$up focus up
+## focus up
+bindsym $mod+Up focus up
+
+## focus right
+bindsym $mod+$right focus right
+## focus right
+bindsym $mod+Right focus right
+
+
+# CONTROL LAYOUT    {{{1
+
+
+# move focused window    {{{2
+#
+# - "ppt" is "percentage points"
+# - "33 ppt" is ⅓ the width of the screen the container is initially on
+
+## move window left (large)
+bindsym $mod+Shift+$left move left 33 ppt
+## move window left (small)
+bindsym $mod+Shift+Left move left
+
+## move window down (large)
+bindsym $mod+Shift+$down move down 33 ppt
+## move window down (small)
+bindsym $mod+Shift+Down move down
+
+## move window up (large)
+bindsym $mod+Shift+$up move up 33 ppt
+## move window up (small)
+bindsym $mod+Shift+Up move up
+
+## move window right (large)
+bindsym $mod+Shift+$right move right 33 ppt
+## move window right (small)
+bindsym $mod+Shift+Right move right
+
+# use Mouse+$mod to drag floating windows    {{{2
+
+floating_modifier $mod
+
+# prevent automatic mouse warping    {{{2
+#
+# - warping is where the mouse follows window focus
+
+mouse_warping none
+
+# split in horizontal and vertical orientations    {{{2
+#
+# - default is $mod+h to split horizontally and $mod+v
+#   to split vertically
+# - this is disrupted by redefining $mod+h to the vim-like 'focus left'
+# - instead use this mode
+
+## split mode
+bindsym $mod+s mode "$mode_split"
+
+set $mode_split Split: [h]orizontal, [v]ertical
+
+mode "$mode_split" {
+    bindsym h             split h, mode "default"
+    bindsym v             split v, mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+# enter fullscreen mode for the focused container    {{{2
+
+## toggle fullscreen
+bindsym $mod+f fullscreen toggle
+
+# change container layout {stacked,tabbed,toggle split}    {{{2
+
+## layout mode
+bindsym $mod+y mode "$mode_layout"
+
+set $mode_layout Container layout: [s]tacked, [t]abbed, to[g]gle split
+
+mode "$mode_layout" {
+
+    bindsym s             layout stacking,     mode "default"
+    bindsym t             layout tabbed,       mode "default"
+    bindsym g             layout toggle split, mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+# floating windows    {{{2
+
+for_window [window_role="File Operation Progress"] floating enable sticky
+for_window [window_role="Open Files"] floating enable sticky
+for_window [window_role="Preferences"] floating enable
+for_window [window_role="bubble"] floating enable
+for_window [window_role="page-info"] floating enable
+for_window [window_role="pop-up"] floating enable
+for_window [window_role="task_dialog"] floating enable
+for_window [window_type="dialog"] floating enable
+for_window [window_type="menu"] floating enable
+
+for_window [instance="file_progress"]  sticky enable
+for_window [class="info"] sticky enable
+for_window [class="timesup"] sticky enable
+for_window [class="GtkFileChooserDialog"] sticky enable
+
+for_window [class="smplayer" instance="smplayer"] floating enable
+for_window [class="calibre" instance="calibre-ebook-viewer"] floating enable
+for_window [class="dolphin" instance="dolphin"] floating enable
+for_window [class="mpv" instance="gl"] floating enable
+for_window [class="Zathura" instance="org.pwmt.zathura"] floating enable, \
+           resize set 1000 1200, move up 250
+for_window [class="okular" instance="okular"] floating enable
+for_window [class="Gimp" instance="gimp"] floating enable
+for_window [class="gwenview" instance="gwenview"] floating enable
+
+no_focus [window_role="pop-up"]
+
+# - plasma windows
+# - from https://www.ryanlue.com/posts/2019-06-13-kde-i3
+
+for_window [class="plasmashell"] floating enable
+for_window [title="Desktop — Plasma"] kill, floating enable, border none
+no_focus [class="plasmashell" window_type="notification"]
+
+# toggle tiling/floating    {{{2
+
+## toggle floating
+bindsym $mod+Shift+space floating toggle
+
+# change focus between tiling/floating windows    {{{2
+
+## toggle tiling/floating focus
+bindsym $mod+space focus mode_toggle
+
+# focus the parent container    {{{2
+
+## focus parent
+bindsym $mod+a focus parent
+
+# focus the child container    {{{2
+
+####bindsym $mod+d focus child
+
+# cycle through workspaces    {{{2
+## cycle through workspaces backwards
+bindsym $mod+Ctrl+h workspace prev
+## cycle through workspaces forwards
+bindsym $mod+Ctrl+l workspace next
+
+# move the currently focused window to the scratchpad    {{{2
+
+## move to scratchpad
+bindsym $mod+Shift+minus move scratchpad
+
+# show, cycle through or hide focussed scratchpad window    {{{2
+#
+# - shows the next scratchpad window or
+#   hides the focused scratchpad window
+# - if there are multiple scratchpad windows,
+#   this command cycles through them
+
+## show scratchpad
+bindsym $mod+minus scratchpad show
+
+# use window marks    {{{2
+#
+# - mark focussed window with user-supplied 1-character mark
+
+## set window mark
+bindsym $mod+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
+
+# - goto requested mark
+
+# Goto window mark
+bindsym $mod+g exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
+
+# window title format    {{{2
+#
+# - make window titles bold
+
+for_window [class=".*"] title_format "<b>%title</b>"
+
+# - enable window icons
+
+for_window [class=".*"] title_window_icon padding 3px
+
+# define names for default workspaces    {{{2
+#
+# - we later configure key bindings for them
+# - use variables to avoid repeating the names in multiple places
+
+set $ws1  1
+set $ws2  2
+set $ws3  3
+set $ws4  4
+set $ws5  5
+set $ws6  6
+set $ws7  7
+set $ws8  8
+set $ws9  9
+set $ws10 10
+
+# switching between workspaces    {{{2
+
+## switch to workspace 1
+bindsym $mod+1 workspace number $ws1
+## switch to workspace 2
+bindsym $mod+2 workspace number $ws2
+## switch to workspace 3
+bindsym $mod+3 workspace number $ws3
+## switch to workspace 4
+bindsym $mod+4 workspace number $ws4
+## switch to workspace 5
+bindsym $mod+5 workspace number $ws5
+## switch to workspace 6
+bindsym $mod+6 workspace number $ws6
+## switch to workspace 7
+bindsym $mod+7 workspace number $ws7
+## switch to workspace 8
+bindsym $mod+8 workspace number $ws8
+## switch to workspace 9
+bindsym $mod+9 workspace number $ws9
+## switch to workspace 0
+bindsym $mod+0 workspace number $ws10
+
+workspace_auto_back_and_forth yes
+
+focus_follows_mouse no
+
+# move focused container to workspace    {{{2
+
+## move to workspace 1
+bindsym $mod+Shift+1 move container to workspace number $ws1
+## move to workspace 2
+bindsym $mod+Shift+2 move container to workspace number $ws2
+## move to workspace 3
+bindsym $mod+Shift+3 move container to workspace number $ws3
+## move to workspace 4
+bindsym $mod+Shift+4 move container to workspace number $ws4
+## move to workspace 5
+bindsym $mod+Shift+5 move container to workspace number $ws5
+## move to workspace 6
+bindsym $mod+Shift+6 move container to workspace number $ws6
+## move to workspace 7
+bindsym $mod+Shift+7 move container to workspace number $ws7
+## move to workspace 8
+bindsym $mod+Shift+8 move container to workspace number $ws8
+## move to workspace 9
+bindsym $mod+Shift+9 move container to workspace number $ws9
+## move to workspace 0
+bindsym $mod+Shift+0 move container to workspace number $ws10
+
+# resize focused window    {{{2
+#
+# - you can also use the mouse for that
+
+# Resize mode
+bindsym $mod+r mode "$mode_resize"
+
+set $mode_resize Resize: \
+[h|l] shrink|grow width, [j|k] shrink|grow height
+
+mode "$mode_resize" {
+    # these bindings trigger as soon as you enter the resize mode
+
+    bindsym $left         resize shrink width 20 px or 20 ppt
+    bindsym Left          resize shrink width 5 px
+
+    bindsym $down         resize shrink height 20 px or 20 ppt
+    bindsym Down          resize shrink height 5 px
+
+    bindsym $up           resize grow height 20 px or 20 ppt
+    bindsym Up            resize grow height 5 px
+
+    bindsym $right        resize grow width 20 px or 20 ppt
+    bindsym Right         resize grow width 5 px
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+# resize gaps    {{{2
+#
+# - press $mod+Shift+g to enter the gap mode
+# - choose 'o' or 'i' for modifying outer/inner gaps
+# - press one of '+', '-' or '0' to increment, decrement or remove gaps
+#   in current workspace
+# - press Shift with '+'. '-' or '0' to make changes to all workspaces
+
+## gaps mode
+bindsym $mod+Shift+g mode "$mode_gaps"
+
+set $mode_gaps Gaps: [o]uter, [i]nner
+set $mode_gaps_outer Outer Gaps: \
+[+|-|0] (local), Shift + [+|-|0] (global)
+set $mode_gaps_inner Inner Gaps: \
+[+|-|0] (local), Shift + [+|-|0] (global)
+
+mode "$mode_gaps" {
+    bindsym o        mode "$mode_gaps_outer"
+    bindsym i        mode "$mode_gaps_inner"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+mode "$mode_gaps_inner" {
+    bindsym plus          gaps inner current plus 5
+    bindsym minus         gaps inner current minus 5
+    bindsym 0             gaps inner current set 0
+
+    bindsym Shift+plus    gaps inner all plus 5
+    bindsym Shift+minus   gaps inner all minus 5
+    bindsym Shift+0       gaps inner all set 0
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+mode "$mode_gaps_outer" {
+    bindsym plus          gaps outer current plus 5
+    bindsym minus         gaps outer current minus 5
+    bindsym 0             gaps outer current set 0
+
+    bindsym Shift+plus    gaps outer all plus 5
+    bindsym Shift+minus   gaps outer all minus 5
+    bindsym Shift+0       gaps outer all set 0
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+# kill focused window    {{{2
+
+## kill window
+bindsym $mod+Shift+q kill
+# }}}2
+
+
+# MANAGE I3WM    {{{1
+
+# reload the configuration file    {{{2
+
+## reload i3 configuration
+bindsym $mod+Shift+c reload
+
+# restart i3 inplace    {{{2
+#
+# - preserves your layout/session
+# - can be used to upgrade i3
+
+## restart i3 in place
+bindsym $mod+Shift+r restart
+
+# exit i3 (log out of X session)    {{{2
+## exit mode
+bindsym $mod+Shift+e mode "$mode_exit"
+
+set $mode_exit Repeat key combination to exit
+
+mode "$mode_exit" {
+    bindsym $mod+Shift+e exec i3-msg exit
+
+    bindsym Return       mode "default"
+    bindsym KP_Enter     mode "default"
+    bindsym Escape       mode "default"
+    bindsym $mod+r       mode "default"
+}
+
+# system control    {{{2
+
+## system control mode
+bindsym $mod+Pause mode "$mode_system"
+
+#set $Locker i3lock && sleep 1
+set $Locker i3lock --color=000000 --ignore-empty-password && sleep 1
+
+set $mode_system System: \
+[l]ock, [e] logout, [s]uspend, [h]ibernate, [r]eboot, \
+[Shift+s] shutdown
+mode "$mode_system" {
+    bindsym l             exec \
+                          $Locker, mode "default"
+    bindsym e             exec \
+                          swaymsg exit, mode "default"
+    bindsym s             exec \
+                          $Locker && systemctl suspend, mode "default"
+    bindsym h             exec \
+                          $Locker && systemctl hibernate, mode "default"
+    bindsym r             exec \
+                          systemctl reboot, mode "default"
+    bindsym Shift+s       exec \
+                          systemctl poweroff -i, mode "default"
+
+    bindsym Return   mode "default"
+    bindsym KP_Enter mode "default"
+    bindsym Escape   mode "default"
+    bindsym $mod+r   mode "default"
+}
+
+# include other config files    {{{2
+
+include ~/.config/sway/config.d/*.conf
+# }}}2
+
+# SETUP SESSION    {{{1
+
+# allocate workspaces to monitors
+# $ws1 = terms
+workspace $ws1 output HDMI-A-1
+# $ws2 = mail
+workspace $ws2 output DVD-D-1
+# $ws3 = chrome
+workspace $ws3 output DVD-D-1
+# $ws4 = qute
+workspace $ws4 output HDMI-A-1
+# $ws5 = wiki
+workspace $ws5 output DVD-D-1
+
+#exec ~/.config/sway/bin/sway-setup-session
+
+# Status bar
+bar {
+    swaybar_command /usr/bin/waybar
+}
+# }}}1
+
+# vim:foldmethod=marker:

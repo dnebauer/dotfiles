@@ -1,0 +1,341 @@
+#!/usr/bin/env bash
+
+# File: sway-screenshot
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: Capture (part of) screen to file or clipboard
+# Created: 2022-05-01
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+required_tools=(
+    basename   kill          tee
+    cut        maim          trap
+    date       notify-send   xclip
+    feh        pidof         xrandr
+    getopt     ps            xdotool
+    grep       sed           zenity
+    swaymsg    sleep
+)
+to_clipboard=false
+to_file=false
+get_window=false     # window with focus
+get_region=false     # user selects region to copy
+get_screen=false     # get current screen
+get_desktop=false    # get all monitor screens
+save_name="$(date +%F_%H-%M-%S_%z).png"
+if [[ -d $HOME/Downloads ]] ; then
+    save_path="$HOME/Downloads"
+else
+    save_path="$HOME"
+fi
+save_fp="$save_path/$save_name"
+# }}}1
+
+# PROCEDURES
+
+# Show usage   {{{1
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: screenshot
+
+A utility for taking screenshots intended for use with swaywm.
+
+There are four capture methods:
+* Currently focussed window
+  - There is a 5-second delay before the capture to allow
+    for changing window focus
+* Region
+  - The user selects a rectangular region using the mouse
+    and its left button
+* Screen (monitor)
+  - The user selects which screen from a menu
+  - The script does not have special handling for a single
+    screen - it is still necessary to select it.
+* Entire desktop
+  - This captures all screens.
+
+Only one capture method may be selected.
+
+There are two possible destinations for a screenshot image:
+* Save to disk file
+  - A default directory path and file name is used but the
+    user has the opportunity to specify a different file path
+  - The default directory path is '~/Downloads' if present,
+    otherwise '~/'
+  - The default file name is constructed from the current
+    date, time and time zone offset
+  - The user should not change the image file extension, but
+    the script will not prevent it happening
+* Clipboard
+  - Image is copied to the system clipboard, i.e., not the
+    primary selection.
+
+Either or both image destinations can be used.
+
+Usage: ${self} [-v] [-u] [-c] [-f] [-w] [-r] [-s] [-d]
+       ${self} -h
+
+Options:
+  Enhanced feedback (use none, 1 or 2 options)
+         -v  = print input lines as read
+               (as per 'set -o verbose')
+         -u  = print expanded commands and values
+               (as per 'set -o xtrace')
+
+  Image destinations (use 1 or both options)
+         -c  = send image to the system clipboard
+         -f  = save the image as a disk file
+
+  Capture methods (use only 1 option)
+         -d  = capture entire desktop
+               (includes all screens)
+         -r  = capture user-selected region
+               (mouse is used to draw a region)
+         -s  = capture a single screen
+               (user selects screen from menu)
+         -w  = capture window with focus
+               (5-second delay before capture)
+_USAGE
+}
+# Process command line options    {{{1
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local LONG_OPTIONS="help,verbose,debug,clipboard,file,desktop"
+    LONG_OPTIONS="${LONG_OPTIONS},region,screen,window"
+    local OPTIONS="$(                             \
+        getopt                                    \
+            --options hvucfdrsw                   \
+            --long    $LONG_OPTIONS               \
+            --name    "${BASH_SOURCE[0]}"         \
+            -- "${@}"                             \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help      ) displayUsage       ; exit 0  ;;
+        -v | --verbose   ) set -o verbose     ; shift 1 ;;
+        -u | --debug     ) set -o xtrace      ; shift 1 ;;
+        -c | --clipboard ) to_clipboard=true  ; shift 1 ;;
+        -f | --file      ) to_file=true       ; shift 1 ;;
+        -d | --desktop   ) get_desktop=true   ; shift 1 ;;
+        -r | --region    ) get_region=true    ; shift 1 ;;
+        -s | --screen    ) get_screen=true    ; shift 1 ;;
+        -w | --window    ) get_window=true    ; shift 1 ;;
+        --               ) shift ; break ;;
+        *                ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# Join items    {{{1
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}
+# Get screen geometry   {{{1
+#  params: nil
+#  prints: screen geometry
+#  return: nil
+function screen_geometry () {
+    local items
+    items=(                        \
+        $(                         \
+            xrandr --query |       \
+            grep "\bconnected\b" | \
+            sed "s/connected //" | \
+            sed "s/primary //" |   \
+            sed "s/(.*) //" |      \
+            sed "s/ x /x/"         \
+        )                          \
+    )
+    local geometry
+    geometry="$(zenity \
+        --list \
+        --text 'Select screen to capture' \
+        --print-column 2 \
+        --column 'Screen' --column 'Geometry' --column 'Size' \
+        "${items[@]}"\
+    )"
+    echo "$geometry"
+}
+# Move/rename image file    {{{1
+#  params: nil
+#  prints: nil
+#  return: nil
+move_image_file () {
+    local new_save_fp
+    new_save_fp="$(                  \
+        zenity                       \
+            --file-selection         \
+            --title 'Save image as'  \
+            --file-selection         \
+            --save                   \
+            --filename "$save_fp"    \
+            --confirm-overwrite      \
+            --file-filter="*.png"    \
+    )"
+    if [[ -n "$new_save_fp" ]] && [[ "$new_save_fp" != "$save_fp" ]] ; then
+        mv --force "$save_fp" "$new_save_fp"
+    fi
+}
+# Abort script    {{{1
+#  params: 1 - message
+#  prints: error message to console if no notify daemon
+#  return: n/a
+function abort () {
+    if command -v notify-send &>/dev/null ; then
+        notify-send                 \
+            --urgency='critical'    \
+            --expire-time=5000      \
+            --category='fatal'      \
+        'Screenshot capture failed' \
+        "$1"
+    else
+        echo 'Screenshot capture failed' > /dev/stderr
+        echo "$1" > /dev/stderr
+    fi
+    exit 1
+}
+# }}}1
+
+# MAIN
+
+# Start up tasks    {{{1
+
+# - check for required tools    {{{2
+
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || abort "Can't run without: $(joinBy ', ' "${missing[@]}")"
+unset missing tools required_tools
+
+# - process command line options    {{{2
+
+processOptions "${@}"
+
+# - check arguments    {{{2
+
+# -- check that an output argument is supplied
+count=0
+for opt in $to_clipboard $to_file ; do
+    [[ $opt = true ]] && let "count += 1"
+done
+[[ $count -eq 0 ]] && abort "Must specify destination(s)\n['-c','-f']"
+# -- check only one selection method nominated
+count=0
+for opt in $get_desktop $get_region $get_screen $get_window ; do
+    [[ $opt = true ]] && let "count += 1"
+done
+[[ $count -eq 0 ]] && abort "Must specify a selection method\n[-b,-r,-s,-w]"
+[[ $count -gt 1 ]] && abort "Specify only 1 selection method\n[-b,-r,-s,-w]"
+
+# Pre-capture tasks    {{{1
+
+# - stop oneko if running
+oneko_cmd='oneko -time 70000 -bg red -position -30+20'
+restart_oneko=false
+if command -v oneko &>/dev/null ; then
+    oneko_path="$(command -v oneko)"
+    oneko_pids=()
+    oneko_pid=$(pidof "$oneko_path") || true
+    if [[ -n "$oneko_pid" ]] ; then
+        oneko_pids+=($oneko_pid)
+        # after sway startup oneko has parent process '/bin/sh oneko ...'
+        while true ; do
+            ppid=$(ps -o ppid= -p $oneko_pid)
+            # result is left-padded with spaces
+            ppid="${ppid#"${ppid%%[![:space:]]*}"}"
+            if [[ $ppid > 1 ]] ; then
+                oneko_pids+=($ppid)
+                oneko_pid=$ppid
+            else
+                break
+            fi
+        done
+        restart_oneko=true
+        # kill oneko
+        kill -TERM "${oneko_pids[@]}"
+        trap "swaymsg 'exec --no-startup-id $oneko_cmd' &>/dev/null" EXIT
+    fi
+fi
+
+# - for window capture need to sleep
+if [[ $get_window = true ]] ; then
+    sleep 5s
+fi
+
+# Set capture command options based on capture type    {{{1
+# - relies on previous arg-checking to ensure only 1 capture type selected
+
+[[ $get_desktop = true ]] && opts=( )
+
+[[ $get_region  = true ]] && opts=( --select )
+
+[[ $get_screen  = true ]] && opts=( --geometry=$(screen_geometry) )
+
+[[ $get_window  = true ]] && opts=( --window=$(xdotool getactivewindow) )
+
+# Execute capture command depending on destination    {{{1
+# - relies on previous check to ensure at least 1 image destination selected
+
+if [[ $to_clipboard = true ]] && [[ $to_file = true ]] ; then
+    maim "${opts[@]}" | tee "$save_fp" | xclip -sel clipboard -t image/png
+
+elif [[ $to_clipboard = true ]] ; then
+    maim "${opts[@]}" | xclip -selection clipboard -t image/png
+
+elif [[ $to_file = true ]] ; then
+    maim "${opts[@]}" "$save_fp"
+fi
+
+# Post-capture tasks    {{{1
+
+# - optionally move/rename destination
+if [[ $to_file = true ]] ; then
+    move_image_file
+fi
+
+# - restart oneko if originally running
+if [[ $restart_oneko = true ]] ; then
+    swaymsg "exec --no-startup-id $oneko_cmd" &>/dev/null
+    trap - EXIT
+fi
+# }}}1
+
+# vim:foldmethod=marker:

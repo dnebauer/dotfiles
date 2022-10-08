@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+
+# File: sway-get-window-criteria
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: get window criteria for use with i3 config commands
+# Created: 2022-05-11
+
+
+# ERROR HANDLING
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+
+# VARIABLES
+
+self="$(basename $0)"
+match_int='[0-9][0-9]*'
+match_string='".*"'
+match_qstring='"[^"\\]*(\\.[^"\\]*)*"'  # adds 1 backreference
+match_class="^WM_CLASS\(STRING\) = ($match_qstring), ($match_qstring)$"
+match_role="^WM_WINDOW_ROLE\(STRING\) = ($match_qstring)$"
+match_name="^WM_NAME\(STRING\) = ($match_string)$"
+match_net_name="^_NET_WM_NAME\(UTF8_STRING\) = ($match_qstring)$"
+required_tools=(
+    getopt
+    xwininfo
+    xprop
+)
+
+
+# PROCEDURES
+
+# Show usage
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: get window criteria for use with i3 config commands
+
+To use, run this script, then click on a window to see its
+available key criteria.
+
+Output is in the format:
+    [<name>=<value> <name>=<value> ...]
+where the names may include: 'class', 'id', 'instance',
+'window_role' and 'title'.
+
+Known problem: when WM_NAME is used as fallback for the
+'title="<string>"' criterion, quotes in "<string>" are not
+escaped properly. This is a problem with the output of
+'xprop'.
+
+usage: ${self} [-v] [-d]
+       ${self} -h
+
+Options: -v = print lines as they are read
+              (equivalent to 'set -o verbose')
+         -d = print lines with commands expanded
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# Process command line options
+#   params: all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                     \
+        getopt                            \
+            --options hvd                 \
+            --long    help,verbose,debug  \
+            --name    "${BASH_SOURCE[0]}" \
+            -- "${@}"                     \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS="${@}"  # remaining arguments
+}
+# Join items
+#   params: 1  - delimiter
+#           2+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local d=$1
+    shift
+    local f=$1
+    shift
+    printf %s "$f" "${@/#/$d}"
+}
+
+
+# MAIN
+
+# Check for required tools
+missing=()
+for tool in "${required_tools[@]}" ; do
+    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+done
+[[ ${#missing[@]} -eq 0 ]] \
+    || dnFailScript "Can't run without: $(joinBy ', ' "${missing[@]}")"
+unset missing tools required_tools
+
+# Process command line options
+# - results in $ARGS holding remaining non-option command line arguments
+processOptions "${@}"
+
+# Get and display window criteria
+{
+    # run xwininfo, get window id
+    window_id="$(                                                 \
+        xwininfo -int |                                           \
+        sed -nre "s/^xwininfo: Window id: ($match_int) .*$/\1/p"  \
+    )"
+    echo "id=$window_id"
+
+    # run xprop, transform its output into i3 criteria
+    # - handle fallback to WM_NAME when _NET_WM_NAME isn't set
+    xprop -id $window_id |
+        sed -nr \
+            -e "s/$match_class/instance=\1\nclass=\3/p" \
+            -e "s/$match_role/window_role=\1/p" \
+            -e "/$match_name/{s//title=\1/; h}" \
+            -e "/$match_net_name/{s//title=\1/; h}" \
+            -e '${g; p}'
+} | sort | tr "\n" " " | sed -r 's/^(.*) $/[\1]\n/'
+
+# vim:foldmethod=marker:

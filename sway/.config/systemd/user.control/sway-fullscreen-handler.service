@@ -1,0 +1,10 @@
+[Unit]
+Description=sway-fullscreen-handler daemon
+
+[Service]
+Type=simple
+ExecStart=%h/.config/sway/bin/sway-fullscreen-handler
+Restart=always
+
+[Install]
+WantedBy=default.target

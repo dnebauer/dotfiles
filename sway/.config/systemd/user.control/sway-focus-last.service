@@ -1,0 +1,10 @@
+[Unit]
+Description=sway-focus-last daemon
+
+[Service]
+Type=simple
+ExecStart=%h/.config/sway/bin/sway-focus-last
+Restart=always
+
+[Install]
+WantedBy=default.target
