@@ -402,7 +402,7 @@ set move
 set attach_save_dir = $my_download_dir
 unset mark_old                       # unread/new is good enough for me
 macro index,pager \cb "\
-<pipe-message> urlscan<Enter>\
+<pipe-message>urlscan<Enter>\
 "    'call urlscan to extract URLs out of a message'
 macro attach,compose \cb "\
 <pipe-entry> urlscan<Enter>\

@@ -1,0 +1,2636 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-AU" xml:lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="David Nebauer" />
+  <meta name="dcterms.date" content="2022-10-08" />
+  <title>Neomutt Default Functions and Bindings</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <style type="text/css">
+
+
+
+div#header, header
+{
+
+border-bottom: 1px solid #aaa;
+margin-bottom: 0.5em;
+}
+.title, .subtitle 
+{
+text-align: center;
+}
+.subtitle
+{
+font-size: medium;
+font-style: italic;
+}
+.author, .date 
+{
+text-align: center;
+}
+
+.abstract {
+text-align: justify;
+font-style: italic;
+margin-bottom: 0.5em;
+margin-left: 3em;
+margin-right: 3em;
+}
+
+div#TOC, nav#TOC
+{
+
+border-bottom: 1px solid #aaa;
+margin-bottom: 0.5em;
+}
+@media print
+{
+div#TOC, nav#TOC
+{
+
+display: none;
+}
+}
+
+h1, h2, h3, h4, h5, h6
+{
+font-family: "Helvetica Neue", Helvetica, "Liberation Sans", Calibri, Arial, sans-serif; 
+
+page-break-after: avoid; 
+}
+
+div div, section section 
+{
+margin-left: 1.5em; 
+}
+p {}
+blockquote
+{ font-style: italic;
+}
+li 
+{
+}
+li > p 
+{
+margin-top: 1em; 
+}
+ul 
+{
+padding-left: 2em; 
+}
+ul li 
+{
+}
+ol 
+{
+padding-left: 2em; 
+}
+ol li 
+{
+}
+hr 
+{
+border: none;
+height: 1pt;
+background: none;
+border-top: 1pt solid #333;
+}
+
+sub 
+{
+}
+sup 
+{
+}
+em 
+{
+}
+em > em 
+{
+font-style: normal;
+}
+strong 
+{
+}
+
+a 
+{
+}
+
+@media screen
+{
+a {
+text-decoration: underline dotted; 
+}
+#TOC a 
+{
+text-decoration: none;
+border-bottom: inherit;
+}
+a:hover
+{
+text-decoration: underline solid blue; / * Hover emphasizes */
+}
+
+a img
+{
+text-decoration: none;
+border: 1px solid white;
+}
+a img:hover {
+text-decoration: none;
+border: 1px dotted blue;
+}
+}
+@media print
+{
+a {
+
+text-decoration: none;
+color: inherit;
+}
+a[href^="http://"]:after, a[href^="https://"]:after
+{
+
+content: " (" attr(href) ") ";
+font-size: 90%;
+}
+}
+
+img
+{
+
+vertical-align: middle;
+}
+@media print
+{
+img
+{
+
+max-height: 8.5in;
+max-width: 6.5in;
+}
+}
+div.figure, figure 
+{
+
+margin-left: auto;
+margin-right: auto;
+text-align: center;
+font-style: italic;
+font-size: small;
+}
+p.caption, figcaption 
+{
+
+}
+
+pre, code {
+
+white-space: pre-wrap;
+word-wrap: break-word;
+}
+
+
+code
+{
+background-color: #E8E8E8;
+}
+
+pre, pre > code
+{
+background-color: #E8E8E8;
+}
+pre 
+{
+
+padding: 0.5em; 
+border-radius: 5px; 
+
+border: 1px solid #aaa;
+
+margin-left: 0.5em;
+margin-right: 0.5em;
+}
+@media screen
+{
+pre
+{
+
+border: none;
+box-shadow: inset 1px 1px 3px #b0b0b0;
+}
+pre, pre > code
+{
+
+white-space: pre;
+word-wrap: normal;
+overflow: auto;
+}
+}
+code 
+{
+
+padding-left: 0.3em;
+padding-right: 0.3em;
+padding-top: 0.1em;
+padding-bottom: 0.1em;
+border-radius: 3px;
+}
+@media screen
+{
+code
+{
+box-shadow: inset 0px 0px 2px #b0b0b0;
+}
+}
+pre > code 
+{
+
+padding: 0;
+border: none;
+border-radius: none;
+background-color: inherit;
+box-shadow: none;
+}
+code.url 
+{
+background-color: inherit; 
+box-shadow: none;
+}
+
+
+span.math 
+{
+}
+span.math.inline 
+{
+}
+span.math.display 
+{
+}
+span.LaTeX 
+{
+} eq 
+{
+} 
+
+table
+{
+border-collapse: collapse;
+border-spacing: 0; 
+border-top: 2pt solid black; 
+border-bottom: 2pt solid black;
+
+margin-left: auto;
+margin-right: auto;
+}
+thead, th 
+{
+
+border-bottom: 1pt solid black;
+background-color: #E8E8E8;
+}
+tr.header 
+{
+} tbody 
+{
+}
+
+tr {
+}
+
+tr.odd {}
+tr.even {}
+tr.odd:hover, tr.even:hover 
+{
+background-color: #E0E0E0;
+}
+td, th 
+{ vertical-align: top; 
+vertical-align: baseline; 
+padding-left: 0.5em;
+padding-right: 0.5em;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+}
+
+
+th 
+{
+font-weight: bold; }
+tfoot 
+{
+}
+caption 
+{
+caption-side: top;
+border: none;
+font-size: 0.9em;
+font-style: italic;
+text-align: center;
+margin-top: 0.5em;
+margin-bottom: 0.3em;
+padding-bottom: 0.2em;
+}
+
+dl 
+{
+border-top: 2pt solid #888;
+padding-top: 0.5em;
+border-bottom: 2pt solid #888;
+}
+dt 
+{
+font-weight: bold;
+}
+dd+dt 
+{
+border-top: 1pt solid #888;
+padding-top: 0.5em;
+}
+dd 
+{
+margin-bottom: 0.5em;
+}
+dd+dd 
+{
+border-top: 1px solid #888; 
+}
+
+a.footnote, a.footnoteRef { 
+font-size: small; vertical-align: text-top;
+}
+a[href^="#fnref"], a.reversefootnote 
+{
+}
+@media print
+{
+a[href^="#fnref"], a.reversefootnote 
+{
+
+display: none;
+}
+}
+.footnotes 
+{
+}
+.footnotes>ol>li[id^="fn"] 
+{
+}
+
+.footnotes > hr
+{
+margin-top: 2em;
+padding: 0;
+border: none;
+border-top: double;
+border-color: #303030;
+border-width: 3pt;
+color: black;
+text-align: center;
+}
+
+
+
+
+@media screen
+{
+.noscreen 
+{
+display: none;
+}
+}
+@media print
+{
+.noprint 
+{
+display:none;
+}
+}
+.block-center
+{
+margin-left: auto;
+margin-right: auto;
+display: table;
+}
+.text-center
+{
+text-align: center;
+}
+.block-right
+{
+margin-left: auto;
+margin-right: 0;
+display: table;
+}
+.text-right
+{
+text-align: right;
+}
+.block-left
+{
+margin-left: 0;
+margin-right: auto;
+display: table;
+}
+.text-left
+{
+text-align: left;
+}
+
+@media screen
+{
+img.shadow 
+{
+box-shadow: 3px 3px 5px #b0b0b0;
+}
+}
+@media print
+{
+img.shadow
+{
+box-shadow: 3px 3px 0px #b0b0b0;
+}
+}
+img.pad 
+{
+padding: 10px;
+}
+img.rounded 
+{
+border-radius: 10px;
+}
+img.border 
+{
+border: 1pt solid #c0c0c0;
+}
+img.well
+{
+box-shadow: 0px 0px 5px #b0b0b0 inset;
+}
+img.right 
+{
+float: right;
+clear: right;
+margin-left: 10px;
+margin-top: 10px;
+margin-bottom: 10px;
+}
+img.left 
+{
+float: left;
+clear: left;
+margin-right: 10px;
+margin-top: 10px;
+margin-bottom: 10px;
+}
+div.figure img, figure img 
+{
+float: none; 
+clear: both;
+}
+img.top
+{
+vertical-align: top;
+}
+img.bottom
+{
+vertical-align: bottom;
+}
+img.middle
+{
+vertical-align: middle;
+}
+img.baseline
+{
+vertical-align: baseline;
+}
+img.margin 
+{
+margin-left: 10px;
+margin-right: 10px;
+}
+
+img.max100
+{
+max-width: 100%;
+}
+img.max95 
+{
+max-width: 95%;
+}
+img.max50
+{
+max-width: 50%;
+}
+img.max45 
+{
+max-width: 45%;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Neomutt Default Functions and Bindings</h1>
+<p class="author">David Nebauer</p>
+<p class="date">8 October 2022</p>
+</header>
+<div style="page-break-after: always;"></div>
+<div id="tbl:default-generic" class="tablenos">
+<table id="tbl:default-generic">
+<caption><span>Table 1:</span> Generic </caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 27%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><Enter></td>
+<td style="text-align: left;">select-entry</td>
+<td style="text-align: left;">select the current entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^L</td>
+<td style="text-align: left;">refresh</td>
+<td style="text-align: left;">clear and redraw the screen</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Return></td>
+<td style="text-align: left;">select-entry</td>
+<td style="text-align: left;">select the current entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>/</td>
+<td style="text-align: left;">search-reverse</td>
+<td style="text-align: left;">search backwards for a regular
+expression</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">!</td>
+<td style="text-align: left;">shell-escape</td>
+<td style="text-align: left;">invoke a command in a subshell</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">*</td>
+<td style="text-align: left;">last-entry</td>
+<td style="text-align: left;">move to the last entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">/</td>
+<td style="text-align: left;">search</td>
+<td style="text-align: left;">search for a regular expression</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">:</td>
+<td style="text-align: left;">enter-command</td>
+<td style="text-align: left;">enter a neomuttrc command</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">;</td>
+<td style="text-align: left;">tag-prefix</td>
+<td style="text-align: left;">apply next function to tagged
+messages</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">&lt;</td>
+<td style="text-align: left;">previous-line</td>
+<td style="text-align: left;">scroll up one line</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">=</td>
+<td style="text-align: left;">first-entry</td>
+<td style="text-align: left;">move to the first entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">&gt;</td>
+<td style="text-align: left;">next-line</td>
+<td style="text-align: left;">scroll down one line</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">?</td>
+<td style="text-align: left;">help</td>
+<td style="text-align: left;">this screen</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">H</td>
+<td style="text-align: left;">top-page</td>
+<td style="text-align: left;">move to the top of the page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">L</td>
+<td style="text-align: left;">bottom-page</td>
+<td style="text-align: left;">move to the bottom of the page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">M</td>
+<td style="text-align: left;">middle-page</td>
+<td style="text-align: left;">move to the middle of the page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Z</td>
+<td style="text-align: left;">previous-page</td>
+<td style="text-align: left;">move to the previous page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">[</td>
+<td style="text-align: left;">half-up</td>
+<td style="text-align: left;">scroll up 1/2 page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">]</td>
+<td style="text-align: left;">half-down</td>
+<td style="text-align: left;">scroll down 1/2 page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">j</td>
+<td style="text-align: left;">next-entry</td>
+<td style="text-align: left;">move to the next entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">k</td>
+<td style="text-align: left;">previous-entry</td>
+<td style="text-align: left;">move to the previous entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">n</td>
+<td style="text-align: left;">search-next</td>
+<td style="text-align: left;">search for next match</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">t</td>
+<td style="text-align: left;">tag-entry</td>
+<td style="text-align: left;">tag the current entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">z</td>
+<td style="text-align: left;">next-page</td>
+<td style="text-align: left;">move to the next page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Down></td>
+<td style="text-align: left;">next-entry</td>
+<td style="text-align: left;">move to the next entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Up></td>
+<td style="text-align: left;">previous-entry</td>
+<td style="text-align: left;">move to the previous entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Left></td>
+<td style="text-align: left;">previous-page</td>
+<td style="text-align: left;">move to the previous page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Right></td>
+<td style="text-align: left;">next-page</td>
+<td style="text-align: left;">move to the next page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Home></td>
+<td style="text-align: left;">first-entry</td>
+<td style="text-align: left;">move to the first entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><PageDown></td>
+<td style="text-align: left;">next-page</td>
+<td style="text-align: left;">move to the next page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><PageUp></td>
+<td style="text-align: left;">previous-page</td>
+<td style="text-align: left;">move to the previous page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><KeypadEnter></td>
+<td style="text-align: left;">select-entry</td>
+<td style="text-align: left;">select the current entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><End></td>
+<td style="text-align: left;">last-entry</td>
+<td style="text-align: left;">move to the last entry</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div style="page-break-after: always;"></div>
+<div id="tbl:default-index" class="tablenos">
+<table id="tbl:default-index">
+<caption><span>Table 2:</span> Index </caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 35%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">^D</td>
+<td style="text-align: left;">delete-thread</td>
+<td style="text-align: left;">delete all messages in thread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^E</td>
+<td style="text-align: left;">edit-type</td>
+<td style="text-align: left;">edit attachment content type</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">^F</td>
+<td style="text-align: left;">forget-passphrase</td>
+<td style="text-align: left;">wipe passphrases from memory</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Tab></td>
+<td style="text-align: left;">next-new-then-unread</td>
+<td style="text-align: left;">jump to the next new or unread
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Enter></td>
+<td style="text-align: left;">display-message</td>
+<td style="text-align: left;">display a message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^K</td>
+<td style="text-align: left;">extract-keys</td>
+<td style="text-align: left;">extract supported public keys</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Return></td>
+<td style="text-align: left;">display-message</td>
+<td style="text-align: left;">display a message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^N</td>
+<td style="text-align: left;">next-thread</td>
+<td style="text-align: left;">jump to the next thread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">^P</td>
+<td style="text-align: left;">previous-thread</td>
+<td style="text-align: left;">jump to previous thread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^R</td>
+<td style="text-align: left;">read-thread</td>
+<td style="text-align: left;">mark the current thread as read</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">^T</td>
+<td style="text-align: left;">untag-pattern</td>
+<td style="text-align: left;">untag messages matching a pattern</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^U</td>
+<td style="text-align: left;">undelete-thread</td>
+<td style="text-align: left;">undelete all messages in thread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc><Tab></td>
+<td style="text-align: left;">previous-new-then-unread</td>
+<td style="text-align: left;">jump to the previous new or unread
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>C</td>
+<td style="text-align: left;">decode-copy</td>
+<td style="text-align: left;">make decoded (text/plain) copy</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>P</td>
+<td style="text-align: left;">check-traditional-pgp</td>
+<td style="text-align: left;">check for classic PGP</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>V</td>
+<td style="text-align: left;">collapse-all</td>
+<td style="text-align: left;">collapse/uncollapse all threads</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>c</td>
+<td style="text-align: left;">change-folder-readonly</td>
+<td style="text-align: left;">open a different folder in read only
+mode</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>d</td>
+<td style="text-align: left;">delete-subthread</td>
+<td style="text-align: left;">delete all messages in subthread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>e</td>
+<td style="text-align: left;">resend-message</td>
+<td style="text-align: left;">use the current message as a template for
+a new one</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>i</td>
+<td style="text-align: left;">change-newsgroup-readonly</td>
+<td style="text-align: left;">open a different newsgroup in read only
+mode</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>k</td>
+<td style="text-align: left;">mail-key</td>
+<td style="text-align: left;">mail a PGP public key</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>l</td>
+<td style="text-align: left;">show-limit</td>
+<td style="text-align: left;">show currently active limit pattern</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>n</td>
+<td style="text-align: left;">next-subthread</td>
+<td style="text-align: left;">jump to the next subthread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>p</td>
+<td style="text-align: left;">previous-subthread</td>
+<td style="text-align: left;">jump to previous subthread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>r</td>
+<td style="text-align: left;">read-subthread</td>
+<td style="text-align: left;">mark the current subthread as read</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>s</td>
+<td style="text-align: left;">decode-save</td>
+<td style="text-align: left;">make decoded copy (text/plain) and
+delete</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>t</td>
+<td style="text-align: left;">tag-thread</td>
+<td style="text-align: left;">tag the current thread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>u</td>
+<td style="text-align: left;">undelete-subthread</td>
+<td style="text-align: left;">undelete all messages in subthread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>v</td>
+<td style="text-align: left;">collapse-thread</td>
+<td style="text-align: left;">collapse/uncollapse current thread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Space></td>
+<td style="text-align: left;">display-message</td>
+<td style="text-align: left;">display a message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">#</td>
+<td style="text-align: left;">break-thread</td>
+<td style="text-align: left;">break the thread in two</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">$</td>
+<td style="text-align: left;">sync-mailbox</td>
+<td style="text-align: left;">save changes to mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">%</td>
+<td style="text-align: left;">toggle-write</td>
+<td style="text-align: left;">toggle whether the mailbox will be
+rewritten</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">&amp;</td>
+<td style="text-align: left;">link-threads</td>
+<td style="text-align: left;">link tagged message to the current
+one</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">mailbox-list</td>
+<td style="text-align: left;">list mailboxes with new mail</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">@</td>
+<td style="text-align: left;">display-address</td>
+<td style="text-align: left;">display full address of sender</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: left;">autocrypt-acct-menu</td>
+<td style="text-align: left;">manage autocrypt accounts</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C</td>
+<td style="text-align: left;">copy-message</td>
+<td style="text-align: left;">copy a message to a file/mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">D</td>
+<td style="text-align: left;">delete-pattern</td>
+<td style="text-align: left;">delete messages matching a pattern</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F</td>
+<td style="text-align: left;">flag-message</td>
+<td style="text-align: left;">toggle a message’s ‘important’ flag</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G</td>
+<td style="text-align: left;">fetch-mail</td>
+<td style="text-align: left;">retrieve mail from POP server</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">J</td>
+<td style="text-align: left;">next-entry</td>
+<td style="text-align: left;">move to the next entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">K</td>
+<td style="text-align: left;">previous-entry</td>
+<td style="text-align: left;">move to the previous entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">L</td>
+<td style="text-align: left;">list-reply</td>
+<td style="text-align: left;">reply to specified mailing list</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">M</td>
+<td style="text-align: left;">show-log-messages</td>
+<td style="text-align: left;">show log (and debug) messages</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">N</td>
+<td style="text-align: left;">toggle-new</td>
+<td style="text-align: left;">toggle a message’s ‘new’ flag</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">O</td>
+<td style="text-align: left;">sort-reverse</td>
+<td style="text-align: left;">sort messages in reverse order</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P</td>
+<td style="text-align: left;">parent-message</td>
+<td style="text-align: left;">jump to parent message in thread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Q</td>
+<td style="text-align: left;">query</td>
+<td style="text-align: left;">query external program for addresses</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">R</td>
+<td style="text-align: left;">recall-message</td>
+<td style="text-align: left;">recall a postponed message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">T</td>
+<td style="text-align: left;">tag-pattern</td>
+<td style="text-align: left;">tag messages matching a pattern</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">U</td>
+<td style="text-align: left;">undelete-pattern</td>
+<td style="text-align: left;">undelete messages matching a pattern</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">V</td>
+<td style="text-align: left;">show-version</td>
+<td style="text-align: left;">show the NeoMutt version number and
+date</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">W</td>
+<td style="text-align: left;">clear-flag</td>
+<td style="text-align: left;">clear a status flag from a message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Y</td>
+<td style="text-align: left;">edit-label</td>
+<td style="text-align: left;">add, change, or delete a message’s
+label</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">a</td>
+<td style="text-align: left;">create-alias</td>
+<td style="text-align: left;">create an alias from a message sender</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">b</td>
+<td style="text-align: left;">bounce-message</td>
+<td style="text-align: left;">remail a message to another user</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">c</td>
+<td style="text-align: left;">change-folder</td>
+<td style="text-align: left;">open a different folder</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">d</td>
+<td style="text-align: left;">delete-message</td>
+<td style="text-align: left;">delete the current entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">e</td>
+<td style="text-align: left;">edit-or-view-raw-message</td>
+<td style="text-align: left;">edit the raw message if the mailbox is not
+read-only, otherwise view it</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">f</td>
+<td style="text-align: left;">forward-message</td>
+<td style="text-align: left;">forward a message with comments</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">g</td>
+<td style="text-align: left;">group-reply</td>
+<td style="text-align: left;">reply to all recipients</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">h</td>
+<td style="text-align: left;">display-toggle-weed</td>
+<td style="text-align: left;">display message and toggle header
+weeding</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">i</td>
+<td style="text-align: left;">change-newsgroup</td>
+<td style="text-align: left;">open a different newsgroup</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">j</td>
+<td style="text-align: left;">next-undeleted</td>
+<td style="text-align: left;">move to the next undeleted message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">k</td>
+<td style="text-align: left;">previous-undeleted</td>
+<td style="text-align: left;">move to the previous undeleted
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">l</td>
+<td style="text-align: left;">limit</td>
+<td style="text-align: left;">show only messages matching a pattern</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">m</td>
+<td style="text-align: left;">mail</td>
+<td style="text-align: left;">compose a new mail message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">o</td>
+<td style="text-align: left;">sort-mailbox</td>
+<td style="text-align: left;">sort messages</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">p</td>
+<td style="text-align: left;">print-message</td>
+<td style="text-align: left;">print the current entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">q</td>
+<td style="text-align: left;">quit</td>
+<td style="text-align: left;">save changes to mailbox and quit</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">r</td>
+<td style="text-align: left;">reply</td>
+<td style="text-align: left;">reply to a message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">s</td>
+<td style="text-align: left;">save-message</td>
+<td style="text-align: left;">save message/attachment to a
+mailbox/file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">u</td>
+<td style="text-align: left;">undelete-message</td>
+<td style="text-align: left;">undelete the current entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">v</td>
+<td style="text-align: left;">view-attachments</td>
+<td style="text-align: left;">show MIME attachments</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">w</td>
+<td style="text-align: left;">set-flag</td>
+<td style="text-align: left;">set a status flag on a message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">exit</td>
+<td style="text-align: left;">exit this menu</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">|</td>
+<td style="text-align: left;">pipe-entry</td>
+<td style="text-align: left;">pipe message/attachment to a shell
+command</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">~</td>
+<td style="text-align: left;">mark-message</td>
+<td style="text-align: left;">create a hotkey macro for the current
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Down></td>
+<td style="text-align: left;">next-undeleted</td>
+<td style="text-align: left;">move to the next undeleted message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Up></td>
+<td style="text-align: left;">previous-undeleted</td>
+<td style="text-align: left;">move to the previous undeleted
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><KeypadEnter></td>
+<td style="text-align: left;">display-message</td>
+<td style="text-align: left;">display a message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">alias-dialog</td>
+<td style="text-align: left;">open the aliases dialog</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">catchup</td>
+<td style="text-align: left;">mark all articles in newsgroup as
+read</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">change-vfolder</td>
+<td style="text-align: left;">open a different virtual folder</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">compose-to-sender</td>
+<td style="text-align: left;">compose new message to the current message
+sender</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">decrypt-copy</td>
+<td style="text-align: left;">make decrypted copy</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">decrypt-save</td>
+<td style="text-align: left;">make decrypted copy and delete</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">edit</td>
+<td style="text-align: left;">edit the raw message (edit and
+edit-raw-message are synonyms)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">edit-raw-message</td>
+<td style="text-align: left;">edit the raw message (edit and
+edit-raw-message are synonyms)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">entire-thread</td>
+<td style="text-align: left;">read entire thread of the current
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">followup-message</td>
+<td style="text-align: left;">followup to newsgroup</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">forward-to-group</td>
+<td style="text-align: left;">forward to newsgroup</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">get-children</td>
+<td style="text-align: left;">get all children of the current
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">get-message</td>
+<td style="text-align: left;">get message with Message-Id</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">get-parent</td>
+<td style="text-align: left;">get parent of the current message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">group-chat-reply</td>
+<td style="text-align: left;">reply to all recipients preserving
+To/Cc</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">imap-fetch-mail</td>
+<td style="text-align: left;">force retrieval of mail from IMAP
+server</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">imap-logout-all</td>
+<td style="text-align: left;">logout from all IMAP servers</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">limit-current-thread</td>
+<td style="text-align: left;">limit view to current thread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">list-subscribe</td>
+<td style="text-align: left;">subscribe to a mailing list</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">list-unsubscribe</td>
+<td style="text-align: left;">unsubscribe from a mailing list</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">modify-labels</td>
+<td style="text-align: left;">modify (notmuch/imap) tags</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">modify-labels-then-hide</td>
+<td style="text-align: left;">modify (notmuch/imap) tags and then hide
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">modify-tags</td>
+<td style="text-align: left;">modify (notmuch/imap) tags</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">modify-tags-then-hide</td>
+<td style="text-align: left;">modify (notmuch/imap) tags and then hide
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">next-new</td>
+<td style="text-align: left;">jump to the next new message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">next-unread</td>
+<td style="text-align: left;">jump to the next unread message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">next-unread-mailbox</td>
+<td style="text-align: left;">open next mailbox with new mail</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">post-message</td>
+<td style="text-align: left;">post message to newsgroup</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">previous-new</td>
+<td style="text-align: left;">jump to the previous new message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">previous-unread</td>
+<td style="text-align: left;">jump to the previous unread message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">purge-message</td>
+<td style="text-align: left;">delete the current entry, bypassing the
+trash folder</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">purge-thread</td>
+<td style="text-align: left;">delete the current thread, bypassing the
+trash folder</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">quasi-delete</td>
+<td style="text-align: left;">delete from NeoMutt, don’t touch on
+disk</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">reconstruct-thread</td>
+<td style="text-align: left;">reconstruct thread containing current
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">root-message</td>
+<td style="text-align: left;">jump to root message in thread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-first</td>
+<td style="text-align: left;">move the highlight to the first
+mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-last</td>
+<td style="text-align: left;">move the highlight to the last
+mailbox</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-next</td>
+<td style="text-align: left;">move the highlight to next mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-next-new</td>
+<td style="text-align: left;">move the highlight to next mailbox with
+new mail</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-open</td>
+<td style="text-align: left;">open highlighted mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-page-down</td>
+<td style="text-align: left;">scroll the sidebar down 1 page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-page-up</td>
+<td style="text-align: left;">scroll the sidebar up 1 page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-prev</td>
+<td style="text-align: left;">move the highlight to previous
+mailbox</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-prev-new</td>
+<td style="text-align: left;">move the highlight to previous mailbox
+with new mail</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-toggle-virtual</td>
+<td style="text-align: left;">toggle between mailboxes and virtual
+mailboxes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-toggle-visible</td>
+<td style="text-align: left;">make the sidebar (in)visible</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">tag-subthread</td>
+<td style="text-align: left;">tag the current subthread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">toggle-read</td>
+<td style="text-align: left;">toggle view of read messages</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">vfolder-from-query</td>
+<td style="text-align: left;">generate virtual folder from query</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">vfolder-from-query-readonly</td>
+<td style="text-align: left;">generate a read-only virtual folder from
+query</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">vfolder-window-backward</td>
+<td style="text-align: left;">shifts virtual folder time window
+backwards</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">vfolder-window-forward</td>
+<td style="text-align: left;">shifts virtual folder time window
+forwards</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">vfolder-window-reset</td>
+<td style="text-align: left;">resets virtual folder time window to the
+present</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">view-raw-message</td>
+<td style="text-align: left;">show the raw message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">check-stats</td>
+<td style="text-align: left;">calculate message statistics for all
+mailboxes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">current-bottom</td>
+<td style="text-align: left;">move entry to bottom of screen</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">current-middle</td>
+<td style="text-align: left;">move entry to middle of screen</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">current-top</td>
+<td style="text-align: left;">move entry to top of screen</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">end-cond</td>
+<td style="text-align: left;">end of conditional execution (noop)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">search-opposite</td>
+<td style="text-align: left;">search for next match in opposite
+direction</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">tag-prefix-cond</td>
+<td style="text-align: left;">apply next function ONLY to tagged
+messages</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">what-key</td>
+<td style="text-align: left;">display the keycode for a key press</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div style="page-break-after: always;"></div>
+<div id="tbl:default-pager" class="tablenos">
+<table id="tbl:default-pager">
+<caption><span>Table 3:</span> Pager </caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 35%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">^D</td>
+<td style="text-align: left;">delete-thread</td>
+<td style="text-align: left;">delete all messages in thread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^E</td>
+<td style="text-align: left;">edit-type</td>
+<td style="text-align: left;">edit attachment content type</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">^F</td>
+<td style="text-align: left;">forget-passphrase</td>
+<td style="text-align: left;">wipe passphrases from memory</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Tab></td>
+<td style="text-align: left;">next-new-then-unread</td>
+<td style="text-align: left;">jump to the next new or unread
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Enter></td>
+<td style="text-align: left;">next-line</td>
+<td style="text-align: left;">scroll down one line</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^K</td>
+<td style="text-align: left;">extract-keys</td>
+<td style="text-align: left;">extract supported public keys</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">^L</td>
+<td style="text-align: left;">redraw-screen</td>
+<td style="text-align: left;">clear and redraw the screen</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Return></td>
+<td style="text-align: left;">next-line</td>
+<td style="text-align: left;">scroll down one line</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">^N</td>
+<td style="text-align: left;">next-thread</td>
+<td style="text-align: left;">jump to the next thread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^P</td>
+<td style="text-align: left;">previous-thread</td>
+<td style="text-align: left;">jump to previous thread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">^R</td>
+<td style="text-align: left;">read-thread</td>
+<td style="text-align: left;">mark the current thread as read</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^U</td>
+<td style="text-align: left;">undelete-thread</td>
+<td style="text-align: left;">undelete all messages in thread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>/</td>
+<td style="text-align: left;">search-reverse</td>
+<td style="text-align: left;">search backwards for a regular
+expression</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>C</td>
+<td style="text-align: left;">decode-copy</td>
+<td style="text-align: left;">make decoded (text/plain) copy</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>P</td>
+<td style="text-align: left;">check-traditional-pgp</td>
+<td style="text-align: left;">check for classic PGP</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>c</td>
+<td style="text-align: left;">change-folder-readonly</td>
+<td style="text-align: left;">open a different folder in read only
+mode</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>d</td>
+<td style="text-align: left;">delete-subthread</td>
+<td style="text-align: left;">delete all messages in subthread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>e</td>
+<td style="text-align: left;">resend-message</td>
+<td style="text-align: left;">use the current message as a template for
+a new one</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>k</td>
+<td style="text-align: left;">mail-key</td>
+<td style="text-align: left;">mail a PGP public key</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>n</td>
+<td style="text-align: left;">next-subthread</td>
+<td style="text-align: left;">jump to the next subthread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>p</td>
+<td style="text-align: left;">previous-subthread</td>
+<td style="text-align: left;">jump to previous subthread</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>r</td>
+<td style="text-align: left;">read-subthread</td>
+<td style="text-align: left;">mark the current subthread as read</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>s</td>
+<td style="text-align: left;">decode-save</td>
+<td style="text-align: left;">make decoded copy (text/plain) and
+delete</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>u</td>
+<td style="text-align: left;">undelete-subthread</td>
+<td style="text-align: left;">undelete all messages in subthread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Space></td>
+<td style="text-align: left;">next-page</td>
+<td style="text-align: left;">move to the next page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">!</td>
+<td style="text-align: left;">shell-escape</td>
+<td style="text-align: left;">invoke a command in a subshell</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">#</td>
+<td style="text-align: left;">break-thread</td>
+<td style="text-align: left;">break the thread in two</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">$</td>
+<td style="text-align: left;">sync-mailbox</td>
+<td style="text-align: left;">save changes to mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">%</td>
+<td style="text-align: left;">toggle-write</td>
+<td style="text-align: left;">toggle whether the mailbox will be
+rewritten</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">&amp;</td>
+<td style="text-align: left;">link-threads</td>
+<td style="text-align: left;">link tagged message to the current
+one</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">previous-page</td>
+<td style="text-align: left;">move to the previous page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">mailbox-list</td>
+<td style="text-align: left;">list mailboxes with new mail</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">/</td>
+<td style="text-align: left;">search</td>
+<td style="text-align: left;">search for a regular expression</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">:</td>
+<td style="text-align: left;">enter-command</td>
+<td style="text-align: left;">enter a neomuttrc command</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">?</td>
+<td style="text-align: left;">help</td>
+<td style="text-align: left;">this screen</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">@</td>
+<td style="text-align: left;">display-address</td>
+<td style="text-align: left;">display full address of sender</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C</td>
+<td style="text-align: left;">copy-message</td>
+<td style="text-align: left;">copy a message to a file/mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">F</td>
+<td style="text-align: left;">flag-message</td>
+<td style="text-align: left;">toggle a message’s ‘important’ flag</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">H</td>
+<td style="text-align: left;">skip-headers</td>
+<td style="text-align: left;">jump to first line after headers</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">J</td>
+<td style="text-align: left;">next-entry</td>
+<td style="text-align: left;">move to the next entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">K</td>
+<td style="text-align: left;">previous-entry</td>
+<td style="text-align: left;">move to the previous entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">L</td>
+<td style="text-align: left;">list-reply</td>
+<td style="text-align: left;">reply to specified mailing list</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">N</td>
+<td style="text-align: left;">mark-as-new</td>
+<td style="text-align: left;">toggle a message’s ‘new’ flag</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">O</td>
+<td style="text-align: left;">sort-reverse</td>
+<td style="text-align: left;">sort messages in reverse order</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P</td>
+<td style="text-align: left;">parent-message</td>
+<td style="text-align: left;">jump to parent message in thread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Q</td>
+<td style="text-align: left;">quit</td>
+<td style="text-align: left;">save changes to mailbox and quit</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">R</td>
+<td style="text-align: left;">recall-message</td>
+<td style="text-align: left;">recall a postponed message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S</td>
+<td style="text-align: left;">skip-quoted</td>
+<td style="text-align: left;">skip beyond quoted text</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">T</td>
+<td style="text-align: left;">toggle-quoted</td>
+<td style="text-align: left;">toggle display of quoted text</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">V</td>
+<td style="text-align: left;">show-version</td>
+<td style="text-align: left;">show the NeoMutt version number and
+date</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">W</td>
+<td style="text-align: left;">clear-flag</td>
+<td style="text-align: left;">clear a status flag from a message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Y</td>
+<td style="text-align: left;">edit-label</td>
+<td style="text-align: left;">add, change, or delete a message’s
+label</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><br />
+</td>
+<td style="text-align: left;">search-toggle</td>
+<td style="text-align: left;">toggle search pattern coloring</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">^</td>
+<td style="text-align: left;">top</td>
+<td style="text-align: left;">jump to the top of the message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">a</td>
+<td style="text-align: left;">create-alias</td>
+<td style="text-align: left;">create an alias from a message sender</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">b</td>
+<td style="text-align: left;">bounce-message</td>
+<td style="text-align: left;">remail a message to another user</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">c</td>
+<td style="text-align: left;">change-folder</td>
+<td style="text-align: left;">open a different folder</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">d</td>
+<td style="text-align: left;">delete-message</td>
+<td style="text-align: left;">delete the current entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">e</td>
+<td style="text-align: left;">edit-or-view-raw-message</td>
+<td style="text-align: left;">edit the raw message if the mailbox is not
+read-only, otherwise view it</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">f</td>
+<td style="text-align: left;">forward-message</td>
+<td style="text-align: left;">forward a message with comments</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">g</td>
+<td style="text-align: left;">group-reply</td>
+<td style="text-align: left;">reply to all recipients</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">h</td>
+<td style="text-align: left;">display-toggle-weed</td>
+<td style="text-align: left;">display message and toggle header
+weeding</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">i</td>
+<td style="text-align: left;">exit</td>
+<td style="text-align: left;">exit this menu</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">j</td>
+<td style="text-align: left;">next-undeleted</td>
+<td style="text-align: left;">move to the next undeleted message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">k</td>
+<td style="text-align: left;">previous-undeleted</td>
+<td style="text-align: left;">move to the previous undeleted
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">m</td>
+<td style="text-align: left;">mail</td>
+<td style="text-align: left;">compose a new mail message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">n</td>
+<td style="text-align: left;">search-next</td>
+<td style="text-align: left;">search for next match</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">o</td>
+<td style="text-align: left;">sort-mailbox</td>
+<td style="text-align: left;">sort messages</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">p</td>
+<td style="text-align: left;">print-message</td>
+<td style="text-align: left;">print the current entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">q</td>
+<td style="text-align: left;">exit</td>
+<td style="text-align: left;">exit this menu</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">r</td>
+<td style="text-align: left;">reply</td>
+<td style="text-align: left;">reply to a message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">s</td>
+<td style="text-align: left;">save-message</td>
+<td style="text-align: left;">save message/attachment to a
+mailbox/file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">t</td>
+<td style="text-align: left;">tag-message</td>
+<td style="text-align: left;">tag the current entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">u</td>
+<td style="text-align: left;">undelete-message</td>
+<td style="text-align: left;">undelete the current entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">v</td>
+<td style="text-align: left;">view-attachments</td>
+<td style="text-align: left;">show MIME attachments</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">w</td>
+<td style="text-align: left;">set-flag</td>
+<td style="text-align: left;">set a status flag on a message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">exit</td>
+<td style="text-align: left;">exit this menu</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">|</td>
+<td style="text-align: left;">pipe-entry</td>
+<td style="text-align: left;">pipe message/attachment to a shell
+command</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Down></td>
+<td style="text-align: left;">next-undeleted</td>
+<td style="text-align: left;">move to the next undeleted message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Up></td>
+<td style="text-align: left;">previous-undeleted</td>
+<td style="text-align: left;">move to the previous undeleted
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Left></td>
+<td style="text-align: left;">previous-undeleted</td>
+<td style="text-align: left;">move to the previous undeleted
+message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Right></td>
+<td style="text-align: left;">next-undeleted</td>
+<td style="text-align: left;">move to the next undeleted message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Home></td>
+<td style="text-align: left;">top</td>
+<td style="text-align: left;">jump to the top of the message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><BackSpace></td>
+<td style="text-align: left;">previous-line</td>
+<td style="text-align: left;">scroll up one line</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><PageDown></td>
+<td style="text-align: left;">next-page</td>
+<td style="text-align: left;">move to the next page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><PageUp></td>
+<td style="text-align: left;">previous-page</td>
+<td style="text-align: left;">move to the previous page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><KeypadEnter></td>
+<td style="text-align: left;">next-line</td>
+<td style="text-align: left;">scroll down one line</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><End></td>
+<td style="text-align: left;">bottom</td>
+<td style="text-align: left;">jump to the bottom of the message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">change-newsgroup</td>
+<td style="text-align: left;">open a different newsgroup</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">change-newsgroup-readonly</td>
+<td style="text-align: left;">open a different newsgroup in read only
+mode</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">change-vfolder</td>
+<td style="text-align: left;">open a different virtual folder</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">check-stats</td>
+<td style="text-align: left;">calculate message statistics for all
+mailboxes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">compose-to-sender</td>
+<td style="text-align: left;">compose new message to the current message
+sender</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">decrypt-copy</td>
+<td style="text-align: left;">make decrypted copy</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">decrypt-save</td>
+<td style="text-align: left;">make decrypted copy and delete</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">edit</td>
+<td style="text-align: left;">edit the raw message (edit and
+edit-raw-message are synonyms)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">edit-raw-message</td>
+<td style="text-align: left;">edit the raw message (edit and
+edit-raw-message are synonyms)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">entire-thread</td>
+<td style="text-align: left;">read entire thread of the current
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">followup-message</td>
+<td style="text-align: left;">followup to newsgroup</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">forward-to-group</td>
+<td style="text-align: left;">forward to newsgroup</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">group-chat-reply</td>
+<td style="text-align: left;">reply to all recipients preserving
+To/Cc</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">half-down</td>
+<td style="text-align: left;">scroll down 1/2 page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">half-up</td>
+<td style="text-align: left;">scroll up 1/2 page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">imap-fetch-mail</td>
+<td style="text-align: left;">force retrieval of mail from IMAP
+server</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">imap-logout-all</td>
+<td style="text-align: left;">logout from all IMAP servers</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">list-subscribe</td>
+<td style="text-align: left;">subscribe to a mailing list</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">list-unsubscribe</td>
+<td style="text-align: left;">unsubscribe from a mailing list</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">modify-labels</td>
+<td style="text-align: left;">modify (notmuch/imap) tags</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">modify-labels-then-hide</td>
+<td style="text-align: left;">modify (notmuch/imap) tags and then hide
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">modify-tags</td>
+<td style="text-align: left;">modify (notmuch/imap) tags</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">modify-tags-then-hide</td>
+<td style="text-align: left;">modify (notmuch/imap) tags and then hide
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">next-new</td>
+<td style="text-align: left;">jump to the next new message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">next-unread</td>
+<td style="text-align: left;">jump to the next unread message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">next-unread-mailbox</td>
+<td style="text-align: left;">open next mailbox with new mail</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">post-message</td>
+<td style="text-align: left;">post message to newsgroup</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">previous-new</td>
+<td style="text-align: left;">jump to the previous new message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">previous-new-then-unread</td>
+<td style="text-align: left;">jump to the previous new or unread
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">previous-unread</td>
+<td style="text-align: left;">jump to the previous unread message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">print-entry</td>
+<td style="text-align: left;">print the current entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">purge-message</td>
+<td style="text-align: left;">delete the current entry, bypassing the
+trash folder</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">purge-thread</td>
+<td style="text-align: left;">delete the current thread, bypassing the
+trash folder</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">quasi-delete</td>
+<td style="text-align: left;">delete from NeoMutt, don’t touch on
+disk</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">reconstruct-thread</td>
+<td style="text-align: left;">reconstruct thread containing current
+message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">root-message</td>
+<td style="text-align: left;">jump to root message in thread</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">save-entry</td>
+<td style="text-align: left;">save message/attachment to a
+mailbox/file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">search-opposite</td>
+<td style="text-align: left;">search for next match in opposite
+direction</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">show-log-messages</td>
+<td style="text-align: left;">show log (and debug) messages</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-first</td>
+<td style="text-align: left;">move the highlight to the first
+mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-last</td>
+<td style="text-align: left;">move the highlight to the last
+mailbox</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-next</td>
+<td style="text-align: left;">move the highlight to next mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-next-new</td>
+<td style="text-align: left;">move the highlight to next mailbox with
+new mail</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-open</td>
+<td style="text-align: left;">open highlighted mailbox</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-page-down</td>
+<td style="text-align: left;">scroll the sidebar down 1 page</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-page-up</td>
+<td style="text-align: left;">scroll the sidebar up 1 page</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-prev</td>
+<td style="text-align: left;">move the highlight to previous
+mailbox</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-prev-new</td>
+<td style="text-align: left;">move the highlight to previous mailbox
+with new mail</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-toggle-virtual</td>
+<td style="text-align: left;">toggle between mailboxes and virtual
+mailboxes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">sidebar-toggle-visible</td>
+<td style="text-align: left;">make the sidebar (in)visible</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">vfolder-from-query</td>
+<td style="text-align: left;">generate virtual folder from query</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">vfolder-from-query-readonly</td>
+<td style="text-align: left;">a read-only virtual folder from query</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">view-raw-message</td>
+<td style="text-align: left;">show the raw message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">what-key</td>
+<td style="text-align: left;">display the keycode for a key press</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">error-history</td>
+<td style="text-align: left;">show log (and debug) messages</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div style="page-break-after: always;"></div>
+<div id="tbl:default-attach" class="tablenos">
+<table id="tbl:default-attach">
+<caption><span>Table 4:</span> Attachments </caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 27%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Key</th>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">^E</td>
+<td style="text-align: left;">edit-type</td>
+<td style="text-align: left;">edit attachment content type</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^F</td>
+<td style="text-align: left;">forget-passphrase</td>
+<td style="text-align: left;">wipe passphrases from memory</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Enter></td>
+<td style="text-align: left;">view-attach</td>
+<td style="text-align: left;">view attachment using mailcap entry if
+necessary</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">^K</td>
+<td style="text-align: left;">extract-keys</td>
+<td style="text-align: left;">extract supported public keys</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Return></td>
+<td style="text-align: left;">view-attach</td>
+<td style="text-align: left;">view attachment using mailcap entry if
+necessary</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><Esc>P</td>
+<td style="text-align: left;">check-traditional-pgp</td>
+<td style="text-align: left;">check for classic PGP</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><Esc>e</td>
+<td style="text-align: left;">resend-message</td>
+<td style="text-align: left;">use the current message as a template for
+a new one</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">L</td>
+<td style="text-align: left;">list-reply</td>
+<td style="text-align: left;">reply to specified mailing list</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">T</td>
+<td style="text-align: left;">view-text</td>
+<td style="text-align: left;">view attachment as text</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">b</td>
+<td style="text-align: left;">bounce-message</td>
+<td style="text-align: left;">remail a message to another user</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">d</td>
+<td style="text-align: left;">delete-entry</td>
+<td style="text-align: left;">delete the current entry</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">f</td>
+<td style="text-align: left;">forward-message</td>
+<td style="text-align: left;">forward a message with comments</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">g</td>
+<td style="text-align: left;">group-reply</td>
+<td style="text-align: left;">reply to all recipients</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">h</td>
+<td style="text-align: left;">display-toggle-weed</td>
+<td style="text-align: left;">display message and toggle header
+weeding</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">m</td>
+<td style="text-align: left;">view-mailcap</td>
+<td style="text-align: left;">force viewing of attachment using
+mailcap</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">p</td>
+<td style="text-align: left;">print-entry</td>
+<td style="text-align: left;">print the current entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">q</td>
+<td style="text-align: left;">exit</td>
+<td style="text-align: left;">exit this menu</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">r</td>
+<td style="text-align: left;">reply</td>
+<td style="text-align: left;">reply to a message</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">s</td>
+<td style="text-align: left;">save-entry</td>
+<td style="text-align: left;">save message/attachment to a
+mailbox/file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">u</td>
+<td style="text-align: left;">undelete-entry</td>
+<td style="text-align: left;">undelete the current entry</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">v</td>
+<td style="text-align: left;">collapse-parts</td>
+<td style="text-align: left;">toggle display of subparts</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">|</td>
+<td style="text-align: left;">pipe-entry</td>
+<td style="text-align: left;">pipe message/attachment to a shell
+command</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><KeypadEnter></td>
+<td style="text-align: left;">view-attach</td>
+<td style="text-align: left;">view attachment using mailcap entry if
+necessary</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">compose-to-sender</td>
+<td style="text-align: left;">compose new message to the current message
+sender</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">followup-message</td>
+<td style="text-align: left;">followup to newsgroup</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">forward-to-group</td>
+<td style="text-align: left;">forward to newsgroup</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">group-chat-reply</td>
+<td style="text-align: left;">reply to all recipients preserving
+To/Cc</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">list-subscribe</td>
+<td style="text-align: left;">subscribe to a mailing list</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">list-unsubscribe</td>
+<td style="text-align: left;">unsubscribe from a mailing list</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">view-pager</td>
+<td style="text-align: left;">view attachment in pager using
+copiousoutput mailcap</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">check-stats</td>
+<td style="text-align: left;">calculate message statistics for all
+mailboxes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">current-bottom</td>
+<td style="text-align: left;">move entry to bottom of screen</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">current-middle</td>
+<td style="text-align: left;">move entry to middle of screen</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">current-top</td>
+<td style="text-align: left;">move entry to top of screen</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">end-cond</td>
+<td style="text-align: left;">end of conditional execution (noop)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">jump</td>
+<td style="text-align: left;">jump to an index number</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">search-opposite</td>
+<td style="text-align: left;">search for next match in opposite
+direction</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">show-log-messages</td>
+<td style="text-align: left;">show log (and debug) messages</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">tag-prefix-cond</td>
+<td style="text-align: left;">apply next function ONLY to tagged
+messages</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">what-key</td>
+<td style="text-align: left;">display the keycode for a key press</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">error-history</td>
+<td style="text-align: left;">show log (and debug) messages</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

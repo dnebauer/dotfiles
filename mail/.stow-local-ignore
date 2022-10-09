@@ -4,4 +4,5 @@ neomutt_print-to-pdf_emailconverter
 __pychache__
 \.ignore
 \.disable
-\.mc
+\.md
+\.html
