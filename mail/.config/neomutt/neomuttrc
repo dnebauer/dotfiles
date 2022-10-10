@@ -8,7 +8,7 @@
 # appear to work)
 ############################################################
 
-# Start with clean slate
+# Tabula rasa
 
 #source neomuttrc.d/undo-all.rc
 
@@ -177,9 +177,11 @@ bind pager yy modify-labels
 macro index yd "\
 <enter-command>echo \
 'Adding [development] tag to selected message(s)...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+development<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 "    'add label: development'
 macro pager yd "\
 <enter-command>echo 'Adding [development] tag to message...'<enter>\
@@ -187,9 +189,11 @@ macro pager yd "\
 "    'add label: development'
 macro index yf "\
 <enter-command>echo 'Adding [financial] tag to selected message(s)...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+financial<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 "    'add label: financial'
 macro pager yf "\
 <enter-command>echo 'Adding [financial] tag to message...'<enter>\
@@ -197,9 +201,11 @@ macro pager yf "\
 "    'add label: financial'
 macro index yl "\
 <enter-command>echo 'Adding [later] tag to selected message(s)...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+later<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 "    'add label: later'
 macro pager yl "\
 <enter-command>echo 'Adding [later] tag to message...'<enter>\
@@ -207,9 +213,11 @@ macro pager yl "\
 "    'add label: later'
 macro index yo "\
 <enter-command>echo 'Adding [order] tag to selected message(s)...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+order<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 "    'add label: order'
 macro pager yo "\
 <enter-command>echo 'Adding [order] tag to message...'<enter>\
@@ -217,9 +225,11 @@ macro pager yo "\
 "    'add label: order'
 macro index yp "\
 <enter-command>echo 'Adding [personal] tag to selected message(s)...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+personal<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 "    'add label: personal'
 macro pager yp "\
 <enter-command>echo 'Adding [personal] tag to message...'<enter>\
@@ -227,9 +237,11 @@ macro pager yp "\
 "    'add label: personal'
 macro index yu "\
 <enter-command>echo 'Adding [union] tag to selected message(s)...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+union<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 "    'add label: union'
 macro pager yu "\
 <enter-command>echo 'Adding [union] tag to message...'<enter>\
@@ -237,9 +249,11 @@ macro pager yu "\
 "    'add label: union'
 macro index yv "\
 <enter-command>echo 'Adding [vault] tag to selected message(s)...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+vault<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 "    'add label: vault'
 macro pager yv "\
 <enter-command>echo 'Adding [vault] tag to message...'<enter>\
@@ -248,19 +262,25 @@ macro pager yv "\
 # - archive message
 macro index a "\
 <enter-command>echo 'Archiving selected message(s)...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
 <tag-prefix><modify-labels>\
 -inbox +archive -draft -spam -trash -sent -unread -new -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
 "    'move to Archive'
 macro pager a "\
 <enter-command>echo 'Archiving message...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
 <clear-flag>N\
 <modify-labels>\
 -inbox +archive -draft -spam -trash -sent -unread -new -junk<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
 "    'move to Archive'
@@ -273,88 +293,104 @@ bind index,pager MS noop
 bind index M noop
 macro index MI "\
 <enter-command>echo 'Moving selected message(s) to Inbox...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
 <tag-prefix><modify-labels>\
 +inbox -archive -draft -spam -trash -sent -unread -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move mail to Inbox'
 macro pager MI "\
 <enter-command>echo 'Moving to Inbox...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <clear-flag>N\
 <modify-labels>\
 +inbox -archive -draft -spam -trash -sent -unread -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <save-message>+INBOX<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move to Inbox'
 macro index MD "\
 <enter-command>echo 'Moving selected message(s) to Drafts...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
 <tag-prefix><modify-labels>\
 -inbox -archive +draft -spam -trash -sent -unread -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX.Drafts<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move mail to Drafts'
 macro pager MD "\
 <enter-command>echo 'Moving to Drafts...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <clear-flag>N\
 <modify-labels>\
 -inbox -archive +draft -spam -trash -sent -unread -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <save-message>+INBOX.Drafts<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move to Drafts'
 macro index MJ "\
 <enter-command>echo 'Moving selected message(s) to Spam...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
 <tag-prefix><modify-labels>\
 -inbox -archive -draft +spam -trash -sent -unread -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX.Spam<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move mail to Spam'
 macro pager MJ "\
 <enter-command>echo 'Moving to Spam...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <clear-flag>N\
 <modify-labels>\
 -inbox -archive -draft +spam -trash -sent -unread -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <save-message>+INBOX.Spam<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move to Spam'
 macro index MS "\
 <enter-command>echo 'Moving selected message(s) to Sent...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
 <tag-prefix><modify-labels>\
 -inbox -archive -draft -spam -trash +sent -unread -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX.Sent<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move mail to Sent'
 macro pager MS "\
 <enter-command>echo 'Moving to Sent...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <clear-flag>N\
 <modify-labels>\
 -inbox -archive -draft -spam -trash +sent -unread -junk<enter>\
-<enter-command>set resolve<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
 <save-message>+INBOX.Sent<enter>\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
