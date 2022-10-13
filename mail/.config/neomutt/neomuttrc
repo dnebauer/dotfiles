@@ -8,9 +8,9 @@
 # appear to work)
 ############################################################
 
-# Tabula rasa
+# Clear all settings (make script idempotent)
 
-#source neomuttrc.d/undo-all.rc
+#source neomuttrc.d/clear-settings.rc
 
 # Custom variables
 
@@ -527,8 +527,7 @@ set abort_noattach = ask-yes
 #       ―         older            %[%F]           2015-06-27
 #   . number of MIME attachments is defined by '%X? .. & .. ?' sequence
 #     - is a conditional construct
-#     - it breaks down as:
-#       '%X?%X📎&   ?' breaks down as:
+#     - '%X?%X📎&   ?' breaks down as:
 #        %X?           # if number is non-zero
 #           %X📎       # then display number followed by paperclip character
 #                      #   (U+1F4CE, which shows here as '📎')
@@ -542,6 +541,7 @@ source $my_cfgdir_d/colours.rc
 # - show mini-index
 #   . warning: neither pager- nor index-bound macros work with this active
 #set pager_index_lines = 8
+set quit = ask-yes
 set timeout = 0
 
 push <show-version>
