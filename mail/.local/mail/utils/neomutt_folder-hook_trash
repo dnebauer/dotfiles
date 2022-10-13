@@ -1,3 +1,19 @@
+# make all mail read
+
+# folders: Trash
+#
+# actions:
+# - tag all new mail and remove new tag
+
+push <tag-pattern>~N\n\
+<tag-prefix-cond><clear-flag>N\
+<untag-pattern>.\n<end-cond>
+push <tag-pattern>~A\n\
+<tag-prefix-cond><modify-labels>+trash\n\
+<untag-pattern>.\n<end-cond>
+
+# ---------------------------------------------------------
+
 # delete mail
 
 # folders: Trash
