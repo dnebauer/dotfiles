@@ -1,5 +1,5 @@
 #
-# undo or reset all bindings and settings
+# clear settings
 #
 
 ############################################################
@@ -17,6 +17,30 @@
 #   all needed bindings
 #
 ############################################################
+
+# reset variables    {{{1
+
+reset all
+
+reset my_name
+reset my_email
+reset my_maildir
+reset my_account
+reset my_mailbox
+reset my_cfgdir
+reset my_cfgdir_d
+reset my_config
+reset my_mailcap
+reset my_utils
+reset my_nvim_args
+reset my_print_pdf
+reset my_signature
+reset my_download_dir
+reset my_cache
+reset my_header_cache
+reset my_message_cache
+reset my_poll_script
+reset my_msmtpq
 
 # unset hooks    {{{1
 
@@ -2948,30 +2972,6 @@ bind generic,pager,editor,index <Esc>* noop
 bind generic,pager,editor,index <Esc>( noop
 bind generic,pager,editor,index <Esc>) noop
 # }}}2
-
-# reset variables    {{{1
-
-reset all
-
-reset my_name
-reset my_email
-reset my_maildir
-reset my_account
-reset my_mailbox
-reset my_cfgdir
-reset my_cfgdir_d
-reset my_config
-reset my_utils
-reset my_nvim_args
-reset my_print_pdf
-reset my_signature
-reset my_download_dir
-reset my_cache
-reset my_header_cache
-reset my_message_cache
-reset my_poll_script
-reset my_msmtpq
-
 # }}}1
 
 # vim: ft=neomuttrc fdm=marker
