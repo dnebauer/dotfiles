@@ -417,13 +417,6 @@ exec --no-startup-id systemctl --user start my-get-mail.service
 set $picom_start "pkill picom; sleep 1; picom -b"
 exec_always --no-startup-id $picom_start
 
-# overview    {{{2
-
-exec --no-startup-id i3-overview
-for_window [class="i3-overview"] floating enable
-for_window [class="i3-overview"] sticky enable
-no_focus [class="i3-overview"]
-
 # }}}2
 
 
