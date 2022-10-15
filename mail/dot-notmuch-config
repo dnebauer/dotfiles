@@ -52,9 +52,12 @@ other_email=davidnebauer@gmail.com;david.nebauer@nt.gov.au;
 #        in the mail store.
 #
 # The 'new' tag is used by the post-new hook, which then deletes it
+#
+# Don't use 'unread' tag since neomutt is slow to remove from display
+# and neomutt has its own 'N' flag that fulfils the same purpose
 
 [new]
-tags=unread;inbox;new;
+tags=inbox;new;
 
 # Search configuration
 #
