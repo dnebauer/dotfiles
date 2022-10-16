@@ -71,7 +71,7 @@ bind index,pager u undelete-message
 
 # folders: all
 #
-# keys: \\ (as fallback)
+# keys: s (as fallback)
 #
 # actions:
 # - open notmuch search field
