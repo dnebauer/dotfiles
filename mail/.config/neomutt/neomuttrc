@@ -570,7 +570,7 @@ set use_from
     # include 'From:' header in sent message
 set user_agent
     # include 'User-Agent:' header in sent message
-set query_command = "echo '' && notmuch address from:%s"
+set query_command = "echo '' && notmuch address from:/%s/"
     # used by <complete-query> function,
     # first line of results is presumed to be header so it is auto-trimmed
     # but notmuch does not include a header line
