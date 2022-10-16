@@ -700,7 +700,11 @@ push <show-version>
 # vim syntax for markdown in email
 # * consider inkarkat/vim-SyntaxRange github repo
 #   (https://github.com/inkarkat/vim-SyntaxRange)
+# * start of region is first blank line, for which the regex is: \n\n
+# * end of region is end of file, for which the regex is: \%$
 
 # change fetch failure message to normal with custom background (yellow?)
+
+# periodically create alias file from notmuch for use with $query_command
 
 # vim: ft=neomuttrc fdm=marker
