@@ -8,11 +8,23 @@
 # appear to work)
 ############################################################
 
-# Clear all settings (make script idempotent)
 
+# LOAD/RELOAD CONFIGURATION
+
+
+# clear settings (make script idempotent)
 #source neomuttrc.d/clear-settings.rc
 
-# Custom variables
+# [gibp] ctrl+r : reload configuration
+macro generic,index,browser,pager \cr "\
+<enter-command>unhook *<enter>\
+<enter-command>source $my_config<enter>\
+<enter-command>echo 'Reloaded $my_config'<enter>\
+"    'clear hooks and reload configuration'
+
+
+# CUSTOM VARIABLES
+
 
 set my_name = 'David Nebauer'
 set my_email = 'david@nebauer.id.au'
@@ -34,13 +46,57 @@ set my_message_cache = $my_cache/cache-messages
 set my_poll_script = $HOME/.local/bin/my-get-mail
 set my_msmtpq = $HOME/.local/bin/msmtpq
 
-# Reload configuration (ctrl+r)
 
-macro generic,index,browser,pager \cr "\
-<enter-command>unhook *<enter>\
-<enter-command>source $my_config<enter>\
-<enter-command>echo 'Reloaded $my_config'<enter>\
-"    'clear hooks and reload configuration'
+# MANAGE MAILBOXES
+
+
+# Standard mailboxes
+
+set mbox_type = Maildir
+    # default mailbox type
+set folder = $my_mailbox
+    # default location of mailboxes
+set record = +INBOX.Sent
+    # sent folder
+set trash = +INBOX.Trash
+    # trash folder
+set postponed = +INBOX.Drafts
+    # drafts folder
+set spool_file = +INBOX
+    # inbox folder
+
+# Virtual mailboxes
+
+set nm_default_url = 'notmuch:///home/david/.local/mail/maildirs'
+    # cannot use 'folder', must use 'nm_default_url'
+set vfolder_format = '%6n(%6N) %f'
+    # file browser display format for vfolders
+set maildir_check_cur
+    # poll maildir 'cur' directory as well as 'new' directory
+set nm_query_type = threads
+    # default query type {threads,messages}
+set nm_record
+    # add sent messages to notmuch database
+set nm_record_tags = "-inbox,+archive,+sent"
+    # adjust tags of sent messages added to notmuch database
+set sort = date
+    # index menu sort value
+    # {date,date-received,from,score,size,spam,subject,threads,to,unsorted}
+set sort_aux = last-date-received
+    # index menu secondary sort value
+set spool_file = 'Inbox'
+    # if not set Inbox defaults to '/var/mail/david' as per <mail> function
+    # if set then setting 'virtual_spool_file' to either {yes,no} has no effect
+unmailboxes *
+unvirtual-mailboxes *
+virtual-mailboxes \
+  'Inbox'   "notmuch://?query=folder:$my_account/INBOX" \
+  'Archive' "notmuch://?query=folder:$my_account/INBOX.Archive" \
+  'Sent'    "notmuch://?query=folder:$my_account/INBOX.Sent" \
+  'Drafts'  "notmuch://?query=folder:$my_account/INBOX.Drafts" \
+  'Spam'    "notmuch://?query=folder:$my_account/INBOX.Spam" \
+  'Junk'    "notmuch://?query=folder:$my_account/INBOX.Junk" \
+  'Trash'   "notmuch://?query=folder:$my_account/INBOX.Trash"
 
 # Hooks
 
@@ -61,71 +117,23 @@ folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Junk" \
 folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Trash" \
     "source $my_utils/neomutt_folder-hook_trash"
 
-# Moving
-
-bind attach,browser,index  gg  noop
-bind attach,browser,index  g   noop
-bind attach,browser,index  gg  first-entry
-bind attach,browser,index  G   last-entry
-bind pager                 gg  noop
-bind pager                 g   noop
-bind pager                 gg  top
-bind pager                 G   bottom
-bind pager                 k   previous-line
-bind pager                 j   next-line
-
 # Sidebar
 
 set sidebar_visible
 set mail_check_stats
 set sidebar_format = '%D%?F? [%F]?%* %?N?%N/?%S'
-bind index,pager <right> sidebar-next
-bind index,pager <left> sidebar-prev
-bind index,pager <space> sidebar-open
 set mail_check_stats
 set sort_browser = unsorted
+# [ip] <right> : next sidebar vfolder
+bind index,pager <right> sidebar-next
+# [ip] <left> : previous sidebar vfolder
+bind index,pager <left> sidebar-prev
+# [ip] <space> : open sidebar vfolder
+bind index,pager <space> sidebar-open
 
-# Mailboxes (standard)
+# Change mailbox
 
-set folder = $my_mailbox
-set record = +INBOX.Sent
-set trash = +INBOX.Trash
-set postponed = +INBOX.Drafts
-set spool_file = +INBOX
-
-# Mailboxes (virtual)
-
-set nm_default_url = 'notmuch:///home/david/.local/mail/maildirs'
-# - cannot use 'folder', must use 'nm_default_url'
-set vfolder_format = '%6n(%6N) %f'
-set maildir_check_cur
-set nm_query_type = threads
-set nm_record    # add sent messages to notmuch database
-# - adjust tags of sent messages added to notmuch database
-set nm_record_tags = "-inbox,+archive,+sent"
-set sort = date
-set sort_aux = last-date-received
-set spool_file = 'Inbox'
-# - if 'spool_file' is set then setting 'virtual_spool_file' to
-#   either 'yes' or 'no' has no effect
-# - if 'spool_file' is not set Inbox defaults to /var/mail/david,
-#   as per mail command
-unmailboxes *
-unvirtual-mailboxes *
-virtual-mailboxes \
-  'Inbox'   "notmuch://?query=folder:$my_account/INBOX" \
-  'Archive' "notmuch://?query=folder:$my_account/INBOX.Archive" \
-  'Sent'    "notmuch://?query=folder:$my_account/INBOX.Sent" \
-  'Drafts'  "notmuch://?query=folder:$my_account/INBOX.Drafts" \
-  'Spam'    "notmuch://?query=folder:$my_account/INBOX.Spam" \
-  'Junk'    "notmuch://?query=folder:$my_account/INBOX.Junk" \
-  'Trash'   "notmuch://?query=folder:$my_account/INBOX.Trash"
-
-# Manage Mailboxes
-
-# - change mailbox
 bind index,pager ca noop
-bind index cc noop
 bind index,pager cd noop
 bind index,pager cf noop
 bind index,pager ci noop
@@ -134,33 +142,79 @@ bind index,pager cm noop
 bind index,pager cs noop
 bind index,pager ct noop
 bind index,pager c noop
+# [ip] ci : change to Inbox vfolder
 macro index,pager ci '<change-vfolder>Inbox<enter>'   'open Inbox'
+# [ip] ca : change to Archive vfolder
 macro index,pager ca '<change-vfolder>Archive<enter>' 'open Archive'
+# [ip] cs : change to Sent vfolder
 macro index,pager cs '<change-vfolder>Sent<enter>'    'open Sent'
+# [ip] cd : change to Draft vfolder
 macro index,pager cd '<change-vfolder>Drafts<enter>'  'open Drafts'
+# [ip] cm : change to Spam vfolder
 macro index,pager cm '<change-vfolder>Spam<enter>'    'open Spam'
+# [ip] cj : change to Junk vfolder
 macro index,pager cj '<change-vfolder>Junk<enter>'    'open Junk'
+# [ip] ct : change to Trash vfolder
 macro index,pager ct '<change-vfolder>Trash<enter>'   'open Trash'
+# [ip] cf : select vfolder to change to
 macro index,pager cf '<change-vfolder>?'              'open mailbox...'
-bind  index cc change-vfolder
-# - search maildir
-#   . folder-specific searching is set in folder-hooks
+
+# Synchronise
+
+timeout-hook 'exec sync-mailbox'
+startup-hook 'exec sync-mailbox'
+shutdown-hook 'exec sync-mailbox'
+
+
+# MESSAGE MANAGEMENT
+
+
+# Display
+
+# [i] <return> : display message
+bind index <return> display-message
+
+# Search for messages
+
+# [ip] s : search current vfolder
+# - set in folder-hooks
+# [ip] X : custom search creating temporary vfolder
 bind index,pager X vfolder-from-query
-# - threads
+
+# Threads
+
+# [ip] + : read thread of current message
 bind index,pager + entire-thread
+# [i] za : toggle collapse of current thread
 bind index za  collapse-thread
-bind index zA  collapse-all  # missing :folddisable/foldenable
-# - select messages
+# [i] zA : toggle collapse of all threads
+# - missing :folddisable/foldenable
+bind index zA  collapse-all
+
+# Tagging
+
+# [i] <insert> : tag current message
 macro index <insert> "\
 <enter-command>push t<enter>\
 "    'select/tag current message'
+# [i] ctrl-a : tag all messages
 macro index \ca "\
 <tag-pattern>~A<enter>\
 "    'select/tag all messages'
+# [i] Ctrl-u : untag all messages
 macro index \cu "\
 <untag-pattern>~A<enter>\
 "    'unselect/untag all messages'
-# - add labels
+
+# Tags (neomutt)
+
+# [i] W : clear
+macro index W "\
+<tag-prefix><clear-flag>\
+"    'clear a status flag from messages(s)'
+
+# Labels (notmuch)
+
 bind index,pager yd noop
 bind index,pager yf noop
 bind index,pager yl noop
@@ -170,13 +224,15 @@ bind index,pager yu noop
 bind index,pager yv noop
 bind index,pager yy noop
 bind index,pager y noop
+# [ip] yy : manually modify
 macro index yy "\
 <tag-prefix><modify-labels>\
 "    'modify (notmuch/imap) tags'
 bind pager yy modify-labels
+# [ip] yd : add [development] label
 macro index yd "\
 <enter-command>echo \
-'Adding [development] tag to selected message(s)...'<enter>\
+'Adding [development] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+development<enter>\
@@ -184,11 +240,12 @@ macro index yd "\
 <enter-command>unset my_resolve<enter>\
 "    'add label: development'
 macro pager yd "\
-<enter-command>echo 'Adding [development] tag to message...'<enter>\
+<enter-command>echo 'Adding [development] label...'<enter>\
 <modify-labels>+development<enter>\
 "    'add label: development'
+# [ip] yf : add [financial] label
 macro index yf "\
-<enter-command>echo 'Adding [financial] tag to selected message(s)...'<enter>\
+<enter-command>echo 'Adding [financial] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+financial<enter>\
@@ -196,11 +253,12 @@ macro index yf "\
 <enter-command>unset my_resolve<enter>\
 "    'add label: financial'
 macro pager yf "\
-<enter-command>echo 'Adding [financial] tag to message...'<enter>\
+<enter-command>echo 'Adding [financial] label...'<enter>\
 <modify-labels>+financial<enter>\
 "    'add label: financial'
+# [ip] yl : add [later] label
 macro index yl "\
-<enter-command>echo 'Adding [later] tag to selected message(s)...'<enter>\
+<enter-command>echo 'Adding [later] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+later<enter>\
@@ -208,11 +266,12 @@ macro index yl "\
 <enter-command>unset my_resolve<enter>\
 "    'add label: later'
 macro pager yl "\
-<enter-command>echo 'Adding [later] tag to message...'<enter>\
+<enter-command>echo 'Adding [later] label...'<enter>\
 <modify-labels>+later<enter>\
 "    'add label: later'
+# [ip] yo : add [order] label
 macro index yo "\
-<enter-command>echo 'Adding [order] tag to selected message(s)...'<enter>\
+<enter-command>echo 'Adding [order] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+order<enter>\
@@ -220,11 +279,12 @@ macro index yo "\
 <enter-command>unset my_resolve<enter>\
 "    'add label: order'
 macro pager yo "\
-<enter-command>echo 'Adding [order] tag to message...'<enter>\
+<enter-command>echo 'Adding [order] label...'<enter>\
 <modify-labels>+order<enter>\
 "    'add label: order'
+# [ip] yp : add [personal] label
 macro index yp "\
-<enter-command>echo 'Adding [personal] tag to selected message(s)...'<enter>\
+<enter-command>echo 'Adding [personal] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+personal<enter>\
@@ -232,11 +292,12 @@ macro index yp "\
 <enter-command>unset my_resolve<enter>\
 "    'add label: personal'
 macro pager yp "\
-<enter-command>echo 'Adding [personal] tag to message...'<enter>\
+<enter-command>echo 'Adding [personal] label...'<enter>\
 <modify-labels>+personal<enter>\
 "    'add label: personal'
+# [ip] yu : add [union] label
 macro index yu "\
-<enter-command>echo 'Adding [union] tag to selected message(s)...'<enter>\
+<enter-command>echo 'Adding [union] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+union<enter>\
@@ -244,11 +305,12 @@ macro index yu "\
 <enter-command>unset my_resolve<enter>\
 "    'add label: union'
 macro pager yu "\
-<enter-command>echo 'Adding [union] tag to message...'<enter>\
+<enter-command>echo 'Adding [union] label...'<enter>\
 <modify-labels>+union<enter>\
 "    'add label: union'
+# [ip] yv : add [vault] label
 macro index yv "\
-<enter-command>echo 'Adding [vault] tag to selected message(s)...'<enter>\
+<enter-command>echo 'Adding [vault] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+vault<enter>\
@@ -256,12 +318,16 @@ macro index yv "\
 <enter-command>unset my_resolve<enter>\
 "    'add label: vault'
 macro pager yv "\
-<enter-command>echo 'Adding [vault] tag to message...'<enter>\
+<enter-command>echo 'Adding [vault] label...'<enter>\
 <modify-labels>+vault<enter>\
 "    'add label: vault'
-# - archive message
+
+# Move
+
+unset confirm_append  # no confirm needed when append to mailbox
+# [ip] a : archive message
 macro index a "\
-<enter-command>echo 'Archiving selected message(s)...'<enter>\
+<enter-command>echo 'Archiving...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -273,7 +339,7 @@ macro index a "\
 <sync-mailbox>\
 "    'move to Archive'
 macro pager a "\
-<enter-command>echo 'Archiving message...'<enter>\
+<enter-command>echo 'Archiving...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <clear-flag>N\
@@ -284,15 +350,16 @@ macro pager a "\
 <save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
 "    'move to Archive'
-# - move messages to other mailboxes
+# move to other mailboxes
 bind index,pager MD noop
 bind index,pager MI noop
 bind index,pager MJ noop
 bind index,pager MM noop
 bind index,pager MS noop
 bind index M noop
+# [ip] MI : move to Inbox
 macro index MI "\
-<enter-command>echo 'Moving selected message(s) to Inbox...'<enter>\
+<enter-command>echo 'Moving to Inbox...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -317,8 +384,9 @@ macro pager MI "\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move to Inbox'
+# [ip] MD : move to Drafts
 macro index MD "\
-<enter-command>echo 'Moving selected message(s) to Drafts...'<enter>\
+<enter-command>echo 'Moving to Drafts...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -343,8 +411,9 @@ macro pager MD "\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move to Drafts'
+# [ip] MJ : move to Spam
 macro index MJ "\
-<enter-command>echo 'Moving selected message(s) to Spam...'<enter>\
+<enter-command>echo 'Moving to Spam...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -369,8 +438,9 @@ macro pager MJ "\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move to Spam'
+# [ip] MS : move to Sent
 macro index MS "\
-<enter-command>echo 'Moving selected message(s) to Sent...'<enter>\
+<enter-command>echo 'Moving to Sent...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><clear-flag>N\
@@ -395,68 +465,58 @@ macro pager MS "\
 <sync-mailbox>\
 <change-vfolder>^<enter>\
 "    'move to Sent'
-# - show log messages
-bind index,pager MM show-log-messages
-# - delete/undelete messages: set in folder-hooks
-macro index W "\
-<tag-prefix><clear-flag>\
-"    'clear a status flag from messages(s)'
-bind index <tab> sync-mailbox
-timeout-hook 'exec sync-mailbox'
-startup-hook 'exec sync-mailbox'
-shutdown-hook 'exec sync-mailbox'
-bind index <return> display-message
+
+# Delete
+
 set delete = yes
-unset confirm_append
+    # purge deleted messages on mailbox close/syncronisation
+# [ip] d,<delete> : trash messages
+# - set in folder-hooks
+# - trashes messages in all vfolders except Trash
+# - deletes messages in Trash vfolder
+# [ip] u : untrash message
+# - in Trash folder only
 
-# Mail Settings
 
-set real_name = $my_name
-alias me $my_name <$my_email>
-set from = $my_email
-set use_from
-set user_agent
-set mbox_type = Maildir
+# FETCH
 
-# Get Mail
-
+# [i] P : fetch mail
 macro index P "\
 <shell-escape>$my_poll_script<enter>\
 <change-vfolder>Inbox<enter>\
 "    'run offlineimap to fetch mail'
 
-# View Mail
 
-auto_view text/html
-alternative_order text/plain text/html
-macro attach 'V' "\
-<pipe-entry>iconv -c --to-code=UTF8 > $my_cache/mail.html<enter>\
-<shell-escape>$BROWSER $my_cache/mail.html<enter>\
-"    'open message in default browser'
-set mbox = +INBOX.Archive
+# VIEW
+
+
 set move
+    # move read messages from $spool_file to $mbox
+set mbox = +INBOX.Archive
+    # folder into which read mail is appended
 set attach_save_dir = $my_download_dir
-unset mark_old                       # unread/new is good enough for me
-macro index,pager \cb "\
-<pipe-message>urlscan<Enter>\
-"    'call urlscan to extract URLs out of a message'
-macro attach,compose \cb "\
-<pipe-entry> urlscan<Enter>\
-"    'call urlscan to extract URLs out of a message'
-set print_command = $my_print_pdf   # conversion by zamzar.com
+    # default 'download' directory
+set print_command = $my_print_pdf
+    # conversion to pdf
 unset print_decode
+    # do not decode message before printing
+set print = ask-yes
+    # check in case accidentally pressed 'p'
+unset mark_old
+    # no 'old' tag, 'new' is good enough
 set header_cache = $my_header_cache
 set message_cachedir = $my_message_cache
-set pager_context=3
+    # try to speed up by caching
+set pager_context = 3
+    # lines of overlap when PgUp and PgDown
 set tilde
+    # pad blank lines with tildes
 set pager_stop
-# - save all attachments
-macro pager S "\
-<pipe-message>\
-ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
-<enter-command>echo 'Attachments saved to $my_download_dir'<enter>\
-"    'Save all non-text attachments using ripmime'
+    # do not automatically PgDown
 unset prompt_after
+    # no prompt when external pager exits
+
+# prefer html
 unauto_view *
 auto_view text/html \
           application/postscript \
@@ -467,83 +527,180 @@ unalternative_order *
 alternative_order text/html \
                   text/plain \
                   text
+# [a] V : open message in default browser ($BROWSER)
+macro attach 'V' "\
+<pipe-entry>iconv -c --to-code=UTF8 > $my_cache/mail.html<enter>\
+<shell-escape>$BROWSER $my_cache/mail.html<enter>\
+"    'open message in default browser'
 
-# Compose Mail
+# [ipac] ctrl+b : view/copy urls
+macro index,pager \cb "\
+<pipe-message>urlscan<Enter>\
+"    'call urlscan to extract URLs out of a message'
+macro attach,compose \cb "\
+<pipe-entry> urlscan<Enter>\
+"    'call urlscan to extract URLs out of a message'
 
+# [ip] S : save all attachments
+macro index,pager S "\
+<pipe-message>\
+ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
+<enter-command>echo 'Attachments saved to $my_download_dir'<enter>\
+"    'Save all non-text attachments using ripmime'
+
+
+# COMPOSE
+
+
+set real_name = $my_name
+    # sender's real name
+alias me $my_name <$my_email>
+    # alias for sender
+set from = $my_email
+    # default 'from' address
+set edit_headers
+    # show headers when composing
+ignore *
+unignore From: To: CC: BCC: Subject:
+    # warning: [un]ignore setting is not honoured
+unhdr_order *
+hdr_order From: Subject: To: Cc: Bcc:
+    # warning: hdr_order setting is not honoured
+set use_from
+    # include 'From:' header in sent message
+set user_agent
+    # include 'User-Agent:' header in sent message
+set query_command = "echo '' && notmuch address from:%s"
+    # used by <complete-query> function,
+    # first line of results is presumed to be header so it is auto-trimmed
+    # but notmuch does not include a header line
+    # so the 'echo' command is a workaround for this
 set editor = "nvim -S '$my_nvim_args' +/^$/+1 '+startinsert!'"
+    # editor invocation, uses external file for initial arguments
 set text_flowed
-# - convert markdown to html
+    # generate content type 'text/plain; format-flowed'
+set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
+    # format of 'query' menu
+set signature = $my_signature
+    # signature file
+unset sig_dashes
+    # no dashes before sig
+set attribution="* %n <%a> [%{%Y-%m-%d %H:%M:%S %Z}]:\n"
+    # string preceding message included in reply
+set mime_forward = ask-no
+    # asks whether to forward message as mime attachment rather than inline
+set fast_reply
+    # skip initial prompts when replying, jump straight to editor
+set forward_format = 'Fwd: %s'
+    # format of subject when forwarding
+set reply_to
+    # reply to address in 'Reply-To:' field rather than 'From:' field
+set include
+    # include message in replies
+set forward_quote
+    # include message in forwards
+set ispell = 'aspell -e -c'
+    # 'ispell' invocation
+
+# [e] <tab> : complete email address (using $query_command)
+bind editor <Tab> complete-query
+# [e] ctrl+t : complete filename or alias
+bind editor \ct complete
+
+
+# SEND
+
+
+set sendmail = "$my_msmtpq"
+    # email sending program
+set sendmail_wait = -1
+    # send in background, 0 waits forever to finish
+set abort_noattach = ask-yes
+    # check before sending if suspect attachments are missing
+
+# [c] Y : convert markdown to html and send
 # - macro solution from NeoMutt Guide (https://neomutt.org/guide),
 #   Chapter 5.2 'Composing Multipart Alternative Emails'
 macro compose Y "\
-<first-entry><enter-command>set wait_key=no<enter>\
+<first-entry>\
+<enter-command>set my_wait_key=\$wait_key<enter>\
+<enter-command>unset wait_key<enter>\
 <pipe-entry>pandoc -o $my_cache/text-alternative.html<enter>\
 <attach-file>$my_cache/text-alternative.html<enter>\
 <toggle-unlink><toggle-disposition>\
 <tag-entry><first-entry><tag-entry><group-alternatives>\
-<enter-command>set wait_key=yes<enter><send-message>\
+<enter-command>set wait_key=\$my_wait_key<enter>\
+<enter-command>unset my_wait_key<enter>\
+<send-message>\
 "    "send the message as 'multipart/alternative'"
-# - email headers
-set edit_headers                     # show headers when composing
-ignore *                             # [un]ignore is not honoured
-unignore From: To: CC: BCC: Subject:
-unhdr_order *                        # [un]hdr_order is not honoured
-hdr_order From: Subject: To: Cc: Bcc:
-set query_command = "echo '' && notmuch address from:%s"
-# - first line of results is presumed to be header, so is trimmed
-# - the 'echo' command is a workaround for this
-bind editor <Tab> complete-query
-bind editor \ct complete
-set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
-set signature = $my_signature
-set attribution="* %n <%a> [%{%Y-%m-%d %H:%M:%S %Z}]:\n"
-set mime_forward = ask-no
-set fast_reply                       # skip to compose when replying
-set forward_format = 'Fwd: %s'       # format of subject when forwarding
-set reply_to                         # reply to Reply to: field
-set include                          # include message in replies
-set forward_quote                    # include message in forwards
-unset sig_dashes                     # no dashes before sig
-set ispell = 'aspell -e -c'
 
-# Send Mail
 
-set sendmail = "$my_msmtpq"
-set sendmail_wait = -1  # background sending, 0 waits forever to finish
-set envelope_from_address
-set abort_noattach = ask-yes
+# MOVING
 
-# Customise Interface
 
-# - index format
-#   . email date-time is defined by '%<[365d .. [%F]>' sequence
-#     - is a conditional date sequence
-#       (see https://neomutt.org/feature/cond-date)
-#     - test      date range       format string   example
-#       -----------------------------------------------------
-#       %[1d      today            %[%R]           12:34
-#       %[7d      last 7 days      %[%a-%d]        Thu-12
-#       %[365d    last 365 days    %[%b-%d]        Dec-10
-#       ―         older            %[%F]           2015-06-27
-#   . number of MIME attachments is defined by '%X? .. & .. ?' sequence
-#     - is a conditional construct
-#     - '%X?%X📎&   ?' breaks down as:
-#        %X?           # if number is non-zero
-#           %X📎       # then display number followed by paperclip character
-#                      #   (U+1F4CE, which shows here as '📎')
-#               &   ?  # else display 3 spaces, which is equivalent to:
-#                      #   1 digit + U+1F4CE (which is as wide as 2 characters)
+bind attach,browser,index  gg  noop
+bind attach,browser,index  g   noop
+bind attach,browser,index  gg  first-entry
+bind attach,browser,index  G   last-entry
+bind pager                 gg  noop
+bind pager                 g   noop
+bind pager                 gg  top
+bind pager                 G   bottom
+bind pager                 k   previous-line
+bind pager                 j   next-line
+
+
+# INTERFACE
+
+
+# [ip] MM : show log messages
+bind index,pager MM show-log-messages
+
+set pager_index_lines = 8
+    # show mini-index
+    # warning: neither pager- nor index-bound macros work in mini-pager
+set quit = ask-yes
+    # don't quit accidentally
+set timeout = 0
+    # wait indefinitely for user input
+unset wait_key
+    # minimise 'Press any key to continue...' messages
 set index_format = '%4C %Z %?X?%X📎&   ? \
 %<[365d?%<[7d?%<[1d?%[%R]&%[%a-%d]>&%[%b-%d]>&%[%F]> \
 %-20.20L (%?l?%4l&%4c?) [%g] %s'
-# - colours
+    # format of index lines
+    # - email date-time is defined by '%<[365d .. [%F]>' sequence
+    #   * is a conditional date sequence
+    #     (see https://neomutt.org/feature/cond-date)
+    #   * test      date range       format string   example
+    #     -----------------------------------------------------
+    #     %[1d      today            %[%R]           12:34
+    #     %[7d      last 7 days      %[%a-%d]        Thu-12
+    #     %[365d    last 365 days    %[%b-%d]        Dec-10
+    #     ―         older            %[%F]           2015-06-27
+    # - number of MIME attachments is defined by '%X? .. & .. ?' sequence
+    #   * is a conditional construct
+    #   * '%X?%X📎&   ?' breaks down as:
+    #      %X?           # if number is non-zero
+    #         %X📎       # then display number followed by paperclip character
+    #                    #   (U+1F4CE, which shows here as '📎')
+    #             &   ?  # else display 3 spaces, which is equivalent to:
+    #                    #   1 digit + U+1F4CE
+    #                    #   (which is as wide as 2 characters)
 source $my_cfgdir_d/colours.rc
-# - show mini-index
-#   . warning: neither pager- nor index-bound macros work with this active
-#set pager_index_lines = 8
-set quit = ask-yes
-set timeout = 0
+    # colour scheme
 
 push <show-version>
+    # display version on startup
+
+
+# TODO
+
+
+# vim syntax for markdown in email
+# * consider inkarkat/vim-SyntaxRange github repo
+#   (https://github.com/inkarkat/vim-SyntaxRange)
+
+# change fetch failure message to normal with custom background (yellow?)
 
 # vim: ft=neomuttrc fdm=marker
