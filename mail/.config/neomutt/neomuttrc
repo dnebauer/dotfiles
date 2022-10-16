@@ -186,10 +186,10 @@ bind index,pager X vfolder-from-query
 # [ip] + : read thread of current message
 bind index,pager + entire-thread
 # [i] za : toggle collapse of current thread
-bind index za  collapse-thread
+bind index za collapse-thread
 # [i] zA : toggle collapse of all threads
 # - missing :folddisable/foldenable
-bind index zA  collapse-all
+bind index zA collapse-all
 
 # Tagging
 
@@ -528,7 +528,7 @@ alternative_order text/html \
                   text/plain \
                   text
 # [a] V : open message in default browser ($BROWSER)
-macro attach 'V' "\
+macro attach V "\
 <pipe-entry>iconv -c --to-code=UTF8 > $my_cache/mail.html<enter>\
 <shell-escape>$BROWSER $my_cache/mail.html<enter>\
 "    'open message in default browser'
@@ -603,7 +603,7 @@ set ispell = 'aspell -e -c'
     # 'ispell' invocation
 
 # [e] <tab> : complete email address (using $query_command)
-bind editor <Tab> complete-query
+bind editor <tab> complete-query
 # [e] ctrl+t : complete filename or alias
 bind editor \ct complete
 
