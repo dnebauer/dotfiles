@@ -125,11 +125,11 @@ set sidebar_format = '%D%?F? [%F]?%* %?N?%N/?%S'
 set mail_check_stats
 set sort_browser = unsorted
 # [ip] <right> : next sidebar vfolder
-bind index,pager <right> sidebar-next
+bind index,pager <Right> sidebar-next
 # [ip] <left> : previous sidebar vfolder
-bind index,pager <left> sidebar-prev
+bind index,pager <Left> sidebar-prev
 # [ip] <space> : open sidebar vfolder
-bind index,pager <space> sidebar-open
+bind index,pager <Space> sidebar-open
 
 # Change mailbox
 
@@ -172,7 +172,7 @@ shutdown-hook 'exec sync-mailbox'
 # Display
 
 # [i] <return> : display message
-bind index <return> display-message
+bind index <Return> display-message
 
 # Search for messages
 
@@ -194,7 +194,7 @@ bind index zA collapse-all
 # Tagging
 
 # [i] <insert> : tag current message
-macro index <insert> "\
+macro index <Insert> "\
 <enter-command>push t<enter>\
 "    'select/tag current message'
 # [i] ctrl-a : tag all messages
@@ -535,10 +535,10 @@ macro attach V "\
 
 # [ipac] ctrl+b : view/copy urls
 macro index,pager \cb "\
-<pipe-message>urlscan<Enter>\
+<pipe-message>urlscan<enter>\
 "    'call urlscan to extract URLs out of a message'
 macro attach,compose \cb "\
-<pipe-entry> urlscan<Enter>\
+<pipe-entry> urlscan<enter>\
 "    'call urlscan to extract URLs out of a message'
 
 # [ip] S : save all attachments
@@ -602,8 +602,8 @@ set forward_quote
 set ispell = 'aspell -e -c'
     # 'ispell' invocation
 
-# [e] <tab> : complete email address (using $query_command)
-bind editor <tab> complete-query
+# [e] <Tab> : complete email address (using $query_command)
+bind editor <Tab> complete-query
 # [e] ctrl+t : complete filename or alias
 bind editor \ct complete
 

@@ -9,25 +9,23 @@ style:  [Standard, Latex14pt, PageBreak]
 \newpage
 
 -------------------------------------------------------------------------------
-Function                  Key       Description
-------------------------- --------- -------------------------------------------
-change-folder             c         open a different folder
+Function                Key         Description
+----------------------- ----------- -------------------------------------------
+change-folder           c           open a different folder
 
-create-alias              a         create an alias from message sender
+create-alias            a           create an alias from message sender
 
-fetch-mail                G         retrieve mail from POP server
+next-page               z           move to the next page (_generic_)
 
-group-reply               g         reply to all recipients
+parent-message          P           jump to parent message in thread
 
-next-page                 z         move to the next page (_generic_)
+previous-page           \<Left\>    move to previous page (_generic_)
 
-parent-message            P         jump to parent message in thread
+display-message         \<Space\>   display a message
 
-previous-page             \<left\>  move to previous page (_generic_)
+read-thread             ^r          mark current thread as read
 
-read-thread               ^r        mark current thread as read
-
-show-log-messages         M         show log and debug messages
+show-log-messages       M           show log and debug messages
 -------------------------------------------------------------------------------
 
 Table: Index {#tbl:default-index}
@@ -41,17 +39,15 @@ change-folder            c          open a different folder
 
 create-alias             a          create an alias from message sender
 
-group-reply              g          reply to all recipients
-
 middle-page              M          move to the middle of the page; generic
 
-next-page                \<space\>  move to next page
+next-page                \<Space\>  move to next page
 
-next-undeleted           \<right\>  move to next undeleted message
+next-undeleted           \<Right\>  move to next undeleted message
 
 next-undeleted           j          move to next undeleted message
 
-previous-undeleted       \<left\>   move to previous undeleted message
+previous-undeleted       \<Left\>   move to previous undeleted message
 
 previous-undeleted       k          move to previous undeleted message
 
@@ -61,13 +57,3 @@ skip-quoted              S          skip beyond quoted text
 -------------------------------------------------------------------------------
 
 Table: Pager {#tbl:default-pager}
-
-\newpage
-
--------------------------------------------------------------------------------
-Function                 Key        Description
------------------------- ---------- -------------------------------------------
-group-reply              g          reply to all recipients
--------------------------------------------------------------------------------
-
-Table: Attachments {#tbl:default-attach}
