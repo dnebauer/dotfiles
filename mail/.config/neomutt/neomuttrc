@@ -2,11 +2,15 @@
 # Local configuration file for NeoMutt
 #
 
-############################################################
-# if enclosing a value containing a $variable, enclose with
-# double-quotes (as doing so with single-quotes does not
-# appear to work)
-############################################################
+##############################################################
+# if enclosing a value containing a $variable, enclose with  #
+# double-quotes (as doing so with single-quotes does not     #
+# appear to work)                                            #
+##############################################################
+
+##############################################################
+# <Ctrl>+x key combinations are expressed as both ^X and \cx #
+##############################################################
 
 
 # LOAD/RELOAD CONFIGURATION
@@ -15,7 +19,7 @@
 # clear settings (make script idempotent)
 #source neomuttrc.d/clear-settings.rc
 
-# [gibp] ctrl+r : reload configuration
+# [gibp] ^R : reload configuration
 macro generic,index,browser,pager \cr "\
 <enter-command>unhook *<enter>\
 <enter-command>source $my_config<enter>\
@@ -124,12 +128,12 @@ set mail_check_stats
 set sidebar_format = '%D%?F? [%F]?%* %?N?%N/?%S'
 set mail_check_stats
 set sort_browser = unsorted
-# [ip] <right> : next sidebar vfolder
+# [ip] <Right> : next sidebar vfolder
 bind index,pager <Right> sidebar-next
-# [ip] <left> : previous sidebar vfolder
+# [ip] <Left> : previous sidebar vfolder
 bind index,pager <Left> sidebar-prev
-# [ip] <space> : open sidebar vfolder
-bind index,pager <Space> sidebar-open
+# [ip] ^O : open sidebar vfolder
+bind index,pager \co sidebar-open
 
 # Change mailbox
 
@@ -197,11 +201,11 @@ bind index zA collapse-all
 macro index <Insert> "\
 <enter-command>push t<enter>\
 "    'select/tag current message'
-# [i] ctrl-a : tag all messages
+# [i] ^A : tag all messages
 macro index \ca "\
 <tag-pattern>~A<enter>\
 "    'select/tag all messages'
-# [i] Ctrl-u : untag all messages
+# [i] ^U : untag all messages
 macro index \cu "\
 <untag-pattern>~A<enter>\
 "    'unselect/untag all messages'
@@ -533,7 +537,7 @@ macro attach V "\
 <shell-escape>$BROWSER $my_cache/mail.html<enter>\
 "    'open message in default browser'
 
-# [ipac] ctrl+b : view/copy urls
+# [ipac] ^B : view/copy urls
 macro index,pager \cb "\
 <pipe-message>urlscan<enter>\
 "    'call urlscan to extract URLs out of a message'
@@ -604,7 +608,7 @@ set ispell = 'aspell -e -c'
 
 # [e] <Tab> : complete email address (using $query_command)
 bind editor <Tab> complete-query
-# [e] ctrl+t : complete filename or alias
+# [e] ^T : complete filename or alias
 bind editor \ct complete
 
 
