@@ -690,9 +690,14 @@ push <show-version>
 #       * start of region is first blank line, for which the regex is: \n\n
 #       * end of region is end of file, for which the regex is: \%$
 
-# TODO: change fetch failure message background (yellow?)
+# TODO: change fetch failure message from critical to normal
 
 # TODO: periodically create alias file from notmuch
 #       * for use with $query_command
+
+# TODO: consider using Konfekt/mutt-trim
+#       * https://github.com/Konfekt/mutt-trim
+
+# TODO: create script man files
 
 # vim: ft=neomuttrc fdm=marker
