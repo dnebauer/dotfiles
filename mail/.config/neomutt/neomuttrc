@@ -635,21 +635,6 @@ macro compose Y "\
 "    "send the message as 'multipart/alternative'"
 
 
-# MOVING
-
-
-bind attach,browser,index  gg  noop
-bind attach,browser,index  g   noop
-bind attach,browser,index  gg  first-entry
-bind attach,browser,index  G   last-entry
-bind pager                 gg  noop
-bind pager                 g   noop
-bind pager                 gg  top
-bind pager                 G   bottom
-bind pager                 k   previous-line
-bind pager                 j   next-line
-
-
 # INTERFACE
 
 
