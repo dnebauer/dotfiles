@@ -68,12 +68,10 @@ abortScript () {
     if has_display ; then
         if use_icon ; then
             notify-send --icon="$mail_icon" \
-                        --urgency='critical' \
                         "$subject" \
                         "$body"
         else
-            notify-send --urgency='critical' \
-                        "$subject" \
+            notify-send "$subject" \
                         "$body"
         fi
     fi

@@ -42,8 +42,6 @@
 # * start of region is first blank line, for which the regex is: \n\n
 # * end of region is end of file, for which the regex is: \%$
 
-# change fetch failure message from critical to normal
-
 # periodically create alias file from notmuch
 # * for use with $query_command
 
