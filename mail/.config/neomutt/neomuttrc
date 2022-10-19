@@ -2,15 +2,55 @@
 # Local configuration file for NeoMutt
 #
 
-##############################################################
-# if enclosing a value containing a $variable, enclose with  #
-# double-quotes (as doing so with single-quotes does not     #
-# appear to work)                                            #
-##############################################################
 
-##############################################################
-# <Ctrl>+x key combinations are expressed as both ^X and \cx #
-##############################################################
+# NOTES
+
+
+# Quoting $variables
+# * enclose values containing a $variable with double-quotes
+# * using single-quotes does not appear to work
+
+# <Ctrl>+key bindings
+# * in binding use '\cx' for <Ctrl>+x key combination
+# * can use either upper- or lowercase key in binding (case-insensitive)
+# * if both <Ctrl>+x and <Ctrl>+X are present, the last binding wins
+# * press either <Ctrl>+x and <Ctrl>+X to trigger binding (case-insensitive)
+# * in neomutt help both <Ctrl>+x and <Ctrl>+X are shown as '^X'
+
+# <Esc>+key bindings
+# * in binding use '<Esc>x' for <Esc>+x key combination
+# * case-sensitive
+# * see below for interaction with <Alt>+x key combinations
+
+# <Alt>+key bindings
+# * in binding use '\ex' for <Alt>+x key combination
+# * case-sensitive
+# * is displayed in neomutt help as '<Esc>x'
+# * <Alt>+key is a synonym for <Esc>+key
+# * both key combinations can be used to trigger the bound function
+# * if both <Alt> and <Esc> bindings for the same key are present,
+#   the last binding wins
+
+
+# TODO
+
+
+# vim syntax for markdown in email
+# * consider "inkarkat/vim-SyntaxRange" github repo
+#   (https://github.com/inkarkat/vim-SyntaxRange)
+# * requires plugin "inkarkat/vim-ingo-library"
+# * start of region is first blank line, for which the regex is: \n\n
+# * end of region is end of file, for which the regex is: \%$
+
+# change fetch failure message from critical to normal
+
+# periodically create alias file from notmuch
+# * for use with $query_command
+
+# consider using Konfekt/mutt-trim
+# * https://github.com/Konfekt/mutt-trim
+
+# create script man files
 
 
 # LOAD/RELOAD CONFIGURATION
@@ -19,7 +59,7 @@
 # clear settings (make script idempotent)
 #source neomuttrc.d/clear-settings.rc
 
-# [gibp] ^R : reload configuration
+# [gibp] <Ctrl>+r : reload configuration
 macro generic,index,browser,pager \cr "\
 <enter-command>unhook *<enter>\
 <enter-command>source $my_config<enter>\
@@ -132,7 +172,7 @@ set sort_browser = unsorted
 bind index,pager <Right> sidebar-next
 # [ip] <Left> : previous sidebar vfolder
 bind index,pager <Left> sidebar-prev
-# [ip] ^O : open sidebar vfolder
+# [ip] <Ctrl>+o : open sidebar vfolder
 bind index,pager \co sidebar-open
 
 # Change mailbox
@@ -201,11 +241,11 @@ bind index zA collapse-all
 macro index <Insert> "\
 <enter-command>push t<enter>\
 "    'select/tag current message'
-# [i] ^A : tag all messages
+# [i] <Ctrl>+a : tag all messages
 macro index \ca "\
 <tag-pattern>~A<enter>\
 "    'select/tag all messages'
-# [i] ^U : untag all messages
+# [i] <Ctrl>+u : untag all messages
 macro index \cu "\
 <untag-pattern>~A<enter>\
 "    'unselect/untag all messages'
@@ -537,7 +577,7 @@ macro attach V "\
 <shell-escape>$BROWSER $my_cache/mail.html<enter>\
 "    'open message in default browser'
 
-# [ipac] ^B : view/copy urls
+# [ipac] <Ctrl>+b : view/copy urls
 macro index,pager \cb "\
 <pipe-message>urlscan<enter>\
 "    'call urlscan to extract URLs out of a message'
@@ -608,7 +648,7 @@ set ispell = 'aspell -e -c'
 
 # [e] <Tab> : complete email address (using $query_command)
 bind editor <Tab> complete-query
-# [e] ^T : complete filename or alias
+# [e] <Ctrl>+t : complete filename or alias
 bind editor \ct complete
 
 
@@ -682,22 +722,5 @@ source $my_cfgdir_d/colours.rc
 push <show-version>
     # display version on startup
 
-
-# TODO: vim syntax for markdown in email
-#       * consider "inkarkat/vim-SyntaxRange" github repo
-#         (https://github.com/inkarkat/vim-SyntaxRange)
-#       * requires plugin "inkarkat/vim-ingo-library"
-#       * start of region is first blank line, for which the regex is: \n\n
-#       * end of region is end of file, for which the regex is: \%$
-
-# TODO: change fetch failure message from critical to normal
-
-# TODO: periodically create alias file from notmuch
-#       * for use with $query_command
-
-# TODO: consider using Konfekt/mutt-trim
-#       * https://github.com/Konfekt/mutt-trim
-
-# TODO: create script man files
 
 # vim: ft=neomuttrc fdm=marker
