@@ -91,9 +91,9 @@ application/x-msexcel; \
 
 # octet stream
 
-##application/octet-stream;  neomutt-my-octet-filter "%s" >dev/null 2>&1; \
+##application/octet-stream;  neomutt_my-octet-filter "%s" >dev/null 2>&1; \
 ##                           copiousoutput
 
 # remaining applications
 
-application/*;  neomutt-my-background-xdg-open "%s"
+application/*;  neomutt_my-background-xdg-open "%s"

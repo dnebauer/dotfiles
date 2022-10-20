@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Script renamed to neomutt-my-octet-filter
+# Script renamed to neomutt_my-octet-filter
 
 #
 #     mutt.octet.filter - Octet filter for use with the mutt autoview facility
