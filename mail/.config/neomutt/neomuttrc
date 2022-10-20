@@ -569,10 +569,13 @@ unalternative_order *
 alternative_order text/html \
                   text/plain \
                   text
-# [a] V : open message in default browser ($BROWSER)
-macro attach V "\
-<pipe-entry>iconv -c --to-code=UTF8 > $my_cache/mail.html<enter>\
-<shell-escape>$BROWSER $my_cache/mail.html<enter>\
+# [ip] V : open message in default html viewer
+bind index,pager V noop
+macro index,pager V "\
+<view-attachments>\
+<search>html<enter>\
+<view-mailcap>\
+<exit>\
 "    'open message in default browser'
 
 # [ipac] <Ctrl>+b : view/copy urls
