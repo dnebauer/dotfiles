@@ -431,14 +431,12 @@ set $mode_launcher Launch: [a]stroid [b]ackground [c]hrome [p]olybar \
 ## launch mode
 bindsym $mod+o mode "$mode_launcher"
 
-set $run_astroid ~/.local/bin/astroid-launcher
 set $run_background ~/.local/bin/i3-my-background-set
 set $run_polybar ~/.config/polybar/launch
 set $run_syncthing ~/.local/bin/syncthing-launcher
 set $run_mybrain ~/.local/bin/mybrain
 
 mode "$mode_launcher" {
-    bindsym a             exec --no-startup-id $run_astroid, mode "default"
     bindsym b             exec --no-startup-id $run_background, mode "default"
     bindsym c             exec --no-startup-id google-chrome, mode "default"
     bindsym q             exec --no-startup-id qutebrowser, mode "default"

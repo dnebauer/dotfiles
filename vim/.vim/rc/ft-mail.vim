@@ -3,7 +3,7 @@
 function! s:MailSupport()
     " re-flow text support    {{{1
     " set parameters to be consistent with re-flowing content
-    " e.g., in astroid setting mail>format_flowed=true
+    " e.g., in neomutt setting text_flowed to true
     setlocal textwidth=72
     setlocal formatoptions+=q
     setlocal comments+=nb:>

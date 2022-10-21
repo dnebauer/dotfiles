@@ -325,11 +325,6 @@ function launchNeomutt () {
 
     # launch neomutt
     alacritty \
-        --class 'AlacrittyNeomuttREADONLY,AlacrittyNeomuttREADONLY' \
-        --title AlacrittyNeomuttREADONLY \
-        --command neomutt -R &
-    sleep $delay_post_launch
-    alacritty \
         --class 'AlacrittyNeomutt,AlacrittyNeomutt' \
         --title AlacrittyNeomutt \
         --command neomutt &

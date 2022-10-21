@@ -426,7 +426,6 @@ set $mode_launcher Launch: [a]stroid [c]hrome \
 bindsym $mod+o mode "$mode_launcher"
 
 mode "$mode_launcher" {
-    bindsym a             exec astroid-launcher, mode "default"
     bindsym c             exec google-chrome, mode "default"
     bindsym q             exec qutebrowser, mode "default"
     bindsym s             exec syncthing-launcher, mode "default"

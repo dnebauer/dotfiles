@@ -24,10 +24,10 @@ set -o pipefail
 self="$(basename "$0")"
 dlg_title='i3 session setup'
 required_tools=(
-    astroid-launcher   qutebrowser
-    getopt             sleep
-    i3-msg             tiddlywiki
-    konsole            xdotool
+    getopt     qutebrowser
+    i3-msg     sleep
+    konsole    tiddlywiki
+    neomutt    xdotool
     nvim-qt
 )
 # trial and error showed that any app post-launch delay < 1 second caused
@@ -174,7 +174,7 @@ if $debug ; then echo 'Appending layout to workspace 5' ; fi
 i3-msg 'workspace 5:wiki; append_layout ~/.config/i3/sessions/workspace_5.json'
 # layouts define the following marks:
 # - workspace 1: t=term, v=vim
-# - workspace 2: m=astroid/mail
+# - workspace 2: a=qutebrowser/gmail, m=alacritty/neomutt
 # - workspace 3: c=chrome
 # - workspace 4: g=games
 # - workspace 5: w=wiki
@@ -186,9 +186,12 @@ if $debug ; then echo 'Launching nvim-qt' ; fi
 nvim-qt &
 sleep $delay_post_launch
 
-# astroid
-if $debug ; then echo 'Launching astroid' ; fi
-astroid-launcher &
+# neomutt
+if $debug ; then echo 'Launching neomutt' ; fi
+alacritty \
+    --class 'AlacrittyNeomutt,AlacrittyNeomutt' \
+    --title AlacrittyNeomutt \
+    --command neomutt &
 sleep $delay_post_launch
 
 # qutebrowser (mail: gmail, primus)
@@ -311,9 +314,9 @@ else
     done
 fi
 
-# Focus astroid in mail workspace    {{{2
-if $debug ; then echo 'Focussing astroid' ; fi
-i3-msg [class="Astroid" instance="astroid"] focus
+# Focus neomutt in mail workspace    {{{2
+if $debug ; then echo 'Focussing neomutt' ; fi
+i3-msg [class='AlacrittyNeomutt' instance='AlacrittyNeomutt'] focus
 
 # Focus terminal in workspace 1    {{{2
 if $debug ; then echo 'Focussing main terminal' ; fi
