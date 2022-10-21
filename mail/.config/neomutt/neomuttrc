@@ -34,6 +34,7 @@
 
 # TODO
 
+# attach multiple files to message
 
 # vim syntax for markdown in email
 # * consider "inkarkat/vim-SyntaxRange" github repo
