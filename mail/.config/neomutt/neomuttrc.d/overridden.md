@@ -23,7 +23,7 @@ previous-page           \<Left\>    move to previous page (_generic_)
 
 display-message         \<Space\>   display a message
 
-read-thread             ^r          mark current thread as read
+read-thread             ^R          mark current thread as read
 
 show-log-messages       M           show log and debug messages
 -------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ previous-undeleted       \<Left\>   move to previous undeleted message
 
 previous-undeleted       k          move to previous undeleted message
 
-read-thread              ^r         mark current thread as read
+read-thread              ^R         mark current thread as read
 
 skip-quoted              S          skip beyond quoted text
 -------------------------------------------------------------------------------

@@ -59,6 +59,7 @@
 #source neomuttrc.d/clear-settings.rc
 
 # [gibp] <Ctrl>+r : reload configuration
+# - overrides [ip] ^R = <read-thread> (marks current thread as read)
 macro generic,index,browser,pager \cr "\
 <enter-command>unhook *<enter>\
 <enter-command>source $my_config<enter>\
@@ -168,10 +169,13 @@ set sidebar_format = '%D%?F? [%F]?%* %?N?%N/?%S'
 set mail_check_stats
 set sort_browser = unsorted
 # [ip] <Ctrl>+n : next sidebar vfolder
+# - overrides [ip] ^N = <next-thread> (jumps to the next thread)
 bind index,pager \cn sidebar-next
 # [ip] <Ctrl>+p : previous sidebar vfolder
+# - overrides [ip] ^P = <prev-thread> (jumps to the previous thread)
 bind index,pager \cp sidebar-prev
 # [ip] <Ctrl>+o : open sidebar vfolder
+# - no default [ip] ^O bindings
 bind index,pager \co sidebar-open
 
 # Change mailbox
@@ -186,20 +190,28 @@ bind index,pager cs noop
 bind index,pager ct noop
 bind index,pager c noop
 # [ip] ci : change to Inbox vfolder
+# - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager ci '<change-vfolder>Inbox<enter>'   'open Inbox'
 # [ip] ca : change to Archive vfolder
+# - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager ca '<change-vfolder>Archive<enter>' 'open Archive'
 # [ip] cs : change to Sent vfolder
+# - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager cs '<change-vfolder>Sent<enter>'    'open Sent'
 # [ip] cd : change to Draft vfolder
+# - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager cd '<change-vfolder>Drafts<enter>'  'open Drafts'
 # [ip] cm : change to Spam vfolder
+# - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager cm '<change-vfolder>Spam<enter>'    'open Spam'
 # [ip] cj : change to Junk vfolder
+# - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager cj '<change-vfolder>Junk<enter>'    'open Junk'
 # [ip] ct : change to Trash vfolder
+# - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager ct '<change-vfolder>Trash<enter>'   'open Trash'
 # [ip] cf : select vfolder to change to
+# - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager cf '<change-vfolder>?'              'open mailbox...'
 
 # Synchronise
@@ -214,37 +226,46 @@ shutdown-hook 'exec sync-mailbox'
 
 # Display
 
-# [i] <return> : display message
+# [i] <Return> : display message
+# = default [i] <Return> binding
 bind index <Return> display-message
 
 # Search for messages
 
 # [ip] s : search current vfolder
 # - set in folder-hooks
+# - overrides [ip] s = <save-message> (save msg/attachment to mailbox/file)
 # [ip] X : custom search creating temporary vfolder
+# - no default [ip] X bindings
 bind index,pager X vfolder-from-query
 
 # Threads
 
 # [ip] + : read thread of current message
+# - no default [ip] + bindings
 bind index,pager + entire-thread
 # [i] za : toggle collapse of current thread
+# - no default [i] z binding
 bind index za collapse-thread
 # [i] zA : toggle collapse of all threads
+# - no default [i] z binding
 # - missing :folddisable/foldenable
 bind index zA collapse-all
 
 # Tagging
 
-# [i] <insert> : tag current message
+# [i] <Insert> : tag current message
+# - no default [i] <Insert> binding
 macro index <Insert> "\
 <enter-command>push t<enter>\
 "    'select/tag current message'
 # [i] <Ctrl>+a : tag all messages
+# - no default [i] ^A binding
 macro index \ca "\
 <tag-pattern>~A<enter>\
 "    'select/tag all messages'
 # [i] <Ctrl>+u : untag all messages
+# - overrides [i] ^U = <undelete-thread> (undelete all messages in thread)
 macro index \cu "\
 <untag-pattern>~A<enter>\
 "    'unselect/untag all messages'
@@ -252,6 +273,7 @@ macro index \cu "\
 # Tags (neomutt)
 
 # [i] W : clear
+# - overrides [i] W = <clear-flag> (clears a status flag from current message)
 macro index W "\
 <tag-prefix><clear-flag>\
 "    'clear a status flag from messages(s)'
@@ -268,11 +290,13 @@ bind index,pager yv noop
 bind index,pager yy noop
 bind index,pager y noop
 # [ip] yy : manually modify
+# - no default [ip] y bindings
 macro index yy "\
 <tag-prefix><modify-labels>\
 "    'modify (notmuch/imap) tags'
 bind pager yy modify-labels
 # [ip] yd : add [development] label
+# - no default [ip] y bindings
 macro index yd "\
 <enter-command>echo \
 'Adding [development] label...'<enter>\
@@ -287,6 +311,7 @@ macro pager yd "\
 <modify-labels>+development<enter>\
 "    'add label: development'
 # [ip] yf : add [financial] label
+# - no default [ip] y bindings
 macro index yf "\
 <enter-command>echo 'Adding [financial] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -300,6 +325,7 @@ macro pager yf "\
 <modify-labels>+financial<enter>\
 "    'add label: financial'
 # [ip] yl : add [later] label
+# - no default [ip] y bindings
 macro index yl "\
 <enter-command>echo 'Adding [later] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -313,6 +339,7 @@ macro pager yl "\
 <modify-labels>+later<enter>\
 "    'add label: later'
 # [ip] yo : add [order] label
+# - no default [ip] y bindings
 macro index yo "\
 <enter-command>echo 'Adding [order] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -326,6 +353,7 @@ macro pager yo "\
 <modify-labels>+order<enter>\
 "    'add label: order'
 # [ip] yp : add [personal] label
+# - no default [ip] y bindings
 macro index yp "\
 <enter-command>echo 'Adding [personal] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -339,6 +367,7 @@ macro pager yp "\
 <modify-labels>+personal<enter>\
 "    'add label: personal'
 # [ip] yu : add [union] label
+# - no default [ip] y bindings
 macro index yu "\
 <enter-command>echo 'Adding [union] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -352,6 +381,7 @@ macro pager yu "\
 <modify-labels>+union<enter>\
 "    'add label: union'
 # [ip] yv : add [vault] label
+# - no default [ip] y bindings
 macro index yv "\
 <enter-command>echo 'Adding [vault] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -369,6 +399,7 @@ macro pager yv "\
 
 unset confirm_append  # no confirm needed when append to mailbox
 # [ip] a : archive message
+# - overrides [ip] a = <create-alias> (create an alias from message sender)
 macro index a "\
 <enter-command>echo 'Archiving...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -401,6 +432,8 @@ bind index,pager MM noop
 bind index,pager MS noop
 bind index M noop
 # [ip] MI : move to Inbox
+# - overrides [i] M = <show-log-messages> (show log/debug messages)
+# - no default [p] M binding
 macro index MI "\
 <enter-command>echo 'Moving to Inbox...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -428,6 +461,8 @@ macro pager MI "\
 <change-vfolder>^<enter>\
 "    'move to Inbox'
 # [ip] MD : move to Drafts
+# - overrides [i] M = <show-log-messages> (show log/debug messages)
+# - no default [p] M binding
 macro index MD "\
 <enter-command>echo 'Moving to Drafts...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -455,6 +490,8 @@ macro pager MD "\
 <change-vfolder>^<enter>\
 "    'move to Drafts'
 # [ip] MJ : move to Spam
+# - overrides [i] M = <show-log-messages> (show log/debug messages)
+# - no default [p] M binding
 macro index MJ "\
 <enter-command>echo 'Moving to Spam...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -482,6 +519,8 @@ macro pager MJ "\
 <change-vfolder>^<enter>\
 "    'move to Spam'
 # [ip] MS : move to Sent
+# - overrides [i] M = <show-log-messages> (show log/debug messages)
+# - no default [p] M binding
 macro index MS "\
 <enter-command>echo 'Moving to Sent...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
@@ -524,6 +563,7 @@ set delete = yes
 # FETCH
 
 # [i] P : fetch mail
+# overrides [i] P = <parent-message> (jump to parent message in thread)
 macro index P "\
 <shell-escape>$my_poll_script<enter>\
 <change-vfolder>Inbox<enter>\
@@ -571,6 +611,7 @@ alternative_order text/html \
                   text/plain \
                   text
 # [ip] V : open message in default html viewer
+# - overrides [ip] V = <show-version> (show neomutt version number and date)
 bind index,pager V noop
 macro index,pager V "\
 <view-attachments>\
@@ -580,6 +621,7 @@ macro index,pager V "\
 "    'open message in default browser'
 
 # [ipac] <Ctrl>+b : view/copy urls
+# no default [ipac] ^B bindings
 macro index,pager \cb "\
 <pipe-message>urlscan<enter>\
 "    'call urlscan to extract URLs out of a message'
@@ -588,6 +630,8 @@ macro attach,compose \cb "\
 "    'call urlscan to extract URLs out of a message'
 
 # [ip] S : save all attachments
+# no default [i] S binding
+# overrides [p] S = <skip-quoted> (skip to beyond quoted text)
 macro index,pager S "\
 <pipe-message>\
 ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
@@ -649,8 +693,10 @@ set ispell = 'aspell -e -c'
     # 'ispell' invocation
 
 # [e] <Tab> : complete email address (using $query_command)
+# - overrides [e] <Tab> = <complete> (complete filename or alias)
 bind editor <Tab> complete-query
 # [e] <Ctrl>+t : complete filename or alias
+# - overrides [e] ^T = <complete-query> (complete address with $query_command)
 bind editor \ct complete
 
 
@@ -665,6 +711,7 @@ set abort_noattach = ask-yes
     # check before sending if suspect attachments are missing
 
 # [c] Y : convert markdown to html and send
+# - no default [c] Y binding
 # - macro solution from NeoMutt Guide (https://neomutt.org/guide),
 #   Chapter 5.2 'Composing Multipart Alternative Emails'
 macro compose Y "\
@@ -684,7 +731,8 @@ macro compose Y "\
 # INTERFACE
 
 
-# [ip] MM : show log messages
+# [ip] MM : show log/debug messages
+# - overrides [i] M = <show-log-messages> (show log/debug messages)
 bind index,pager MM show-log-messages
 
 set pager_index_lines = 8
