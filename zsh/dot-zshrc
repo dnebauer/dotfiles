@@ -210,12 +210,6 @@ autoload_my_fns git-add-all
 if type -f git-add-all &>/dev/null ; then
     alias gaa=git-add-all
 fi
-# - file navigation    {{{3
-#   . commands: to, bm, unbm and bms (where 'bm' is 'bookmark')
-#   . http://jeroenjanssens.com/2013/08/16/quickly-navigate-your-filesystem-from-the-command-line.html
-export MARKPATH=$HOME/.marks
-compctl -K _completebms to
-compctl -K _completebms unbm
 # ansi colours    {{{2
 # - provides variables: RED, GREEN, YELLOW, BLUE, MAGENTA,
 #   CYAN, BLACK, WHITE, the same colours as BOLD_*, and RESET
