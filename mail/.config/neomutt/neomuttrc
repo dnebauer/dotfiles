@@ -77,6 +77,8 @@
 # update msmtpq
 # * set zsh config directory mechanism for envvars
 
+# troubleshoot lack of notification of new messages
+
 
 # LOAD/RELOAD CONFIGURATION
 
