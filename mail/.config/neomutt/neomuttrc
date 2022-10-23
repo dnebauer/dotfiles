@@ -74,6 +74,9 @@
 
 # create script man files
 
+# update msmtpq
+# * set zsh config directory mechanism for envvars
+
 
 # LOAD/RELOAD CONFIGURATION
 
