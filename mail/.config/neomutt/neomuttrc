@@ -31,8 +31,31 @@
 # * if both <Alt> and <Esc> bindings for the same key are present,
 #   the last binding wins
 
+# Generic bindings
+# * apply to *all* menus *except*:
+#   - pager
+#   - editor
+
+# Reset bindings
+# * the 'clear-settings.rc' file clears all bindings from modes:
+#   - generic
+#   - index
+#   - pager
+#   - editor
+#   - attach
+# * bindings for these modes must be restored in this file
+
+# Binding annotations
+# * a binding's modes are indicated by '[xy]' notation, with:
+#   - g = generic
+#   - i = index
+#   - p = pager
+#   - e = editor
+#   - a = attach
+
 
 # TODO
+
 
 # attach multiple files to message
 
@@ -56,20 +79,9 @@
 
 
 # clear settings (make script idempotent)
-#source neomuttrc.d/clear-settings.rc
+source neomuttrc.d/clear-settings.rc
 
-# [gibp] <Ctrl>+r : reload configuration
-# - overrides [ip] ^R = <read-thread> (marks current thread as read)
-macro generic,index,browser,pager \cr "\
-<enter-command>unhook *<enter>\
-<enter-command>source $my_config<enter>\
-<enter-command>echo 'Reloaded $my_config'<enter>\
-"    'clear hooks and reload configuration'
-
-
-# CUSTOM VARIABLES
-
-
+# custom variables
 set my_name = 'David Nebauer'
 set my_email = 'david@nebauer.id.au'
 set my_maildir = $HOME/.local/mail/maildirs
@@ -87,8 +99,16 @@ set my_download_dir = $HOME/Downloads
 set my_cache = $HOME/.cache/neomutt
 set my_header_cache = $my_cache/cache-headers
 set my_message_cache = $my_cache/cache-messages
-set my_poll_script = $HOME/.local/bin/my-get-mail
+set my_fetch_script = $HOME/.local/bin/my-get-mail
 set my_msmtpq = $HOME/.local/bin/msmtpq
+
+# [gibp] <Ctrl>+r : reload configuration
+# - overrides [ip] ^R = <read-thread> (marks current thread as read)
+macro generic,index,browser,pager \cr "\
+<enter-command>echo 'Reloading configuration...<enter>\
+<enter-command>source $my_config<enter>\
+<enter-command>echo 'Reloaded $my_config'<enter>\
+"    'clear hooks and reload configuration'
 
 
 # MANAGE MAILBOXES
@@ -164,10 +184,14 @@ folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Trash" \
 # Sidebar
 
 set sidebar_visible
-set mail_check_stats
+    # show sidebar
 set sidebar_format = '%D%?F? [%F]?%* %?N?%N/?%S'
+    # format of sidebat display
 set mail_check_stats
+    # recalculate message statistics periodically
 set sort_browser = unsorted
+    # sort method for file browser
+
 # [ip] <Ctrl>+n : next sidebar vfolder
 # - overrides [ip] ^N = <next-thread> (jumps to the next thread)
 bind index,pager \cn sidebar-next
@@ -180,15 +204,6 @@ bind index,pager \co sidebar-open
 
 # Change mailbox
 
-bind index,pager ca noop
-bind index,pager cd noop
-bind index,pager cf noop
-bind index,pager ci noop
-bind index,pager cj noop
-bind index,pager cm noop
-bind index,pager cs noop
-bind index,pager ct noop
-bind index,pager c noop
 # [ip] ci : change to Inbox vfolder
 # - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager ci '<change-vfolder>Inbox<enter>'   'open Inbox'
@@ -214,8 +229,106 @@ macro index,pager ct '<change-vfolder>Trash<enter>'   'open Trash'
 # - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager cf '<change-vfolder>?'              'open mailbox...'
 
+# Display
+
+# [g] <Ctrl>+l : redraw screen (default binding)
+bind generic \cl refresh
+# [ip] O : reverse sort mailbox (default binding)
+bind index,pager O sort-reverse
+# [ip] o : sort mailbox (default binding)
+bind index,pager o sort-mailbox
+# [gp] ? : help (default binding)
+bind generic,pager ? help
+
+# Navigation
+
+# {[g] j,<Down>;[ip] J} : move to next entry (default bindings)
+bind generic j next-entry
+bind generic <Down> next-entry
+bind index,pager J next-entry
+# [ip] {j,<Down>} : move to next undeleted message (default bindings)
+bind index,pager j next-undeleted
+bind index,pager <Down> next-undeleted
+# {[g] k,<Up>;[ip] K} : move to previous entry (default bindings)
+bind generic k previous-entry
+bind generic <Up> previous-entry
+bind index,pager K previous-entry
+# [ip] {k,<Up>} : move to next undeleted message (default bindings)
+bind index,pager k previous-undeleted
+bind index,pager <Up> previous-undeleted
+# [ip] <Tab> : jump to next new or unread message (default binding)
+bind index,pager <Tab> next-new-then-unread
+# [g] < : scroll up one line (default binding)
+bind generic < previous-line
+# {[g] >;[p] <Return>,<Enter>,<KeypadEnter>} : scroll down one line
+# (default binding)
+bind generic > next-line
+bind pager <Return> next-line
+bind pager <Enter> next-line
+bind pager <KeypadEnter> next-line
+# [gp] 1-9 : jump (default bindings)
+bind generic,pager 1 jump
+bind generic,pager 2 jump
+bind generic,pager 3 jump
+bind generic,pager 4 jump
+bind generic,pager 5 jump
+bind generic,pager 6 jump
+bind generic,pager 7 jump
+bind generic,pager 8 jump
+bind generic,pager 9 jump
+# [g] <Left> : move to previous page (default binding)
+bind generic <Left> previous-page
+# {[g] <Right>;[p] <Space>} : move to next page (default binding)
+bind generic <Right> next-page
+bind pager <Space> next-page
+# [gp] <PageUp> : move to previous page (default binding)
+bind generic,pager <PageUp> previous-page
+# [gp] <PageDown> : move to next page (default binding)
+bind generic,pager <PageDown> next-page
+# [g] <Home> : move to first entry (default binding)
+bind generic <Home> first-entry
+# [g] <End> : move to last entry (default binding)
+bind generic <End> last-entry
+# [p] <Home> : jump to top of message (default binding)
+bind pager <Home> top
+# [p] <End> : jump to bottom of message (default binding)
+bind pager <End> bottom
+
+# Search
+
+# [gp] {<Alt>+/,<Esc>/} : search backwards (default binding)
+bind generic,pager \e/ search-reverse
+# [gp] / : search (default binding)
+bind generic,pager / search
+# [gp] n : next match (default binding)
+
+# Process control
+
+# [gp] ! : invoke subshell (default binding)
+bind generic,pager ! shell-escape
+# [ipa] | : pipe message/attachment to a shell command (default bindings)
+bind index,pager,attach | pipe-entry
+bind attach | pipe-message
+# [gp] : : enter command (default binding)
+bind generic,pager : enter-command
+# [g] ; : tag prefix (default binding)
+# - need to escape semicolon or get 'not enough arguments' error
+bind generic \; tag-prefix
+# {[i] x;[p] i,q,x;[a] q} : exit menu (default binding)
+bind index,pager x exit
+bind pager,attach q exit
+bind pager i exit
+# [i] q : save changes and quit (default binding)
+bind index q quit
+
 # Synchronise
 
+# [ip] $ : save changes to current mailbox and recalculate all mailbox stats
+# - overrides [ip] $ = <sync-mailbox> (save changes to current mailbox)
+macro index,pager $ "\
+<sync-mailbox><check-stats>\
+"    'save changes to current mailbox, recalculate all mailbox stats'
+# hooks
 timeout-hook 'exec sync-mailbox'
 startup-hook 'exec sync-mailbox'
 shutdown-hook 'exec sync-mailbox'
@@ -226,9 +339,16 @@ shutdown-hook 'exec sync-mailbox'
 
 # Display
 
-# [i] <Return> : display message
-# = default [i] <Return> binding
+# [g] {<Return>,<Enter>,<KeypadEnter>} : select entry (default bindings)
+bind generic <Return> select-entry
+bind generic <Enter> select-entry
+bind generic <KeypadEnter> select-entry
+# [i] {<Space>,<Return>,<Enter>,<KeypadEnter>} : display message
+# (default bindings)
+bind index <Space> display-message
 bind index <Return> display-message
+bind index <Enter> display-message
+bind index <KeypadEnter> display-message
 
 # Search for messages
 
@@ -238,6 +358,8 @@ bind index <Return> display-message
 # [ip] X : custom search creating temporary vfolder
 # - no default [ip] X bindings
 bind index,pager X vfolder-from-query
+# [i] ~ : create hotkey macro for message (default binding)
+bind index ~ mark-message
 
 # Threads
 
@@ -249,11 +371,14 @@ bind index,pager + entire-thread
 bind index za collapse-thread
 # [i] zA : toggle collapse of all threads
 # - no default [i] z binding
-# - missing :folddisable/foldenable
 bind index zA collapse-all
 
 # Tagging
 
+# [g] t : tag entry (default bindings)
+bind generic t tag-entry
+# [i] T : tag messages matching a pattern (default binding)
+bind index T tag-pattern
 # [i] <Insert> : tag current message
 # - no default [i] <Insert> binding
 macro index <Insert> "\
@@ -264,6 +389,8 @@ macro index <Insert> "\
 macro index \ca "\
 <tag-pattern>~A<enter>\
 "    'select/tag all messages'
+# [i] <Ctrl>+t : untag messages matching a pattern (default binding)
+bind index \ct untag-pattern
 # [i] <Ctrl>+u : untag all messages
 # - overrides [i] ^U = <undelete-thread> (undelete all messages in thread)
 macro index \cu "\
@@ -272,6 +399,15 @@ macro index \cu "\
 
 # Tags (neomutt)
 
+# [ip] w : set status flag (default bindings)
+bind index,pager w set-flag
+# [ip] N : toggle new flag
+# - overrides [i] N = <toggle-new> (toggle a message's 'new' flag)
+macro index N "\
+<tag-prefix><toggle-new>\
+"    "toggle 'new' flag of messages(s)"
+# - default [p] binding for N
+bind pager N mark-as-new
 # [i] W : clear
 # - overrides [i] W = <clear-flag> (clears a status flag from current message)
 macro index W "\
@@ -280,15 +416,6 @@ macro index W "\
 
 # Labels (notmuch)
 
-bind index,pager yd noop
-bind index,pager yf noop
-bind index,pager yl noop
-bind index,pager yo noop
-bind index,pager yp noop
-bind index,pager yu noop
-bind index,pager yv noop
-bind index,pager yy noop
-bind index,pager y noop
 # [ip] yy : manually modify
 # - no default [ip] y bindings
 macro index yy "\
@@ -397,7 +524,9 @@ macro pager yv "\
 
 # Move
 
-unset confirm_append  # no confirm needed when append to mailbox
+set noconfirm_append
+    # no confirm needed when append to mailbox
+
 # [ip] a : archive message
 # - overrides [ip] a = <create-alias> (create an alias from message sender)
 macro index a "\
@@ -411,6 +540,7 @@ macro index a "\
 <enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
+<check-stats>\
 "    'move to Archive'
 macro pager a "\
 <enter-command>echo 'Archiving...'<enter>\
@@ -423,14 +553,9 @@ macro pager a "\
 <enter-command>unset my_resolve<enter>\
 <save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
+<check-stats>\
 "    'move to Archive'
 # move to other mailboxes
-bind index,pager MD noop
-bind index,pager MI noop
-bind index,pager MJ noop
-bind index,pager MM noop
-bind index,pager MS noop
-bind index M noop
 # [ip] MI : move to Inbox
 # - overrides [i] M = <show-log-messages> (show log/debug messages)
 # - no default [p] M binding
@@ -445,6 +570,7 @@ macro index MI "\
 <enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'move mail to Inbox'
 macro pager MI "\
@@ -458,6 +584,7 @@ macro pager MI "\
 <enter-command>unset my_resolve<enter>\
 <save-message>+INBOX<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'move to Inbox'
 # [ip] MD : move to Drafts
@@ -474,6 +601,7 @@ macro index MD "\
 <enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX.Drafts<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'move mail to Drafts'
 macro pager MD "\
@@ -487,6 +615,7 @@ macro pager MD "\
 <enter-command>unset my_resolve<enter>\
 <save-message>+INBOX.Drafts<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'move to Drafts'
 # [ip] MJ : move to Spam
@@ -503,6 +632,7 @@ macro index MJ "\
 <enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX.Spam<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'move mail to Spam'
 macro pager MJ "\
@@ -516,6 +646,7 @@ macro pager MJ "\
 <enter-command>unset my_resolve<enter>\
 <save-message>+INBOX.Spam<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'move to Spam'
 # [ip] MS : move to Sent
@@ -532,6 +663,7 @@ macro index MS "\
 <enter-command>unset my_resolve<enter>\
 <tag-prefix><save-message>+INBOX.Sent<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'move mail to Sent'
 macro pager MS "\
@@ -545,6 +677,7 @@ macro pager MS "\
 <enter-command>unset my_resolve<enter>\
 <save-message>+INBOX.Sent<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'move to Sent'
 
@@ -552,20 +685,25 @@ macro pager MS "\
 
 set delete = yes
     # purge deleted messages on mailbox close/syncronisation
+
+# [a] d : delete current entry (default binding)
+bind attach d delete-entry
 # [ip] d,<delete> : trash messages
 # - set in folder-hooks
 # - trashes messages in all vfolders except Trash
 # - deletes messages in Trash vfolder
+# [a] u : undelete current entry (default binding)
+bind attach u undelete-entry
 # [ip] u : untrash message
 # - in Trash folder only
 
 
 # FETCH
 
-# [i] P : fetch mail
-# overrides [i] P = <parent-message> (jump to parent message in thread)
-macro index P "\
-<shell-escape>$my_poll_script<enter>\
+# [i] G : fetch mail
+# overrides [i] G = <fetch-mail> (retrieve mail from POP server)
+macro index G "\
+<shell-escape>$my_fetch_script<enter>\
 <change-vfolder>Inbox<enter>\
 "    'run offlineimap to fetch mail'
 
@@ -581,11 +719,11 @@ set attach_save_dir = $my_download_dir
     # default 'download' directory
 set print_command = $my_print_pdf
     # conversion to pdf
-unset print_decode
+set noprint_decode
     # do not decode message before printing
 set print = ask-yes
     # check in case accidentally pressed 'p'
-unset mark_old
+set nomark_old
     # no 'old' tag, 'new' is good enough
 set header_cache = $my_header_cache
 set message_cachedir = $my_message_cache
@@ -596,7 +734,7 @@ set tilde
     # pad blank lines with tildes
 set pager_stop
     # do not automatically PgDown
-unset prompt_after
+set noprompt_after
     # no prompt when external pager exits
 
 # prefer html
@@ -610,16 +748,17 @@ unalternative_order *
 alternative_order text/html \
                   text/plain \
                   text
+
+# [ip] e : edit/view message (default binding)
+bind index,pager e edit-or-view-raw-message
 # [ip] V : open message in default html viewer
 # - overrides [ip] V = <show-version> (show neomutt version number and date)
-bind index,pager V noop
 macro index,pager V "\
 <view-attachments>\
 <search>html<enter>\
 <view-mailcap>\
 <exit>\
 "    'open message in default browser'
-
 # [ipac] <Ctrl>+b : view/copy urls
 # no default [ipac] ^B bindings
 macro index,pager \cb "\
@@ -628,7 +767,17 @@ macro index,pager \cb "\
 macro attach,compose \cb "\
 <pipe-entry> urlscan<enter>\
 "    'call urlscan to extract URLs out of a message'
-
+# [ip] v : show MIME attachments (default bindings)
+bind index,pager v view-attachments
+# [a] {<Return>,<Enter>,<Keypadenter>} : view attachment with mailcap
+# if necessary (default binding)
+bind attach <Return> view-attach
+bind attach <Enter> view-attach
+bind attach <KeypadEnter> view-attach
+# [a] m : force viewing of attachment with mailcap (default binding)
+bind attach m view-mailcap
+# [a] T : view attachment as text (default binding)
+bind attach T view-text
 # [ip] S : save all attachments
 # no default [i] S binding
 # overrides [p] S = <skip-quoted> (skip to beyond quoted text)
@@ -637,6 +786,9 @@ macro index,pager S "\
 ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
 <enter-command>echo 'Attachments saved to $my_download_dir'<enter>\
 "    'Save all non-text attachments using ripmime'
+# [ipa] p : print message (default binding)
+bind index,pager p print-message
+bind attach p print-entry
 
 
 # COMPOSE
@@ -673,7 +825,7 @@ set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
     # format of 'query' menu
 set signature = $my_signature
     # signature file
-unset sig_dashes
+set nosig_dashes
     # no dashes before sig
 set attribution="* %n <%a> [%{%Y-%m-%d %H:%M:%S %Z}]:\n"
     # string preceding message included in reply
@@ -692,12 +844,55 @@ set forward_quote
 set ispell = 'aspell -e -c'
     # 'ispell' invocation
 
+# [ip] m : new message (default binding)
+bind index,pager m mail
+# [ipa] r : reply to message (default binding)
+bind index,pager,attach r reply
+# [ipa] g : reply all preserving To/Cc
+# - overrides [ipa] g = group-reply (reply to all recipients)
+bind index,pager,attach g group-chat-reply
+# [ipa] f : forward message (default binding)
+bind index,pager,attach f forward-message
+# [ipa] b : remail message to another user (default binding)
+bind index,pager,attach b bounce-message
+# [ip] L : reply to mailing list (default binding)
+bind index,pager L list-reply
+# [ia] {<Alt>+e,<Esc>e} : use current message as template for new message
+# (default bindings)
+bind index,attach \ee resend-message
+# [ipa] @ : compose new message to sender of current message (default binding)
+bind index,pager,attach @ compose-to-sender
 # [e] <Tab> : complete email address (using $query_command)
 # - overrides [e] <Tab> = <complete> (complete filename or alias)
 bind editor <Tab> complete-query
 # [e] <Ctrl>+t : complete filename or alias
 # - overrides [e] ^T = <complete-query> (complete address with $query_command)
 bind editor \ct complete
+# [e] <Left> : move the cursor one character to the left (default binding)
+bind editor <Left> backward-char
+# [e] <Home> : jump to the beginning of the line (default binding)
+bind editor <Home> bol
+# [e] {<Alt>+c,<Esc>c} : capitalize the word (default binding)
+bind editor \ec capitalize-word
+# [e] <Delete> : delete the char under the cursor (default binding)
+bind editor <Delete> delete-char
+# [e] <End> : jump to the end of the line (default binding)
+bind editor <End> eol
+# [e] <Right> : move the cursor one character to the right (default binding)
+bind editor <Right> forward-char
+# [e] {<Down>,<Ctrl>+n} : scroll down through the history list
+# (default binding)
+bind editor \cn history-down
+bind editor <Down> history-down
+# [e] <Ctrl+r> : search through the history list (default binding)
+bind editor \cr history-search
+# [e] {<Up>,<Ctrl>+p} : scroll up through the history list (default binding)
+bind editor \cp history-up
+bind editor <Up> history-up
+# [e] <Ctrl>+k : delete chars from cursor to end of line (default binding)
+bind editor \ck kill-eol
+# [e] <Ctrl>+w : delete the word in front of the cursor (default binding)
+bind editor \cw kill-word
 
 
 # SEND
@@ -742,7 +937,7 @@ set quit = ask-yes
     # don't quit accidentally
 set timeout = 0
     # wait indefinitely for user input
-unset wait_key
+set nowait_key
     # minimise 'Press any key to continue...' messages
 set index_format = '%4C %Z %?X?%X📎&   ? \
 %<[365d?%<[7d?%<[1d?%[%R]&%[%a-%d]>&%[%b-%d]>&%[%F]> \

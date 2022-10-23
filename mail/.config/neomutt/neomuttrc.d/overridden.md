@@ -15,17 +15,26 @@ change-folder           c           open a different folder
 
 create-alias            a           create an alias from message sender
 
+fetch-mail              G           retrieve mail from POP server
+
+group-reply             g           reply to all recipients
+
 next-page               z           move to the next page (_generic_)
 
-parent-message          P           jump to parent message in thread
+next-thread             ^N          jump to the next thread
 
-previous-page           \<Left\>    move to previous page (_generic_)
-
-display-message         \<Space\>   display a message
+prev-thread             ^P          jump to the previous thread
 
 read-thread             ^R          mark current thread as read
 
+save-message            s           save message/attachment in mailbox/file
+
 show-log-messages       M           show log and debug messages
+
+undelete-message        u           undelete the current entry (Trash folder
+                                    only)
+
+undelete-thread         ^U          undelete all messages in a thread
 -------------------------------------------------------------------------------
 
 Table: Index {#tbl:default-index}
@@ -39,21 +48,22 @@ change-folder            c          open a different folder
 
 create-alias             a          create an alias from message sender
 
-middle-page              M          move to the middle of the page; generic
+group-reply              g          reply to all recipients
 
-next-page                \<Space\>  move to next page
+middle-page              M          move to the middle of the page (_generic_)
 
-next-undeleted           \<Right\>  move to next undeleted message
+next-thread             ^N          jump to the next thread
 
-next-undeleted           j          move to next undeleted message
-
-previous-undeleted       \<Left\>   move to previous undeleted message
-
-previous-undeleted       k          move to previous undeleted message
+prev-thread             ^P          jump to the previous thread
 
 read-thread              ^R         mark current thread as read
 
+save-message             s          save message/attachment in mailbox/file
+
 skip-quoted              S          skip beyond quoted text
+
+undelete-message         u          undelete the current entry (Trash folder
+                                    only)
 -------------------------------------------------------------------------------
 
 Table: Pager {#tbl:default-pager}

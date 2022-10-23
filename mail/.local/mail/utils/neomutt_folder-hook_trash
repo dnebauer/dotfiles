@@ -27,24 +27,28 @@ macro index d "\
 <enter-command>echo 'Deleting selected message(s)...'<enter>\
 <tag-prefix><purge-message>\
 <sync-mailbox>\
+<check-stats>\
 "    'delete current or tagged message(s) from Trash'
 
 macro pager d "\
 <enter-command>echo 'Deleting message...'<enter>\
 <purge-message>\
 <sync-mailbox>\
+<check-stats>\
 "    'delete from Trash'
 
 macro index <delete> "\
 <enter-command>echo 'Deleting selected message(s)...'<enter>\
 <tag-prefix><purge-message>\
 <sync-mailbox>\
+<check-stats>\
 "    'delete current or tagged message(s) from Trash'
 
 macro pager <delete> "\
 <enter-command>echo 'Deleting message...'<enter>\
 <purge-message>\
 <sync-mailbox>\
+<check-stats>\
 "    'delete from Trash'
 
 # ---------------------------------------------------------
@@ -67,6 +71,7 @@ macro index u "\
 <enter-command>set resolve<enter>\
 <tag-prefix><save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'untrash current or tagged message(s)'
 
@@ -77,6 +82,7 @@ macro pager u "\
 <enter-command>set resolve<enter>\
 <save-message>+INBOX.Archive<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'untrash message'
 

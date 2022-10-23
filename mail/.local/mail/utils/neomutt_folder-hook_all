@@ -16,6 +16,7 @@ macro index d "\
 <enter-command>set resolve<enter>\
 <tag-prefix><save-message>+INBOX.Trash<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'trash current or tagged message(s)'
 
@@ -27,6 +28,7 @@ macro pager d "\
 <enter-command>set resolve<enter>\
 <save-message>+INBOX.Trash<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'trash message'
 
@@ -38,6 +40,7 @@ macro index <delete> "\
 <enter-command>set resolve<enter>\
 <tag-prefix><save-message>+INBOX.Trash<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'trash current or tagged message(s)'
 
@@ -49,6 +52,7 @@ macro pager <delete> "\
 <enter-command>set resolve<enter>\
 <save-message>+INBOX.Trash<enter>\
 <sync-mailbox>\
+<check-stats>\
 <change-vfolder>^<enter>\
 "    'trash message'
 
