@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-
-# ~/.local/bin/msmtp-queue
+#!/usr/bin/env sh
 
 ##--------------------------------------------------------------
 ##
@@ -29,4 +27,4 @@
 ## change the below line to be
 ##   exec /path/to/msmtpq --q-mgmt
 
-exec $HOME/.local/bin/msmtpq --q-mgmt "$1"
+exec msmtpq --q-mgmt "$1"
