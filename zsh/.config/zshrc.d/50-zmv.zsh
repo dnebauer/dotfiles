@@ -1,0 +1,3 @@
+# Renaming
+autoload -Uz zmv
+

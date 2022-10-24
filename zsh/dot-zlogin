@@ -1,28 +1,8 @@
-# only run in login shell
-if [[ -z "$DISPLAY" && "$TTY" == '/dev/tty1' ]] ; then
+#!/bin/zsh
 
-    # can't continue unless a winmanager is selected
-    if [[ -n "$MY_WINDOW_MANAGER" ]] ; then
-
-        # start window manager and display server
-        case $MY_WINDOW_MANAGER in
-        sway )
-            # run with debug log
-            XDG_SESSION_TYPE=wayland exec \
-                dbus-run-session sway --debug > ~/sway.log
-            ;;
-        dwm|gnome-session|gnome-session-classic|\
-        i3|i3-with-shmlog|startplasma-x11 )
-            # assume winmanager runs in X
-            exec startx "$MY_WINDOW_MANAGER"
-            ;;
-        * )
-            # hope winmanager runs in X!
-            exec startx "$MY_WINDOW_MANAGER"
-            ;;
-        esac
-    else
-        echo 'No window manager selected'
-        echo 'Not starting a display server'
-    fi
-fi
+# load from configuration directory ~/.config/zlogin.d/
+config=${XDG_CONFIG_HOME:-$HOME/.config}
+for file in $config/zlogin.d/**/*(.N)
+do
+    [ -x "$file" ] &&  . "$file"
+done
