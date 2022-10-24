@@ -810,8 +810,6 @@ unignore From: To: CC: BCC: Subject:
 unhdr_order *
 hdr_order From: Subject: To: Cc: Bcc:
     # warning: hdr_order setting is not honoured
-set use_from
-    # include 'From:' header in sent message
 set user_agent
     # include 'User-Agent:' header in sent message
 set query_command = "echo '' && notmuch address from:/%s/"
@@ -904,6 +902,8 @@ set sendmail = "$my_msmtpq"
     # email sending program
 set sendmail_wait = -1
     # send in background, 0 waits forever to finish
+set use_from
+    # include 'From:' header in sent message
 set abort_noattach = ask-yes
     # check before sending if suspect attachments are missing
 
