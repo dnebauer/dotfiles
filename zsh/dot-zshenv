@@ -2,7 +2,7 @@
 
 # load from configuration directory ~/.config/zshenv.d/
 config=${XDG_CONFIG_HOME:-$HOME/.config}
-for file in $config/zshenv.d/**/*(.N)
-do
-    [ -x "$file" ] &&  . "$file"
+# - glob qualifiers: . = plain files, @ = symlinks, N = no error if no match
+for file in $config/zshenv.d/**/*(.,@,N) ; do
+    [[ -x "$file" ]] && . "$file"
 done

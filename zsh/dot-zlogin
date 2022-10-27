@@ -2,7 +2,7 @@
 
 # load from configuration directory ~/.config/zlogin.d/
 config=${XDG_CONFIG_HOME:-$HOME/.config}
-for file in $config/zlogin.d/**/*(.N)
-do
-    [ -x "$file" ] &&  . "$file"
+# - glob qualifiers: . = plain files, @ = symlinks, N = no error if no match
+for file in $config/zlogin.d/**/*(.,@,N) ; do
+    [[ -x "$file" ]] && . "$file"
 done
