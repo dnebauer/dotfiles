@@ -76,6 +76,9 @@
 
 # troubleshoot lack of notification of new messages
 
+# troubleshoot why 'trash' label is added to archived posts
+# - phenomenon noted with messages having the 'order' label
+
 
 # LOAD/RELOAD CONFIGURATION
 
