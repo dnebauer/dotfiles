@@ -64,6 +64,8 @@
 # * start of region is first blank line, for which the regex is: \n\n
 # * end of region is end of file, for which the regex is: \%$
 
+# add vim plugin for address selection
+
 # consider using Konfekt/mutt-trim
 # * https://github.com/Konfekt/mutt-trim
 
