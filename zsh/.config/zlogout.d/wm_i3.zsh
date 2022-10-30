@@ -14,6 +14,7 @@ else
             i3-my-focus-last
             i3-my-fullscreen-handler
             my-get-mail
+            neomutt_aliases-regenerate
         )
         for service in "${services[@]}" ; do
             if systemctl --user --quiet is-active $service.service ; then
