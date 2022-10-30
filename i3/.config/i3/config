@@ -396,6 +396,10 @@ exec --no-startup-id systemctl --user start i3-my-focus-last.service
 ## switch tasks
 bindsym $alt+Tab exec --no-startup-id ~/.local/bin/i3-my-focus-last --switch
 
+# periodically regenerate neomutt aliases    {{{2
+
+exec --no-startup-id systemctl --user start neomutt_aliases-regenerate.service
+
 # automount removable media    {{{2
 
 exec --no-startup-id udiskie &

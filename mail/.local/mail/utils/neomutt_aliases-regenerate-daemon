@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+
+# File: neomutt_aliases-regenerate-daemon
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: periodically regenerate neomutt alias file
+# Created: 2022-10-30
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+
+# VARIABLES    {{{1
+
+self="$(basename $0)"
+parameters=" [-v] [-d]"
+interval='10m'  # delay between checks for mail
+required_system_tools=(logger sleep)   # find on system path
+my_script="/home/david/.local/mail/utils/neomutt_aliases-regenerate"
+required_local_tools=("$my_script")  # find by absolute path
+# }}}1
+
+# PROCEDURES
+
+# regenerateAliasesLoop()    {{{1
+#   intent: infinite loop that periodically regenerates alias file
+#   params: nil
+#   prints: feedback
+#   return: nil
+regenerateAliasesLoop () {
+    while true ; do
+        # do not terminate if called script fails
+        "$my_script" || true
+        sleep "$interval"
+    done
+}
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+function checkPrereqs () {
+    local missing tool
+    missing=()
+    # these tools can be found on the system path
+    for tool in "${required_system_tools[@]}" ; do
+        command -v "$tool" &>/dev/null || missing+=("$tool")
+    done
+    # these tools are specified by absolute path
+    for tool in "${required_local_tools[@]}" ; do
+        [[ -x "$tool" ]] || missing+=("$tool")
+    done
+    if [[ ${#missing[@]} -ne 0 ]] ; then
+        local msg ; msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+        echo "$msg" 1>&2
+        logger --priority "user.err" --tag "REGEN-ALIASES" "$msg"
+        exit 1
+    fi
+}
+# displayUsage()    {{{1
+#   intent: display script usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: periodically regenerate neomutt aliases file
+
+Runs the $my_script
+script periodically (interval = $interval).
+
+USAGE: ${self} ${parameters}
+       ${self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# joinBy($delim, $item1[, $item2[, ...]])    {{{1
+#   intent: join items with given delimiter
+#   params: $delim - delimiter
+#           $itemX - items to be joined
+#   prints: string containing joined items
+#   return: nil
+joinBy () {
+    local delim first_item
+    delim="${1:-}"
+    shift
+    first_item="${1:-}"
+    shift
+    printf %s "$first_item" "${@/#/$delim}"
+}
+# processOptions(@opts)    {{{1
+#   intent: process command line options
+#   params: @opts - all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                     \
+        getopt                            \
+            --options hvd                 \
+            --long    help,verbose,debug  \
+            --name    "${BASH_SOURCE[0]}" \
+            -- "${@}"                     \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo '$self: invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS=("${@}")  # remaining arguments
+}
+# }}}1
+
+# MAIN
+
+checkPrereqs
+processOptions
+regenerateAliasesLoop  # begin infinite loop of periodic checking for mail
+
+# vim:foldmethod=marker:

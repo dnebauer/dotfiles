@@ -1,0 +1,10 @@
+[Unit]
+Description=regenerate-neomutt-aliases
+
+[Service]
+Type=simple
+ExecStart=%h/.local/mail/utils/neomutt_aliases-regenerate-daemon
+Restart=always
+
+[Install]
+WantedBy=default.target
