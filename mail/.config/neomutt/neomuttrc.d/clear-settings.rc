@@ -41,6 +41,8 @@ reset my_header_cache
 reset my_message_cache
 reset my_poll_script
 reset my_msmtpq
+reset my_file_picker
+reset my_picker_cache
 
 # unset hooks    {{{1
 

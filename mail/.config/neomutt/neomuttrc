@@ -57,8 +57,6 @@
 # TODO
 
 
-# attach multiple files to message
-
 # vim syntax for markdown in email
 # * consider "inkarkat/vim-SyntaxRange" github repo
 #   (https://github.com/inkarkat/vim-SyntaxRange)
@@ -104,6 +102,8 @@ set my_header_cache = $my_cache/cache-headers
 set my_message_cache = $my_cache/cache-messages
 set my_fetch_script = $HOME/.local/bin/my-get-mail
 set my_msmtpq = $HOME/.local/bin/msmtpq
+set my_file_picker = $my_utils/neomutt_file-picker
+set my_picker_cache = $my_cache/picker-cache
 
 # [gibp] <Ctrl>+r : reload configuration
 # - overrides [ip] ^R = <read-thread> (marks current thread as read)
@@ -897,8 +897,17 @@ bind editor \cp history-up
 bind editor <Up> history-up
 # [e] <Ctrl>+k : delete chars from cursor to end of line (default binding)
 bind editor \ck kill-eol
+# [e] <Ctrl>+v : quote the next typed key (default binding)
+bind editor \cv quote-char
 # [e] <Ctrl>+w : delete the word in front of the cursor (default binding)
 bind editor \cw kill-word
+# [c] A : attach multiple files with file manager
+# - overrides [c] A = <attach-message> (attach messages to this message)
+macro compose A "\
+<shell-escape>bash $my_file_picker<enter>\
+<enter-command>source $my_picker_cache<enter>\
+<shell-escape>bash $my_file_picker clean<enter>\
+"    'Attach files using file manager'
 
 
 # SEND
