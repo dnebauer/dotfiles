@@ -46,6 +46,10 @@ reset my_msmtpq
 
 unhook *
 
+# unset aliases    {{{1
+
+unalias *
+
 # undo bindings    {{{1
 
 # [letter][letter]    {{{2
