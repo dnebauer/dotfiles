@@ -3,7 +3,7 @@ Description=my-get-mail
 
 [Service]
 Type=simple
-ExecStart=%h/.local/bin/my-get-mail-daemon
+ExecStart=%h/.local/mail/utils/my-get-mail-daemon
 Restart=always
 
 [Install]

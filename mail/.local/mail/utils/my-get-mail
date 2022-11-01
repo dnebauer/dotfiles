@@ -38,7 +38,7 @@ full_sync_interval=$((2 * 60 * 60))  # 2 hours, in seconds
 cache_dir="$HOME/.cache/offlineimap"
 cache_fp="$cache_dir/last-full-sync"
 log_file="$HOME/.local/mail/log/offlineimap.log"
-ps_grep='bash /home/david/.local/bin/my-get-mail-daemon'
+ps_grep='bash /home/david/.local/mail/utils/my-get-mail-daemon'
 piddir="${XDG_RUNTIME_DIR:-~/.local/var/run}/$self"
 pidfile="${piddir}/$self.pid"
 

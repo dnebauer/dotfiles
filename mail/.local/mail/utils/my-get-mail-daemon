@@ -26,7 +26,7 @@ parameters=" [-v] [-d]"
 check_interval='10m'  # delay between checks for mail
 startup_delay='3m'    # delay while internet becomes reachable
 required_system_tools=(logger sleep)   # find on system path
-my_get_mail="$HOME/.local/bin/my-get-mail"
+my_get_mail="$HOME/.local/mail/utils/my-get-mail"
 required_local_tools=("$my_get_mail")  # find by absolute path
 # }}}1
 
