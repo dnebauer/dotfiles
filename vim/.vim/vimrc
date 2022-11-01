@@ -269,17 +269,12 @@ if executable('w3m')
                 \         'W3mHistoryClear'],
                 \ }
 endif
-" - address : notmuch email addresses    {{{3
-if executable('notmuch')
-    "Plug 'dnebauer/vim-notmuch-address', { 'for': ['mail', 'notmuch-compose'] }
-    if executable('notmuch-addrlookup')
-        Plug 'Konfekt/vim-notmuch-addrlookup'
-    else
-        call dn#rc#error([
-                    \ 'vim-notmuch-addrlookup: missing notmuch-addrlookup'])
-    endif
+" - address : neomutt email addresses    {{{3
+if executable('neomutt')
+    Plug 'dnebauer/vim-dn-neomutt-address',
+                \ { 'for': ['mail', 'notmuch-compose'] }
 else
-    call dn#rc#error(['vim-notmuch-address: notmuch is not installed'])
+    call dn#rc#error(['vim-dn-neomutt-address: neomutt is not installed'])
 endif
 " bundles: printing    {{{2
 " - dn-print-dialog : pure vim print dialog    {{{3
