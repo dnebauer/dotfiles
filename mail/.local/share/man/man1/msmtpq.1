@@ -1,0 +1,294 @@
+.\" Hey, EMACS: -*- nroff -*-
+
+.\" Filename: msmtpq.1
+.\" Author:   David Nebauer
+.\" History:  2022-11-01 - created
+
+.\" -----------------------------------------------------------------
+.\" NOTES
+.\" -----------------------------------------------------------------
+.ig
+
+For header (.TH), first parameter, NAME, should be all caps
+Second parameter, SECTION, should be 1-8, maybe w/ subsection
+Other parameters are allowed: see man(7), man(1)
+Please adjust the date whenever revising the manpage.
+
+Some roff macros, for reference:
+.nh        disable hyphenation
+.hy        enable hyphenation
+.ad l      left justify
+.ad b      justify to both left and right margins
+.nf        disable filling
+.fi        enable filling
+.br        insert line break
+.sp <n>    insert n+1 empty lines
+for manpage-specific macros, see groff_man(7) and man(7)
+
+Formatting [see groff_char (7) and man (7) for details]:
+\(aq  : escape sequence for (')
+\[dq] : plain double quote
+\[lq] : left/open double quote
+\[rq] : right/close double quote
+`     : left/open single quote
+'     : right/close single quote
+\(em  : escape sequence for em dash
+\(en  : escape sequence for en dash
+\.    : escape sequence for period/dot
+\(rg  : registration symbol
+\(tm  : trademark symbol
+\fX   : escape sequence that changes font, where 'X' can be 'R|I|B|BI'
+        (R = roman/normal | I = italic | B = bold | BI = bold-italic)
+\fP   : switch to previous font
+        in this case '\fR' could also have been used
+.B    : following arguments are boldened
+.I    : following arguments are italicised
+.BI   : following arguments are bold alternating with italics
+.BR   : following arguments are bold alternating with roman
+.IB   : following arguments are italics alternating with bold
+.IR   : following arguments are italics alternating with roman
+.RB   : following arguments are roman alternating with bold
+.RI   : following arguments are roman alternating with italics
+.SM   : following arguments are small (scaled 9/10 of the regular size)
+.SB   : following arguments are small bold (not small alternating with bold)
+        [note: if argument in alternating pattern contains whitespace,
+               enclose in whitespace]
+.RS x : indent following lines by x characters
+.RE   : end indent
+
+Bulleted list:
+   A bulleted list:
+   .IP \[bu] 2
+   lawyers
+   .IP \[bu]
+   guns
+   .IP \[bu]
+   money
+Numbered list:
+   .nr step 1 1
+   A numbered list:
+   .IP \n[step] 3
+   lawyers
+   .IP \n+[step]
+   guns
+   .IP \n+[step]
+   money
+..
+
+.\" -----------------------------------------------------------------
+.\" SETUP
+.\" -----------------------------------------------------------------
+
+.\" Macro: Format URL
+.\"  usage:  .URL "http:\\www.gnu.org" "GNU Project" " of the"
+.\"  params: 1 = url
+.\"          2 = link text/name
+.\"          3 = postamble (optional)
+.\"  note:   The www.tmac macro provides a .URL macro package; this
+.\"          is a local fallback in case www.tmac is unavailable
+.\"  credit: man(7)
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+
+.\" Prefer .URL macro from www.tmac macro package if it is available
+.\"  note: In the conditional below the '\n' escape returns the value of
+.\"        a register, in this the '.g'
+.\"        The '.g' register is only found in GNU 'troff', and it is
+.\"        assumed that GNU troff will always include the www.tmac
+.\"        macro package
+.if \n[.g] .mso www.tmac
+
+.\" Macro: Ellipsis
+.\"  usage: .ellipsis
+.\"  note: only works at beginning of line
+.de ellipsis
+.cc ^
+...
+^cc
+..
+
+.\" String: Command name
+.ds self msmtpq
+
+.\" -----------------------------------------------------------------
+.\" MANPAGE CONTENT
+.\" -----------------------------------------------------------------
+
+.TH "MSMTPQ" "1" "2022-11-01" "" "MSMTPQ Manual"
+.SH "NAME"
+\*[self] \- mail queue handler for msmtp
+.SH "SYNOPSIS"
+.BR "\*[self] " "["
+.BR "\-\-q\-mgmt " "[ "
+.IR "\-r" "|" "\-R" "|" "\-d" "|" "\-p" "|" "\-a" "|" "\-h"
+.R " ] ]"
+.SH "DESCRIPTION"
+.SS "Usage"
+.I "\*[self]"
+attempts be useful to
+.I "msmtp"
+by holding mail sent by an mail user agent (MUA) when a system, e.g. a laptop,
+is not connected to the net. Queued mails are held as files in a user-defined
+and created queue directory. When the machine is connected all mail can be sent
+directly out; otherwise it queues the mail.
+.PP
+.I "\*[self]"
+takes care of the management and routing of outgoing mail. Normally sending a
+mail is nearly instantaneous, but a very long mail, e.g., one with large
+attachments, can take some time to make its way through. It is therefore wise
+to have the mail user agent background the process if possible.
+.PP
+Unless run in queue management mode (see OPTIONS below),
+.I "\*[self]"
+is invoked as a drop-in replacement for
+.IR "msmtp" "."
+That is:
+.IP \[bu] 2
+It is invoked with the same options as
+.I "msmtp"
+.IP \[bu]
+Recipients are specified on the command after a \(aq\-\-\(aq
+.IP \[bu]
+The mail content is read from standard input.
+.SS "Configure locations"
+Three environment variables control file and directory locations critical for
+the operation of
+.IR "\*[self]" ":"
+.TP
+.I "MSMTP"
+Set this variable to point to the location of the msmtp executable. Set this
+only if necessary, i.e., if it is not on the path. If you are running a normal
+Linux distribution msmtp should be on the execution path by default.
+.TP
+.I "MSMTP_Q"
+Set this variable to point to the location of the queue directory. Please note
+that it's preferable to create the queue directory (with 0700 permissions)
+before using these routines.
+.TP
+.I "MSMTPQ_LOG"
+This variable should have the desired name and location of the queue log. Set
+it to an empty string (\(aqexport MSMTPQ_LOG=""\(aq) to disable logging.
+.br
+.R " "
+.br
+Note that the default msmtpq set-up creates a separate log for queue
+operations. This is distinct from the
+.I "msmtp"
+log set by the \(aqlogfile\(aq setting in
+.IR ".msmtprc" "."
+.SS "Configure behaviour"
+Two further environmental variables control the operation of
+.IR "\*[self]" "."
+.TP
+.I "EMAIL_CONN_TEST"
+This variable configures what test is used for the net connection:
+.br
+if
+.RI "=" "x"
+will suppress any testing for a connection
+.br
+if
+.RI "=" "p"
+or unset will use a ping test (debian.org) for a connection
+.br
+if
+.RI "=" "P"
+will use a fast ping test (8.8.8.8) for a connection
+.br
+if
+.RI "=" "n"
+will use netcat (nc) to test for a connection
+.br
+if
+.RI "=" "s"
+will use bash sockets to test for a connection
+.TP
+.I "EMAIL_QUEUE_QUIET"
+If this variable is set it suppresses unnecessary queue 'chatter'. (This may
+perhaps be useful for some of the emacs mail clients.)
+.PP
+These variables can be part of the command which invokes
+.IR "\*[self]" "."
+Multiple environmental variables may be used on the command line, space
+separated, before the
+.I "\*[self]"
+invocation. For example, the mutt configuration variable \(aqsendmail\(aq might
+be set using the command:
+.PP
+.RS 4
+set sendmail = "EMAIL_CONN_TEST=p EMAIL_QUEUE_QUIET=y /path/to/msmtpq"
+.RE
+.SS "Log rotation"
+On a Debian or Debian-based system a file can be created in
+.I "/etc/logrotate.d"
+(named, e.g., 'msmtp') that configures logrotate to compress and rotate both
+the
+.I "msmtp"
+logs and
+.I "msmtpq"
+queue logs.
+.PP
+Suggested contents of this file are:
+.PP
+.RS 4
+/home/xyz/log/msmtp.log /home/xyz/log/msmtp.queue.log {
+.br
+  rotate 9999
+.br
+  weekly
+.br
+  compress
+.br
+  notifempty
+.br
+  missingok
+.br
+}
+.RE
+.PP
+Adjust the log file paths as necessary.
+.SH "OPTIONS"
+.TP
+.IR "\-\-q\-mgmt " "[operator]"
+Run
+.I "\*[self]"
+in queue management mode. Optionally accepts a single parameter as operator
+(default:
+.IR "-d" "):"
+.TS
+tab (:);
+cb  lb
+c   l.
+Operator:Action
+\-r:run (flush) the queue
+\-R:send individual mail(s) in queue
+\-d:display queue [default action]
+\-p:purge individual email(s) from queue
+\-a:purge all mail in queue
+\-h:show help
+.TE
+.br
+.R " "
+.br
+.I msmtp-queue
+is a wrapper script which calls
+.I "msmtpq"
+with the
+.I "\-\-q\-mgmt"
+argument. The user optionally provides an operator as the sole parameter
+(default:
+.IR "-d" ")."
+.SH "FILES"
+See description above of the environmental variables MSMTP, MSMTP_Q and
+MSMTP_LOG, which define key files and directories used by
+.IR "\*[self]" "."
+.SH "SEE ALSO"
+.BR "msmtp " "(1),"
+.BR "msmtp-queue " "(1),"
+.BR "logrotate " "(1)."
+.SH "AUTHOR"
+\*[self] was written by David Nebauer (david at nebauer dot org).
+.PP
+This manual page was written by David Nebauer (david at nebauer dot org)
+for the Debian project (but may be used by others).

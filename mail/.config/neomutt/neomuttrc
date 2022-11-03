@@ -67,8 +67,6 @@
 # consider using Konfekt/mutt-trim
 # * https://github.com/Konfekt/mutt-trim
 
-# create script man files
-
 # troubleshoot lack of notification of new messages
 
 # troubleshoot why 'trash' label is added to archived posts
