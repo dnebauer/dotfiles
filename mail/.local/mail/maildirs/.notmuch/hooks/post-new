@@ -83,7 +83,7 @@ displayNotification () {
     body="${2:-}"
     if has_display ; then
         if use_icon ; then
-            notify-send --icon="$mail_icon" "$subject" "$body"
+            notify-send --icon="$mail_icon" "Email: $subject" "$body"
         else
             notify-send "$subject" "$body"
         fi
@@ -209,7 +209,7 @@ processOptions "${@}"
 newcount=$(notmuch count tag:new) \
     || abortScript 'Unable to count new emails'
 [[ $newcount -gt 0 ]] || exit 0
-summary="Email: $newcount new message"
+summary="$newcount new message"
 [[ $newcount -gt 1 ]] && summary+='s'
 body="$(                                                    \
     notmuch search --output=summary --format=json tag:new | \
