@@ -57,9 +57,6 @@
 # TODO
 
 
-# consider using Konfekt/mutt-trim
-# * https://github.com/Konfekt/mutt-trim
-
 # troubleshoot highlighted newlines on opening mail editor
 
 # experiment with whether jump shortcuts can enter jump number automatically
@@ -91,6 +88,7 @@ set my_utils = $HOME/.local/mail/utils
 set my_fetch_script = $my_utils/my-get-mail
 set my_nvim_args = $my_utils/neomutt_nvim-args.vim
 set my_print_pdf = $my_utils/neomutt_print-to-pdf
+set my_trim_quotes = $my_utils/neomutt_trim-quotes
 set my_signature = $my_cfgdir_d/signature
 set my_download_dir = $HOME/Downloads
 set my_cache = $HOME/.cache/neomutt
@@ -815,7 +813,10 @@ set query_command = "echo '' && notmuch address from:/%s/"
    # first line of results is presumed to be header so it is auto-trimmed
    # but notmuch does not include a header line
    # so the 'echo' command is a workaround for this
-set editor = "nvim -S '$my_nvim_args' +/^$/+1 '+startinsert!'"
+set editor = "\
+$my_trim_quotes %s ;\
+nvim -S '$my_nvim_args' +/^$/+1 '+startinsert!' %s\
+"
     # editor invocation, uses external file for initial arguments
 set text_flowed
     # generate content type 'text/plain; format-flowed'

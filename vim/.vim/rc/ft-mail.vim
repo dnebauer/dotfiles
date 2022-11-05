@@ -68,6 +68,12 @@ function! s:MailSupport()
         nmap <buffer> <unique> <LocalLeader>md
                     \ :call <SID>SynMailIncludeMarkdown()<CR>
     endif
+    " fold quoted text    {{{1
+    " - taken from 'mutt-trim' github repo README file
+    "   (https://github.com/Konfekt/mutt-trim)
+    setlocal foldexpr=strlen(substitute(matchstr(getline(v:lnum)
+    setlocal foldexpr+=,'\\v^\\s*%(\\>\\s*)+'),'\\s','','g'))
+    setlocal foldmethod=expr foldlevel=1 foldminlines=2
     " }}}1
 endfunction
 
