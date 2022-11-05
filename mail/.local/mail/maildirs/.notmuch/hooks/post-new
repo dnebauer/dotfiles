@@ -241,7 +241,7 @@ EOF
 ##    || abortScript 'Unable to write to system log'
 
 # display desktop notification    {{{1
-displayNotification "$subject" "$body" \
+displayNotification "$summary" "$body" \
     || abortScript 'Unable to display notification'
 
 # force exit with success    {{{1

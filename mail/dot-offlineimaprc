@@ -24,7 +24,6 @@ singlethreadperfolder = yes
 [Account vodien]
 localrepository = vodien-local
 remoterepository = vodien-remote-secure
-postsynchook = notmuch new
 
 #[Account bigpond]
 #localrepository = bigpond-local
