@@ -57,8 +57,6 @@
 # TODO
 
 
-# experiment with whether jump shortcuts can enter jump number automatically
-
 # troubleshoot lack of notification of new messages
 
 # troubleshoot why 'trash' label is added to archived posts
@@ -260,16 +258,20 @@ bind generic > next-line
 bind pager <Return> next-line
 bind pager <Enter> next-line
 bind pager <KeypadEnter> next-line
-# [gp] 1-9 : jump (default bindings)
-bind generic,pager 1 jump
-bind generic,pager 2 jump
-bind generic,pager 3 jump
-bind generic,pager 4 jump
-bind generic,pager 5 jump
-bind generic,pager 6 jump
-bind generic,pager 7 jump
-bind generic,pager 8 jump
-bind generic,pager 9 jump
+# [gp] 1-9 : jump to specified index number
+# - overrides [gp] 1-9 = <jump> (jump to an index number)
+macro generic,pager 1 "<jump>1<enter>"    'jump to index number 1'
+macro generic,pager 2 "<jump>2<enter>"    'jump to index number 2'
+macro generic,pager 3 "<jump>3<enter>"    'jump to index number 3'
+macro generic,pager 4 "<jump>4<enter>"    'jump to index number 4'
+macro generic,pager 5 "<jump>5<enter>"    'jump to index number 5'
+macro generic,pager 6 "<jump>6<enter>"    'jump to index number 6'
+macro generic,pager 7 "<jump>7<enter>"    'jump to index number 7'
+macro generic,pager 8 "<jump>8<enter>"    'jump to index number 8'
+macro generic,pager 9 "<jump>9<enter>"    'jump to index number 9'
+# [gp] 0 : jump to an index number
+# - no default [gp] 0 bindings
+bind generic,pager 0 jump
 # [g] <Left> : move to previous page (default binding)
 bind generic <Left> previous-page
 # {[g] <Right>;[p] <Space>} : move to next page (default binding)
