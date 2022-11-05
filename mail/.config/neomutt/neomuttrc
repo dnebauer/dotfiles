@@ -57,13 +57,6 @@
 # TODO
 
 
-# vim syntax for markdown in email
-# * consider "inkarkat/vim-SyntaxRange" github repo
-#   (https://github.com/inkarkat/vim-SyntaxRange)
-# * requires plugin "inkarkat/vim-ingo-library"
-# * start of region is first blank line, for which the regex is: \n\n
-# * end of region is end of file, for which the regex is: \%$
-
 # consider using Konfekt/mutt-trim
 # * https://github.com/Konfekt/mutt-trim
 
