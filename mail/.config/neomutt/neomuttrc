@@ -60,6 +60,8 @@
 # consider using Konfekt/mutt-trim
 # * https://github.com/Konfekt/mutt-trim
 
+# troubleshoot highlighted newlines on opening mail editor
+
 # troubleshoot lack of notification of new messages
 
 # troubleshoot why 'trash' label is added to archived posts
