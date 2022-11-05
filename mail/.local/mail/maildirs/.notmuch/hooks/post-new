@@ -89,7 +89,6 @@ displayNotification () {
         fi
     fi
     echo "$self: $subject: $body"
-    exit 1
 }
 # displayUsage()    {{{1
 #   intent: display script usage information
