@@ -57,8 +57,6 @@
 # TODO
 
 
-# troubleshoot highlighted newlines on opening mail editor
-
 # experiment with whether jump shortcuts can enter jump number automatically
 
 # troubleshoot lack of notification of new messages
@@ -815,7 +813,7 @@ set query_command = "echo '' && notmuch address from:/%s/"
    # so the 'echo' command is a workaround for this
 set editor = "\
 $my_trim_quotes %s ;\
-nvim -S '$my_nvim_args' +/^$/+1 '+startinsert!' %s\
+nvim -S '$my_nvim_args' +/^$/+1 '+nohlsearch' '+startinsert!' %s\
 "
     # editor invocation, uses external file for initial arguments
 set text_flowed
