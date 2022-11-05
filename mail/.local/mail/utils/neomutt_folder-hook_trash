@@ -1,4 +1,4 @@
-# make all mail read
+# make all mail read    {{{1
 
 # folders: Trash
 #
@@ -14,7 +14,7 @@ push <tag-pattern>~A\n\
 
 # ---------------------------------------------------------
 
-# delete mail
+# delete mail: d,<delete>    {{{1
 
 # folders: Trash
 #
@@ -53,7 +53,7 @@ macro pager <delete> "\
 
 # ---------------------------------------------------------
 
-# untrash/undelete mail
+# untrash/undelete mail: u    {{{1
 
 # folders: Trash
 #
@@ -88,7 +88,7 @@ macro pager u "\
 
 # ----------------------------------------------------------
 
-# notmuch search
+# notmuch search: s    {{{1
 
 # folders: Trash
 #
@@ -101,5 +101,6 @@ macro index,pager s '\
 <vfolder-from-query>folder:personal/INBOX.Trash and \
 ' \
 'generate virtual folder from query of Trash'
+# }}}1
 
-# vim: ft=neomuttrc
+# vim: ft=neomuttrc fdm=marker

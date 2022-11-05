@@ -1,4 +1,4 @@
-# trash mail
+# trash mail: d,<delete>    {{{1
 
 # folders: all except Trash
 #
@@ -58,7 +58,8 @@ macro pager <delete> "\
 
 # ---------------------------------------------------------
 
-# reset undelete-message function binding
+# undelete mail: u    {{{1
+# - reset undelete-message function binding
 
 # folders: all except Trash
 #
@@ -71,7 +72,7 @@ bind index,pager u undelete-message
 
 # ---------------------------------------------------------
 
-# notmuch search
+# notmuch search: s    {{{1
 
 # folders: all
 #
@@ -81,5 +82,6 @@ bind index,pager u undelete-message
 # - open notmuch search field
 
 bind index s vfolder-from-query
+# }}}1
 
-# vim: ft=neomuttrc
+# vim: ft=neomuttrc fdm=marker
