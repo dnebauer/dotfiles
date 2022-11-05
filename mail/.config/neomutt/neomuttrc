@@ -6,23 +6,23 @@
 # NOTES
 
 
-# Quoting $variables
+# Quoting $variables    {{{1
 # * enclose values containing a $variable with double-quotes
 # * using single-quotes does not appear to work
 
-# <Ctrl>+key bindings
+# <Ctrl>+key bindings    {{{1
 # * in binding use '\cx' for <Ctrl>+x key combination
 # * can use either upper- or lowercase key in binding (case-insensitive)
 # * if both <Ctrl>+x and <Ctrl>+X are present, the last binding wins
 # * press either <Ctrl>+x and <Ctrl>+X to trigger binding (case-insensitive)
 # * in neomutt help both <Ctrl>+x and <Ctrl>+X are shown as '^X'
 
-# <Esc>+key bindings
+# <Esc>+key bindings    {{{1
 # * in binding use '<Esc>x' for <Esc>+x key combination
 # * case-sensitive
 # * see below for interaction with <Alt>+x key combinations
 
-# <Alt>+key bindings
+# <Alt>+key bindings    {{{1
 # * in binding use '\ex' for <Alt>+x key combination
 # * case-sensitive
 # * is displayed in neomutt help as '<Esc>x'
@@ -31,12 +31,12 @@
 # * if both <Alt> and <Esc> bindings for the same key are present,
 #   the last binding wins
 
-# Generic bindings
+# Generic bindings    {{{1
 # * apply to *all* menus *except*:
 #   - pager
 #   - editor
 
-# Reset bindings
+# Reset bindings    {{{1
 # * the 'clear-settings.rc' file clears all bindings from modes:
 #   - generic
 #   - index
@@ -45,29 +45,33 @@
 #   - attach
 # * bindings for these modes must be restored in this file
 
-# Binding annotations
+# Binding annotations    {{{1
 # * a binding's modes are indicated by '[xy]' notation, with:
 #   - g = generic
 #   - i = index
 #   - p = pager
 #   - e = editor
 #   - a = attach
+# }}}1
 
 
 # TODO
 
 
-# troubleshoot why 'trash' label is added to archived posts
+# troubleshoot why 'trash' label is added to archived posts    {{{1
 # - phenomenon noted with messages having the 'order' label
+# }}}1
 
 
 # LOAD/RELOAD CONFIGURATION
 
 
-# clear settings (make script idempotent)
+# Clear settings (make script idempotent)    {{{1
+
 source neomuttrc.d/clear-settings.rc
 
-# custom variables
+# Set custom variables    {{{1
+
 set my_name = 'David Nebauer'
 set my_email = 'david@nebauer.id.au'
 set my_maildir = $HOME/.local/mail/maildirs
@@ -92,6 +96,8 @@ set my_msmtpq = $HOME/.local/bin/msmtpq
 set my_file_picker = $my_utils/neomutt_file-picker
 set my_picker_cache = $my_cache/picker-cache
 
+# Bindings    {{{1
+
 # [gibp] <Ctrl>+r : reload configuration
 # - overrides [ip] ^R = <read-thread> (marks current thread as read)
 macro generic,index,browser,pager \cr "\
@@ -99,12 +105,13 @@ macro generic,index,browser,pager \cr "\
 <enter-command>source $my_config<enter>\
 <enter-command>echo 'Reloaded $my_config'<enter>\
 "    'clear hooks and reload configuration'
+# }}}1
 
 
 # MANAGE MAILBOXES
 
 
-# Standard mailboxes
+# Standard mailboxes    {{{1
 
 set mbox_type = Maildir
     # default mailbox type
@@ -119,7 +126,7 @@ set postponed = +INBOX.Drafts
 set spool_file = +INBOX
     # inbox folder
 
-# Virtual mailboxes
+# Virtual mailboxes    {{{1
 
 set nm_default_url = 'notmuch:///home/david/.local/mail/maildirs'
     # cannot use 'folder', must use 'nm_default_url'
@@ -152,7 +159,7 @@ virtual-mailboxes \
   'Junk'    "notmuch://?query=folder:$my_account/INBOX.Junk" \
   'Trash'   "notmuch://?query=folder:$my_account/INBOX.Trash"
 
-# Hooks
+# Hooks    {{{1
 
 folder-hook '.' \
     "source $my_utils/neomutt_folder-hook_all"
@@ -171,7 +178,7 @@ folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Junk" \
 folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Trash" \
     "source $my_utils/neomutt_folder-hook_trash"
 
-# Sidebar
+# Sidebar    {{{1
 
 set sidebar_visible
     # show sidebar
@@ -192,7 +199,7 @@ bind index,pager \cp sidebar-prev
 # - no default [ip] ^O bindings
 bind index,pager \co sidebar-open
 
-# Change mailbox
+# Change mailbox    {{{1
 
 # [ip] ci : change to Inbox vfolder
 # - overrides [ip] c = <change-folder> (opens a different folder)
@@ -219,7 +226,7 @@ macro index,pager ct '<change-vfolder>Trash<enter>'   'open Trash'
 # - overrides [ip] c = <change-folder> (opens a different folder)
 macro index,pager cf '<change-vfolder>?'              'open mailbox...'
 
-# Display
+# Display    {{{1
 
 # [g] <Ctrl>+l : redraw screen (default binding)
 bind generic \cl refresh
@@ -230,7 +237,7 @@ bind index,pager o sort-mailbox
 # [gp] ? : help (default binding)
 bind generic,pager ? help
 
-# Navigation
+# Navigation    {{{1
 
 # {[g] j,<Down>;[ip] J} : move to next entry (default bindings)
 bind generic j next-entry
@@ -288,7 +295,7 @@ bind pager <Home> top
 # [p] <End> : jump to bottom of message (default binding)
 bind pager <End> bottom
 
-# Search
+# Search    {{{1
 
 # [gp] {<Alt>+/,<Esc>/} : search backwards (default binding)
 bind generic,pager \e/ search-reverse
@@ -296,7 +303,7 @@ bind generic,pager \e/ search-reverse
 bind generic,pager / search
 # [gp] n : next match (default binding)
 
-# Process control
+# Process control    {{{1
 
 # [gp] ! : invoke subshell (default binding)
 bind generic,pager ! shell-escape
@@ -315,7 +322,7 @@ bind pager i exit
 # [i] q : save changes and quit (default binding)
 bind index q quit
 
-# Synchronise
+# Synchronise    {{{1
 
 # [ip] $ : save changes to current mailbox and recalculate all mailbox stats
 # - overrides [ip] $ = <sync-mailbox> (save changes to current mailbox)
@@ -326,12 +333,13 @@ macro index,pager $ "\
 timeout-hook 'exec sync-mailbox'
 startup-hook 'exec sync-mailbox'
 shutdown-hook 'exec sync-mailbox'
+# }}}1
 
 
 # MESSAGE MANAGEMENT
 
 
-# Display
+# Display    {{{1
 
 # [g] {<Return>,<Enter>,<KeypadEnter>} : select entry (default bindings)
 bind generic <Return> select-entry
@@ -344,7 +352,7 @@ bind index <Return> display-message
 bind index <Enter> display-message
 bind index <KeypadEnter> display-message
 
-# Search for messages
+# Search for messages    {{{1
 
 # [ip] s : search current vfolder
 # - set in folder-hooks
@@ -355,7 +363,7 @@ bind index,pager X vfolder-from-query
 # [i] ~ : create hotkey macro for message (default binding)
 bind index ~ mark-message
 
-# Threads
+# Threads    {{{1
 
 # [ip] + : read thread of current message
 # - no default [ip] + bindings
@@ -367,7 +375,7 @@ bind index za collapse-thread
 # - no default [i] z binding
 bind index zA collapse-all
 
-# Tagging
+# Tagging    {{{1
 
 # [g] t : tag entry (default bindings)
 bind generic t tag-entry
@@ -391,7 +399,7 @@ macro index \cu "\
 <untag-pattern>~A<enter>\
 "    'unselect/untag all messages'
 
-# Tags (neomutt)
+# Tags (neomutt)    {{{1
 
 # [ip] w : set status flag (default bindings)
 bind index,pager w set-flag
@@ -408,7 +416,7 @@ macro index W "\
 <tag-prefix><clear-flag>\
 "    'clear a status flag from messages(s)'
 
-# Labels (notmuch)
+# Labels (notmuch)    {{{1
 
 # [ip] yy : manually modify
 # - no default [ip] y bindings
@@ -516,7 +524,7 @@ macro pager yv "\
 <modify-labels>+vault<enter>\
 "    'add label: vault'
 
-# Move
+# Move    {{{1
 
 set noconfirm_append
     # no confirm needed when append to mailbox
@@ -675,7 +683,7 @@ macro pager MS "\
 <change-vfolder>^<enter>\
 "    'move to Sent'
 
-# Delete
+# Delete    {{{1
 
 set delete = yes
     # purge deleted messages on mailbox close/syncronisation
@@ -690,9 +698,13 @@ bind attach d delete-entry
 bind attach u undelete-entry
 # [ip] u : untrash message
 # - in Trash folder only
+# }}}1
 
 
 # FETCH
+
+
+# Bindings    {{{1
 
 # [i] G : fetch mail
 # overrides [i] G = <fetch-mail> (retrieve mail from POP server)
@@ -700,10 +712,13 @@ macro index G "\
 <shell-escape>$my_fetch_script<enter>\
 <change-vfolder>Inbox<enter>\
 "    'run offlineimap to fetch mail'
+# }}}1
 
 
 # VIEW
 
+
+# Settings    {{{1
 
 set move
     # move read messages from $spool_file to $mbox
@@ -742,6 +757,8 @@ unalternative_order *
 alternative_order text/html \
                   text/plain \
                   text
+
+# Bindings    {{{1
 
 # [ip] e : edit/view message (default binding)
 bind index,pager e edit-or-view-raw-message
@@ -783,10 +800,13 @@ ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
 # [ipa] p : print message (default binding)
 bind index,pager p print-message
 bind attach p print-entry
+# }}}1
 
 
 # COMPOSE
 
+
+# Settings    {{{1
 
 set real_name = $my_name
     # sender's real name
@@ -841,9 +861,12 @@ set forward_quote
 set ispell = 'aspell -e -c'
     # 'ispell' invocation
 
-# source aliases
-# - note this file is periodically regenerated by a custom script
+# Source aliases    {{{1
+
+# this file is periodically regenerated by a custom script
 source $my_alias
+
+# Bindings    {{{1
 
 # [ip] m : new message (default binding)
 bind index,pager m mail
@@ -902,10 +925,13 @@ macro compose A "\
 <enter-command>source $my_picker_cache<enter>\
 <shell-escape>bash $my_file_picker clean<enter>\
 "    'Attach files using file manager'
+# }}}1
 
 
 # SEND
 
+
+# Settings    {{{1
 
 set sendmail = "$my_msmtpq"
     # email sending program
@@ -915,6 +941,8 @@ set use_from
     # include 'From:' header in sent message
 set abort_noattach = ask-yes
     # check before sending if suspect attachments are missing
+
+# Bindings    {{{1
 
 # [c] Y : convert markdown to html and send
 # - no default [c] Y binding
@@ -932,15 +960,13 @@ macro compose Y "\
 <enter-command>unset my_wait_key<enter>\
 <send-message>\
 "    "send the message as 'multipart/alternative'"
+# }}}1
 
 
 # INTERFACE
 
 
-# [ip] MM : show log/debug messages
-# - overrides [i] M = <show-log-messages> (show log/debug messages)
-bind index,pager MM show-log-messages
-
+# Settings    {{{1
 set pager_index_lines = 8
     # show mini-index
     # warning: neither pager- nor index-bound macros work in mini-pager
@@ -975,8 +1001,16 @@ set index_format = '%4C %Z %?X?%X📎&   ? \
 source $my_cfgdir_d/colours.rc
     # colour scheme
 
+# Bindings    {{{1
+
+# [ip] MM : show log/debug messages
+# - overrides [i] M = <show-log-messages> (show log/debug messages)
+bind index,pager MM show-log-messages
+
+# Startup actions    {{{1
+
 push <show-version>
     # display version on startup
-
+# }}}1
 
 # vim: ft=neomuttrc fdm=marker
