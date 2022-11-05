@@ -301,6 +301,7 @@ synced_ok || abortscript "See offlineimap log: $log_file"
 unset cache_fp full_sync_interval log_file time_now time_since_last_full_sync
 
 # update notmuch    {{{1
+echo "$self: update notmuch database"
 notmuch new
 # }}}1
 
