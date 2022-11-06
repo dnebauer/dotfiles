@@ -223,8 +223,10 @@ processOptions () {
 
 # MAIN
 
+# basic setup    {{{1
 checkPrereqs
 processOptions "${@}"  # leaves ${ARGS[@]} holding positional arguments
+echo -e "\n------------------------------"  # demarcate new feedback
 
 # set boolean values    {{{1
 [[ "x$DISPLAY" != "x" ]] && has_display 'true'
