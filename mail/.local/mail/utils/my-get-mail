@@ -302,7 +302,12 @@ unset cache_fp full_sync_interval log_file time_now time_since_last_full_sync
 
 # update notmuch    {{{1
 echo "$self: update notmuch database"
-notmuch new
+while IFS= read -r line ; do
+    echo "notmuch-new: $line"
+done < <(notmuch new)
+
+# pause to review feedback    {{{1
+read -p "$self: press a key to continue... " -n 1 -t 5 -e || true
 # }}}1
 
 # vim:foldmethod=marker:

@@ -88,7 +88,8 @@ displayNotification () {
             notify-send "$subject" "$body"
         fi
     fi
-    echo "$self: $subject: $body"
+    echo "notmuch-new: $subject: $body"
+    return 0
 }
 # displayUsage()    {{{1
 #   intent: display script usage information
