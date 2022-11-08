@@ -5,9 +5,11 @@
 # actions:
 # - tag all new mail and remove new tag
 
+# select all mail with neomutt 'new' tag ('N') and clear it
 push <tag-pattern>~N\n\
 <tag-prefix-cond><clear-flag>N\
 <untag-pattern>.\n<end-cond>
+# select all mail and add notmuch 'trash' label
 push <tag-pattern>~A\n\
 <tag-prefix-cond><modify-labels>+trash\n\
 <untag-pattern>.\n<end-cond>
