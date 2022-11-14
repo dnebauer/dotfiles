@@ -274,7 +274,7 @@ for server in "${mail_servers[@]}" ; do
     ping -c1 "$server" &>/dev/null || missing+=("$server")
 done
 [[ ${#missing[@]} -eq 0 ]] \
-    || abortScript "Unable to reach: $(joinBy ', ' "${missing[@]}")"
+    || abortScript "unable to reach $(joinBy ', ' "${missing[@]}")"
 unset mail_servers missing
 
 # get time since last full sync    {{{1
