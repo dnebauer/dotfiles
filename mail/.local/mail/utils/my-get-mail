@@ -41,6 +41,7 @@ log_file="$HOME/.local/mail/log/offlineimap.log"
 ps_grep='bash /home/david/.local/mail/utils/my-get-mail-daemon'
 piddir="${XDG_RUNTIME_DIR:-~/.local/var/run}/$self"
 pidfile="${piddir}/$self.pid"
+now="$(date '+%T, %-A %d %B %Y')"
 
 # flags
 
@@ -227,6 +228,7 @@ processOptions () {
 checkPrereqs
 processOptions "${@}"  # leaves ${ARGS[@]} holding positional arguments
 echo -e "\n------------------------------"  # demarcate new feedback
+echo "$self: $now"  # timestamp
 
 # set boolean values    {{{1
 [[ "x$DISPLAY" != "x" ]] && has_display 'true'
