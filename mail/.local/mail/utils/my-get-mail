@@ -256,6 +256,17 @@ unset oldpid pid piddir pidfile result
 pgrep -x offlineimap &>/dev/null \
     && abortScript 'Offlineimap is already running'
 
+# give user chance to force full syncronisation    {{{1
+timeout=1
+prompt="$self: press any key to force full synchronisation..."
+errexit_setting="$(set -o | grep 'errexit' | awk '{print $2}')"
+set +o errexit
+read -n 1 -p "$prompt" -s -t $timeout full_sync
+[[ $? -le 128 ]] && full_sync='yes'
+[[ "$errexit_setting" = 'on' ]] && set -o errexit
+echo ' '
+[[ -n "${full_sync}" ]] && rm -f "$cache_fp"
+
 # flush queued mail    {{{1
 num_queue=$("$msmtpq" --q-mgmt -d | grep "num" | wc -l || true)
 if [[ $num_queue -gt 0 ]] ; then
