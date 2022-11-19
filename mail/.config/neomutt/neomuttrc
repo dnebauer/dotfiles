@@ -698,9 +698,10 @@ bind attach u undelete-entry
 
 # Bindings    {{{1
 
-# [i] G : fetch mail
-# overrides [i] G = <fetch-mail> (retrieve mail from POP server)
-macro index G "\
+# [ip] G : fetch mail
+# - overrides [i] G = <fetch-mail> (retrieve mail from POP server)
+# - no default [p] G binding
+macro index,pager G "\
 <shell-escape>$my_fetch_script<enter>\
 <change-vfolder>Inbox<enter>\
 "    'run offlineimap to fetch mail'
