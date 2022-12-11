@@ -548,8 +548,9 @@ mode "$mode_ss_window" {
 #
 # - need to ensure this is a floating window
 
+set $clipboard_loader ~/.local/bin/i3-my-load-clipboard
 ## clipboard loader
-bindsym F1 exec --no-startup-id dn-load-clipboard
+bindsym F1 exec --no-startup-id $clipboard_loader
 
 # display shortcuts    {{{2
 
@@ -701,6 +702,8 @@ for_window [class="timesup"] sticky enable
 for_window [instance="file_progress"]  sticky enable
 
 for_window [class="calibre" instance="calibre-ebook-viewer"] floating enable
+for_window [class="Clipboard_Loader" instance="Clipboard_Loader"] \
+            floating enable, resize set 1000 600
 for_window [class="dolphin" instance="dolphin"] floating enable
 for_window [class="Gimp" instance="gimp"] floating enable
 for_window [class="gwenview" instance="gwenview"] floating enable

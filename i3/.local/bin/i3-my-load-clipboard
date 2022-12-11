@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+
+# File: i3-my-load-clipboard
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: copy user-selected value to the system clipboard
+# Created: 2022-12-11
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename $0)"
+# required tools findable on system path
+required_system_tools=(
+    alacritty
+    cat
+    getopt
+    mktemp
+)
+required_local_tools=(
+    $HOME/.local/libexec/i3-my-load-clipboard-engine
+)
+engine="$HOME/.local/libexec/i3-my-load-clipboard-engine"
+temp_file="$(mktemp)"
+trap "[[ -f \"$temp_file\" ]] && rm -f \"$temp_file\"" EXIT
+# }}}1
+
+# PROCEDURES
+
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+function checkPrereqs () {
+    local missing tool
+    missing=()
+    # these tools can be found on the base system path
+    for tool in "${required_system_tools[@]}" ; do
+        command -v "$tool" &>/dev/null || missing+=("$tool")
+    done
+    # these tools are specified by absolute path
+    for tool in "${required_local_tools[@]}" ; do
+        [[ -x "$tool" ]] || missing+=("$tool")
+    done
+    if [[ ${#missing[@]} -ne 0 ]] ; then
+        echo "$msg" >/dev/stderr
+        exit 1
+    fi
+    unset required_system_tools
+}
+# displayUsage()    {{{1
+#   intent: display usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: load user-selected value into the system clipboard
+
+The user selects from menus of pre-defined options. The
+selected option is loaded into the system clipboard.
+
+A submenu is indicated by an option with an appended '-->'.
+Selecting such an option opens a submenu.
+
+Menu options have a one character prefix (a hotkey) to
+enable quick option selection.
+
+The menu options are hard-coded into this script and include
+email address, postal addresses, and the current date in
+multiple formats.
+
+Usage: ${self}
+       ${self} -h
+
+Options: -d | --debug   = print expanded commands as
+                          they are expanded
+         -v | --verbose = print script lines as they
+                          are read
+         -h | --help    = display this help and exit
+_USAGE
+}
+# processOptions([@options])    {{{1
+#   intent: process all command line options
+#   params: @options - all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable @ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                      \
+        getopt                             \
+            --options hvds                 \
+            --long    help,verbose,debug   \
+            --name    "${BASH_SOURCE[0]}"  \
+            -- "${@}"                      \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS=("${@}")  # remaining arguments
+}
+# joinBy($delim, @items)    {{{1
+#   intent: join all items using delimiter
+#   params: delim - delimiter
+#           items - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy () {
+    local delimiter first_item
+    delimiter="${1:-}"
+    shift
+    first_item="${1:-}"
+    shift
+    printf %b%s "$first_item" "${@/#/$delimiter}"
+}
+# }}}1
+
+# MAIN
+
+# check for required tools    {{{1
+checkPrereqs
+
+# process command line options    {{{1
+processOptions "${@}"  # leaves ${ARGS[@]} holding positional arguments
+
+# launch engine script in alacritty    {{{1
+cmd=(
+    $engine
+    --temp_file
+    $temp_file
+)
+alacritty \
+    --title   'Clipboard Loader' \
+    --class   'Clipboard_Loader,Clipboard_Loader' \
+    --command ${cmd[@]}
+
+# retrieve and copy selected value    {{{1
+value="$(cat "$temp_file")"
+echo -n "$value" | xclip -sel clip
+# }}}1
+
+# vim:foldmethod=marker:

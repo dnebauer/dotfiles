@@ -1,0 +1,845 @@
+#!/usr/bin/perl
+
+use Moo;                 # {{{1
+use strictures 2;
+use 5.006;
+use 5.022_001;
+use version; our $VERSION = qv('0.1');
+use namespace::clean;    # }}}1
+
+# package Dn::MenuItem    {{{1
+
+# - encapsulate menu item functionality
+{
+
+    package Dn::MenuItem;
+
+    use Moo;    # {{{2
+    use strictures 2;
+    use namespace::clean;
+    use Const::Fast;
+    use English qw(-no_match_vars);
+    use Types::Standard;
+
+    const my $TRUE => 1;    # }}}2
+
+    # attributes
+
+    # kind    {{{2
+    has 'kind' => (
+        is       => 'ro',
+        isa      => Types::Standard::Str,
+        required => $TRUE,
+        doc      => 'Menu item type {submenu,item}',
+    );
+
+    # value    {{{2
+    has 'value' => (
+        is       => 'ro',
+        isa      => Types::Standard::Str,
+        required => $TRUE,
+        doc      => 'Menu item value (submenu name or item string)',
+    );
+
+    # hotkey    {{{2
+    has 'hotkey' => (
+        is       => 'ro',
+        isa      => Types::Standard::Str,
+        required => $TRUE,
+        doc      => 'Menu item hotkey (single character)',
+    );    # }}}2
+
+}
+
+# package Dn::Menu    {{{1
+
+# - encapsulate menu functionality.
+# - main method is 'choose'.
+# - returns array with 1 or 2 items:
+#   * action = {escape,submenu,item}
+#   * value = submenu name or item string
+{
+
+    ## no critic (ProhibitMultiplePackages)
+    package Dn::Menu;
+    ## use critic
+
+    use Moo;    # {{{2
+    use strictures 2;
+    use namespace::clean;
+    use Carp qw(croak);
+    use Const::Fast;
+    use English qw(-no_match_vars);
+    use Function::Parameters;
+    use MooX::HandlesVia;
+    use Term::ANSIColor;
+    use Term::Cap;
+    use Term::ReadKey;
+    use Types::Standard;
+
+    const my $TRUE       => 1;
+    const my $FALSE      => 0;
+    const my $ENTER      => '[Enter]';
+    const my $ENTER_NUM  => 10;
+    const my $ESCAPE     => '[Esc]';
+    const my $ESCAPE_NUM => 27;
+    const my $BOLD       => ['bold'];           # Term::ANSIColor format codes
+    const my $BOLD_RED   => [ 'bold', 'red' ];  # Term::ANSIColor format codes
+    const my $YELLOW     => ['yellow'];         # Term::ANSIColor format codes
+    const my $TOKEN      => Term::ANSIColor::colored( $YELLOW, '-->' );
+    # }}}2
+
+    # attributes
+
+    # title    {{{2
+    has 'title' => (
+        is       => 'ro',
+        isa      => Types::Standard::Str,
+        required => $TRUE,
+        doc      => 'Menu title',
+    );
+
+    # prompt    {{{2
+    has 'prompt' => (
+        is       => 'ro',
+        isa      => Types::Standard::Str,
+        required => $TRUE,
+        doc      => 'Menu prompt',
+    );
+
+    # items, add_item, has_items    {{{2
+    has '_items_list' => (
+        is  => 'ro',
+        isa => Types::Standard::ArrayRef [
+            Types::Standard::InstanceOf ['Dn::MenuItem'],
+        ],
+        lazy        => $TRUE,
+        default     => sub { [] },
+        handles_via => 'Array',
+        handles     => {
+            items     => 'elements',
+            add_item  => 'push',
+            has_items => 'count',
+        },
+        doc => 'Array of values',
+    );
+
+    # default_key    {{{2
+    has 'default_key' => (
+        is      => 'lazy',
+        isa     => Types::Standard::Str,
+        default => q{},
+        doc     => 'Default hotkey selection (if user presses [Enter])',
+    );    # }}}2
+
+    # methods
+
+    # choose()    {{{2
+    #
+    # does:   main method in which user makes menu selection
+    # params: nil
+    # prints: feedback
+    # return: array
+    #         0 = action = {item,escape}
+    #         1 = value  = item string or null
+    method choose () {
+
+        # create hotkey hash
+        my $hotkey_index_ref = $self->_hotkey_index;
+        my %hotkey_index     = %{$hotkey_index_ref};
+
+        # display menu
+        $self->_display_menu;
+
+        # user makes selection
+        while ($TRUE) {
+
+            # get user key input
+            my $key = $self->_user_select;
+
+            # handle special cases
+            if ( $key eq $ESCAPE ) {
+                say $key or croak;
+                return ['escape'];
+            }
+            if ( $key eq $ENTER ) {
+                $key = $self->default_key;
+            }
+
+            # return a valid selection
+            if ( exists $hotkey_index{$key} ) {
+                say $key or croak;
+                return $hotkey_index{$key};
+            }
+
+            # repeat user selection if selection is invalid
+
+        }
+
+        return;
+    }
+
+    # _clear_screen()    {{{2
+    #
+    # does:   clear terminal screen
+    # params: nil
+    # prints: nil
+    # return: n/a, dies on failure
+    # source: method taken from perlfaq
+    #         (https://perldoc.perl.org/perlfaq8#How-do-I-clear-the-screen?)
+    method _clear_screen () {
+
+        # get clear control string for current terminal
+        my $terminal = Term::Cap->Tgetent( { OSPEED => 9600 } );
+        my $clear_screen = $terminal->Tputs('cl');
+
+        # use clear control string
+        print $clear_screen or croak;
+
+        return;
+    }
+
+    # _display_menu()    {{{2
+    #
+    # does:   print menu in terminal
+    # params: nil
+    # prints: nil, except error messages
+    # return: n/a, dies on failure
+    method _display_menu () {
+
+        # handle optional font formatting
+        my $line;
+
+        # clear screen
+        $self->_clear_screen;
+
+        # indent all lines by one space
+        my $indent = q{ } x 1;
+
+        # header material
+        my $title = $self->title;
+        $line = "\n$indent$title\n";
+        $line = Term::ANSIColor::colored( $BOLD, "$line" );
+        say $line or croak;
+
+        # items
+        my @items = $self->items;
+        for my $item (@items) {
+
+            # get item data
+            my $kind   = $item->kind;
+            my $value  = $item->value;
+            my $hotkey = $item->hotkey;
+
+            # add submenu signifier
+            if ( $kind eq 'submenu' ) {
+                $value .= " $TOKEN";
+            }
+
+            # print item
+            $line = "$indent$hotkey";
+            $line = Term::ANSIColor::colored( $BOLD_RED, "$line" );
+            $line .= ": $value";
+            say $line or croak;
+        }
+
+        # footer material
+        my $default = Term::ANSIColor::colored( $BOLD, $self->default_key );
+        say "\n${indent}Default option: $default"                    or croak;
+        say "\n$indent-- press a hotkey to select associated option" or croak;
+        say "$indent-- press [Enter] to select default option"       or croak;
+        say "$indent-- submenus are indicated by $TOKEN"             or croak;
+        say "$indent-- press [Esc] to abort"                         or croak;
+        my $prompt = $self->prompt;
+        print "\n$indent$prompt" or croak;
+
+        return;
+    }
+
+    # _hotkey_index()    {{{2
+    #
+    # does:   build and return hotkey hash
+    # params: nil
+    # prints: nil
+    # return: hashref
+    #         key   = hotkey
+    #         value = arrayref (0=action {submenu,item}, 1=value)
+    method _hotkey_index () {
+
+        my %index;
+        my @items = $self->items;
+        for my $item (@items) {
+            my $kind   = $item->kind;
+            my $value  = $item->value;
+            my $hotkey = $item->hotkey;
+            $index{$hotkey} = [ $kind, $value ];
+        }
+
+        return {%index};
+    }
+
+    # _user_select()    {{{2
+    #
+    # does:   user makes menu selection
+    # params: nil
+    # prints: nil, except error messages
+    # return: string (hotkey)
+    method _user_select () {
+
+        # get single character of input
+        # - source: https://stackoverflow.com/a/2685736
+        ReadMode('cbreak');
+        my $key = ReadKey(0);
+        ReadMode('normal');
+
+        # special cases
+        my $ord = ord $key;
+        if ( $ord == $ENTER_NUM )  { $key = $ENTER; }
+        if ( $ord == $ESCAPE_NUM ) { $key = $ESCAPE; }
+
+        return $key;
+    };    # }}}2
+
+}    # }}}1
+
+{
+
+    ## no critic (ProhibitMultiplePackages)
+    package Dn::LoadClipboard;
+    ## use critic
+
+    use Moo;    # {{{1
+    use strictures 2;
+    use namespace::clean -except => [ '_options_data', '_options_config' ];
+    use Carp qw(croak);
+    use Clipboard;
+    use Const::Fast;
+    use DateTime;
+    use DateTime::TimeZone;
+    use English qw(-no_match_vars);
+    use Function::Parameters;
+    use MooX::HandlesVia;
+    use MooX::Options protect_argv => 0;
+    use Path::Tiny;
+    use Types::Standard;
+
+    const my $TRUE  => 1;
+    const my $FALSE => 0;    # }}}1
+
+    # options
+
+    # temp_file (-t)    {{{1
+    option 'temp_file' => (
+        is       => 'ro',
+        short    => 't',
+        required => $TRUE,
+        format   => 's@',
+        default  => sub { [] },
+        doc      => 'File to hold clipboard value (assumed to be empty)',
+    );
+
+    method _temp_file () {
+        my @temp_files = @{ $self->temp_file };
+        if ( not @temp_files ) { croak "No temporary filepath provided\n"; }
+        if ( scalar @temp_files > 1 ) { warn "Ignoring extra arguments\n"; }
+        my $file_obj = Path::Tiny::path( $temp_files[0] );
+        return $file_obj;
+    }                      # }}}1
+
+    # attributes
+
+    # _previous_menu[s], _add_previous_menu    {{{1
+    has '_previous_menus_list' => (
+        is          => 'rw',
+        isa         => Types::Standard::ArrayRef [Types::Standard::Str],
+        lazy        => $TRUE,
+        default     => sub { [] },
+        handles_via => 'Array',
+        handles     => {
+            _previous_menus    => 'elements',
+            _add_previous_menu => 'push',
+            _previous_menu     => 'pop',
+        },
+        doc => 'Array of previously invoked menus',
+    );
+
+    # _[add,get,has]_menu    {{{1
+    has '_menu_list' => (
+        is  => 'rw',
+        isa => Types::Standard::HashRef [
+            Types::Standard::InstanceOf ['Dn::Menu'],
+        ],
+        lazy        => $TRUE,
+        default     => sub { {} },
+        handles_via => 'Hash',
+        handles     => {
+            _add_menu => 'set',      # name => Dn::Menu
+            _get_menu => 'get',      # name
+            _has_menu => 'exists',
+        },
+        doc => 'Hash of menu objects',
+    );    # }}}1
+
+    # methods
+
+    # main()    {{{1
+    #
+    # does:   main method
+    # params: nil
+    # prints: feedback
+    # return: n/a, dies on failure
+    method main () {
+
+        # load menus
+        $self->_load_menus;
+
+        # check menu integrity
+        $self->_check_menus;
+
+        # user makes selection
+        my $selection = $self->_select_from_menu('Main');
+        my $action    = $selection->[0];
+
+        # if user made selection
+        if ( $action eq 'item' ) {
+
+            # get user selection
+            my $value = $selection->[1];
+
+            # write to temp file
+            my $temp = $self->_temp_file;
+            $temp->spew($value)
+                or croak "Unable to write clipboard value: $OS_ERROR\n";
+        }
+
+        return;
+    }
+
+    # _check_menus()    {{{1
+    #
+    # does:   check validity of menus
+    # params: nil
+    # prints: feedback
+    # return: n/a, dies on failure
+    method _check_menus () {
+
+        # stub
+
+        return;
+    }
+
+    # _load_menus()    {{{1
+    #
+    # does:   load menu data
+    # params: nil
+    # prints: nil
+    # return: n/a, dies on failure
+    method _load_menus () {
+
+        # main menu    {{{2
+        my $main = Dn::Menu->new(
+            title       => 'Main menu',
+            prompt      => 'Select an option: ',
+            _items_list => [
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'david@nebauer.id.au',
+                    hotkey => 'i',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'David Nebauer',
+                    hotkey => 'n',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'david_nebauer',
+                    hotkey => 'u',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'submenu',
+                    value  => 'Date',
+                    hotkey => 'd',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'submenu',
+                    value  => 'Email',
+                    hotkey => 'e',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'submenu',
+                    value  => 'Address',
+                    hotkey => 'a',
+                ),
+            ],
+            default_key => 'i',
+        );
+        $self->_add_menu( Main => $main );
+
+        # address menu    {{{2
+        my $address = Dn::Menu->new(
+            title       => 'Address menu',
+            prompt      => 'Select an address: ',
+            _items_list => [
+                Dn::MenuItem->new(
+                    kind  => 'item',
+                    value => 'Shop 1, 4 Rowling Street, '
+                        . 'Parcel Locker 10108 96917, Casuarina NT 0810',
+                    hotkey => 'p',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => '3 McColl St, Unit 4, Fannie Bay NT 0820',
+                    hotkey => 'h',
+                ),
+                Dn::MenuItem->new(
+                    kind  => 'item',
+                    value => 'Level 1B, Casuarina Plaza, 258 Trower Road, '
+                        . 'Casuarina NT 0810',
+                    hotkey => 'c',
+                ),
+                Dn::MenuItem->new(
+                    kind  => 'item',
+                    value => 'Central Registry, Royal Darwin Hospital, '
+                        . '105 Rocklands Drive, Tiwi NT 0810',
+                    hotkey => 'r',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'PO Box 41326, Casuarina NT 0811',
+                    hotkey => 'm',
+                ),
+            ],
+            default_key => 'p',
+        );
+        $self->_add_menu( Address => $address );
+
+        # date menu    {{{2
+        my $time_zone = DateTime::TimeZone->new( name => 'local' )->name();
+        my $today     = DateTime->now( time_zone => $time_zone );
+        my $iso_8601  = $today->ymd;
+        my $full      = $today->strftime('%d %B %Y');
+        $full =~ s/\A0//xsm;
+        my $full_nbsp = $full =~ s/\s/ /grxsm;
+        my $rfc_email = $today->strftime('%a, %d %b %Y %T %z');
+        my $date      = Dn::Menu->new(
+            title       => 'Date menu',
+            prompt      => 'Select a date: ',
+            _items_list => [
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => $full,
+                    hotkey => 'f',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => $full_nbsp,
+                    hotkey => 'n',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => $iso_8601,
+                    hotkey => 'i',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => $rfc_email,
+                    hotkey => 'r',
+                ),
+            ],
+            default_key => 'f',
+        );
+        $self->_add_menu( Date => $date );
+
+        # email menu    {{{2
+        my $email = Dn::Menu->new(
+            title       => 'Email address menu',
+            prompt      => 'Select an email address: ',
+            _items_list => [
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'david@nebauer.id.au',
+                    hotkey => 'i',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'david.nebauer@nt.gov.au',
+                    hotkey => 'w',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'davidnebauer@gmail.com',
+                    hotkey => 'g',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'davidnebauer3@bigpond.com',
+                    hotkey => 'b',
+                ),
+                Dn::MenuItem->new(
+                    kind   => 'item',
+                    value  => 'davidnebauer@hotkey.net.au',
+                    hotkey => 'h',
+                ),
+            ],
+            default_key => 'i',
+        );
+        $self->_add_menu( Email => $email );    # }}}2
+
+        return;
+    }
+
+    # _select_from_menu($name)    {{{1
+    #
+    # does:   select item from menu
+    # params: $name - menu name
+    # prints: nil, except error messages
+    # return: arrayref
+    #         0 = action = {item,escape}
+    #         1 = value  = item string or null
+    # notes:  function may recurse if user selects a submenu
+    method _select_from_menu ($name) {
+
+        # select from menu
+        my $menu = $self->_get_menu($name);
+        my $selection = $menu->choose;
+
+        # process selection
+        my $action = $selection->[0];
+
+        # - escape if user aborted
+        if ( $action eq 'escape' ) {
+            return ['escape'];
+        }
+
+        # - recurse if submenu selected
+        if ( $action eq 'submenu' ) {
+            my $submenu = $selection->[1];
+            my $submenu_selection = $self->_select_from_menu($submenu);
+            my $submenu_action = $submenu_selection->[0];
+
+            # if user aborted submenu, redo current menu
+            if ( $submenu_action eq 'escape' ) {
+                return $self->_select_from_menu($name);
+            }
+
+            # if user selected submenu item, pass to caller
+            if ( $submenu_action eq 'item' ) {
+                return $submenu_selection;
+            }
+        }
+
+        # - return selection if user selected a menu item
+        if ( $action eq 'item' ) {
+            return $selection;
+        }
+
+        return;
+    };    # }}}1
+
+}
+
+my $p = Dn::LoadClipboard->new_with_options->main;
+
+1;
+
+# POD    {{{1
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+i3-my-load-clipboard-engine - load selected value into system clipboard
+
+=head1 USAGE
+
+B<i3-my-load-clipboard-engine> B<-t> I<filepath>
+
+B<i3-my-load-clipboard-engine -h>
+
+=head1 REQUIRED ARGUMENTS
+
+Nil.
+
+=head1 REQUIRED OPTIONS
+
+=over
+
+=item B<-t>  B<--temp_file>
+
+Path to a temporary file to which is written the selected copy value. It is
+intended that this script's wrapper script will capture that value and write it
+to the system clipboard. The file is assumed to be empty, i.e., created by a
+process such as the shell command C<mktemp>.
+
+Required. No default value.
+
+=back
+
+=head1 OPTIONS
+
+=item B<-h>
+
+Display help and exit.
+
+=back
+
+=head1 DESCRIPTION
+
+The user selects from menus of pre-defined options. The selected option is
+loaded into the system clipboard.
+
+A submenu is indicated by an option with an appended '-->'. Selecting such an
+option opens a submenu.
+
+Menu options have a one character prefix (a hotkey) to enable quick option
+selection.
+
+=head2 Invoking
+
+This script is intended to be invoked by a wrapper script called
+S<<F<i3-my-load-clipboard>>>. This is to overcome limitations in i3wm which
+prevent this script from:
+
+=over
+
+=item *
+
+Being invoked directly from a binding
+
+=item *
+
+Writing successfully to the system clipboard.
+
+=back
+
+To overcome the second limitation this script writes the clipboard value to a
+temporary file which the wrapper script then reads and sends to the system
+clipboard.
+
+=head2 Current menu items
+
+=over
+
+=item i: david@nebauer.id.au
+
+=item n: David Nebauer
+
+=item u: david_nebauer
+
+=item d: Date -->
+
+=over
+
+=item f: current date (format = 'd MMMM YYYY')
+
+=item n: current date (format = as previous item but with no-break spaces)
+
+=item i: current date (format = ISO 8601, i.e., 'yyyy-mm-dd')
+
+=item r: current date (format = email date, i.e., RFC 2822)
+
+=back
+
+=item e: Email -->
+
+=over
+
+=item i: david@nebauer.id.au
+
+=item w: david.nebauer@nt.gov.au
+
+=item g: davidnebauer@gmail.com
+
+=item b: davidnebauer3@bigpond.com
+
+=item h: davidnebauer@hotkey.net.au
+
+=back
+
+=item a: Address -->
+
+=over
+
+=item p: Shop 1, 4 Rowling Street, Parcel Locker 10108 96917, Casuarina NT 0810
+
+=item h: 3 McColl St, Unit 4, Fannie Bay NT 0820
+
+=item c: Level 1B, Casuarina Plaza, 258 Trower Road, Casuarina NT 0810
+
+=item r: Central Registry, Royal Darwin Hospital, 105 Rocklands Drive, Tiwi NT 0810
+
+=item m: PO Box 41326, Casuarina NT 0811
+
+=back
+
+=back
+
+=head1 DIAGNOSTICS
+
+No diagnostic messages are displayed during routine script use.
+
+=head1 DEPENDENCIES
+
+=head2 Perl modules
+
+Carp, Clipboard, Const::Fast, DateTime, DateTime::TimeZone, English,
+Function::Parameters, Moo, MooX::HandlesVia, MooX::Options, namespace::clean,
+Path::Tiny, strictures, Term::ANSIColor, Term::Cap, Term::ReadKey,
+Types::Standard, version.
+
+=head1 CONFIGURATION
+
+=head2 i3wm
+
+In the i3 window manager the wrapper script can be invoked from a binding that
+can be set in the F<config> file. For example, to launch it with the F2 key use
+the following configuration command:
+
+  set $loader_launcher ~/.local/bin/i3-my-load-clipboard
+  bindsym F2 exec --no-startup-id $loader_launcher
+
+The wrapper script launches this script in an alacritty instance. To ensure the
+terminal window is free-floating add a line like this to the i3wm F<config>
+file:
+
+  for_window [class="Clipboard_Loader" instance="Clipboard_Loader"] \
+              floating enable, resize set 1000 600
+
+Adjust the 'class' and 'instance' values as appropriate.
+
+If the picom compositor is being used add a line like the following to its
+F<picon.conf' file to ensure the alacritty terminal is opaque:
+
+  opacity-rule = [ "100:class_g *?= 'Clipboard_Loader'" ];
+
+Adjust the 'class' value as appropriate.
+
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly the
+error code is that given by the system.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs to the author.
+
+=head1 AUTHOR
+
+David Nebauer (david at nebauer dot org)
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (c) 2022 David Nebauer (david at nebauer dot org)
+
+This script is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut
+# vim:foldmethod=marker:
