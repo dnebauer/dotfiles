@@ -78,9 +78,10 @@ Selecting such an option opens a submenu.
 Menu options have a one character prefix (a hotkey) to
 enable quick option selection.
 
-The menu options are hard-coded into this script and include
-email address, postal addresses, and the current date in
-multiple formats.
+The menu options are defined in configuration file:
+'~/.config/i3/i3-my-load-clipboard-data.json'.
+See the man page for details of how the configuration file
+is structured.
 
 Usage: ${self}
        ${self} -h

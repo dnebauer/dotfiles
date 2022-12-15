@@ -110,6 +110,8 @@ Numbered list:
 
 .\" String: Command name
 .ds self i3-my-load-clipboard
+.ds engine i3-my-load-clipboard-engine
+.ds conf i3-my-load-clipboard-data.json
 
 .\" -----------------------------------------------------------------
 .\" MANPAGE CONTENT
@@ -121,6 +123,7 @@ Numbered list:
 .SH "SYNOPSIS"
 .B "\*[self]"
 .SH "DESCRIPTION"
+.SS "Usage"
 The user selects from menus of pre-defined options. The selected option is
 loaded into the system clipboard.
 .PP
@@ -130,58 +133,138 @@ such an option opens a submenu.
 Menu options have a one character prefix (a hotkey) to enable quick option
 selection.
 .PP
-The current menu options are:
+The script executes in an alacritty terminal.
+.SS "Design"
+The i3 window manager has two limitations that affected the design of this
+script:
+.IP \[bu] 2
+It is not possible to define a binding in the configuration file that executes
+the script directly in a terminal
+.IP \[bu]
+When the script executes in a terminal it is not possible to directly write to
+the system clipboard.
+.PP
+Because of these limitations it was necessary to use two scripts. The primary
+script,
+.IR "\*[self]" ","
+is able to be used in an i3wm binding. When run it invokes a secondary script
+called
+.I "\*[engine]"
+in an alacritty terminal. The secondary script handles user selection of an
+option and writes the selected value to a temporary file. When control passes
+back to the primary script it reads the selected value from the temporary file
+and writes it to the system clipboard.
+.SH "CONFIGURATION"
+.SS "Menu contents"
+The menu content is defined in configuration file
+.IR "\*[conf]" "."
+The general structure of the menu is:
+.PP
 .RS 4
-i: david@nebauer.id.au
-.br
-n: David Nebauer
-.br
-u: david_nebauer
-.br
-d: Date -->
-.br
+[
 .RE
 .RS 8
-f: current date (format = 'd MMMM YYYY')
+{"a": "Item 1"},
 .br
-n: current date (format = as previous item but with no-break spaces)
+{"b": "Item 2"},
 .br
-i: current date (format = ISO 8601, i.e., 'yyyy-mm-dd')
-.br
-r: current date (format = email date, i.e., RFC 2822)
-.br
+{"Submenu;c": [
 .RE
-.RS 4
-e: Email -->
+.RS 12
+{"p": "Submenu item 1"},
 .br
+{"r": "Submenu item 2"}
 .RE
 .RS 8
-i: david@nebauer.id.au
+]},
 .br
-w: david.nebauer@nt.gov.au
+{"c": "Item 3"},
 .br
-g: davidnebauer@gmail.com
-.br
-b: davidnebauer3@bigpond.com
-.br
-h: davidnebauer@hotkey.net.au
-.br
+{"d": "Item 4"}
 .RE
 .RS 4
-a: Address -->
-.br
+]
 .RE
-.RS 8
-p: Shop 1, 4 Rowling Street, Parcel Locker 10108 96917, Casuarina NT 0810
+.PP
+While the structure is largely self-explanatory, its major features are:
+.PP
+.IP \[bu] 2
+The data is valid JSON.
+.IP \[bu]
+The outer data structure is an array.
+.IP \[bu]
+Each menu item is a single name-value object. (In perl a JSON object is known
+as a hash. In other languages it is an associative array.)
+.IP \[bu]
+The name (or key) for each menu item is a single character 'hotkey'. This
+hotkey must be unique within each (sub)menu.
+.IP \[bu]
+A submenu has a name (or key) composed of the menu name and hotkey joined by a
+semicolon. The menu name must be unique.
+.IP \[bu]
+A submenu has a JSON array as its value. This array has the same structure as
+the outer array.
+.IP \[bu]
+The name of the outer menu cannot be defined in the configuration file. It
+defaults to 'Main'.
+.IP \[bu]
+There are special tokens which signify the current date in a particular format.
+.IP \[bu]
+The menu item value must contain only the token string with no additional
+characters. See below for available date tokens.
+.PP
+The available date tokens are:
+.TP
+.I "%current_date_full%"
+Example: 1 December 2022
+.TP
+.I "%current_date_full_nbsp%"
+As for \(aq%current_date_full%\(aq except that spaces are replaced with
+non-breaking spaces
+.TP
+.I "%current_date_iso%"
+Example: 2022-12-01
+.TP
+.I "%current_date_rfc%"
+Example: Thu,  1 Dec 2022 18:51:37 +0930
 .br
-h: 3 McColl St, Unit 4, Fannie Bay NT 0820
+The system time zone is used and day numbers less than 10 have a leading space.
+.SS "i3 window manager"
+In the i3 window manager the wrapper script can be invoked from a binding that
+can be set in the
+.I "config"
+file. For example, to launch it with the F2 key use the following configuration
+command:
+.PP
+.RS 4
+set $loader_launcher ~/.local/bin/i3-my-load-clipboard
 .br
-c: Level 1B, Casuarina Plaza, 258 Trower Road, Casuarina NT 0810
-.br
-r: Central Registry, Royal Darwin Hospital, 105 Rocklands Drive, Tiwi NT 0810
-.br
-m: PO Box 41326, Casuarina NT 0811
+bindsym F2 exec --no-startup-id $loader_launcher
 .RE
+.PP
+The wrapper script launches this script in an alacritty instance. To ensure the
+terminal window is free-floating add a line like this to the i3wm 
+.I "config"
+file:
+.PP
+.RS 4
+for_window [class="Clipboard_Loader" instance="Clipboard_Loader"] \\
+.RE
+.RS 16
+floating enable, resize set 1000 600
+.RE
+.PP
+Adjust the \(aqclass\(aq and \(aqinstance\(aq values as appropriate.
+.PP
+If the picom compositor is being used add a line like the following to its
+.I "picom.conf"
+file to ensure the alacritty terminal is opaque:
+.PP
+.RS 4
+opacity-rule = [ "100:class_g *?= 'Clipboard_Loader'" ];
+.RE
+.PP
+Adjust the \(aqclass\(aq value as appropriate.
 .SH "OPTIONS"
 .TP
 .B "\-x   \-\-debug"
@@ -192,6 +275,23 @@ Print script lines as they are read. Optional.
 .TP
 .B "\-h  \-\-help"
 Display basic help and exit. Optional.
+.SH "FILES"
+.B ~/.local/bin/\*[self]
+.IP
+The primary script used to select a value to write to the system clipboard.
+.PP
+.B ~/.local/libexec/\*[engine]
+.IP
+A secondary script called by the primary script and which runs in an alacritty
+terminal.
+.PP
+.B ~/.config/i3/\*[conf]
+.IP
+Menu configuration file.
+.SH "SEE ALSO"
+.BR "alacritty " "(1),"
+.BR "i3 " "(1),"
+.BR "picom " "(1)."
 .SH "AUTHOR"
 \*[self] was written by David Nebauer (david at nebauer dot org).
 .PP
