@@ -85,3 +85,8 @@ image/x-xpixmap; gwenview "%s"; test=test -n "$DISPLAY"
 text/html; qutebrowser %s && sleep 5;      test=test -n "$DISPLAY"; nametemplate=%s.html; needsterminal
 text/html; w3m -I %{charset} -T text/html; nametemplate=%s.html; copiousoutput
 text/html; lynx -dump %s;                  nametemplate=%s.html; copiousoutput
+
+# Email
+
+# based on StackExchange answer https://unix.stackexchange.com/a/96665
+message/rfc822; formail -b < %s > %s.mbox && neomutt -Rf '%s.mbox'; needsterminal

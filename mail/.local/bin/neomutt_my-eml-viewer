@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+
+# File: neomutt_my-eml-viewer
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: open eml file in new neomutt instance
+# Created: 2023-01-22
+# Credit: based on StackExchange answer https://unix.stackexchange.com/a/96665
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename $0)"
+required_system_tools=(
+    basename    logger
+    cat         mktemp
+    formail     neomutt
+    getopt      realpath
+)
+# required tools specified by full path
+required_local_tools=()
+eml=''
+mbox=''
+# }}}1
+
+# PROCEDURES
+
+# abort()    {{{1
+#   intent: display error message and exit script
+#   params: 1 - error message
+#   prints: error message
+#   return: n/a, aborts scipts
+abort () {
+    local msg
+    msg="$1"
+    echo "$self: $msg" 1>&2
+    logger --priority "user.err" --tag "$self" "$msg"
+    exit 1
+}
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+checkPrereqs () {
+    local missing tool
+    missing=()
+    # these tools can be found on the base system path
+    for tool in "${required_system_tools[@]}" ; do
+        command -v "$tool" &>/dev/null || missing+=("$tool")
+    done
+    # these tools are specified by absolute path
+    for tool in "${required_local_tools[@]}" ; do
+        [[ -x "$tool" ]] || missing+=("$tool")
+    done
+    if [[ ${#missing[@]} -ne 0 ]] ; then
+        local msg ; msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+        echo "$msg" 1>&2
+        # cannot use 'log' function here:
+        # - options have not yet been processed
+        logger --priority "user.err" --tag "$self" "$msg"
+        exit 1
+    fi
+    unset required_system_tools required_local_tools
+}
+# displayUsage()    {{{1
+#   intent: display usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage () {
+cat << _USAGE
+${self}: open eml file in a new neomutt instance
+
+Neomutt is unable to directly open an eml (message/rfc822)
+file. If the eml file is converted into a single-file
+mailbox, however, neomutt is able to open the mailbox
+directly. The procmail utility 'formail' is used to perform
+the conversion. The created mailbox file is deleted when the
+neomutt instance exits.
+
+Usage: $self [-d] [-v] eml
+       $self -h
+
+Options: eml = path to eml file (relative or absolute)
+          -d = debug (print simple command expansions)
+          -v = verbose (print each line as it is read)
+_USAGE
+}
+# joinBy($delim, @items)    {{{1
+#   intent: join all items using delimiter
+#   params: delim - delimiter
+#           items - items to be joined
+#   prints: string containing joined items
+#   return: nil
+joinBy () {
+    local delimiter first_item
+    delimiter="${1:-}"
+    shift
+    first_item="${1:-}"
+    shift
+    printf %b%s "$first_item" "${@/#/$delimiter}"
+}
+# processOptions([@options])    {{{1
+#   intent: process all command line options
+#   params: @options - all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable @ARGS contains
+#           remaining command line args (after options removed)
+processOptions () {
+    # read the command line options
+    local OPTIONS="$(                     \
+        getopt                            \
+            --options hvd                 \
+            --long    help,verbose,debug  \
+            --name    "${BASH_SOURCE[0]}" \
+            -- "${@}"                     \
+    )"
+    [[ ${?} -eq 0 ]] || {
+        echo 'Invalid command line options' 1>&2
+        exit 1
+    }
+    eval set -- "${OPTIONS}"
+    while true ; do
+        case "${1}" in
+        -h | --help    ) displayUsage   ; exit 0  ;;
+        -v | --verbose ) set -o verbose ; shift 1 ;;
+        -d | --debug   ) set -o xtrace  ; shift 1 ;;
+        --             ) shift ; break ;;
+        *              ) break ;;
+        esac
+    done
+    ARGS=("${@}")  # remaining arguments
+}
+# }}}1
+
+# MAIN
+
+# check for required tools    {{{1
+checkPrereqs
+
+# process command line options    {{{1
+# - leaves ${ARGS[@]} holding positional arguments
+processOptions "${@}"
+
+# check arguments    {{{1
+# - require eml path
+[[ $# -eq 0 ]] && abort "No eml filepath provided"
+[[ $# -gt 1 ]] && abort "Expected 1 argument, got $#"
+eml="$(realpath --logical --canonicalize-missing "$1")"
+[[ -f "$eml" ]] || abort "cannot locate file: $eml"
+
+# create mailbox file    {{{1
+eml_base="$(basename --suffix=".eml" "$eml")"
+mbox="$(mktemp --tmpdir "${eml_base}_XXX.mbox")"
+unset eml_base
+[[ $? -eq 0 ]] || abort "unable to create temp file: $mbox"
+trap "[[ -f \"$mbox\" ]] && rm -rf \"$mbox\"" EXIT
+formail -b < $eml > $mbox
+unset eml
+
+# open mailbox file in neomutt    {{{1
+neomutt -Rf $mbox
+# }}}1
+
+# vim:foldmethod=marker:
