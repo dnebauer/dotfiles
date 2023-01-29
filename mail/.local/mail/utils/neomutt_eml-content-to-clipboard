@@ -1,0 +1,164 @@
+#! /usr/bin/env python3
+# pylint: disable=invalid-name
+
+# module docstring    {{{1
+""" script to send email content to clipboard
+
+This script reads an email from stdin, extracts the
+content/payload as plain text, and sends it to the system
+clipboard.
+
+Copyright: David Nebauer, 2023-01-29
+License: GPL-3+
+"""
+
+# import    {{{1
+
+import sys
+import logging as log
+import textwrap
+import argparse
+import email
+import html2text
+import xerox  # type: ignore
+
+
+class ContentToClipboard():    # {{{1
+    # class docstring    {{{2
+    """ send content to clipboard as plain text
+
+    assumes:
+    * email is supplied via stdin
+
+    usage:
+
+    sendclip = ContentToClipboard()
+    sendclip.process_args()
+    sendclip.create_email_object()
+    sendclip.extract_content()
+    sendclip.send_to_clipboard()
+    """
+
+    def __init__(self):    # {{{2
+        """ initialise variables """
+        # configure logging
+        log.basicConfig(format='%(message)s')
+
+        # email object
+        self._email = None
+
+        # email content/payload
+        self._content = None
+
+    @staticmethod
+    def _abort(msg):    # {{{2
+        """ display error and exit """
+        log.error(msg)
+        sys.exit(msg)
+
+    @staticmethod
+    def process_args():    # {{{2
+        """ print help if requested """
+        description = textwrap.dedent('''\
+        script to send email content to clipboard as plain text
+
+        This script reads an email from stdin, extracts the content
+        as plaint text, and sends it to the system clipboard.
+        ''')
+        argparse.ArgumentParser(formatter_class=argparse.
+                                RawDescriptionHelpFormatter,
+                                description=description
+                                ).parse_args()
+
+    def create_email_object(self):    # {{{2
+        """ create email object from stdin """
+        # save stdin to string
+        if sys.stdin.isatty():
+            self._abort('No data has been piped into script')
+        lines = sys.stdin.readlines()
+        data = ''.join(lines)
+        # create email object
+        self._email = email.message_from_string(data)
+
+    def extract_content(self):    # {{{2
+        """ extract email content as plain text """
+        text = self._pullout(self._email)
+        text = text.strip()
+        self._content = text
+
+    def _pullout(self, msg):    # {{{2
+        """ pull out email content
+        * handles multipart and nested multipart messages
+
+        args:
+        * msg email.Message()
+
+        return:
+        * all text/html content from all parts (as plaintext string)
+        """
+        text = ''
+        # first handle simplest case - a single-part message
+        if not msg.is_multipart():
+            # ignore attachments
+            if msg.get_filename():
+                return text
+            content_type = msg.get_content_type()
+            # in following commands note that 'get_payload' can
+            # return bytes objects which can confuse 'html2text'
+            # and may also cause problems when contenated with
+            # strings
+            if content_type == "text/plain":
+                payload = msg.get_payload(decode=True)
+                if isinstance(payload, bytes):
+                    payload = payload.decode()
+                text += payload
+            elif content_type == "text/html":
+                payload = msg.get_payload(decode=True)
+                if isinstance(payload, bytes):
+                    payload = payload.decode()
+                text += html2text.html2text(payload)
+            else:
+                text += 'Skipping part that is neither plaintext nor html\n'
+            return text
+        # now handle multipart messages
+        # - iterate over message parts and recurse
+        for part in msg.walk():
+            payload = part.get_payload(decode=True)
+            t = self._pullout(payload)
+            text += t
+        return text
+
+    def send_to_clipboard(self):    # {{{2
+        """ send extracted plaintext content to clipboard
+        use xerox.copy():
+        * homepage is https://github.com/adityarathod/xerox
+        * packaged to install with pip (see https://pypi.org/project/xerox/)
+        before using xerox.copy() tried:
+        * pyperclip.copy(content)
+        * - failed silently
+        * tkinter.Tk.clipboard_append(content)
+        * - if used 'mainloop' it worked but that showed the main window,
+        *   which halted execution until the user dismissed it
+        * - a workaround was supposedly to use 'update' instead of
+        *   'mainloop', but that failed silently
+        * pandas.DataFrame([content]).to_clipboard(index=False, header=False)
+        * - works successfully, but wraps the content in double quotes
+        * - could not find a workaround to prevent this
+        """
+        xerox.copy(self._content)
+# }}}1
+
+
+def main():
+    """ script execution starts here """
+    sendclip = ContentToClipboard()
+    sendclip.process_args()
+    sendclip.create_email_object()
+    sendclip.extract_content()
+    sendclip.send_to_clipboard()
+
+
+if __name__ == '__main__':
+    main()
+
+# vim:fdm=marker:

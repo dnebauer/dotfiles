@@ -78,6 +78,7 @@ set my_utils = $HOME/.local/mail/utils
 set my_fetch_script = $my_utils/my-get-mail
 set my_nvim_args = $my_utils/neomutt_nvim-args.vim
 set my_print_pdf = $my_utils/neomutt_print-to-pdf
+set my_send_clipboard = $my_utils/neomutt_eml-content-to-clipboard
 set my_trim_quotes = $my_utils/neomutt_trim-quotes
 set my_signature = $my_cfgdir_d/signature
 set my_download_dir = $HOME/Downloads
@@ -789,10 +790,16 @@ macro index,pager S "\
 <pipe-message>\
 ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
 <enter-command>echo 'Attachments saved to $my_download_dir'<enter>\
-"    'Save all non-text attachments using ripmime'
+"    'save all non-text attachments using ripmime'
 # [ipa] p : print message (default binding)
 bind index,pager p print-message
 bind attach p print-entry
+# [ip] C : copy content to clipboard
+# no default [ip] C binding
+macro index,pager C "\
+<pipe-message> $my_send_clipboard<enter>\
+<enter-command>echo 'Copied content to system clipboard'<enter>\
+"    'copy content to clipboard as plaintext'
 # }}}1
 
 
