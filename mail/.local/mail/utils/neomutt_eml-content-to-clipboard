@@ -97,16 +97,26 @@ class ContentToClipboard():    # {{{1
         * all text/html content from all parts (as plaintext string)
         """
         text = ''
-        # first handle simplest case - a single-part message
-        if not msg.is_multipart():
-            # ignore attachments
+        # 1. handle part that is an email object
+        if isinstance(msg, (email.message.EmailMessage,
+                            email.message.Message)):
+            # 1.a. handle part that is an email object with multiple parts
+            if msg.is_multipart():
+                # - iterate over message parts and recurse
+                for part in msg.walk():
+                    payload = part.get_payload(decode=True)
+                    t = self._pullout(payload)
+                    text += t
+                return text
+            # 1.b. handle part that is an email object with 1 part
+            #      - ignore attachments
             if msg.get_filename():
                 return text
             content_type = msg.get_content_type()
-            # in following commands note that 'get_payload' can
-            # return bytes objects which can confuse 'html2text'
-            # and may also cause problems when contenated with
-            # strings
+            # - in following commands note that 'get_payload' can
+            #   return bytes objects which can confuse 'html2text'
+            #   and may also cause problems when contenated with
+            #   strings
             if content_type == "text/plain":
                 payload = msg.get_payload(decode=True)
                 if isinstance(payload, bytes):
@@ -120,13 +130,19 @@ class ContentToClipboard():    # {{{1
             else:
                 text += 'Skipping part that is neither plaintext nor html\n'
             return text
-        # now handle multipart messages
-        # - iterate over message parts and recurse
-        for part in msg.walk():
-            payload = part.get_payload(decode=True)
-            t = self._pullout(payload)
-            text += t
-        return text
+        # 2. handle part that is not an email object
+        #    - so far can handle 'bytes' and 'None' types
+        if isinstance(msg, bytes):
+            try:
+                payload = msg.decode()
+                text += payload
+            except ValueError as err:
+                errmsg = getattr(err, 'message', str(err))
+                print(f'Unable to decode bytes part: {errmsg}')
+            return text
+        if msg is None:
+            return text
+        raise ValueError(f"Script can't handle {str(type(msg))} part")
 
     def send_to_clipboard(self):    # {{{2
         """ send extracted plaintext content to clipboard
