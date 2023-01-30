@@ -168,7 +168,7 @@ mbox="$(mktemp --tmpdir "${eml_base}_XXX.mbox")"
 unset eml_base
 [[ $? -eq 0 ]] || abort "unable to create temp file: $mbox"
 trap "[[ -f \"$mbox\" ]] && rm -rf \"$mbox\"" EXIT
-formail -b < $eml > $mbox
+formail -b < "$eml" > "$mbox"
 unset eml
 
 # open mailbox file in neomutt    {{{1
