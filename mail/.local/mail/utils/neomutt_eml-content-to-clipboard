@@ -73,6 +73,8 @@ class ContentToClipboard():    # {{{1
     def create_email_object(self):    # {{{2
         """ create email object from stdin """
         # save stdin to string
+        # - ignore UnicodeDecodeErrors from sys.stdin.readlines
+        sys.stdin.reconfigure(errors='ignore')
         if sys.stdin.isatty():
             self._abort('No data has been piped into script')
         lines = sys.stdin.readlines()
