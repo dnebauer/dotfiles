@@ -370,7 +370,7 @@ bind index zA collapse-all
 
 # Tagging    {{{1
 
-# [g,p] t : tag entry/message (default bindings)
+# [gp] t : tag entry/message (default bindings)
 bind generic t tag-entry
 bind pager t tag-message
 # [i] T : tag messages matching a pattern (default binding)
