@@ -705,6 +705,7 @@ bind attach u undelete-entry
 macro index,pager G "\
 <shell-escape>$my_fetch_script<enter>\
 <change-vfolder>Inbox<enter>\
+<sync-mailbox><check-stats>\
 "    'run offlineimap to fetch mail'
 # }}}1
 
