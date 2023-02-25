@@ -977,8 +977,8 @@ macro compose Y "\
 set pager_index_lines = 8
     # show mini-index
     # warning: neither pager- nor index-bound macros work in mini-pager
-set quit = ask-yes
-    # don't quit accidentally
+set quit
+    # do not confirm if user quits
 set timeout = 0
     # wait indefinitely for user input
 set nowait_key
