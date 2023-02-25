@@ -370,14 +370,18 @@ bind index zA collapse-all
 
 # Tagging    {{{1
 
-# [g] t : tag entry (default bindings)
+# [g,p] t : tag entry/message (default bindings)
 bind generic t tag-entry
+bind pager t tag-message
 # [i] T : tag messages matching a pattern (default binding)
 bind index T tag-pattern
-# [i] <Insert> : tag current message
-# - no default [i] <Insert> binding
+# [i,p] <Insert> : tag current message
+# - no default [i,p] <Insert> binding
 macro index <Insert> "\
-<enter-command>push t<enter>\
+<tag-entry>\
+"    'select/tag current message'
+macro pager <Insert> "\
+<tag-message>\
 "    'select/tag current message'
 # [i] <Ctrl>+a : tag all messages
 # - no default [i] ^A binding
