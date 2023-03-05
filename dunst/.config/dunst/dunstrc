@@ -38,7 +38,7 @@
     width = 400
 
     # The maximum height of a single notification.
-    height = 5
+    height = 400
 
     # The origin of the notification window on the screen. It can then be moved
     # with offset. Origin can be one of: top-left, top-center, top-right,
@@ -55,6 +55,15 @@
     #     offset = 10x300     # a margin of 10 pixels from the right
     #                         # and 300 pixels from the top
     offset = 30x20
+
+    # The number of notifications that can appear at one time. When this limit
+    # is reached any additional notifications will be queued and displayed when
+    # the currently displayed ones either time out or are manually dismissed.
+    # The value 0 means no limit. If indicate_hidden is true, then the
+    # specified limit is reduced by 1 and the last notification is a message
+    # informing how many hidden notifications are waiting to be displayed. See
+    # the indicate_hidden entry for more information. Default: 0.
+    notification_limit = 5
 
     # Show how many messages are currently hidden (because of geometry).
     indicate_hidden = yes
