@@ -433,6 +433,8 @@ macro index yd "\
 <tag-prefix><modify-labels>+development<enter>\
 <enter-command>set resolve=\$my_resolve<enter>\
 <enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: development'
 macro pager yd "\
 <enter-command>echo 'Adding [development] label...'<enter>\
@@ -447,6 +449,8 @@ macro index yf "\
 <tag-prefix><modify-labels>+financial<enter>\
 <enter-command>set resolve=\$my_resolve<enter>\
 <enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: financial'
 macro pager yf "\
 <enter-command>echo 'Adding [financial] label...'<enter>\
@@ -461,6 +465,8 @@ macro index yl "\
 <tag-prefix><modify-labels>+later<enter>\
 <enter-command>set resolve=\$my_resolve<enter>\
 <enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: later'
 macro pager yl "\
 <enter-command>echo 'Adding [later] label...'<enter>\
@@ -475,6 +481,8 @@ macro index yo "\
 <tag-prefix><modify-labels>+order<enter>\
 <enter-command>set resolve=\$my_resolve<enter>\
 <enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: order'
 macro pager yo "\
 <enter-command>echo 'Adding [order] label...'<enter>\
@@ -489,6 +497,8 @@ macro index yp "\
 <tag-prefix><modify-labels>+personal<enter>\
 <enter-command>set resolve=\$my_resolve<enter>\
 <enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: personal'
 macro pager yp "\
 <enter-command>echo 'Adding [personal] label...'<enter>\
@@ -503,6 +513,8 @@ macro index yu "\
 <tag-prefix><modify-labels>+union<enter>\
 <enter-command>set resolve=\$my_resolve<enter>\
 <enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: union'
 macro pager yu "\
 <enter-command>echo 'Adding [union] label...'<enter>\
@@ -517,6 +529,8 @@ macro index yv "\
 <tag-prefix><modify-labels>+vault<enter>\
 <enter-command>set resolve=\$my_resolve<enter>\
 <enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: vault'
 macro pager yv "\
 <enter-command>echo 'Adding [vault] label...'<enter>\
