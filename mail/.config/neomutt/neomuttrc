@@ -438,7 +438,13 @@ macro index yd "\
 "    'add label: development'
 macro pager yd "\
 <enter-command>echo 'Adding [development] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
 <modify-labels>+development<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: development'
 # [ip] yf : add [financial] label
 # - no default [ip] y bindings
@@ -454,7 +460,13 @@ macro index yf "\
 "    'add label: financial'
 macro pager yf "\
 <enter-command>echo 'Adding [financial] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
 <modify-labels>+financial<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: financial'
 # [ip] yl : add [later] label
 # - no default [ip] y bindings
@@ -470,7 +482,13 @@ macro index yl "\
 "    'add label: later'
 macro pager yl "\
 <enter-command>echo 'Adding [later] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
 <modify-labels>+later<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: later'
 # [ip] yo : add [order] label
 # - no default [ip] y bindings
@@ -486,7 +504,13 @@ macro index yo "\
 "    'add label: order'
 macro pager yo "\
 <enter-command>echo 'Adding [order] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
 <modify-labels>+order<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: order'
 # [ip] yp : add [personal] label
 # - no default [ip] y bindings
@@ -502,7 +526,13 @@ macro index yp "\
 "    'add label: personal'
 macro pager yp "\
 <enter-command>echo 'Adding [personal] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
 <modify-labels>+personal<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: personal'
 # [ip] yu : add [union] label
 # - no default [ip] y bindings
@@ -518,7 +548,13 @@ macro index yu "\
 "    'add label: union'
 macro pager yu "\
 <enter-command>echo 'Adding [union] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
 <modify-labels>+union<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: union'
 # [ip] yv : add [vault] label
 # - no default [ip] y bindings
@@ -534,7 +570,13 @@ macro index yv "\
 "    'add label: vault'
 macro pager yv "\
 <enter-command>echo 'Adding [vault] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
 <modify-labels>+vault<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
 "    'add label: vault'
 
 # Move    {{{1
