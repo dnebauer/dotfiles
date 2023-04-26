@@ -578,6 +578,28 @@ macro pager yv "\
 <sync-mailbox>\
 <check-stats>\
 "    'add label: vault'
+# [ip] yw : add [work] label
+# - no default [ip] y bindings
+macro index yw "\
+<enter-command>echo 'Adding [work] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
+<tag-prefix><modify-labels>+work<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
+"    'add label: work'
+macro pager yw "\
+<enter-command>echo 'Adding [work] label...'<enter>\
+<enter-command>set my_resolve=\$resolve<enter>\
+<enter-command>unset resolve<enter>\
+<modify-labels>+work<enter>\
+<enter-command>set resolve=\$my_resolve<enter>\
+<enter-command>unset my_resolve<enter>\
+<sync-mailbox>\
+<check-stats>\
+"    'add label: work'
 
 # Move    {{{1
 
