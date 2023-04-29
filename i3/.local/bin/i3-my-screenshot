@@ -263,8 +263,8 @@ count=0
 for opt in $get_desktop $get_region $get_screen $get_window ; do
     [[ $opt = true ]] && let "count += 1"
 done
-[[ $count -eq 0 ]] && abort "Must specify a selection method\n[-b,-r,-s,-w]"
-[[ $count -gt 1 ]] && abort "Specify only 1 selection method\n[-b,-r,-s,-w]"
+[[ $count -eq 0 ]] && abort "Must specify a selection method\n[-d,-r,-s,-w]"
+[[ $count -gt 1 ]] && abort "Specify only 1 selection method\n[-d,-r,-s,-w]"
 
 # Pre-capture tasks    {{{1
 
@@ -313,7 +313,8 @@ fi
 [[ $get_window  = true ]] && opts=( --window=$(xdotool getactivewindow) )
 
 # Execute capture command depending on destination    {{{1
-# - relies on previous check to ensure at least 1 image destination selected
+# - relies on options check at startup to ensure
+#   at least 1 image destination has been selected
 
 if [[ $to_clipboard = true ]] && [[ $to_file = true ]] ; then
     maim "${opts[@]}" | tee "$save_fp" | xclip -sel clipboard -t image/png
