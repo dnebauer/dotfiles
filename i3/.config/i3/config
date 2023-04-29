@@ -504,9 +504,12 @@ mode "$mode_screenshot" {
 set $Screenshot ~/.local/bin/i3-my-screenshot
 
 mode "$mode_ss_desktop" {
-    bindsym --release c exec --no-startup-id $Screenshot -c -d, mode "default"
-    bindsym --release f exec --no-startup-id $Screenshot -f -d, mode "default"
-    bindsym --release b exec --no-startup-id $Screenshot -b -d, mode "default"
+    bindsym --release c exec --no-startup-id \
+                             $Screenshot -c -d, mode "default"
+    bindsym --release f exec --no-startup-id \
+                             $Screenshot -f -d, mode "default"
+    bindsym --release b exec --no-startup-id \
+                             $Screenshot -c -f -d, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -514,9 +517,12 @@ mode "$mode_ss_desktop" {
     bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_region" {
-    bindsym --release c exec --no-startup-id $Screenshot -c -r, mode "default"
-    bindsym --release f exec --no-startup-id $Screenshot -f -r, mode "default"
-    bindsym --release b exec --no-startup-id $Screenshot -b -r, mode "default"
+    bindsym --release c exec --no-startup-id \
+                             $Screenshot -c -r, mode "default"
+    bindsym --release f exec --no-startup-id \
+                             $Screenshot -f -r, mode "default"
+    bindsym --release b exec --no-startup-id \
+                             $Screenshot -c -f -r, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -524,9 +530,12 @@ mode "$mode_ss_region" {
     bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_screen" {
-    bindsym --release c exec --no-startup-id $Screenshot -c -s, mode "default"
-    bindsym --release f exec --no-startup-id $Screenshot -f -s, mode "default"
-    bindsym --release b exec --no-startup-id $Screenshot -b -s, mode "default"
+    bindsym --release c exec --no-startup-id \
+                             $Screenshot -c -s, mode "default"
+    bindsym --release f exec --no-startup-id \
+                             $Screenshot -f -s, mode "default"
+    bindsym --release b exec --no-startup-id \
+                             $Screenshot -c -f -s, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
@@ -534,9 +543,12 @@ mode "$mode_ss_screen" {
     bindsym $mod+r   mode "default"
 }
 mode "$mode_ss_window" {
-    bindsym --release c exec --no-startup-id $Screenshot -c -w, mode "default"
-    bindsym --release f exec --no-startup-id $Screenshot -f -w, mode "default"
-    bindsym --release b exec --no-startup-id $Screenshot -b -w, mode "default"
+    bindsym --release c exec --no-startup-id \
+                             $Screenshot -c -w, mode "default"
+    bindsym --release f exec --no-startup-id \
+                             $Screenshot -f -w, mode "default"
+    bindsym --release b exec --no-startup-id \
+                             $Screenshot -c -f -w, mode "default"
 
     bindsym Return   mode "default"
     bindsym KP_Enter mode "default"
