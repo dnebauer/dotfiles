@@ -24,9 +24,9 @@ function Span(el)
     -- if no color attribute, return unchanged
     if color == nil then return nil end
 
-    -- html: transform attribute to:
-    --       <span style="color: red;"></span>
-    if FORMAT:match 'html' then
+    -- {html,epub}: transform attribute to:
+    --              <span style="color: red;"></span>
+    if FORMAT:match 'html' or FORMAT:match 'epub' then
         -- remove color attributes
         el.attributes['color'] = nil
         -- use style attribute instead
