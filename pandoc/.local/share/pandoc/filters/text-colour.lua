@@ -30,7 +30,7 @@ function Span(el)
         -- remove color attributes
         el.attributes['color'] = nil
         -- use style attribute instead
-        el.attributes['style'] = 'color: ' .. color .. ';'
+        el.attributes['style'] = 'color:'..color..';'
         -- return full span element
         return el
 
