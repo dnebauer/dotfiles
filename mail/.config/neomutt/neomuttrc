@@ -310,8 +310,9 @@ bind generic,pager : enter-command
 bind generic \; tag-prefix
 # {[i] x;[p] i,q,x;[a] q} : exit menu (default binding)
 bind index,pager x exit
-bind pager,alias,query,compose,postpone,browser,pgp,smime,autocrypt q exit
 bind pager i exit
+bind pager,alias,query,compose,attach q exit
+bind postpone,browser,pgp,smime,autocrypt q exit
 # [gip] Q : save changes and quit neomutt
 # - [p] Q (default binding)
 # - overrides [i] Q = <query> (query external program for addresses)
