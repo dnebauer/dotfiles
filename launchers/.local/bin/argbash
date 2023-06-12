@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# File: argbash
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: wrapper for docker argbash
+# Created: 2023-06-11
+# Credit: https://hub.docker.com/r/matejak/argbash/
+
+program='argbash'
+image='matejak/argbash'
+cwd="$(pwd)"
+user="$(id -u)"
+group="$(id -g)"
+
+# docker run options
+# --rm     = automatically remove the container when it exits
+# --env    = set environment variables
+# --volume = bind mount a volume
+# --user   = username or UID (format: <name|uid>[:<group|gid>])
+
+sudo docker run               \
+    --rm                      \
+    --env PROGRAM="$program"  \
+    --volume "$cwd:/work"     \
+    --user "$user:$group"     \
+    "$image"                  \
+    "$@"
