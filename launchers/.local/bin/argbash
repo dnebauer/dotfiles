@@ -6,22 +6,48 @@
 # Created: 2023-06-11
 # Credit: https://hub.docker.com/r/matejak/argbash/
 
+# VARIABLES    {{{1
+
 program='argbash'
 image='matejak/argbash'
 cwd="$(pwd)"
 user="$(id -u)"
-group="$(id -g)"
+group="$(id -g)"    # }}}1
 
-# docker run options
-# --rm     = automatically remove the container when it exits
-# --env    = set environment variables
-# --volume = bind mount a volume
-# --user   = username or UID (format: <name|uid>[:<group|gid>])
+# MAIN
 
-sudo docker run               \
-    --rm                      \
-    --env PROGRAM="$program"  \
-    --volume "$cwd:/work"     \
-    --user "$user:$group"     \
-    "$image"                  \
-    "$@"
+# set stdin flag    {{{1
+
+has_stdin () { return 1; }                           # false
+[[ -p /dev/stdin ]] && has_stdin () { return 0; }    # true
+
+# docker run options    {{{1
+
+# --interactive = keep STDIN open even if not attached
+#          --rm = automatically remove the container when it exits
+#         --env = set environment variables
+#      --volume = bind mount a volume
+#        --user = username or UID (format: <name|uid>[:<group|gid>])
+
+# build docker command    {{{1
+
+cmd=(sudo docker run)
+has_stdin && cmd+=(--interactive)
+cmd+=(
+    --rm
+    --env PROGRAM="$program"
+    --volume "$cwd:/work"
+    --user "$user:$group"
+    "$image"
+)
+
+# execute docker comman    {{{1
+
+if has_stdin ; then
+    input="$(< /dev/stdin)"
+    echo "$input" | "${cmd[@]}" "$@"
+else
+    "${cmd[@]}" "$@"
+fi    # }}}1
+
+# vim:foldmethod=marker:
