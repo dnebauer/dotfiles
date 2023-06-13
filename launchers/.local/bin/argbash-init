@@ -13,10 +13,10 @@ user="$(id -u)"
 group="$(id -g)"
 
 # docker run options
-# --rm     = automatically remove the container when it exits
-# --env    = set environment variables
+#     --rm = automatically remove the container when it exits
+#    --env = set environment variables
 # --volume = bind mount a volume
-# --user   = username or UID (format: <name|uid>[:<group|gid>])
+#   --user = username or UID (format: <name|uid>[:<group|gid>])
 
 sudo docker run               \
     --rm                      \
