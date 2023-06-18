@@ -18,7 +18,7 @@ group="$(id -g)"
 # --volume = bind mount a volume
 #   --user = username or UID (format: <name|uid>[:<group|gid>])
 
-sudo docker run               \
+docker run                    \
     --rm                      \
     --env PROGRAM="$program"  \
     --volume "$cwd:/work"     \

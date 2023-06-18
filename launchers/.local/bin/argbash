@@ -31,7 +31,7 @@ has_stdin () { return 1; }                           # false
 
 # build docker command    {{{1
 
-cmd=(sudo docker run)
+cmd=(docker run)
 has_stdin && cmd+=(--interactive)
 cmd+=(
     --rm
