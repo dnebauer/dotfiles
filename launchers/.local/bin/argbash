@@ -6,18 +6,13 @@
 # Created: 2023-06-11
 # Credit: https://hub.docker.com/r/matejak/argbash/
 
-# VARIABLES    {{{1
+# environs    {{{1
 
 program='argbash'
 image='matejak/argbash'
 cwd="$(pwd)"
 user="$(id -u)"
-group="$(id -g)"    # }}}1
-
-# MAIN
-
-# set stdin flag    {{{1
-
+group="$(id -g)"
 has_stdin () { return 1; }                           # false
 [[ -p /dev/stdin ]] && has_stdin () { return 0; }    # true
 
@@ -41,11 +36,11 @@ cmd+=(
     "$image"
 )
 
-# execute docker comman    {{{1
+# execute docker command    {{{1
 
 if has_stdin ; then
-    input="$(< /dev/stdin)"
-    echo "$input" | "${cmd[@]}" "$@"
+    stdin="$(< /dev/stdin)"
+    echo "$stdin" | "${cmd[@]}" "$@"
 else
     "${cmd[@]}" "$@"
 fi    # }}}1
