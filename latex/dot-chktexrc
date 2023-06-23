@@ -1,0 +1,2 @@
+# avoid "command terminated with space" warnings
+CmdLine { --nowarn 1 }
