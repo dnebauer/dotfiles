@@ -1,0 +1,191 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2023 by David Nebauer <david@nebauer.org>
+% ---------------------------------------------------------------------------
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005-12-01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is <+maintainer+>.
+%
+% This work consists of the files dtnlistsflushleft.dtx and
+% dtnlistsflushleft.ins and the derived filebase dtnlistsflushleft.sty.
+%
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{dtnlistsflushleft.dtx}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[2020-12-31]
+%<package>\ProvidesPackage{dtnlistsflushleft}
+%<*package>
+    [2023-07-05 v0.1 Align bulleted and numbered lists flush left]
+%</package>
+%
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{dtnlistsflushleft}
+\usepackage{etoolbox}
+\frenchspacing
+\newcommand{\pkgname}[1]{\textsf{#1}}
+\newcommand{\envname}[1]{\texttt{#1}}
+\newcommand{\optname}[1]{\texttt{#1}}
+\newcommand{\optval}[1]{\texttt{#1}}
+\newcommand{\codesep}{\vspace{2ex}}
+\BeforeBeginEnvironment{macrocode}{\codesep}
+\AfterEndEnvironment{macrocode}{\codesep}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{dtnlistsflushleft.dtx}
+  \PrintChanges
+  \PrintIndex
+\end{document}
+%</driver>
+% \fi
+%
+% \changes{v0.1}{2023-07-05}{Converted to DTX file}
+%
+% \DoNotIndex{\newcommand,\newenvironment}
+%
+% \providecommand*{\url}{\texttt}
+% \GetFileInfo{dtnlistsflushleft.dtx}
+% \title{The \textsf{dtnlistsflushleft} package}
+% \author{David Nebauer \\ \url{david@nebauer.org}}
+% \date{\fileversion~from \filedate}
+%
+% \maketitle
+%
+% \section{Introduction}
+%
+% The default \LaTeX{} formatting of bullet lists (\envname{itemize}
+% environment) and numbered lists (\envname{enumerate} environment) indents
+% them from the left margin. This package moves them flush left with the text
+% margin.
+%
+% \section{Usage}
+%
+% The package is loaded with the command:
+% \begin{quote}
+%    \cmd{\usepackage}\oarg{width}\verb|{dtnlistsflushleft}|
+% \end{quote}
+% The \optname{width} determines how much space is allocated for list item
+% numbers in numbered lists (\envname{enumerate} environment). The value
+% represents the maximum number of characters in list item numbers. Put another
+% way, it is the number of characters in the number of the last list item. For
+% short lists -- with fewer than 10~items -- the \optname{width} value would be
+% \optval{1}:
+% \begin{quote}
+%    \cmd{\usepackage}\verb|[width=1]{dtnlistsflushleft}|
+% \end{quote}
+% Since most document lists tend to be short this is actually the default
+% \optname{width} value, meaning that in those cases the package can be loaded
+% with:
+% \begin{quote}
+%    \cmd{\usepackage}\verb|{dtnlistsflushleft}|
+% \end{quote}
+% If most lists in a document will contain up to 99~items the value \optval{2}
+% would be used:
+% \begin{quote}
+%    \cmd{\usepackage}\verb|[width=2]{dtnlistsflushleft}|
+% \end{quote}
+% As lists increase in size, increment the \optname{width} value for each
+% increase in magnitude of list size.
+%
+% \subsection{Overriding the package for individual lists}
+%
+% The \pkgname{dtnlistsflushleft} package uses the \optname{width} option value
+% to adjust the \envname{enumerate} environment's \optname{labelwidth} option.
+% To override this value for a single list -- if, for example, a document
+% contained multiple short lists and one long list of more than 9~items --
+% override the \optname{labelwidth} option of the long list:
+% \begin{quote}
+%    |\begin{enumerate}[labelwidth=\widthof{00}]|
+% \end{quote}
+% Note that rather than providing the magnitude of the largest list item number
+% as an integer, it is necessary to take a string of zeroes as long as the
+% largest list item number and pass it to the \pkgname{calc} package's
+% \cmd{\widthof} macro to calculate the width value.
+%
+% \StopEventually{}
+%
+% \section{Implementation}
+%
+% \iffalse
+%<*package>
+% \fi
+%
+%    \begin{macrocode}
+\DeclareCurrentRelease{v0.1}{2023-07-05}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dtnlistsflushleft}
+%    \end{macrocode}
+%    \DescribeMacro{\dtn@opt@width} Process the package's only option:
+%    \optname{width}. It defaults to \optval{1} if not supplied and is
+%    available only in the preamble. The option value is stored in the
+%    \cmd{\dtn@opt@width} macro.
+%    \begin{macrocode}
+\DeclareKeys{
+    width.store = \dtn@opt@width,
+    width.usage = preamble
+}
+\SetKeys{
+    width = 1
+}
+\ProcessKeyOptions
+%    \end{macrocode}
+%    Uses packages \pkgname{enumitem} (for its \cmd{\setlist} command) and
+%    \pkgname{calc} (for its \cmd{\widthof} command).
+%    \begin{macrocode}
+\RequirePackage{enumitem}
+\RequirePackage{calc}
+%    \end{macrocode}
+%    First customise bulleted lists to flush left.
+%    \begin{macrocode}
+\setlist[itemize]{leftmargin=*}
+%    \end{macrocode}
+%    Then customise numbered lists to flush left. This requires using the
+%    \optname{width} option value to calculate a length to allocate for item
+%    numbers. The somewhat clumsy method used to do this starts with building a
+%    string of \optname{width} zeroes. (The technique of appending to a macro
+%    using \cmd{\expandafter} was taken from
+%    \url{https://tex.stackexchange.com/a/102383}.)
+%    \begin{macrocode}
+\newcommand{\dtn@string}{}
+\newcount\loopcount
+\loop
+    \advance\loopcount by 1\relax
+    \expandafter\renewcommand\expandafter\dtn@string\expandafter{\dtn@string 0}
+\ifnum\loopcount<\dtn@opt@width
+\repeat
+%    \end{macrocode}
+%    The \pkgname{calc} package's \cmd{\widthof}
+%    command is used to get the length of this string.
+%    \begin{macrocode}
+\newcommand{\dtn@width}{\widthof{\dtn@string}}
+%    \end{macrocode}
+%    This string length is then used as the \envname{enumerate} environment's
+%    default \optname{labelwidth}.
+%    \begin{macrocode}
+\setlist[enumerate]{
+    labelindent = *,
+    labelwidth  = \dtn@width,
+    label       = \arabic*.,
+    itemindent  = *,
+    leftmargin  = !
+}
+%    \end{macrocode}
+
+%
+% \iffalse
+%</package>
+% \fi
+\endinput

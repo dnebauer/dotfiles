@@ -1,0 +1,56 @@
+%%
+%% This is file `dtnlistsflushleft.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% dtnlistsflushleft.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2023 by David Nebauer <david@nebauer.org>
+%% --------------------------------------------------------------------------
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2005-12-01 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[2020-12-31]
+\ProvidesPackage{dtnlistsflushleft}
+    [2023-07-05 v0.1 Align bulleted and numbered lists flush left]
+\DeclareCurrentRelease{v0.1}{2023-07-05}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dtnlistsflushleft}
+\DeclareKeys{
+    width.store = \dtn@opt@width,
+    width.usage = preamble
+}
+\SetKeys{
+    width = 1
+}
+\ProcessKeyOptions
+\RequirePackage{enumitem}
+\RequirePackage{calc}
+\setlist[itemize]{leftmargin=*}
+\newcommand{\dtn@string}{}
+\newcount\loopcount
+\loop
+    \advance\loopcount by 1\relax
+    \expandafter\renewcommand\expandafter\dtn@string\expandafter{\dtn@string 0}
+\ifnum\loopcount<\dtn@opt@width
+\repeat
+\newcommand{\dtn@width}{\widthof{\dtn@string}}
+\setlist[enumerate]{
+    labelindent = *,
+    labelwidth  = \dtn@width,
+    label       = \arabic*.,
+    itemindent  = *,
+    leftmargin  = !
+}
+
+\endinput
+%%
+%% End of file `dtnlistsflushleft.sty'.
