@@ -1,0 +1,247 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2023 by David Nebauer <david@nebauer.org>
+% ---------------------------------------------------------------------------
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005-12-01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is David Nebauer.
+%
+% This work consists of the files dtnfootnotes.dtx and dtnfootnotes.ins
+% and the derived filebase dtnfootnotes.sty.
+%
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{dtnfootnotes.dtx}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[2022-11-01]
+%<package>\ProvidesPackage{dtnfootnotes}
+%<*package>
+    [2023-07-10 v0.1 Custom footnote formatting]
+%</package>
+%
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{dtnfootnotes}[2023-07-10]
+\usepackage{xltabular}
+\usepackage{enumitem}
+\usepackage{parskip}
+\frenchspacing
+\newcommand{\pkgname}[1]{\textsf{#1}}
+\newcommand{\optname}[1]{\texttt{#1}}
+\newcommand{\optval}[1]{\texttt{#1}}
+\newcommand{\codesep}{\vspace{2ex}}
+\BeforeBeginEnvironment{macrocode}{\codesep}
+\AfterEndEnvironment{macrocode}{\codesep}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{dtnfootnotes.dtx}
+  \PrintChanges
+  \PrintIndex
+\end{document}
+%</driver>
+% \fi
+%
+% \changes{v0.1}{2023-07-10}{Converted to DTX file}
+%
+% \DoNotIndex{\newcommand,\newenvironment}
+%
+% \providecommand*{\url}{\texttt}
+% \GetFileInfo{dtnfootnotes.dtx}
+% \title{The \textsf{dtnfootnotes} package}
+% \author{David Nebauer \\ \url{david@nebauer.org}}
+% \date{\fileversion~from \filedate}
+%
+% \maketitle
+%
+% \section*{Introduction}
+%
+% The default formatting of footnotes in \LaTeX{} is painfully ugly with
+% footnotes indented and footnote marks superscripted and directly adjoining
+% the footnote text.
+%
+% This package changes the footnote format to:
+%
+% \begin{itemize}[nosep,leftmargin=*]
+% \item flush left
+% \item display the mark in normal (non-superscripted) font
+% \item add space between the footnote mark and text.
+% \end{itemize}
+%
+% The package can also optionally:
+%
+% \begin{itemize}[nosep,leftmargin=*]
+% \item add a blank line between footnotes
+% \item adjust the space between the footnote mark and text
+% \item adjust the footnote font size.
+% \end{itemize}
+%
+% \section*{Usage}
+%
+% The package is loaded with the command:
+% \begin{quote}
+%    \cmd{\usepackage}\oarg{sep}\oarg{margin}\oarg{size}\verb|{dtnfootnotes}|
+% \end{quote}
+% The package options are:
+%
+% \newcommand{\fsize}[1]{\texttt{\textbackslash{}#1}}
+% \begin{xltabular}{\linewidth}{rX}
+%        \optname{sep} & This is a boolean that determines whether footnotes
+%                        are separated by a blank line. It defaults to
+%                        \optval{false}. The option value is stored in the
+%                        \TeX{} switch \texttt{@dtn@opt@sep}.
+%                        \\
+%                      & \\
+%     \optname{margin} & This accepts a length used to set
+%                        \fsize{footnotemargin}, which determines the space
+%                        between the footnote mark and text. It defaults to
+%                        \optval{1.10em}. If an invalid length is provided
+%                        the package displays a warning and reverts
+%                        \optname{margin} to its default value. The option
+%                        value is stored in the \fsize{dtn@opt@margin} macro.
+%                        \\
+%                      & \\
+%       \optname{size} & This is a font size used to set \fsize{footnotesize},
+%                        which is one of the standard \LaTeX{} predefined
+%                        commands: \fsize{tiny}, \fsize{scriptsize},
+%                        \fsize{footnotesize}, \fsize{small},
+%                        \fsize{normalsize}, \fsize{large}, \fsize{Large},
+%                        \fsize{LARGE}, \fsize{huge}, and \fsize{Huge}. Use
+%                        the option value \optval{\scriptsize} to reduce the
+%                        footnote size by one step, and \optval{\small} to
+%                        increase it by one step. The option value is stored
+%                        in the \fsize{dtn@opt@size} macro.
+%                        \\
+% \end{xltabular}
+%
+% Here is an example in which all options are used in loading the package:
+% \begin{quote}
+%    \cmd{\usepackage}\verb|[sep=true][margin=1.6em][size=\small]{dtnfootnotes}|
+% \end{quote}
+%
+% \section*{Implementation}
+%
+% \iffalse
+%<*package>
+% \fi
+%
+%    \begin{macrocode}
+\DeclareCurrentRelease{v0.1}{2023-07-10}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dtnfootnotes}
+    [2023-07-10 v0.1 Improve footnote formatting]
+%    \end{macrocode}
+%    \DescribeMacro{@dtn@opt@sep} \DescribeMacro{\dtn@opt@margin}
+%    \DescribeMacro{\dtn@opt@size} Process the package options.
+%    \begin{macrocode}
+\DeclareKeys{
+          sep.if = @dtn@opt@sep,        sep.usage = preamble,
+    margin.store = \dtn@opt@margin,  margin.usage = preamble,
+      size.store = \dtn@opt@size,      size.usage = preamble
+}
+\SetKeys{
+       sep = false,
+    margin = 1.10em,
+      size = \empty
+}
+\ProcessKeyOptions
+%    \end{macrocode}
+%    Processing the \optname{margin} option value requires checking the
+%    validity of a length value. This is done by setting up a command that
+%    checks length validity. The command definition is taken from
+%    \url{https://tex.stackexchange.com/a/499223}. It, in turn, credits
+%    \url{https://stackoverflow.com/a/23872060/923955} for the regex it
+%    contains.
+%
+%    To ensure that any commands containing lengths, such as \cmd{\small}, are
+%    expanded the newly defined command needs to be invoked with
+%    \cmd{\expandafter} preceding and following the command name.
+%    \begin{macrocode}
+\ExplSyntaxOn
+\NewDocumentCommand{\iflengthTF}{mmm}{%
+    \regex_match:nnTF
+    { \A [+\-]? ((\d+(\.\d*)?)|(\.\d+)) \s*
+    (pt|pc|in|bp|cm|mm|dd|cc|sp|ex|em) \Z} % regex
+    { #1 } % test string
+    { #2 } % true text
+    { #3 } % false text
+}
+\ExplSyntaxOff
+%    \end{macrocode}
+%    If the \optname{margin} is not a valid length then warn the user and reset
+%    \optname{margin} to the default value.
+%    \begin{macrocode}
+\expandafter\iflengthTF\expandafter{\dtn@opt@margin}{}{%
+    \PackageWarning{dtnfootnotes}{margin value is not a valid length
+                                  \MessageBreak
+                                  using default value of 1.10em instead}
+    \renewcommand{\dtn@opt@margin}{1.10em}
+}
+%    \end{macrocode}
+%    Uses \pkgname{footmisc} to shift the footnotes flush left and use hanging
+%    indent. The \pkgname{ifthen} package is used for logical branching. The
+%    purpose served by the \pkgname{setspace} is truly mysterious.
+%    \begin{macrocode}
+\RequirePackage[hang,flushmargin,splitrule,multiple,abovefloats]{footmisc}
+\RequirePackage{etoolbox}
+\RequirePackage{ifthen}
+\RequirePackage{setspace}
+%    \end{macrocode}
+%    Change the footnote font size if a \optname{size} option value was
+%    provided.
+%    \begin{macrocode}
+\ifthenelse{\equal{\dtn@opt@size}{\empty}}{}{%
+    \renewcommand{\footnotesize}{\small}
+}%
+%    \end{macrocode}
+%    Make the footnote mark normal font size. This technique is taken from
+%    \url{https://tex.stackexchange.com/a/306278}.
+%    \begin{macrocode}
+\patchcmd{\@makefntext}{%
+\ifFN@hangfoot
+\bgroup}%
+{%
+\ifFN@hangfoot
+\bgroup\def\@makefnmark{\rlap{\normalfont\@thefnmark.}}}{}{}%
+\patchcmd{\@makefntext}{%
+\ifdim\footnotemargin>\z@
+\hb@xt@ \footnotemargin{\hss\@makefnmark}}%
+{%
+\ifdim\footnotemargin>\z@
+\hb@xt@ \footnotemargin{\@makefnmark\hss}}{}{}%
+%    \end{macrocode}
+%    Set distance between main text and note rule.
+%    \begin{macrocode}
+\setlength{\skip\footins}{1\baselineskip}
+%    \end{macrocode}
+%    Set distance between footnote mark and text, using the \optname{margin}
+%    option value if provided.
+%    \begin{macrocode}
+\expandafter\setlength\expandafter{\footnotemargin}{\dtn@opt@margin}
+%    \end{macrocode}
+%    Add a blank line between footnotes if requested with the \optname{sep}
+%    option. This is implemented by setting \cmd{\footnotesep} to a non-zero
+%    length. This vertical space is inserted before each footnote.
+%    \begin{macrocode}
+\ifthenelse{\boolean{@dtn@opt@sep}}{%
+    \setlength{\footnotesep}{\skip\footins} % Between footnotes [= previous]
+}{}%
+\renewcommand{\hangfootparskip}{0pt}
+\renewcommand{\hangfootparindent}{1em}
+%    \end{macrocode}
+%
+% \iffalse
+%</package>
+% \fi
+\endinput
