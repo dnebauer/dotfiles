@@ -1,10 +1,10 @@
 %%
-%% This is file `dtnlistsflushleft.sty',
+%% This is file `dtnlists.sty',
 %% generated with the docstrip utility.
 %%
 %% The original source files were:
 %%
-%% dtnlistsflushleft.dtx  (with options: `package')
+%% dtnlists.dtx  (with options: `package')
 %% 
 %% This is a generated file.
 %% 
@@ -19,11 +19,11 @@
 %% version 2005-12-01 or later.
 %% 
 \NeedsTeXFormat{LaTeX2e}[2020-12-31]
-\ProvidesPackage{dtnlistsflushleft}
-    [2023-07-05 v0.1 Align bulleted and numbered lists flush left]
-\DeclareCurrentRelease{v0.1}{2023-07-05}
+\ProvidesPackage{dtnlists}
+    [2023-07-09 v0.1 Align bulleted and numbered lists flush left]
+\DeclareCurrentRelease{v0.1}{2023-07-09}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{dtnlistsflushleft}
+\ProvidesPackage{dtnlists}
 \DeclareKeys{
     width.store = \dtn@opt@width,
     width.usage = preamble
@@ -34,7 +34,10 @@
 \ProcessKeyOptions
 \RequirePackage{enumitem}
 \RequirePackage{calc}
-\setlist[itemize]{leftmargin=*}
+\setlist[itemize]{%
+      leftmargin = *,
+    beginpenalty = 10000
+}%
 \newcommand{\dtn@string}{}
 \newcount\loopcount
 \loop
@@ -43,14 +46,14 @@
 \ifnum\loopcount<\dtn@opt@width
 \repeat
 \newcommand{\dtn@width}{\widthof{\dtn@string}}
-\setlist[enumerate]{
-    labelindent = *,
-    labelwidth  = \dtn@width,
-    label       = \arabic*.,
-    itemindent  = *,
-    leftmargin  = !
-}
-
+\setlist[enumerate]{%
+     labelindent = *,
+      labelwidth = \dtn@width,
+           label = \arabic*.,
+      itemindent = *,
+      leftmargin = !,
+    beginpenalty = 10000
+}%
 \endinput
 %%
-%% End of file `dtnlistsflushleft.sty'.
+%% End of file `dtnlists.sty'.

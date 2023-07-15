@@ -14,51 +14,52 @@
 %
 % The Current Maintainer of this work is <+maintainer+>.
 %
-% This work consists of the files dtnlistsflushleft.dtx and
-% dtnlistsflushleft.ins and the derived filebase dtnlistsflushleft.sty.
+% This work consists of the files dtnlists.dtx and
+% dtnlists.ins and the derived filebase dtnlists.sty.
 %
 % \fi
 %
 % \iffalse
 %<*driver>
-\ProvidesFile{dtnlistsflushleft.dtx}
+\ProvidesFile{dtnlists.dtx}
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[2020-12-31]
-%<package>\ProvidesPackage{dtnlistsflushleft}
+%<package>\ProvidesPackage{dtnlists}
 %<*package>
-    [2023-07-05 v0.1 Align bulleted and numbered lists flush left]
+    [2023-07-09 v0.1 Align bulleted and numbered lists flush left]
 %</package>
 %
 %<*driver>
 \documentclass{ltxdoc}
-\usepackage{dtnlistsflushleft}
+\usepackage{dtnlists}
 \usepackage{etoolbox}
+\usepackage{parskip}
 \frenchspacing
 \newcommand{\pkgname}[1]{\textsf{#1}}
 \newcommand{\envname}[1]{\texttt{#1}}
 \newcommand{\optname}[1]{\texttt{#1}}
 \newcommand{\optval}[1]{\texttt{#1}}
-\newcommand{\codesep}{\vspace{2ex}}
+\newcommand{\codesep}{\vspace{1ex}}
 \BeforeBeginEnvironment{macrocode}{\codesep}
 \AfterEndEnvironment{macrocode}{\codesep}
 \EnableCrossrefs
 \CodelineIndex
 \RecordChanges
 \begin{document}
-  \DocInput{dtnlistsflushleft.dtx}
+  \DocInput{dtnlists.dtx}
   \PrintChanges
   \PrintIndex
 \end{document}
 %</driver>
 % \fi
 %
-% \changes{v0.1}{2023-07-05}{Converted to DTX file}
+% \changes{v0.1}{2023-07-09}{Converted to DTX file}
 %
 % \DoNotIndex{\newcommand,\newenvironment}
 %
 % \providecommand*{\url}{\texttt}
-% \GetFileInfo{dtnlistsflushleft.dtx}
-% \title{The \textsf{dtnlistsflushleft} package}
+% \GetFileInfo{dtnlists.dtx}
+% \title{The \textsf{dtnlists} package}
 % \author{David Nebauer \\ \url{david@nebauer.org}}
 % \date{\fileversion~from \filedate}
 %
@@ -68,14 +69,18 @@
 %
 % The default \LaTeX{} formatting of bullet lists (\envname{itemize}
 % environment) and numbered lists (\envname{enumerate} environment) indents
-% them from the left margin. This package moves them flush left with the text
+% them from the left margin. \pkgname{dtnlists} moves them flush left with the text
 % margin.
+%
+% \pkgname{dtnlists} also adjusts page break penalties to prevent page breaks
+% at the beginning of a list. This is because it is usually preferable to keep
+% the initial list item with the line leading into the list.
 %
 % \section{Usage}
 %
 % The package is loaded with the command:
 % \begin{quote}
-%    \cmd{\usepackage}\oarg{width}\verb|{dtnlistsflushleft}|
+%    \cmd{\usepackage}\oarg{width}\verb|{dtnlists}|
 % \end{quote}
 % The \optname{width} determines how much space is allocated for list item
 % numbers in numbered lists (\envname{enumerate} environment). The value
@@ -84,25 +89,25 @@
 % short lists -- with fewer than 10~items -- the \optname{width} value would be
 % \optval{1}:
 % \begin{quote}
-%    \cmd{\usepackage}\verb|[width=1]{dtnlistsflushleft}|
+%    \cmd{\usepackage}\verb|[width=1]{dtnlists}|
 % \end{quote}
 % Since most document lists tend to be short this is actually the default
 % \optname{width} value, meaning that in those cases the package can be loaded
 % with:
 % \begin{quote}
-%    \cmd{\usepackage}\verb|{dtnlistsflushleft}|
+%    \cmd{\usepackage}\verb|{dtnlists}|
 % \end{quote}
 % If most lists in a document will contain up to 99~items the value \optval{2}
 % would be used:
 % \begin{quote}
-%    \cmd{\usepackage}\verb|[width=2]{dtnlistsflushleft}|
+%    \cmd{\usepackage}\verb|[width=2]{dtnlists}|
 % \end{quote}
 % As lists increase in size, increment the \optname{width} value for each
 % increase in magnitude of list size.
 %
 % \subsection{Overriding the package for individual lists}
 %
-% The \pkgname{dtnlistsflushleft} package uses the \optname{width} option value
+% The \pkgname{dtnlists} package uses the \optname{width} option value
 % to adjust the \envname{enumerate} environment's \optname{labelwidth} option.
 % To override this value for a single list -- if, for example, a document
 % contained multiple short lists and one long list of more than 9~items --
@@ -124,9 +129,9 @@
 % \fi
 %
 %    \begin{macrocode}
-\DeclareCurrentRelease{v0.1}{2023-07-05}
+\DeclareCurrentRelease{v0.1}{2023-07-09}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{dtnlistsflushleft}
+\ProvidesPackage{dtnlists}
 %    \end{macrocode}
 %    \DescribeMacro{\dtn@opt@width} Process the package's only option:
 %    \optname{width}. It defaults to \optval{1} if not supplied and is
@@ -148,9 +153,13 @@
 \RequirePackage{enumitem}
 \RequirePackage{calc}
 %    \end{macrocode}
-%    First customise bulleted lists to flush left.
+%    First customise bulleted lists to flush left and not break at the
+%    beginning.
 %    \begin{macrocode}
-\setlist[itemize]{leftmargin=*}
+\setlist[itemize]{%
+      leftmargin = *,
+    beginpenalty = 10000
+}%
 %    \end{macrocode}
 %    Then customise numbered lists to flush left. This requires using the
 %    \optname{width} option value to calculate a length to allocate for item
@@ -175,15 +184,15 @@
 %    This string length is then used as the \envname{enumerate} environment's
 %    default \optname{labelwidth}.
 %    \begin{macrocode}
-\setlist[enumerate]{
-    labelindent = *,
-    labelwidth  = \dtn@width,
-    label       = \arabic*.,
-    itemindent  = *,
-    leftmargin  = !
-}
+\setlist[enumerate]{%
+     labelindent = *,
+      labelwidth = \dtn@width,
+           label = \arabic*.,
+      itemindent = *,
+      leftmargin = !,
+    beginpenalty = 10000
+}%
 %    \end{macrocode}
-
 %
 % \iffalse
 %</package>

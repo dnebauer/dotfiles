@@ -1,4 +1,4 @@
-# build latex package: dtnlistsflushleft
+# build latex package: dtnlists
 
 # this makefile assumes 'sty' and 'pdf' files are built from
 # source 'dtx' and 'ins' files in a build directory, and the
@@ -32,7 +32,7 @@
 # ls-R database file in TEXMFHOME
 
 
-    PACKAGE = dtnlistsflushleft
+    PACKAGE = dtnlists
 
 PACKAGE_STY = $(PACKAGE).sty
 PACKAGE_PDF = $(PACKAGE).pdf
