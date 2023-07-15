@@ -32,7 +32,7 @@
 %<*driver>
 \documentclass{ltxdoc}
 \usepackage{dtnfootnotes}[2023-07-10]
-\usepackage{xltabular}
+\usepackage{xltabular,bigstrut}
 \usepackage{enumitem}
 \usepackage{parskip}
 \frenchspacing
@@ -95,14 +95,14 @@
 % \end{quote}
 % The package options are:
 %
+% \setlength{\bigstrutjot}{6pt}
 % \newcommand{\fsize}[1]{\texttt{\textbackslash{}#1}}
 % \begin{xltabular}{\linewidth}{rX}
 %        \optname{sep} & This is a boolean that determines whether footnotes
 %                        are separated by a blank line. It defaults to
 %                        \optval{false}. The option value is stored in the
 %                        \TeX{} switch \texttt{@dtn@opt@sep}.
-%                        \\
-%                      & \\
+%                        \bigstrut[b] \\
 %     \optname{margin} & This accepts a length used to set
 %                        \fsize{footnotemargin}, which determines the space
 %                        between the footnote mark and text. It defaults to
@@ -110,8 +110,7 @@
 %                        the package displays a warning and reverts
 %                        \optname{margin} to its default value. The option
 %                        value is stored in the \fsize{dtn@opt@margin} macro.
-%                        \\
-%                      & \\
+%                        \bigstrut[b] \\
 %       \optname{size} & This is a font size used to set \fsize{footnotesize},
 %                        which is one of the standard \LaTeX{} predefined
 %                        commands: \fsize{tiny}, \fsize{scriptsize},
@@ -122,7 +121,6 @@
 %                        footnote size by one step, and \optval{\small} to
 %                        increase it by one step. The option value is stored
 %                        in the \fsize{dtn@opt@size} macro.
-%                        \\
 % \end{xltabular}
 %
 % Here is an example in which all options are used in loading the package:
