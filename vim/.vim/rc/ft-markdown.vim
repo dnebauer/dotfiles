@@ -90,7 +90,7 @@ function! s:MarkdownSupport()
     if has('unix')
         try
             execute "set <M-q>=\<Esc>q"
-		catch /^Vim\%((\a\+)\)\=:E518:/  " Unknown option: <M-q>=q
+        catch /^Vim\%((\a\+)\)\=:E518:/  " Unknown option: <M-q>=q
         endtry
     endif
     nnoremap <silent> <M-q> {gq}<Bar>:echo "Rewrapped paragraph"<CR>
