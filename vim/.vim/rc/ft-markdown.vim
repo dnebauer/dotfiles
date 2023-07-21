@@ -96,6 +96,8 @@ function! s:MarkdownSupport()
     nnoremap <silent> <M-q> {gq}<Bar>:echo "Rewrapped paragraph"<CR>
     inoremap <silent> <M-q> <Esc>{gq}<CR>a
     " change filetype to trigger vim-pandoc plugin    {{{1
+    set filetype=pandoc
+    sleep
     set filetype=markdown.pandoc
     " specify linters for ALE    {{{1
     " - not using 'remark'
