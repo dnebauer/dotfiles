@@ -40,8 +40,8 @@
 \newcommand{\optname}[1]{\texttt{#1}}
 \newcommand{\optval}[1]{\texttt{#1}}
 \newcommand{\codesep}{\vspace{1ex}}
-\BeforeBeginEnvironment{macrocode}{\codesep}
-\AfterEndEnvironment{macrocode}{\codesep}
+\AddToHook{env/macrocode/begin}{\codesep}
+\AddToHook{env/macrocode/after}{\codesep}
 \EnableCrossrefs
 \CodelineIndex
 \RecordChanges
