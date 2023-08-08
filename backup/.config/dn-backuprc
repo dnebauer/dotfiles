@@ -1,0 +1,128 @@
+# paths are relative to root directory
+# see dn-backup manpage for further details of this file's format
+
+# target devices
+# - display_label@@@dir_path
+# - duplicate labels not allowed
+
+target_dir: lacie@@@/mnt/lacie-d2-pro/
+
+# source files
+# - no duplicates allowed
+
+source_file: /home/david/.ICEauthority
+source_file: /home/david/.Xauthority
+source_file: /home/david/.abcde.conf
+source_file: /home/david/.bash_history
+source_file: /home/david/.bash_logout
+source_file: /home/david/.bashrc_OLD
+source_file: /home/david/.dmrc
+source_file: /home/david/.esniper
+source_file: /home/david/.fasd
+source_file: /home/david/.gtkrc-2.0
+source_file: /home/david/.jigdo-lite
+source_file: /home/david/.lesshst
+source_file: /home/david/.perlcriticrc
+source_file: /home/david/.perltidyrc
+source_file: /home/david/.python_history
+source_file: /home/david/.reportbugrc
+source_file: /home/david/.selected_editor
+source_file: /home/david/.tld_set
+source_file: /home/david/.tz
+source_file: /home/david/.units_history
+source_file: /home/david/.viminfo
+source_file: /home/david/.vimtags
+source_file: /home/david/.wget-hsts
+source_file: /home/david/.xscreensaver
+source_file: /home/david/.xsession-errors
+source_file: /home/david/.xsession-errors.old
+source_file: /home/david/.zcompdump
+source_file: /home/david/.zcompdump-hezmana-5.9
+source_file: /home/david/.zsh_history
+
+
+# source directories
+# - no duplicates allowed
+
+source_dir: /home/david/.FBReader/
+source_dir: /home/david/.aptitude/
+source_dir: /home/david/.clui_dir/
+source_dir: /home/david/.config/
+source_dir: /home/david/.cpanm/
+source_dir: /home/david/.dbus/
+source_dir: /home/david/.dropbox/
+source_dir: /home/david/.dropbox-dist/
+source_dir: /home/david/.dzil/
+source_dir: /home/david/.enscript/
+source_dir: /home/david/.get_iplayer/
+source_dir: /home/david/.gnome/
+source_dir: /home/david/.gnupg/
+source_dir: /home/david/.java/
+source_dir: /home/david/.kde/
+source_dir: /home/david/.keys/
+source_dir: /home/david/.local/
+source_dir: /home/david/.mplayer/
+source_dir: /home/david/.msmtp.queue/
+source_dir: /home/david/.npm/
+source_dir: /home/david/.offlineimap/
+source_dir: /home/david/.oh-my-zsh/
+source_dir: /home/david/.password-store/
+source_dir: /home/david/.pstill/
+source_dir: /home/david/.recoll/
+source_dir: /home/david/.recoll-context-mail/
+source_dir: /home/david/.recoll-ntg-context/
+source_dir: /home/david/.recoll-skeptical-inquirer/
+source_dir: /home/david/.screenlayout/
+source_dir: /home/david/.ssh/
+source_dir: /home/david/.texlive2022/
+source_dir: /home/david/.tmux/
+source_dir: /home/david/.turboprint/
+source_dir: /home/david/.var/
+source_dir: /home/david/.vim/
+source_dir: /home/david/.w3m/
+source_dir: /home/david/.wine/
+source_dir: /home/david/.xine/
+source_dir: /home/david/.zoom/
+source_dir: /home/david/Camera/
+source_dir: /home/david/Downloads/
+source_dir: /home/david/Dropbox/
+source_dir: /home/david/PDF/
+source_dir: /home/david/data/computing/
+source_dir: /home/david/data/cooking/
+source_dir: /home/david/data/correspondence/
+source_dir: /home/david/data/education/
+source_dir: /home/david/data/employment/
+source_dir: /home/david/data/entertainment/anime/
+source_dir: /home/david/data/entertainment/audio/
+source_dir: /home/david/data/entertainment/audiobooks/
+source_dir: /home/david/data/entertainment/books/
+source_dir: /home/david/data/entertainment/cinema/
+source_dir: /home/david/data/entertainment/collections/
+source_dir: /home/david/data/entertainment/dancing/
+source_dir: /home/david/data/entertainment/dvd/
+source_dir: /home/david/data/entertainment/games/
+source_dir: /home/david/data/entertainment/home-theatre/
+source_dir: /home/david/data/entertainment/mags/
+source_dir: /home/david/data/entertainment/music/
+source_dir: /home/david/data/entertainment/p2p/
+source_dir: /home/david/data/entertainment/podcasts/
+# source_dir: /home/david/data/entertainment/prons/
+source_dir: /home/david/data/entertainment/reading/
+source_dir: /home/david/data/entertainment/sci-fi/
+source_dir: /home/david/data/entertainment/theatre/
+source_dir: /home/david/data/entertainment/tv/
+source_dir: /home/david/data/entertainment/vids/
+source_dir: /home/david/data/evaluation/
+source_dir: /home/david/data/family/
+source_dir: /home/david/data/financial/
+source_dir: /home/david/data/genealogy/
+source_dir: /home/david/data/health/
+source_dir: /home/david/data/humour/
+source_dir: /home/david/data/misc/
+source_dir: /home/david/data/travel/
+source_dir: /home/david/games/
+source_dir: /home/david/go/
+source_dir: /home/david/log/
+source_dir: /home/david/storage/
+source_dir: /home/david/tmp/
+source_dir: /etc/
