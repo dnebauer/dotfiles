@@ -80,7 +80,7 @@ source_dir: /home/david/.turboprint/
 source_dir: /home/david/.var/
 source_dir: /home/david/.vim/
 source_dir: /home/david/.w3m/
-source_dir: /home/david/.wine/
+#source_dir: /home/david/.wine/
 source_dir: /home/david/.xine/
 source_dir: /home/david/.zoom/
 source_dir: /home/david/Camera/
