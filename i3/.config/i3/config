@@ -402,7 +402,7 @@ exec --no-startup-id systemctl --user start neomutt_aliases-regenerate.service
 
 # automount removable media    {{{2
 
-exec --no-startup-id udiskie &
+exec --no-startup-id udiskie --smart-tray &
 
 # handle fullscreen containers    {{{2
 
