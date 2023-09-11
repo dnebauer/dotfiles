@@ -283,6 +283,8 @@ Plug 'dnebauer/vim-dn-print-dialog', { 'on':  ['PrintDialog'] }
 " bundles: calendar    {{{2
 " - calendar : display calendar    {{{3
 Plug 'mattn/calendar-vim', { 'on': ['Calendar', 'CalendarH', 'CalendarT'] }
+" - speeddating : use C-{x,a} on dates
+Plug 'tpope/vim-speeddating'
 " bundles: formatting    {{{2
 " - tabular : align text    {{{3
 Plug 'godlygeek/tabular', {
