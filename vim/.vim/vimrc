@@ -220,8 +220,14 @@ endif
 Plug 'wikitopian/hardmode', { 'on': ['HardMode', 'EasyMode'] }
 " - matchit : jump around matched structures    {{{3
 Plug 'vim-scripts/matchit.zip'
+" - leap : two-character motion plugin    {{{3
+if has('nvim')
+    Plug 'ggandor/leap.nvim'
+endif
 " - sneak : two-character motion plugin    {{{3
-Plug 'justinmk/vim-sneak'
+if !has('nvim')
+    Plug 'justinmk/vim-sneak'
+endif
 " - vim-textobj-user : mechanism for defining text objects    {{{3
 "   . required by: kana/vim-textobj-entire, reedes/vim-textobj-sentence
 Plug 'kana/vim-textobj-user'
