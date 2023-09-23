@@ -1,7 +1,9 @@
 # editors
 
+nvim_appimage=/use/local/bin/nvim.appimage
+
 # terminal editor
-term_editors=(nvim vim vi)
+term_editors=($nvim_appimage nvim vim vi)
 for term_editor in "${term_editors[@]}" ; do
     if type "$term_editor" > /dev/null 2>&1; then
         export EDITOR="$term_editor"
@@ -24,4 +26,10 @@ for gui_editor in "${gui_editors[@]}" ; do
 done
 unset gui_editor gui_editors
 
-export NEOVIDE_MULTIGRID=1
+# - if prefer nvim.appimage how to inform gui nvim?
+# - some gui nvims (such as neovide) honour $NEOVIM_BIN
+[[ "$EDITOR"x = "$nvim_appimage"x ]] && export NEOVIM_BIN=$nvim_appimage
+unset nvim_appimage
+
+# - some neovide-specific envvars
+[[ "$VISUAL"x = 'neovide'x ]] && export NEOVIDE_MULTIGRID=1
