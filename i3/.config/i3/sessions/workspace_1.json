@@ -4,22 +4,22 @@
     "current_border_width": 2,
     "floating": "auto_off",
     "geometry": {
-       "height": 600,
-       "width": 800,
-       "x": 0,
-       "y": 0
+        "height": 600,
+        "width": 800,
+        "x": 0,
+        "y": 0
     },
     "marks": [
-      "t"
+        "t"
     ],
     "name": "AlacrittyTmux",
     "percent": 0.75,
     "swallows": [
-       {
-        "class": "^AlacrittyTmux$",
-        "instance": "^AlacrittyTmux$",
-        "title": "^AlacrittyTmux$"
-       }
+        {
+            "class": "^AlacrittyTmux$",
+            "instance": "^AlacrittyTmux$",
+            "title": "^AlacrittyTmux$"
+        }
     ],
     "type": "con"
 }
@@ -29,23 +29,21 @@
     "current_border_width": 2,
     "floating": "auto_off",
     "geometry": {
-       "height": 1384,
-       "width": 1716,
-       "x": 3642,
-       "y": 54
+        "height": 1384,
+        "width": 1716,
+        "x": 3642,
+        "y": 54
     },
     "marks": [
-       "v"
+        "v"
     ],
-    "name": "[No Name] - NVIM",
+    "name": "Neovide",
     "percent": 0.25,
     "swallows": [
-       {
-        "class": "^nvim\\-qt$",
-        "instance": "^nvim\\-qt$",
-        "title": "^\\[No\\ Name\\]\\ \\-\\ NVIM\\ \\—\\ Neovim$"
-       }
+        {
+            "class": "^neovide$",
+            "instance": "^neovide$",
+        }
     ],
     "type": "con"
 }
-
