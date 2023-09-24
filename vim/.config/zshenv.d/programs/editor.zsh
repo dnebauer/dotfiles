@@ -1,6 +1,6 @@
 # editors
 
-nvim_appimage=/use/local/bin/nvim.appimage
+nvim_appimage=/usr/local/bin/nvim.appimage
 
 # terminal editor
 term_editors=($nvim_appimage nvim vim vi)
