@@ -919,9 +919,10 @@ set query_command = "echo '' && notmuch address from:/%s/"
    # so the 'echo' command is a workaround for this
 set editor = "\
 $my_trim_quotes %s ;\
-nvim -S '$my_nvim_args' +/^$/+1 '+nohlsearch' '+startinsert!' %s\
+editor -S '$my_nvim_args' +/^$/+1 '+nohlsearch' '+startinsert!' %s\
 "
-    # editor invocation, uses external file for initial arguments
+    # editor invocation, assumes 'editor' is set to nvim
+    # uses external file for initial arguments
 set text_flowed
     # generate content type 'text/plain; format-flowed'
 set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
