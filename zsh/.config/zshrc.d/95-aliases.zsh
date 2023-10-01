@@ -18,6 +18,10 @@ if [ -f '/usr/bin/ag' ] ; then
     fi
 fi
 
+# mc alias
+# - subshell support causes slow startup
+alias mc='mc --nosubshell'
+
 # ugrep aliases
 if command -v ugrep >/dev/null ; then
     # - uq   = 'ug -Q'  = short & quick query UI
