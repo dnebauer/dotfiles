@@ -1,0 +1,2 @@
+exe=/usr/bin/editor
+"$exe" "$@"
