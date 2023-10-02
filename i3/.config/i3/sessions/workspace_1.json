@@ -42,7 +42,7 @@
     "swallows": [
         {
             "class": "^neovide$",
-            "instance": "^neovide$",
+            "instance": "^neovide$"
         }
     ],
     "type": "con"
