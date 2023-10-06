@@ -26,7 +26,7 @@ dlg_title='i3 session setup'
 # at startup i3 uses path that does not contain ~/.local/bin
 # - these tools can be found on base system path
 required_system_tools=(
-	'alacritty' 'i3-msg' 'neovide' 'xdotool'
+	'alacritty' 'i3-msg' 'dn-neovide' 'xdotool'
 	'bc' 'logger' 'printf' 'yad'
 	'date' 'mkfifo' 'sleep'
 	'exec' 'mktemp' 'tmux'
@@ -367,6 +367,10 @@ function launchNeomutt() {
 #   params: nil
 #   prints: nil
 #   return: nil
+#   note:   actually launches wrapper script dn-neovim which
+#           sets environmental variable NEOVIM_BIN to
+#           /usr/local/bin/nvim.appimage to force neovim to
+#           use that nvim binary
 function launchNvimGui() {
 	# logging
 	local tmr
@@ -377,7 +381,7 @@ function launchNvimGui() {
 	notifyMessage 'Launching nvim gui...'
 
 	# launch neovide
-	neovide &
+	dn-neovide &
 	sleep $delay_post_launch
 
 	# logging
