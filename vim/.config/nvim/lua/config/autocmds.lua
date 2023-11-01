@@ -5,13 +5,6 @@
 -- TODO {{{1
 
 --[[
-TODO: markdown within the mail filetype
-      * possibly use nvim-treesitter to inject markdown syntax into mail
-      * possibly configure markdown_inline in treesitter +/- LSP
-
-]]
-
---[[
 TODO: msmtp syntax
       * disable treesitter syntax and engage vim syntax
       * custom msmtp syntax installed as per msmtp package README.Debian
@@ -26,6 +19,64 @@ local create_augroup = vim.api.nvim_create_augroup
 local opt_local = vim.opt_local
 
 --[[ functions ]]
+
+-- mail_md_mode_X(mode) {{{1
+-- * format mail message body as markdown
+local mail_md_mode_X = function(mode)
+  -- only do this once
+  local ok, _ = pcall(vim.api.nvim_buf_get_var, 0, "mail_mode_done")
+  if ok then
+    return
+  end
+  vim.b.mail_mode_done = 1
+  -- exit insert mode if necessary
+  if mode == "i" then
+    vim.api.nvim_input("<Esc>")
+  end
+  -- define syntax group list '@synMailIncludeMarkdown'
+  -- * add 'contained' flag to all syntax items in 'syntax/markdown.vim'
+  -- * add top-level syntax items in 'syntax/markdown.vim' to
+  --   '@synMailIncludeMarkdown' syntax group list
+  vim.b.current_syntax = nil
+  vim.cmd([[syntax include @synMailIncludeMarkdown syntax/markdown.vim]])
+  vim.b.current_syntax = "mail"
+  -- apply markdown region
+  --       keepend: a match with an end pattern truncates any contained
+  --                matches
+  --         start: markdown region starts after first empty line
+  --                * '\n' is newline [see ':h /\n']
+  --                * '\_^$' is empty line [see ':h /\_^', ':h /$']
+  --                * '\@1<=' means:
+  --                  - must still match preceding ('\n') and following
+  --                    ('\_^$') atoms in sequence
+  --                  - the '1' means only search backwards 1 character for
+  --                    the previous match
+  --                  - although the following atom is required for a match,
+  --                    the match is actually deemed to end before it begins
+  --                    [see ':h /zero-width']
+  --           end: markdown region ends at end of file
+  --   containedin: markdown region can be included in any syntax group in
+  --                'mail'
+  --      contains: syntax group '@synMailIncludeMarkdown' is allowed to
+  --                begin inside region
+  vim.cmd(
+    [[syntax region synMailIncludeMarkdown keepend start='\n\@1<=\_^$' end='\%$' containedin=ALL contains=@synMailIncludeMarkdown]]
+  )
+  -- notify user
+  vim.api.nvim_echo({ { "Using markdown syntax for mail body" } }, true, {})
+  -- enter insert mode if necessary
+  if mode == "i" then
+    vim.api.nvim_input("a")
+  end
+end
+
+local mail_md_mode_n = function()
+  mail_md_mode_X("n")
+end
+
+local mail_md_mode_i = function()
+  mail_md_mode_X("i")
+end
 
 -- text_editing_settings() {{{1
 local text_editing_settings = function()
@@ -206,6 +257,9 @@ create_autocmd("FileType", {
     opt_local.colorcolumn = "72"
     -- text edit settings
     text_editing_settings()
+    -- set mapping to turn on markdown highlighting in message body
+    vim.keymap.set("n", "<Leader>md", mail_md_mode_n, { buffer = 0, silent = true })
+    vim.keymap.set("i", "<Leader>md", mail_md_mode_i, { buffer = 0, silent = true })
   end,
   desc = "Support for mail filetype",
 })
