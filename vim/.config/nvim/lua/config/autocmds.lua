@@ -2,16 +2,6 @@
 -- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
 -- Add any additional autocmds here
 
--- TODO {{{1
-
---[[
-TODO: msmtp syntax
-      * disable treesitter syntax and engage vim syntax
-      * custom msmtp syntax installed as per msmtp package README.Debian
-
-]]
--- }}}1
-
 --[[ variables ]]
 
 local create_autocmd = vim.api.nvim_create_autocmd
@@ -285,6 +275,13 @@ create_autocmd("FileType", {
 })
 
 -- msmtprc {{{1
+-- * relies on syntax file from msmtp debian package
+-- * as per package README.Debian file use command:
+--     sudo vim-addons -w install msmtp
+--   to install the syntax file:
+--     /usr/share/vim/addons/syntax/msmtp.vim
+-- * symlink to it from first directory in runtimepath:
+--     ~/.config/nvim/syntax/msmtp.vim
 create_autocmd({ "BufRead", "BufNewFile" }, {
   group = create_augroup("my_msmtp_support", { clear = true }),
   pattern = { "/etc/msmtprc", vim.fn.expand("~") .. "/.msmtprc" },
