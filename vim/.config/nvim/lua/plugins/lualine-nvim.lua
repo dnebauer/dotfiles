@@ -40,7 +40,16 @@ return {
             { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
             { Util.lualine.pretty_path() },
           },
-          lualine_x = { "encoding", "fileformat", "filetype" },
+          lualine_x = {
+            {
+              require("noice").api.status.command.get,
+              cond = require("noice").api.status.command.has,
+              color = { fg = "#ff9e64" },
+            },
+            "encoding",
+            "fileformat",
+            "filetype",
+          },
           lualine_y = { { "progress", separator = " ", padding = { left = 1, right = 0 } } },
           lualine_z = { { "location", padding = { left = 0, right = 1 } } },
         },

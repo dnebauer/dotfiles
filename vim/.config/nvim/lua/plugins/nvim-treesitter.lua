@@ -1,14 +1,5 @@
 --[[ nvim-treesitter/nvim-treesitter : interface to parsing tool treesitter ]]
 
-local disable_function = function(lang)
-  local buf_name = vim.api.nvim_buf_get_name(0)
-  --vim.notify("Lang:'" .. lang .. "'")
-  --if lang == "clojure" and string.find(buf_name, "conjure%-") then
-  if string.find(buf_name, "msmtprc") then
-    return true
-  end
-end
-
 return {
   {
     "nvim-treesitter/nvim-treesitter",
@@ -24,10 +15,7 @@ return {
     ---@type TSConfig
     ---@diagnostic disable-next-line: missing-fields
     opts = {
-      highlight = {
-        enable = true,
-        disable = disable_function, -- WARNING: function is not called
-      },
+      highlight = { enable = true },
       indent = { enable = true },
       ensure_installed = {
         "bash",
@@ -60,9 +48,11 @@ return {
         enable = true,
         keymaps = {
           init_selection = "<C-space>",
-          node_incremental = "<C-space>",
+          --node_incremental = "<C-space>",
+          node_incremental = "v",
           scope_incremental = false,
-          node_decremental = "<bs>",
+          --node_decremental = "<bs>",
+          node_decremental = "V",
         },
       },
       textobjects = {
