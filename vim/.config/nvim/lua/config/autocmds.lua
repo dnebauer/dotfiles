@@ -295,13 +295,11 @@ create_autocmd("FileType", {
 --     /usr/share/vim/addons/syntax/msmtp.vim
 -- * symlink to it from first directory in runtimepath:
 --     ~/.config/nvim/syntax/msmtp.vim
-create_autocmd({ "BufRead", "BufNewFile" }, {
-  group = create_augroup("my_msmtp_support", { clear = true }),
-  pattern = { "/etc/msmtprc", vim.fn.expand("~") .. "/.msmtprc" },
-  callback = function()
-    opt_local.filetype = "msmtp"
-  end,
-  desc = "Force filetype for msmtp config files for syntax support",
+vim.filetype.add({
+  filename = {
+    [".msmtprc"] = "msmtp",
+    ["/etc/msmtprc"] = "msmtp",
+  },
 })
 
 -- nsis {{{1
