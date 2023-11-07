@@ -191,19 +191,19 @@ create_autocmd({ "BufNewFile", "BufReadPost" }, {
 })
 
 -- cd to file directory {{{1
-create_autocmd("BufEnter", {
-  group = create_augroup("my_local_dir", { clear = true }),
-  pattern = "*",
-  callback = function()
-    -- INFO: ignore following "Fields cannot be injected" warning
-    vim.b.my_initial_cwd = vim.fn.getcwd()
-    local full_path = vim.fn.expand("%:p")
-    if not string.find(full_path, "://", 1, true) then
-      vim.cmd([[lcd %:p:h]])
-    end
-  end,
-  desc = "Change to file directory",
-})
+--create_autocmd("BufEnter", {
+--  group = create_augroup("my_local_dir", { clear = true }),
+--  pattern = "*",
+--  callback = function()
+--    -- INFO: ignore following "Fields cannot be injected" warning
+--    vim.b.my_initial_cwd = vim.fn.getcwd()
+--    local full_path = vim.fn.expand("%:p")
+--    if not string.find(full_path, "://", 1, true) then
+--      vim.cmd([[lcd %:p:h]])
+--    end
+--  end,
+--  desc = "Change to file directory",
+--})
 
 -- }}}1
 

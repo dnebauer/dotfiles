@@ -65,6 +65,9 @@ vim.g.nrformats = ""
 -- save undo history in a file
 opt.undofile = true
 
+-- change to file directory
+opt.autochdir = true
+
 -- case sensitivity
 opt.ignorecase = true -- case insensitive matching if all lowercase
 opt.smartcase = true -- case sensitive matching if any capital letters
