@@ -15,6 +15,7 @@ return {
     ---@type TSConfig
     ---@diagnostic disable-next-line: missing-fields
     opts = {
+      matchup = { enable = true },
       highlight = { enable = true },
       indent = { enable = true },
       ensure_installed = {

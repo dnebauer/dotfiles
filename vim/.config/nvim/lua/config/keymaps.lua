@@ -86,13 +86,20 @@ map("n", "<BS>", ":b#<CR>", { silent = true, desc = "switch between alternate bu
 --map("n", "A", "zzA", { desc = "centre current line vertically before operation [n]" })
 
 -- move highlighted text vertically
-map("v", "J", ":m '>+1<CR>gv==kgvo<esc>=kgvo", { desc = "move highlighted text down" })
-map("v", "K", ":m '<-2<CR>gv==jgvo<esc>=jgvo", { desc = "move highlighted text up" })
+map("v", "J", ":move '>+1<CR>gv==kgvo<esc>=kgvo", { desc = "move highlighted text down" })
+map("v", "K", ":move '<-2<CR>gv==jgvo<esc>=jgvo", { desc = "move highlighted text up" })
 
 -- delete whole words backwards
 map("i", "<C-BS>", "<Esc>cvb", { desc = "delete whole words backwards [n]" })
 
 -- enable insert new line without losing indent if escape immediately after
 -- does not work if configured to delete trailing whitespace on InsertLeave
-map("n", "o", "o <BS>")
-map("n", "O", "O <BS>")
+map("n", "o", "o <BS>", { desc = "insert newline but don't lose indent" })
+map("n", "O", "O <BS>", { desc = "insert newline but don't lose indent" })
+
+-- paste over currently selected text without yanking it
+map("v", "p", '"_dP', { desc = "paste over visual selection without yanking it" })
+
+-- better escape using jk in insert and terminal mode
+map("i", "jk", "<ESC>", { desc = "alternative escape in insert mode" })
+map("t", "jk", "<C-\\><C-n>", { desc = "alternative escape in terminal mode" })
