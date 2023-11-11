@@ -444,6 +444,13 @@ $endif$
 %\setlength{\footnotesep}{\skip\footins} % Between footnotes [= previous]
 \renewcommand{\hangfootparskip}{0pt}
 \renewcommand{\hangfootparindent}{1em}
+% Add text font command for keyboard symbols
+% (as per https://tex.stackexchange.com/a/37251)
+% can change font colour with additional font feature, i.e., change to
+% [Color=Blue, Scale=MatchUppercase]
+\newfontfamily{\mykbdfont}{Linux Biolinum Keyboard O}[Scale=MatchUppercase]
+\DeclareTextFontCommand{\textmykbdfont}{\mykbdfont}
+% end: new text font command for keyboard symbols
 $if(title)$
 \title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
 $endif$
@@ -489,7 +496,7 @@ $else$
 $endif$
 $if(abstract)$
 \begin{abstract}
-$abstract$
+	$abstract$
 \end{abstract}
 $endif$
 $endif$
@@ -504,19 +511,19 @@ $if(toc-title)$
 $endif$
 $if(beamer)$
 \begin{frame}[allowframebreaks]
-$if(toc-title)$
-  \frametitle{$toc-title$}
-$endif$
-  \tableofcontents[hideallsubsections]
+	$if(toc-title)$
+	\frametitle{$toc-title$}
+	$endif$
+	\tableofcontents[hideallsubsections]
 \end{frame}
 $else$
 {
-$if(colorlinks)$
-\hypersetup{linkcolor=$if(toccolor)$$toccolor$$else$$endif$}
-$endif$
-\setcounter{tocdepth}{$toc-depth$}
-\tableofcontents
-}
+		$if(colorlinks)$
+		\hypersetup{linkcolor=$if(toccolor)$$toccolor$$else$$endif$}
+		$endif$
+		\setcounter{tocdepth}{$toc-depth$}
+		\tableofcontents
+	}
 $endif$
 $endif$
 $if(lof)$
@@ -547,10 +554,10 @@ $endif$
 $endif$
 $if(beamer)$
 \begin{frame}[allowframebreaks]{$biblio-title$}
-  \bibliographytrue
-$endif$
-  \bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
-$if(beamer)$
+	\bibliographytrue
+	$endif$
+	\bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
+	$if(beamer)$
 \end{frame}
 $endif$
 
@@ -559,8 +566,8 @@ $endif$
 $if(biblatex)$
 $if(beamer)$
 \begin{frame}[allowframebreaks]{$biblio-title$}
-  \bibliographytrue
-  \printbibliography[heading=none]
+	\bibliographytrue
+	\printbibliography[heading=none]
 \end{frame}
 $else$
 \printbibliography$if(biblio-title)$[title=$biblio-title$]$endif$
