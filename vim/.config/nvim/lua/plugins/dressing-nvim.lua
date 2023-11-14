@@ -1,5 +1,7 @@
 --[[ stevearc/dressing.nvim : override core ui hooks ]]
 
+-- WARNING: these settings are ignored, even if noice.nvim is disabled
+
 return {
   {
     "stevearc/dressing.nvim",
