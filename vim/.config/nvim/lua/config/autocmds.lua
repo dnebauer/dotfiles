@@ -76,6 +76,7 @@ local text_editing_settings = function()
   -- rewrap paragraph using <M-q>, i.e., <Alt-q>
   vim.keymap.set("n", "<M-q>", '{gq}<Bar>:echo "Rewrapped paragraph"<CR>', { remap = false, silent = true })
   vim.keymap.set("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true })
+  opt_local.formatexpr = "tqna1"
 end
 -- }}}1
 
