@@ -11,7 +11,7 @@ local api = vim.api
 --       is the default with vim.keymap.set()
 
 -- <CR> to replace colon
-map("n", "<CR>", ":", { desc = "use <CR> for : [n]" })
+map({ "n", "v" }, "<CR>", ":", { desc = "use <CR> for : [n]" })
 
 -- save and exit mappings
 -- * ZZ : save and exit
