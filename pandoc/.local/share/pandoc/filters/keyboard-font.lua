@@ -35,11 +35,11 @@ function Span(el)
 		-- remove font attribute
 		el.attributes["font"] = nil
 		-- use style attribute instead
-		el.attributes["style"] = "font-family: 'Linux Biolinum Keyboard O';"
-			.. "border-radius: revert;"
-			.. "font-size: revert;"
-			.. "background-color: revert;"
-			.. "padding: revert;"
+		el.attributes["style"] = "font-family:'Linux Biolinum Keyboard O';"
+			.. "border-radius:revert;"
+			.. "font-size:revert;"
+			.. "background-color:revert;"
+			.. "padding:revert;"
 		-- return full span element
 		return el
 
