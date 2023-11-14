@@ -23,89 +23,63 @@ return {
       -- file finder based on frequency and recency
       {
         "nvim-telescope/telescope-frecency.nvim",
-        event = "VeryLazy",
-        opts = {},
         config = function(_, opts)
-          require("frecency").setup(opts)
-          require("lazyvim.util").on_load("telescope.nvim", function()
-            require("telescope").load_extension("frecency")
-          end)
+          require("telescope").load_extension("frecency")
         end,
       },
       -- software licenses
       {
         "chip/telescope-software-licenses.nvim",
         dependencies = { "nvim-lua/plenary.nvim" },
-        event = "VeryLazy",
         config = function()
-          require("lazyvim.util").on_load("telescope.nvim", function()
-            require("telescope").load_extension("software-licenses")
-          end)
+          require("telescope").load_extension("software-licenses")
         end,
       },
       -- symbols
       {
         "nvim-telescope/telescope-symbols.nvim",
-        event = "VeryLazy",
       },
       -- emojis
       {
         "xiyaowong/telescope-emoji.nvim",
-        event = "VeryLazy",
         config = function()
-          require("lazyvim.util").on_load("telescope.nvim", function()
-            require("telescope").load_extension("emoji")
-          end)
+          require("telescope").load_extension("emoji")
         end,
       },
       -- glyphs
       {
         "ghassan0/telescope-glyph.nvim",
-        event = "VeryLazy",
         config = function()
-          require("lazyvim.util").on_load("telescope.nvim", function()
-            require("telescope").load_extension("glyph")
-          end)
+          require("telescope").load_extension("glyph")
         end,
       },
       -- headings
       {
         "crispgm/telescope-heading.nvim",
-        event = "VeryLazy",
         config = function()
-          require("lazyvim.util").on_load("telescope.nvim", function()
-            require("telescope").load_extension("heading")
-          end)
+          require("telescope").load_extension("heading")
         end,
       },
       -- ctags outline
       {
         "fcying/telescope-ctags-outline.nvim",
-        event = "VeryLazy",
         config = function()
-          require("lazyvim.util").on_load("telescope.nvim", function()
-            require("telescope").load_extension("ctags_outline")
-          end)
+          require("telescope").load_extension("ctags_outline")
         end,
       },
       -- scriptnames
       {
         "LinArcX/telescope-scriptnames.nvim",
-        event = "VeryLazy",
         config = function()
-          require("lazyvim.util").on_load("telescope.nvim", function()
-            require("telescope").load_extension("scriptnames")
-          end)
+          require("telescope").load_extension("scriptnames")
         end,
       },
       -- undo
       {
         "debugloop/telescope-undo.nvim",
-        event = "VeryLazy",
+        keys = { { "<leader>U", "<cmd>Telescope undo<cr>" } },
         config = function()
-          require("lazyvim.util").on_load("telescope.nvim", function()
-            require("telescope").load_extension("undo")
-          end)
+          require("telescope").load_extension("undo")
         end,
       },
     },
