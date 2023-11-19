@@ -10,6 +10,10 @@ path+=('/bin')
 path+=('/usr/games')
 
 # local executables
+# - cargo-installed executables
+local_cargo="$HOME/.cargo/bin"
+[[ -d "$local_cargo" ]] && path=("$local_cargo" $path)
+# - locally installed executables
 local_bin="$HOME/.local/bin"
 [[ -d "$local_bin" ]] && path=("$local_bin" $path)
 unset local_bin
