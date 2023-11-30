@@ -1,0 +1,324 @@
+*dn-utils-nvim.txt*   For Neovim version 0.9   Last change: 2023 November 19
+
+==============================================================================
+Table of Contents                                            *dn_utils.contents*
+
+Introduction ·················································· |dn_utils.intro|
+Variables ················································· |dn_utils.variables|
+Function List ·············································· |dn_utils.funclist|
+Functions ················································· |dn_utils.functions|
+
+==============================================================================
+Introduction                                                    *dn_utils.intro*
+
+A plugin to provide useful generic functions. It is intended to be available
+to all files being edited. These functions were developed over time by the
+author and later combined into a library. Some |commands| and |mappings| are
+provided.
+
+See |dn#util#rev| for a discussion of how scripts depending on this library
+can check for its availability.
+
+==============================================================================
+Variables                                                   *dn_utils.variables*
+
+                                                              *dn_utils.options*
+While it is not anticipated that users will need to inspect the plugin
+options, they are exposed as a table in the "options" field. The preferred
+method to set or alter these options is through the |dn_utils.setup| method.
+Change them in any other way at your own risk!
+
+==============================================================================
+Function List                                                *dn_utils.funclist*
+
+This is a list of functions grouped by what they are used for. An alphabetical
+list of function descriptions is located at |functions|. Use CTRL-] on the
+function name to jump to detailed help on it.
+
+Dates
+  * |dn#util#insertCurrentDate| insert current date in ISO format
+  * |dn#util#dayOfWeek|         get name of weekday
+  * |dn#util#nowDay|            get current day in month
+  * |dn#util#nowMonth|          get current month
+  * |dn#util#nowYear|           get current year
+
+Files and directories
+  * |dn#util#fileExists|        whether file exists (uses |glob()|)
+  * |dn#util#getFilePath|       get filepath of file being edited
+  * |dn#util#getFileDir|        get directory of file being edited
+  * |dn#util#getFileName|       get name of file being edited
+  * |dn#util#getRtpDir|         finds directory from runtimepath
+  * |dn#util#getRtpFile|        finds file(s) in directories under 'rtp'
+
+User interaction
+  * |dn#util#showMsg|           display message to user
+  * |dn#util#error|             display error message
+  * |dn#util#warn|              display warning message
+  * |dn#util#prompt|            display prompt message
+  * |dn#util#echoWrap|          echoes text but wraps it sensibly
+  * |dn#util#menuSelect|        select item from menu
+  * |dn#util#menuAddOption|     add option to menu
+  * |dn#util#menuAddSubmenu|    add submenu to menu
+  * |dn#util#help|              user can select from help topics
+  * |dn#util#getSelection|      returns currently selected text
+
+Lists
+  * |dn#util#listExchangeItems| exchange two elements in the same list
+  * |dn#util#listSubtract|      subtract one list from another
+  * |dn#util#listToScreen|      formats list for screen display
+  * |dn#util#listToScreenColumns|
+                                         formats list for columnar screen display
+  * |dn#util#listToText|        convert list to text fragment
+
+Programming
+  * |dn#util#unusedFunctions|   checks for uncalled functions
+  * |dn#util#insertMode|        switch to insert mode
+  * |dn#util#executeShellCommand|
+                                         execute shell command
+  * |dn#util#exceptionError|    extract error message from exception
+  * |dn#util#scriptNumber|      get SID of given script
+  * |dn#util#filetypes|         get list of available filetypes
+  * |dn#util#showFiletypes|     display list of available filetypes
+  * |dn#util#runtimepaths|      get list of runtime paths
+  * |dn#util#showRuntimepaths|  display list of runtime paths
+  * |dn#util#isMappedTo|        find mode mappings for given |{rhs}|
+  * |dn#util#updateUserHelpTags|
+                                         rebuild help tags in rtp "doc" subdirs
+  * |dn#util#os|                determine operating system family
+  * |dn#utilis#isWindows|       determine whether using windows OS
+  * |dn#utilis#isUnix|          determine whether using unix-like OS
+
+Version control
+  * |dn#util#localGitRepoFetch| perform a fetch on a local git repository
+  * |dn#util#localGitRepoUpdatedRecently|
+                                         check that local repo is updated
+
+String manipulation
+  * |dn#util#stripLastChar|     removes last character from string
+  * |dn#util#insertString|      insert string at current cursor location
+  * |dn#util#trimChar|          removes leading and trailing chars
+  * |dn#util#entitise|          replace special html chars with entities
+  * |dn#util#deentitise|        replace html entities with characters
+  * |dn#util#dumbifyQuotes(|    replace smart quotes with straight quotes
+  * |dn#util#stringify|         convert variable to string
+  * |dn#util#matchCount|        finds number of occurrences of string
+  * |dn#util#padInternal|       pad string at internal location
+  * |dn#util#padLeft|           left pad string
+  * |dn#util#padRight|          right pad string
+  * |dn#util#substitute|        perform global substitution in file
+  * |dn#util#changeHeaderCaps|  changes capitalisation of selection
+  * |dn#util#wrap|              wrap string sensibly
+
+Numbers
+  * |dn#util#validPosInt|       check whether input is valid positive int
+
+Miscellaneous
+  * |dn#util#selectWord|        select |<cword>| under cursor
+  * |dn#util#varType|           get variable type
+  * |dn#util#testFn|            utility function used for testing only
+
+==============================================================================
+Functions                                                   *dn_utils.functions*
+
+dn_utils.change_caps()                                    *dn_utils.change_caps*
+    Changes capitalisation of line or visual selection. The {mode} is "n"
+    (|Normal-mode|) "i" (|Insert-mode|) or "v" (|Visual-mode|). The line or
+    selection is replaced with the altered line or selection. The user chooses
+    the type of capitalisation from a menu:
+    upper case:
+      * convert to all uppercase characters
+
+    lower case:
+      * convert to all lowercase characters
+
+    sentence case:
+      * convert the first character to uppercase and all other characters to
+        lowercase
+
+    start case:
+      * convert the first letter of each word to uppercase and all other letters
+        to lower case
+
+    title case:
+      * capitalises first and last words, and all other words except articles,
+        prepositions and conjunctions of fewer than five letters
+
+    Newlines in a selection are preserved.
+
+    Returns: ~
+        (nil)  No return value
+
+
+dn_utils.clear_prompt()                                  *dn_utils.clear_prompt*
+    Clear command line.
+
+    Returns: ~
+        (nil)  No return value
+
+
+dn_utils.is_table_sequence({tbl})                   *dn_utils.is_table_sequence*
+    Test whether a table is a sequence.
+    A valid sequence "seq" has elements from 1 to #seq without any gaps (nils)
+    in between.
+    Throws error if supplied variable is not a table.
+
+    Parameters: ~
+        {tbl}  (table)  Table to be tested
+
+    Returns: ~
+        (boolean)  Whether the table is a sequence
+
+
+dn_utils.is_table_value({tbl}, {str})                  *dn_utils.is_table_value*
+    Test whether a table contains a specific string.
+    Will recurse through nested tables.
+    The string must match the entire table value.
+
+    Parameters: ~
+        {tbl}  (table)  Table to search
+        {str}  (any)    Value to search for (is converted to string)
+
+    Returns: ~
+        (boolean)  Whether the table contains the provided string as a value
+
+
+dn_utils.menu_select({menu}, {prompt})                    *dn_utils.menu_select*
+    Select an option from a multi-level sequence or table menu.
+
+    An optional [prompt] string can be provided to this function; the default
+    value is "Select an option:". Empty strings are ignored. An empty menu causes
+    an error.
+
+    The selected menu option (or its associated value) is returned, with a
+    |luaref-nil| -indicating no item was selected.
+
+    In the following discussion a "simple" menu is one without any submenus, and
+    "simple" variables are string, number, boolean, and nil. A "simple" sequence
+    has elements which are all either simple variables or single key-value
+    dictionaries whose values are also simple variables. A "simple" table has
+    values which are all simple variables.
+
+    If a simple sequence menu is provided, its simple elements are displayed in
+    the menu and returned if selected. If a sequence item is a dictionary
+    containing one key-value pair, the key is displayed in the menu and, if
+    selected, its value is returned. (It is a fatal error if a sequence item is a
+    dictionary containing multiple key-value pairs.)
+
+    If a simple dictionary menu is provided, its keys form the menu items and
+    when an item is selected its corresponding value is returned. Because the
+    order of key-value pairs in a dictionary is undefined, the order of menu
+    items arising from a dictionary menu cannot be predicted.
+
+    Submenus can be added to both sequence and dictionary menus. In such a case
+    the header for the submenu, or child menu, is indicated in the parent menu by
+    appending an arrow ( ->) to the header option in the parent menu. Adding a
+    submenu Dict is easy - the new submenu is added as a new key-value pair to
+    the parent menu. The new key is the submenu header in the parent menu while
+    the new value is a sequence or dictionary defining the new submenu options.
+
+    A single menu can contain a mixture of sequence and dictionary elements, and
+    multi-level menus can become complex.
+
+    Errors are thrown if a menu item is not a valid data type, if the menu is
+    neither a sequence nor a dictionary, and if a menu has no items.
+
+    Parameters: ~
+        {menu}    (table)   Menu items
+        {prompt}  (string)  Prompt (optional, default: 'Select an option:')
+
+    Returns: ~
+        (string)  Selected menu option
+
+
+dn_utils.pairs_by_keys({tbl}, {sort_fn})                *dn_utils.pairs_by_keys*
+    Iterator returning key-value pairs in order of sorted keys. If no sort
+    function is provided the default sort method for the lua table.sort
+    function is used.
+
+    Parameters: ~
+        {tbl}      (table)         Dictionary table to process
+        {sort_fn}  (function|nil)  Sort function (default = default sort
+                                   method for lua function "table.sort")
+
+    Returns: ~
+        (function)  Iterator that presents table key-value pairs in key sort
+                    order
+
+    Usage: ~
+>lua
+        for name, line in pairs_by_keys(lines) do
+          print(name, line)
+        end
+<
+
+
+dn_utils.setup({opts})                                          *dn_utils.setup*
+    Called explicitly by users to configure this plugin.
+
+    Parameters: ~
+        {opts}  (table)  Plugin options
+
+    Returns: ~
+        (nil)  No return value
+
+
+dn_utils.split({str}, {sep})                                    *dn_utils.split*
+    Split a string. The optional second parameter is a separator which defaults
+    to whitespace (lua "%s" character class).
+
+    Parameters: ~
+        {str}  (string)      String to split
+        {sep}  (string|nil)  Separator which can be any valid lua pattern, default to lua character class "%s"
+
+    Returns: ~
+        (table)  Array of split items
+
+
+dn_utils.stringify({var})                                   *dn_utils.stringify*
+    Convert variable to string and return the converted string.
+    "big-arrow" (" => ") notation is used between keys and values. Consider
+    using |lua_tostring()| instead of this function.
+
+    Parameters: ~
+        {var}  (any|nil)  Variable to be stringified
+
+    Returns: ~
+        (string)  Stringified variable
+
+
+                                                          *dn_utils.table_print*
+dn_utils.table_print({tbl}, {count}, {pad})
+    Print prettified table to console.
+
+    Parameters: ~
+        {tbl}    (table)       Table to convert to a string
+        {count}  (number|nil)  Number of pads between string tokens (default=1)
+        {pad}    (string|nil)  String to use for indenting and padding (default=<Tab>)
+
+
+dn_utils.table_size({tbl})                                 *dn_utils.table_size*
+    Determine the number of elements in a table (sequence or dictionary).
+
+    A fatal error is raised if the parameter is not a table.
+
+    Parameters: ~
+        {tbl}  (table)  Table to analyse
+
+    Returns: ~
+        (number)  Integer size of table
+
+
+                                                      *dn_utils.table_stringify*
+dn_utils.table_stringify({tbl}, {count}, {pad})
+    Convert table to a prettified string.
+
+    Parameters: ~
+        {tbl}    (table)       Table to convert to a string
+        {count}  (number|nil)  Number of pads between string tokens (default=1)
+        {pad}    (string|nil)  String to use for indenting and padding (default=<Tab>)
+
+    Returns: ~
+        (string)  Pretty printed table
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
