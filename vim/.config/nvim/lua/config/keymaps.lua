@@ -94,8 +94,8 @@ map("i", "<C-BS>", "<Esc>cvb", { desc = "delete whole words backwards [n]" })
 
 -- enable insert new line without losing indent if escape immediately after
 -- does not work if configured to delete trailing whitespace on InsertLeave
-map("n", "o", "o <BS>", { desc = "insert newline but don't lose indent" })
-map("n", "O", "O <BS>", { desc = "insert newline but don't lose indent" })
+--map("n", "o", "o <BS>", { desc = "insert newline but don't lose indent" })
+--map("n", "O", "O <BS>", { desc = "insert newline but don't lose indent" })
 
 -- paste over currently selected text without yanking it
 map("v", "p", '"_dP', { desc = "paste over visual selection without yanking it" })
@@ -103,3 +103,5 @@ map("v", "p", '"_dP', { desc = "paste over visual selection without yanking it" 
 -- better escape using jk in insert and terminal mode
 map("i", "jk", "<ESC>", { desc = "alternative escape in insert mode" })
 map("t", "jk", "<C-\\><C-n>", { desc = "alternative escape in terminal mode" })
+
+map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
