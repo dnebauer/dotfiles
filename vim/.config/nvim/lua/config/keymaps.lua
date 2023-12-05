@@ -103,5 +103,3 @@ map("v", "p", '"_dP', { desc = "paste over visual selection without yanking it" 
 -- better escape using jk in insert and terminal mode
 map("i", "jk", "<ESC>", { desc = "alternative escape in insert mode" })
 map("t", "jk", "<C-\\><C-n>", { desc = "alternative escape in terminal mode" })
-
-map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
