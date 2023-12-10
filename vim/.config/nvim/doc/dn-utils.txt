@@ -4,6 +4,7 @@
 Table of Contents                                            *dn_utils.contents*
 
 Introduction ·················································· |dn_utils.intro|
+External requirements ·································· |dn_utils.requirements|
 Variables ················································· |dn_utils.variables|
 Function List ·············································· |dn_utils.funclist|
 Functions ················································· |dn_utils.functions|
@@ -16,8 +17,12 @@ to all files being edited. These functions were developed over time by the
 author and later combined into a library. Some |commands| and |mappings| are
 provided.
 
-See |dn#util#rev| for a discussion of how scripts depending on this library
-can check for its availability.
+==============================================================================
+External requirements                                    *dn_utils.requirements*
+
+The menu selection function |dn_utils.menu_select| uses an embedded
+|python3| script whose only external dependency is the tkinter package
+(https://docs.python.org/3/library/tkinter.html).
 
 ==============================================================================
 Variables                                                   *dn_utils.variables*
@@ -35,13 +40,6 @@ This is a list of functions grouped by what they are used for. An alphabetical
 list of function descriptions is located at |functions|. Use CTRL-] on the
 function name to jump to detailed help on it.
 
-Dates
-  * |dn#util#insertCurrentDate| insert current date in ISO format
-  * |dn#util#dayOfWeek|         get name of weekday
-  * |dn#util#nowDay|            get current day in month
-  * |dn#util#nowMonth|          get current month
-  * |dn#util#nowYear|           get current year
-
 Files and directories
   * |dn#util#fileExists|        whether file exists (uses |glob()|)
   * |dn#util#getFilePath|       get filepath of file being edited
@@ -51,14 +49,13 @@ Files and directories
   * |dn#util#getRtpFile|        finds file(s) in directories under 'rtp'
 
 User interaction
-  * |dn#util#showMsg|           display message to user
-  * |dn#util#error|             display error message
-  * |dn#util#warn|              display warning message
+  * |dn_utils.clear_prompt      clear command line
+  * |dn_utils.error|            display error message
+  * |dn_utils.info|             display message to user
+  * |dn_utils.warn|             display warning message
   * |dn#util#prompt|            display prompt message
   * |dn#util#echoWrap|          echoes text but wraps it sensibly
-  * |dn#util#menuSelect|        select item from menu
-  * |dn#util#menuAddOption|     add option to menu
-  * |dn#util#menuAddSubmenu|    add submenu to menu
+  * |dn_utils.menu_select|      select item from menu
   * |dn#util#help|              user can select from help topics
   * |dn#util#getSelection|      returns currently selected text
 
@@ -78,6 +75,7 @@ Programming
   * |dn#util#exceptionError|    extract error message from exception
   * |dn#util#scriptNumber|      get SID of given script
   * |dn#util#filetypes|         get list of available filetypes
+  * |dn_utils.setup|            initialise/set up plugin
   * |dn#util#showFiletypes|     display list of available filetypes
   * |dn#util#runtimepaths|      get list of runtime paths
   * |dn#util#showRuntimepaths|  display list of runtime paths
@@ -100,14 +98,26 @@ String manipulation
   * |dn#util#entitise|          replace special html chars with entities
   * |dn#util#deentitise|        replace html entities with characters
   * |dn#util#dumbifyQuotes(|    replace smart quotes with straight quotes
-  * |dn#util#stringify|         convert variable to string
+  * |dn_utils.stringify|        convert variable to string
   * |dn#util#matchCount|        finds number of occurrences of string
   * |dn#util#padInternal|       pad string at internal location
   * |dn#util#padLeft|           left pad string
   * |dn#util#padRight|          right pad string
   * |dn#util#substitute|        perform global substitution in file
-  * |dn#util#changeHeaderCaps|  changes capitalisation of selection
+  * |dn_utils.change_caps       changes capitalisation of line/selection
+  * |dn_utils.split|            split string on separator
   * |dn#util#wrap|              wrap string sensibly
+
+Tables
+  * |dn_utils.is_table_sequence|
+                                check whether var is a table sequence
+  * |dn_utils.is_table_value|   check whether var is a value in table
+  * |dn_utils.pairs_by_keys|    iterate through table key-value pairs
+  * |dn_utils.table_remove_empty_end_items|
+                                remove empty lines from end of sequence
+  * |dn_utils.table_print|      print prettified table
+  * |dn_utils.table_size|       get item or key-value pair count
+  * |dn_utils.table_stringify|  prettify table
 
 Numbers
   * |dn#util#validPosInt|       check whether input is valid positive int
@@ -151,6 +161,26 @@ dn_utils.change_caps()                                    *dn_utils.change_caps*
 
 dn_utils.clear_prompt()                                  *dn_utils.clear_prompt*
     Clear command line.
+
+    Returns: ~
+        (nil)  No return value
+
+
+dn_utils.error({...})                                           *dn_utils.error*
+    Display error messages(s).
+
+    Parameters: ~
+        {...}  (string)  Error messages to display.
+
+    Returns: ~
+        (nil)  No return value
+
+
+dn_utils.info({...})                                             *dn_utils.info*
+    Display messages(s).
+
+    Parameters: ~
+        {...}  (string)  Messages to display.
 
     Returns: ~
         (nil)  No return value
@@ -221,6 +251,11 @@ dn_utils.menu_select({menu}, {prompt})                    *dn_utils.menu_select*
 
     Errors are thrown if a menu item is not a valid data type, if the menu is
     neither a sequence nor a dictionary, and if a menu has no items.
+
+    The inbuilt vim |inputlist()| is used for small and medium sized lists of
+    menu options (up to around 20 options). For menus with more options an
+    embedded |python3| script is used that has a sole external dependency on the
+    tkinter package (https://docs.python.org/3/library/tkinter.html).
 
     Parameters: ~
         {menu}    (table)   Menu items
@@ -330,6 +365,16 @@ dn_utils.table_stringify({tbl}, {count}, {pad})
 
     Returns: ~
         (string)  Pretty printed table
+
+
+dn_utils.warning({...})                                       *dn_utils.warning*
+    Display warning messages(s).
+
+    Parameters: ~
+        {...}  (string)  Warning messages to display.
+
+    Returns: ~
+        (nil)  No return value
 
 
 vim:tw=78:ts=8:noet:ft=help:norl:
