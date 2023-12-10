@@ -33,10 +33,12 @@ end
 vim.g.dn_utils_loaded = true
 
 -- record plugin state
+--[[
 local ok, _ = pcall(vim.api.nvim_get_var, "dn_utils")
 if not ok then
   vim.g.dn_utils = {}
 end
+--]]
 
 local sf = string.format
 
@@ -65,6 +67,8 @@ local _extract_single_element_dict_contents
 local _menu_normalise
 local _menu_simple_type
 local _menu_ui_select
+local _menu_ui_select_inputlist
+local _menu_ui_select_pythontk
 local _t
 local _tbl_to_str
 
@@ -419,7 +423,7 @@ function _menu_simple_type(item)
   return dn_utils.is_table_value(simple_types, item_type)
 end
 
--- _menu_ui_select
+-- _menu_ui_select(prompt, options)
 ---@private
 ---This is a helper function for the |dn_utils.menu_select| function. That
 ---function receives a user {prompt}. It also receives a multi-level sequence or
@@ -430,11 +434,42 @@ end
 ---WARNING: The calling function is responsible for checking that the
 ---         parameters passed to this function are valid
 ---
----A fatal error occurs if unable to find a choice in the option list.
+---This function calls either |_menu_ui_select_inputlist()| or
+---|_menu_ui_select_pythontk()| depending on window height.
 ---@param prompt string Menu prompt
 ---@param options table Sequence containing menu options
 ---@return number|nil _ Option number
 function _menu_ui_select(prompt, options)
+  -- do not use inputlist if:
+  -- * number of options > 20 : dressing.vim limits inputlist height to 20 in
+  --   a 30 line window, and inputlist does not scroll
+  -- * number of options > (window height - 3) : inputlist does not scroll
+  local window_height = vim.api.nvim_list_uis()[1].height
+  local number_of_options = #options
+  if number_of_options > 20 or number_of_options > (window_height - 3) then
+    return _menu_ui_select_pythontk(prompt, options)
+  else
+    return _menu_ui_select_inputlist(prompt, options)
+  end
+end
+
+-- _menu_ui_select_inputlist(prompt, options)
+---@private
+---This is a helper function for the |dn_utils.menu_select| function. That
+---function receives a user {prompt}. It also receives a multi-level sequence
+---or dictionary menu variable, normalises the menu (using the
+---|_menu_normalise| function, builds parallel lists of {options} and
+---{return_values}, and then calls on a subsidiary function to get the user to
+---select a value.
+---
+---WARNING: The calling function is responsible for checking that the
+---         parameters passed to this function are valid
+---
+---This function uses vim's inbuilt |inputlist()| to invoke a menu.
+---@param prompt string Menu prompt
+---@param options table Sequence containing menu options
+---@return number|nil _ Option number
+function _menu_ui_select_inputlist(prompt, options)
   local choices = { prompt }
   for i, option in ipairs(options) do
     table.insert(choices, sf("%d: %s", i, option))
@@ -444,6 +479,181 @@ function _menu_ui_select(prompt, options)
     return nil
   end
   return choice
+end
+
+-- _menu_ui_select_pythontk(prompt, options)
+---@private
+---This is a helper function for the |dn_utils.menu_select| function. That
+---function receives a user {prompt}. It also receives a multi-level sequence
+---or dictionary menu variable, normalises the menu (using the
+---|_menu_normalise| function, builds parallel lists of {options} and
+---{return_values}, and then calls on subsidiary functions to get the user to
+---select a value.
+---
+---WARNING: The calling function is responsible for checking that the
+---         parameters passed to this function are valid
+---
+---This function uses python script and the python tkinter module to invoke a
+---gui menu.
+---@param prompt string Menu prompt
+---@param options table Sequence containing menu options
+---@return number|nil _ Option number
+function _menu_ui_select_pythontk(prompt, options)
+  -- python script to invoke gui menu
+  local python_code = [[
+    # import statements
+    import tkinter as tk
+    from tkinter import ttk
+
+    # variables
+    selections = []
+    title = "Menu"
+    prompt = "{{prompt}}"
+    items = {{items}}
+
+
+    # event handlers
+
+
+    def on_item_selection(event):  # pylint: disable=unused-argument
+        register_item_selections()
+
+
+    def on_tree_double_click(event):  # pylint: disable=unused-argument
+        accept_selections()
+
+
+    def on_return_keypress(event):  # pylint: disable=unused-argument
+        # if Cancel button has focus then cancel, otherwise accept picks
+        if "focus" in (cancel_button.state()):
+            abort_selection()
+        else:
+            accept_selections()
+
+
+    def on_escape_keypress(event):  # pylint: disable=unused-argument
+        abort_selection()
+
+
+    def register_item_selections():
+        global selections
+        selections = []
+        for selected_id in tree.selection():
+            selections.append(menu_items[selected_id])
+
+
+    def abort_selection():
+        global selections
+        selections = []
+        root.destroy()
+
+
+    def accept_selections():
+        register_item_selections()
+        root.destroy()
+
+
+    # create main window
+    root = tk.Tk()
+    root.title(title)
+
+    # set style theme
+    # - should be available on all systems: {clam,alt,default,classic}
+    style = ttk.Style(root)
+    try:
+        style.theme_use("clam")
+    except tk.TclError:
+        pass
+
+    # create frame within main window
+    # - main window is 'old' tk; frame is 'modern' ttk
+    mainframe = ttk.Frame(root, padding="3 3 12 12")
+    mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+    # - next two lines ensure frame resizes with main window (to fill it)
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
+
+    # add prompt
+    prompt_label = ttk.Label(mainframe, text=prompt)
+    prompt_label.grid(column=1, row=1, sticky=(tk.W))
+
+    # add menu
+    select_mode = "browse"
+    tree = ttk.Treeview(mainframe, selectmode=select_mode, show=["tree"])
+    tree.grid(column=1, row=2, sticky=(tk.W))
+    menu_items = {}
+    first_id = None
+    for item in items:
+        item_id = tree.insert("", "end", text=item)
+        menu_items[item_id] = item
+        if not first_id:
+            first_id = item_id
+
+    # add OK and Cancel buttons
+    okay_button = ttk.Button(mainframe, text="OK")
+    okay_button.grid(column=1, row=3, sticky=(tk.E))
+    cancel_button = ttk.Button(mainframe, text="Cancel")
+    cancel_button.grid(column=1, row=4, sticky=(tk.E))
+
+    # add padding to all widgets
+    for child in mainframe.winfo_children():
+        child.grid_configure(padx=5, pady=5)
+
+    # determine initial focus in window
+    tree.focus_set()
+    tree.focus(first_id)
+    tree.selection_set(first_id)
+
+    # event handling
+    okay_button.config(command=accept_selections)
+    cancel_button.config(command=abort_selection)
+    tree.bind("<<TreeviewSelect>>", on_item_selection)
+    tree.bind("<Double-Button-1>", on_tree_double_click)
+    root.bind("<Return>", on_return_keypress)
+    root.bind("<Escape>", on_escape_keypress)
+
+    # display mainwindow
+    root.mainloop()
+
+    # return selection
+    vim.command("unlet! g:dn_utils_menu")
+    vim.command("let g:dn_utils_menu = {}")
+    if selections:
+        # hardcoded menu mode allows selection of only one item
+        return_value = selections[0]
+        vim.command("let g:dn_utils_menu.selected = v:true")
+        vim.command("let g:dn_utils_menu.selection = '{val}'".format(val=return_value))
+    else:
+        vim.command("let g:dn_utils_menu.selected = v:false")
+  ]]
+  local python_code_sequence = dn_utils.split(python_code, "\n")
+  -- remove end items consisting only of spaces
+  python_code_sequence = dn_utils.table_remove_empty_end_items(python_code_sequence)
+  -- remove indent based on indent in first line
+  local _, spaces = python_code_sequence[1]:find("^%s*")
+  for idx, item in ipairs(python_code_sequence) do
+    python_code_sequence[idx] = item:sub(spaces + 1, -1)
+  end
+  python_code = table.concat(python_code_sequence, "\n")
+  -- insert menu prompt and items into python code
+  python_code = python_code:gsub("{{prompt}}", prompt, 1)
+  local items = '["' .. table.concat(options, '", "') .. '"]'
+  python_code = python_code:gsub("{{items}}", items, 1)
+  vim.cmd.python("import vim")
+  vim.cmd.python(python_code)
+  -- get return value
+  local ok, pick = pcall(vim.api.nvim_get_var, "dn_utils_menu")
+  if not ok then
+    return nil
+  end
+  if not pick.selected then
+    return nil
+  end
+  local flipped_options = {}
+  for idx, option in ipairs(options) do
+    flipped_options[option] = idx
+  end
+  return flipped_options[pick.selection]
 end
 
 -- _t(code)
@@ -460,8 +670,8 @@ end
 ---  return vim.fn.pumvisible() == 1 and t'<C-N>' or t'<Tab>'
 ---end
 ---@usage ]]
-function _t(str)
-  return vim.api.nvim_replace_termcodes(str, true, true, true)
+function _t(code)
+  return vim.api.nvim_replace_termcodes(code, true, true, true)
 end
 
 -- _tbl_to_str(tbl, count, indent, pad)
@@ -857,22 +1067,28 @@ end
 ---@return string _ Selected menu option
 function dn_utils.menu_select(menu, prompt, recursive)
   -- process parameters
-  -- * menu
-  assert(type(menu) == "table", "Expected a table menu, got a " .. type(menu))
-  assert(next(menu) ~= nil, "Menu table is empty")
-  local items
-  if recursive then
-    -- normalise menu to 'sequence of dictionaries'
-    -- this includes checking menu validity
-    items = vim.deepcopy(menu)
-  else
-    -- first call
-    items = _menu_normalise(menu)
-  end
+  -- * recursive
+  --   - this is a hidden parameter used only by the function when calling
+  --     itself recursively, and should never be used by an external caller
+  recursive = recursive or 0
+  assert(type(recursive) == "number", "Expected number, got " .. type(recursive))
   -- * prompt
   if not (prompt ~= nil and prompt ~= "") then
     prompt = "Select an option:"
   end
+  -- * menu
+  assert(type(menu) == "table", "Expected a table menu, got a " .. type(menu))
+  assert(next(menu) ~= nil, "Menu table is empty")
+  local items
+  if recursive == 0 then
+    -- first call
+    -- normalise menu to 'sequence of dictionaries'
+    -- this includes checking menu validity
+    items = _menu_normalise(menu)
+  else
+    items = vim.deepcopy(menu)
+  end
+  recursive = recursive + 1
 
   -- process items to build parallel sequences of options and return values
   local options = {}
@@ -906,14 +1122,20 @@ function dn_utils.menu_select(menu, prompt, recursive)
   end
 
   -- select from menu
-  local pick = _menu_ui_select(prompt, options)
-  local selection = return_values[pick]
-
-  -- recurse if selected a submenu, otherwise return selection
-  if type(selection) == "table" then
-    return dn_utils.menu_select(selection, prompt, recursive)
-  else
-    return selection
+  while true do
+    local pick = _menu_ui_select(prompt, options)
+    local selection = return_values[pick]
+    -- recurse if selected a submenu, otherwise return selection
+    if type(selection) == "table" then
+      -- if submenu selection returned nil, do not return it in turn,
+      -- but repeat current menu selection
+      local recursive_selection = dn_utils.menu_select(selection, prompt, recursive)
+      if not recursive or (recursive and recursive_selection ~= nil) then
+        return recursive_selection
+      end
+    else
+      return selection
+    end
   end
 end
 
@@ -976,8 +1198,7 @@ function dn_utils.setup(opts)
 end
 
 -- split(str, [sep])
----Split a string. The optional second parameter is a separator which defaults
----to whitespace (lua "%s" character class).
+---Split a string on a separator character.
 ---@param str string String to split
 ---@param sep string|nil Separator which can be any valid lua pattern, default to lua character class "%s"
 ---@return table _ Array of split items
@@ -1028,6 +1249,47 @@ end
 function dn_utils.table_print(tbl, count, pad)
   -- credit: https://gist.github.com/jackbritchford/5f0d5f6dbf694b44ef0cd7af952070c9
   print(_tbl_to_str(tbl, count, 0, pad))
+end
+
+-- table_remove_empty_end_items(seq)
+---Remove empty (no characters or only spaces) items from the end of a table
+---sequence.
+---@param source table Table sequence to trim
+---@return table _ Sequence with empty terminal items removed
+function dn_utils.table_remove_empty_end_items(source)
+  -- credit:
+  -- https://www.alanwsmith.com/pages/lua-remove-empty-elements-from-a-list--2xget6vp/
+
+  -- process param
+  assert(type(source) == "table", "Expected table, got " .. type(source))
+  assert(dn_utils.is_table_sequence(source), "Table is not a sequence")
+  -- copy items except for empty end items
+  -- but this reverses order of sequence
+  local reversed = {}
+  local load_counter = #source
+  local hit_content = false
+  local match_start
+  while load_counter > 0 do
+    -- search for nothing but optional spaces
+    match_start, _ = source[load_counter]:find("^%s*$")
+    -- if no match then not empty, i.e., contains non-space content
+    if match_start == nil then
+      hit_content = true
+      table.insert(reversed, source[load_counter])
+    elseif hit_content == true then
+      table.insert(reversed, source[load_counter])
+    end
+    load_counter = load_counter - 1
+  end
+  -- reverse order again to get original order
+  local trimmed = {}
+  local reverse_counter = #reversed
+  while reverse_counter > 0 do
+    table.insert(trimmed, reversed[reverse_counter])
+    reverse_counter = reverse_counter - 1
+  end
+  -- return resulting sequence
+  return trimmed
 end
 
 -- table_size(tbl)

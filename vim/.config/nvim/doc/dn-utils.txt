@@ -263,8 +263,7 @@ dn_utils.setup({opts})                                          *dn_utils.setup*
 
 
 dn_utils.split({str}, {sep})                                    *dn_utils.split*
-    Split a string. The optional second parameter is a separator which defaults
-    to whitespace (lua "%s" character class).
+    Split a string on a separator character.
 
     Parameters: ~
         {str}  (string)      String to split
@@ -294,6 +293,18 @@ dn_utils.table_print({tbl}, {count}, {pad})
         {tbl}    (table)       Table to convert to a string
         {count}  (number|nil)  Number of pads between string tokens (default=1)
         {pad}    (string|nil)  String to use for indenting and padding (default=<Tab>)
+
+
+                                         *dn_utils.table_remove_empty_end_items*
+dn_utils.table_remove_empty_end_items({source})
+    Remove empty (no characters or only spaces) items from the end of a table
+    sequence.
+
+    Parameters: ~
+        {source}  (table)  Table sequence to trim
+
+    Returns: ~
+        (table)  Sequence with empty terminal items removed
 
 
 dn_utils.table_size({tbl})                                 *dn_utils.table_size*
