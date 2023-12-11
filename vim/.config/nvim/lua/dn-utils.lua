@@ -816,8 +816,10 @@ end
 -- change_caps()
 ---Changes capitalisation of line or visual selection. The {mode} is "n"
 ---(|Normal-mode|) "i" (|Insert-mode|) or "v" (|Visual-mode|). The line or
----selection is replaced with the altered line or selection. The user chooses
----the type of capitalisation from a menu:
+---selection is replaced with the altered line or selection. Newlines in a
+---selection are preserved.
+---
+---The user chooses the type of capitalisation from a menu:
 ---     upper case: convert to all uppercase characters
 ---     lower case: convert to all lowercase characters
 ---  sentence case: convert the first character to uppercase and all other
@@ -827,8 +829,6 @@ end
 ---     title case: capitalises first and last words, and all other words
 ---                 except articles, prepositions and conjunctions of fewer
 ---                 than five letters
----
----Newlines in a selection are preserved.
 ---@return nil _ No return value
 function dn_utils.change_caps()
   -- can represent "" as _t("<C-v>") where _t() is a local function
