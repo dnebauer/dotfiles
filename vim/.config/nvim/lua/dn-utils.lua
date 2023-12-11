@@ -80,22 +80,22 @@ local _tbl_to_str
 ---be "upper", "lower", "sentence", "start" or "title":
 ---
 ---upper:
----  * convert the string to all uppercase characters
+---• convert the string to all uppercase characters
 ---
 ---lower:
----  * convert the string to all lowercase characters
+---• convert the string to all lowercase characters
 ---
 ---sentence:
----  * convert the first character to uppercase and all other characters to
+---• convert the first character to uppercase and all other characters to
 ---    lowercase
 ---
 ---start:
----  * convert the first letter of each word to uppercase and all other letters
----    to lower case
+---• convert the first letter of each word to uppercase and all other letters
+---  to lower case
 ---
 ---title:
----  * capitalises first and last words, and all other words except articles,
----    prepositions and conjunctions of fewer than five letters
+---• capitalises first and last words, and all other words except articles,
+---  prepositions and conjunctions of fewer than five letters
 ---
 ---Newlines are preserved. The converted string is returned.
 ---@param str string String to be converted
@@ -113,9 +113,9 @@ function _change_caps(str, cap_type)
     error("Invalid capitalisation type: " .. type)
   end
   -- variables
-  -- * articles of speech are not capitalised in title case
+  -- • articles of speech are not capitalised in title case
   local articles = { "a", "an", "the" }
-  -- * prepositions are not capitalised in title case
+  -- • prepositions are not capitalised in title case
   local prepositions = {
     "amid",
     "as",
@@ -149,7 +149,7 @@ function _change_caps(str, cap_type)
     "via",
     "with",
   }
-  -- * conjunctions are not capitalised in title case
+  -- • conjunctions are not capitalised in title case
   local conjunctions = {
     "and",
     "as",
@@ -179,15 +179,15 @@ function _change_caps(str, cap_type)
   for _, v in ipairs(conjunctions) do
     table.insert(temp, v)
   end
-  -- * merge all words not capitalised in title case
-  -- * weed out duplicates for aesthetic reasons
+  -- • merge all words not capitalised in title case
+  -- • weed out duplicates for aesthetic reasons
   local title_lowercase = {}
   for _, item in ipairs(temp) do
     if not dn_utils.is_table_value(title_lowercase, item) then
       table.insert(title_lowercase, item)
     end
   end
-  -- * splitting of header on word boundaries produces some pseudo-words that
+  -- • splitting of header on word boundaries produces some pseudo-words that
   --   are not actual words, and these should not be capitalised in 'start'
   --   or 'title' case
   local pseudowords = { "s" }
@@ -357,11 +357,11 @@ function _menu_normalise(menu)
       error("Invalid menu item data type: " .. type(item) .. " (" .. dn_utils.stringify(item) .. ")")
     end
     -- sequence menu item might be:
-    -- * simple data item
-    -- * sequence (must be an expected submenu)
-    -- * dict (might be an expected submenu)
-    -- * dict (might be an option:return-value pair)
-    -- * dict (might be an header:submenu pair)
+    -- • simple data item
+    -- • sequence (must be an expected submenu)
+    -- • dict (might be an expected submenu)
+    -- • dict (might be an option:return-value pair)
+    -- • dict (might be an header:submenu pair)
     local option, retval
     local key, value
     local item_size
@@ -449,9 +449,9 @@ end
 ---@return number|nil _ Option number
 function _menu_ui_select(prompt, options)
   -- do not use inputlist if:
-  -- * number of options > 20 : dressing.vim limits inputlist height to 20 in
+  -- • number of options > 20 : dressing.vim limits inputlist height to 20 in
   --   a 30 line window, and inputlist does not scroll
-  -- * number of options > (window height - 3) : inputlist does not scroll
+  -- • number of options > (window height - 3) : inputlist does not scroll
   local window_height = vim.api.nvim_list_uis()[1].height
   local number_of_options = #options
   if number_of_options > 20 or number_of_options > (window_height - 3) then
@@ -724,91 +724,91 @@ end
 ---function name to jump to detailed help on it.
 ---
 ---Files and directories
----  * |dn#util#fileExists|        whether file exists (uses |glob()|)
----  * |dn#util#getFilePath|       get filepath of file being edited
----  * |dn#util#getFileDir|        get directory of file being edited
----  * |dn#util#getFileName|       get name of file being edited
----  * |dn#util#getRtpDir|         finds directory from runtimepath
----  * |dn#util#getRtpFile|        finds file(s) in directories under 'rtp'
+---• |dn#util#fileExists|        whether file exists (uses |glob()|)
+---• |dn#util#getFilePath|       get filepath of file being edited
+---• |dn#util#getFileDir|        get directory of file being edited
+---• |dn#util#getFileName|       get name of file being edited
+---• |dn#util#getRtpDir|         finds directory from runtimepath
+---• |dn#util#getRtpFile|        finds file(s) in directories under 'rtp'
 ---
 ---User interaction
----  * |dn_utils.clear_prompt      clear command line
----  * |dn_utils.error|            display error message
----  * |dn_utils.info|             display message to user
----  * |dn_utils.warn|             display warning message
----  * |dn#util#prompt|            display prompt message
----  * |dn#util#echoWrap|          echoes text but wraps it sensibly
----  * |dn_utils.menu_select|      select item from menu
----  * |dn#util#help|              user can select from help topics
----  * |dn#util#getSelection|      returns currently selected text
+---• |dn_utils.clear_prompt      clear command line
+---• |dn_utils.error|            display error message
+---• |dn_utils.info|             display message to user
+---• |dn_utils.warn|             display warning message
+---• |dn#util#prompt|            display prompt message
+---• |dn#util#echoWrap|          echoes text but wraps it sensibly
+---• |dn_utils.menu_select|      select item from menu
+---• |dn#util#help|              user can select from help topics
+---• |dn#util#getSelection|      returns currently selected text
 ---
 ---Lists
----  * |dn#util#listExchangeItems| exchange two elements in the same list
----  * |dn#util#listSubtract|      subtract one list from another
----  * |dn#util#listToScreen|      formats list for screen display
----  * |dn#util#listToScreenColumns|
----                                         formats list for columnar screen display
----  * |dn#util#listToText|        convert list to text fragment
+---• |dn#util#listExchangeItems| exchange two elements in the same list
+---• |dn#util#listSubtract|      subtract one list from another
+---• |dn#util#listToScreen|      formats list for screen display
+---• |dn#util#listToScreenColumns|
+---                              formats list for columnar screen display
+---• |dn#util#listToText|        convert list to text fragment
 ---
 ---Programming
----  * |dn#util#unusedFunctions|   checks for uncalled functions
----  * |dn#util#insertMode|        switch to insert mode
----  * |dn#util#executeShellCommand|
----                                         execute shell command
----  * |dn#util#exceptionError|    extract error message from exception
----  * |dn#util#scriptNumber|      get SID of given script
----  * |dn#util#filetypes|         get list of available filetypes
----  * |dn_utils.setup|            initialise/set up plugin
----  * |dn#util#showFiletypes|     display list of available filetypes
----  * |dn#util#runtimepaths|      get list of runtime paths
----  * |dn#util#showRuntimepaths|  display list of runtime paths
----  * |dn#util#isMappedTo|        find mode mappings for given |{rhs}|
----  * |dn#util#updateUserHelpTags|
----                                         rebuild help tags in rtp "doc" subdirs
----  * |dn#util#os|                determine operating system family
----  * |dn#utilis#isWindows|       determine whether using windows OS
----  * |dn#utilis#isUnix|          determine whether using unix-like OS
+---• |dn#util#unusedFunctions|   checks for uncalled functions
+---• |dn#util#insertMode|        switch to insert mode
+---• |dn#util#executeShellCommand|
+---                              execute shell command
+---• |dn#util#exceptionError|    extract error message from exception
+---• |dn#util#scriptNumber|      get SID of given script
+---• |dn#util#filetypes|         get list of available filetypes
+---• |dn_utils.setup|            initialise/set up plugin
+---• |dn#util#showFiletypes|     display list of available filetypes
+---• |dn#util#runtimepaths|      get list of runtime paths
+---• |dn#util#showRuntimepaths|  display list of runtime paths
+---• |dn#util#isMappedTo|        find mode mappings for given |{rhs}|
+---• |dn#util#updateUserHelpTags|
+---                              rebuild help tags in rtp "doc" subdirs
+---• |dn#util#os|                determine operating system family
+---• |dn#utilis#isWindows|       determine whether using windows OS
+---• |dn#utilis#isUnix|          determine whether using unix-like OS
 ---
 ---Version control
----  * |dn#util#localGitRepoFetch| perform a fetch on a local git repository
----  * |dn#util#localGitRepoUpdatedRecently|
----                                         check that local repo is updated
+---• |dn#util#localGitRepoFetch| perform a fetch on a local git repository
+---• |dn#util#localGitRepoUpdatedRecently|
+---                              check that local repo is updated
 ---
 ---String manipulation
----  * |dn#util#stripLastChar|     removes last character from string
----  * |dn#util#insertString|      insert string at current cursor location
----  * |dn#util#trimChar|          removes leading and trailing chars
----  * |dn#util#entitise|          replace special html chars with entities
----  * |dn#util#deentitise|        replace html entities with characters
----  * |dn#util#dumbifyQuotes(|    replace smart quotes with straight quotes
----  * |dn_utils.stringify|        convert variable to string
----  * |dn#util#matchCount|        finds number of occurrences of string
----  * |dn#util#padInternal|       pad string at internal location
----  * |dn#util#padLeft|           left pad string
----  * |dn#util#padRight|          right pad string
----  * |dn#util#substitute|        perform global substitution in file
----  * |dn_utils.change_caps       changes capitalisation of line/selection
----  * |dn_utils.split|            split string on separator
----  * |dn#util#wrap|              wrap string sensibly
+---• |dn#util#stripLastChar|     removes last character from string
+---• |dn#util#insertString|      insert string at current cursor location
+---• |dn#util#trimChar|          removes leading and trailing chars
+---• |dn#util#entitise|          replace special html chars with entities
+---• |dn#util#deentitise|        replace html entities with characters
+---• |dn_utils.dumbify_quotes|   replace smart quotes with straight quotes
+---• |dn_utils.stringify|        convert variable to string
+---• |dn#util#matchCount|        finds number of occurrences of string
+---• |dn#util#padInternal|       pad string at internal location
+---• |dn#util#padLeft|           left pad string
+---• |dn#util#padRight|          right pad string
+---• |dn#util#substitute|        perform global substitution in file
+---• |dn_utils.change_caps       changes capitalisation of line/selection
+---• |dn_utils.split|            split string on separator
+---• |dn#util#wrap|              wrap string sensibly
 ---
 ---Tables
----  * |dn_utils.is_table_sequence|
----                                check whether var is a table sequence
----  * |dn_utils.is_table_value|   check whether var is a value in table
----  * |dn_utils.pairs_by_keys|    iterate through table key-value pairs
----  * |dn_utils.table_remove_empty_end_items|
----                                remove empty lines from end of sequence
----  * |dn_utils.table_print|      print prettified table
----  * |dn_utils.table_size|       get item or key-value pair count
----  * |dn_utils.table_stringify|  prettify table
+---• |dn_utils.is_table_sequence|
+---                              check whether var is a table sequence
+---• |dn_utils.is_table_value|   check whether var is a value in table
+---• |dn_utils.pairs_by_keys|    iterate through table key-value pairs
+---• |dn_utils.table_remove_empty_end_items|
+---                              remove empty lines from end of sequence
+---• |dn_utils.table_print|      print prettified table
+---• |dn_utils.table_size|       get item or key-value pair count
+---• |dn_utils.table_stringify|  prettify table
 ---
 ---Numbers
----  * |dn#util#validPosInt|       check whether input is valid positive int
+---• |dn#util#validPosInt|       check whether input is valid positive int
 ---
 ---Miscellaneous
----  * |dn#util#selectWord|        select |<cword>| under cursor
----  * |dn#util#varType|           get variable type
----  * |dn#util#testFn|            utility function used for testing only
+---• |dn#util#selectWord|        select |<cword>| under cursor
+---• |dn#util#varType|           get variable type
+---• |dn#util#testFn|            utility function used for testing only
 ---@brief ]]
 
 ---@mod dn_utils.functions Functions
@@ -818,23 +818,15 @@ end
 ---(|Normal-mode|) "i" (|Insert-mode|) or "v" (|Visual-mode|). The line or
 ---selection is replaced with the altered line or selection. The user chooses
 ---the type of capitalisation from a menu:
----upper case:
----  * convert to all uppercase characters
----
----lower case:
----  * convert to all lowercase characters
----
----sentence case:
----  * convert the first character to uppercase and all other characters to
----    lowercase
----
----start case:
----  * convert the first letter of each word to uppercase and all other letters
----    to lower case
----
----title case:
----  * capitalises first and last words, and all other words except articles,
----    prepositions and conjunctions of fewer than five letters
+---     upper case: convert to all uppercase characters
+---     lower case: convert to all lowercase characters
+---  sentence case: convert the first character to uppercase and all other
+---                 characters to lowercase
+---     start case: convert the first letter of each word to uppercase and
+---                 all other letters to lower case
+---     title case: capitalises first and last words, and all other words
+---                 except articles, prepositions and conjunctions of fewer
+---                 than five letters
 ---
 ---Newlines in a selection are preserved.
 ---@return nil _ No return value
@@ -881,9 +873,9 @@ function dn_utils.change_caps()
       ce = temp[2]
     end
     -- getpos() is partially broken because it uses the start and end positions of the *cursor*, not the selection:
-    -- * this does not matter for "v" (charwise-visual) mode
-    -- * this does not matter for "" (blockwise-visual) mode
-    -- * this causes wrong results in "V" (linewise-visual) mode
+    -- • this does not matter for "v" (charwise-visual) mode
+    -- • this does not matter for "" (blockwise-visual) mode
+    -- • this causes wrong results in "V" (linewise-visual) mode
     if mode == "V" then
       cs, ce = 1, -1
     end
@@ -900,11 +892,11 @@ function dn_utils.change_caps()
     -- subtract 1 from coords because vim.region() uses zero-based coordinates
     local region = vim.region(0, { ls - 1, cs - 1 }, { le - 1, ce - 1 }, reg_type, false)
     -- vim.region is partially broken:
-    -- * correct output in "v" (charwise-visual) mode
-    -- * correct output in "V" (linewise-visual) mode, except
+    -- • correct output in "v" (charwise-visual) mode
+    -- • correct output in "V" (linewise-visual) mode, except
     --   that it indicates end of line with -1 for all lines except the last,
     --   in which end of line is indicated with -2
-    -- * incorrect output in "" (blockwise-visual) mode, where the
+    -- • incorrect output in "" (blockwise-visual) mode, where the
     --   first and last rows are correct but the intervening rows give whole-
     --   line start and end columns instead of using the columns from the
     --   start and end coordinates
@@ -950,9 +942,9 @@ function dn_utils.change_caps()
       -- get line part before selected text
       replace = replace .. line:sub(0, startcol - 1)
       -- get selected text
-      -- * the elements of 'changed_lines' correspond to line_no-line_data
+      -- • the elements of 'changed_lines' correspond to line_no-line_data
       --   pairs in 'region' when 'region' ordered by line_no
-      -- * consume 'changed_lines' elements 1 per loop
+      -- • consume 'changed_lines' elements 1 per loop
       replace = replace .. table.remove(changed_lines, 1)
       -- get line part after selected text
       replace = replace .. line:sub(endcol + 1, line_length + 1)
@@ -969,6 +961,27 @@ end
 ---@return nil _ No return value
 function dn_utils.clear_prompt()
   vim.api.nvim_command("normal! :")
+end
+
+-- dumbify_quotes()
+---Convert "smart" quotes and apostrophes in the current buffer to their
+---corresponding "dumb" equivalents.
+---
+---The "smart" characters are:
+---• “ - left double quotation mark (U+201C)
+---• ” - right double quotation mark (U+201D)
+---• ‘ - left single quotation mark (U+2018)
+---• ’ - right single quotation mark, apostrophe (U+2019)
+---
+---The "dumb" equivalents these characters are converted to are:
+---• " - quotation mark (U+0022)
+---• ' - apostrophe, single quotation mark (U+0027)
+---@return nil _ No return value
+function dn_utils.dumbify_quotes()
+  dn_utils.info("Dumbifying smart double quotes...")
+  dn_utils.substitute("[“”]", '"')
+  dn_utils.info("Dumbifying smart single quotes...")
+  dn_utils.substitute("[‘’]", "'")
 end
 
 -- error(messages)
@@ -1102,16 +1115,16 @@ end
 ---@return string _ Selected menu option
 function dn_utils.menu_select(menu, prompt, recursive)
   -- process parameters
-  -- * recursive
+  -- • recursive
   --   - this is a hidden parameter used only by the function when calling
   --     itself recursively, and should never be used by an external caller
   recursive = recursive or 0
   assert(type(recursive) == "number", "Expected number, got " .. type(recursive))
-  -- * prompt
+  -- • prompt
   if not (prompt ~= nil and prompt ~= "") then
     prompt = "Select an option:"
   end
-  -- * menu
+  -- • menu
   assert(type(menu) == "table", "Expected a table menu, got a " .. type(menu))
   assert(next(menu) ~= nil, "Menu table is empty")
   local items
@@ -1131,8 +1144,8 @@ function dn_utils.menu_select(menu, prompt, recursive)
   local item_size
   for _, item in ipairs(items) do
     -- sequence menu items are single-pair dictionaries whose values are either:
-    -- * simple data types (for plain menu options)
-    -- * sequences (for submenus)
+    -- • simple data types (for plain menu options)
+    -- • sequences (for submenus)
     -- ignore empty dictionaries
     if next(item) ~= nil then
       -- cannot have multiple entries
@@ -1248,7 +1261,7 @@ function dn_utils.split(str, sep)
   local store_item = function(item)
     table.insert(items, item)
   end
-  -- * assign return value to dummy variable to prevent warning message
+  -- • assign return value to dummy variable to prevent warning message
   _ = str:gsub("[^" .. sep .. "]+", store_item)
 
   return items
@@ -1274,6 +1287,78 @@ function dn_utils.stringify(var)
   end
   -- should never reach here
   error("Unknown variable type: " .. var_type)
+end
+
+-- substitute(pattern, replace, opts)
+---Performs a configuration-agnostic substitution in the current buffer.
+---For the duration of the substitution 'gdefault' is set to off.
+---If the default flags are used, then for the duration of the substitution
+---'gdefault' is on, case is ignored (the 'ignorecase' and 'smartcase'
+---options are ignored), and errors are not shown.
+---The cursor does not move.
+---The range is the whole file by default.
+---@param pattern string The |pattern| to replace
+---@param replace string The replacement string (can
+---be |sub-replace-special|)
+---@param opts table|nil Optional configuration options
+---• {flags} (string) Search flags, see |:s_flags|
+---  (default= "egi")
+---• {firstline} (number) First line of
+---  replacement range (default=0)
+---• {lastline} (number) Last line of replacement
+---  range (default=line("$"))
+---• {delim} (string) Search delimiter character,
+---  must be accepted by |:s| (default=/)
+function dn_utils.substitute(pattern, replace, opts)
+  -- check params
+  assert(type(pattern) == "string", "Expected string, got " .. type(pattern))
+  assert(pattern ~= "", "Empty pattern")
+  assert(type(replace) == "string", "Expected string, got " .. type(replace))
+  assert(replace ~= "", "Empty replace string")
+  opts = opts or {}
+  assert(type(opts) == "table", "Expected table, got " .. type(opts))
+  -- process options
+  local flags = "egi"
+  if opts.flags then
+    assert(type(opts.flags) == "string", "Expected string, got " .. type(opts.flags))
+    flags = opts.flags
+  end
+  local firstline = 0
+  if opts.firstline then
+    assert(type(opts.firstline) == "number", "Expected number, got " .. type(opts.firstline))
+    firstline = opts.firstline
+  end
+  local lastline = vim.fn.line("$")
+  if opts.lastline then
+    assert(type(opts.lastline) == "number", "Expected number, got " .. type(opts.lastline))
+    lastline = opts.lastline
+  end
+  local delim = "/"
+  if opts.delim then
+    assert(type(opts.delim) == "string", "Expected character, got " .. type(opts.delim))
+    local delim_length = opts.delim:len()
+    assert(delim_length > 0, "Expected character, got empty string")
+    assert(delim_length == 1, "Expected character, got '" .. opts.delim .. "'")
+    delim = opts.delim
+  end
+  -- save cursor
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  -- preserve gdefault option
+  local opt_gdefault = vim.opt.gdefault:get()
+  vim.opt.gdefault = false
+  -- perform substitution
+  local cmd = firstline .. "," .. lastline .. "s" .. delim .. pattern .. delim .. replace .. delim .. flags
+  local output = vim.api.nvim_exec2(cmd, { output = true })
+  -- restore gdefault option
+  vim.opt.gdefault = opt_gdefault
+  -- restore cursor
+  local endline = vim.fn.line("$")
+  if line > endline then
+    line = endline
+  end
+  vim.api.nvim_win_set_cursor(0, { line, col })
+  -- display feedback
+  dn_utils.info(output.output)
 end
 
 -- table_print(tbl, count, pad)
@@ -1363,8 +1448,26 @@ function dn_utils.warning(...)
   vim.api.nvim_echo({ { msgs, "WarningMsg" } }, true, {})
 end
 
--- KEYMAPS
+---@mod dn_utils.mappings Mappings
 
+-- \xc [n,v,i]
+---@tag dn_utils.<Leader>xc
+---@brief [[
+---This mapping calls the function |dn_utils.change_caps| in modes "n", "v" and
+---"i".
+---@brief ]]
 vim.keymap.set({ "n", "v", "i" }, "<Leader>xc", dn_utils.change_caps)
+
+---@mod dn_utils.commands Commands
+
+-- XDumbifyQuotes
+---@tag dn_utils.DumbifyQuotes
+---@brief [[
+---Replaces smart quotes with plain ascii "straight" single quotes (apostrophes)
+---and double quotes. Calls function |dn_utils.dumbify_quotes|.
+---@brief ]]
+vim.api.nvim_create_user_command("XDumbifyQuotes", function()
+  dn_utils.dumbify_quotes()
+end, {})
 
 return dn_utils
