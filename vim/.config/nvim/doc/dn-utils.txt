@@ -354,7 +354,7 @@ dn_utils.substitute({pattern}, {replace}, {opts})
                                 • {lastline} (number) Last line of replacement
                                   range (default=line("$"))
                                 • {delim} (string) Search delimiter character,
-                                  must be accepted by |:s| (default=/)
+                                  must be accepted by `:s` (default=/)
 
 
                                                           *dn_utils.table_print*

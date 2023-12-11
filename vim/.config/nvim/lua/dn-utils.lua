@@ -1308,7 +1308,7 @@ end
 ---• {lastline} (number) Last line of replacement
 ---  range (default=line("$"))
 ---• {delim} (string) Search delimiter character,
----  must be accepted by |:s| (default=/)
+---  must be accepted by `:s` (default=/)
 function dn_utils.substitute(pattern, replace, opts)
   -- check params
   assert(type(pattern) == "string", "Expected string, got " .. type(pattern))
@@ -1456,7 +1456,12 @@ end
 ---This mapping calls the function |dn_utils.change_caps| in modes "n", "v" and
 ---"i".
 ---@brief ]]
-vim.keymap.set({ "n", "v", "i" }, "<Leader>xc", dn_utils.change_caps)
+vim.keymap.set(
+  { "n", "v", "i" },
+  "<Leader>xc",
+  dn_utils.change_caps,
+  { desc = "Change capitalisation of line or selection" }
+)
 
 ---@mod dn_utils.commands Commands
 
@@ -1468,6 +1473,6 @@ vim.keymap.set({ "n", "v", "i" }, "<Leader>xc", dn_utils.change_caps)
 ---@brief ]]
 vim.api.nvim_create_user_command("XDumbifyQuotes", function()
   dn_utils.dumbify_quotes()
-end, {})
+end, { desc = "Replace smart quotes in buffer with plain ascii 'straight' quotes" })
 
 return dn_utils
