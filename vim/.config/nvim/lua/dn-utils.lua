@@ -2,8 +2,34 @@
 
 -- TODO: Check whether functions every return nil return value
 -- TODO: What is return value of functions with no explicit return value
+-- TODO: Implement these functions:
+--
+--       * dn-utils:
+--         * show_filetypes()
+--           * filetypes()
+--           * list_to_screen_columns()
+--             * trim_char()
+--         * show_runtime_paths()
+--           * runtimepaths()
+--           * echo_wrap()
+--             * _wrap_params()
+--               * var_type()
+--             * wrap()
+--               * _wrap_fmt()
+--               * _wrap_manual()
+--         * scriptnames()
+--
+--       * dn-perl:
+--         * get_rtp_file()
+--         * get_file_dir()
+--
+--       * dn-latex:
+--         * pad_internal()
+--         * match_count()
+--         * insert_string()
+--         * get_rtp_dir()
 
----@brief [[
+---@brief [[https://www.reddit.com/r/neovim/comments/w4r2de/comment/ih46dhl/
 ---*dn-utils-nvim.txt*   For Neovim version 0.9   Last change: 2023 November 19
 ---@brief ]]
 
@@ -758,6 +784,7 @@ end
 ---• |dn#util#exceptionError|    extract error message from exception
 ---• |dn#util#scriptNumber|      get SID of given script
 ---• |dn#util#filetypes|         get list of available filetypes
+---• |dn_utils.sleep|            pause script execution for defined time
 ---• |dn_utils.setup|            initialise/set up plugin
 ---• |dn#util#showFiletypes|     display list of available filetypes
 ---• |dn#util#runtimepaths|      get list of runtime paths
@@ -803,12 +830,12 @@ end
 ---• |dn_utils.table_stringify|  prettify table
 ---
 ---Numbers
----• |dn#util#validPosInt|       check whether input is valid positive int
+---• |dn_utils.valid_pos_int|    check whether input is valid positive int
 ---
 ---Miscellaneous
 ---• |dn#util#selectWord|        select |<cword>| under cursor
 ---• |dn#util#varType|           get variable type
----• |dn#util#testFn|            utility function used for testing only
+---• |dn_utils.test|             utility function used for testing only
 ---@brief ]]
 
 ---@mod dn_utils.functions Functions
@@ -1245,6 +1272,19 @@ function dn_utils.setup(opts)
   --vim.api.nvim_create_user_command("MyUtilsGreeting", dn_utils.greet, {})
 end
 
+-- sleep(sec)
+---Pause script for a specified number of seconds.
+---@param sec number Number of seconds to pause script execution
+---@return nil _ No return value
+function dn_utils.sleep(sec)
+  -- credit: http://lua-users.org/wiki/SleepFunction
+  assert(type(sec) == "number", "Expected number, got " .. type(sec))
+  assert(dn_utils.valid_pos_int(sec), "Expected positive integer, got " .. dn_utils.stringify(sec))
+  local ntime = os.time() + sec
+  repeat
+  until os.time() > ntime
+end
+
 -- split(str, [sep])
 ---Split a string on a separator character.
 ---@param str string String to split
@@ -1344,13 +1384,13 @@ function dn_utils.substitute(pattern, replace, opts)
   -- save cursor
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
   -- preserve gdefault option
-  local opt_gdefault = vim.opt.gdefault:get()
+  local opt_gdefault = vim.api.nvim_get_option_value("gdefault", {})
   vim.opt.gdefault = false
   -- perform substitution
   local cmd = firstline .. "," .. lastline .. "s" .. delim .. pattern .. delim .. replace .. delim .. flags
   local output = vim.api.nvim_exec2(cmd, { output = true })
   -- restore gdefault option
-  vim.opt.gdefault = opt_gdefault
+  vim.api.nvim_set_option_value("gdefault", opt_gdefault, {})
   -- restore cursor
   local endline = vim.fn.line("$")
   if line > endline then
@@ -1439,6 +1479,17 @@ function dn_utils.table_stringify(tbl, count, pad)
   return _tbl_to_str(tbl, count, 0, pad)
 end
 
+-- valid_pos_int(var)
+---Check whether variable is a positive (non-zero) integer.
+---@param var any Variable to check
+---@return boolean _ Whether variable is a positive integer
+function dn_utils.valid_pos_int(var)
+  if type(var) ~= "number" then
+    return false
+  end
+  return (var % 1) == 0
+end
+
 -- warning(messages)
 ---Display warning messages(s).
 ---@param ... string Warning messages to display.
@@ -1462,6 +1513,8 @@ vim.keymap.set(
   dn_utils.change_caps,
   { desc = "Change capitalisation of line or selection" }
 )
+
+vim.keymap.set({ "n" }, "<Leader>xa", dn_utils.test, { desc = "Generic test function" })
 
 ---@mod dn_utils.commands Commands
 
