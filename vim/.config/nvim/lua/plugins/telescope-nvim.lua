@@ -19,6 +19,13 @@ return {
         },
       },
     },
+    keys = {
+      {
+        "<Leader>fs",
+        "<Cmd>Telescope builtin<CR>",
+        desc = "Telescope builtin selectors",
+      },
+    },
     dependencies = {
       -- file finder based on frequency and recency
       {
