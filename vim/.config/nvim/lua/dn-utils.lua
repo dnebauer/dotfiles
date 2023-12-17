@@ -1479,6 +1479,13 @@ function dn_utils.table_stringify(tbl, count, pad)
   return _tbl_to_str(tbl, count, 0, pad)
 end
 
+-- test()
+---Function used for testing. It's interface is not stable.
+---@return nil _ No return value
+function dn_utils.test()
+  -- stub
+end
+
 -- valid_pos_int(var)
 ---Check whether variable is a positive (non-zero) integer.
 ---@param var any Variable to check
@@ -1501,6 +1508,13 @@ end
 
 ---@mod dn_utils.mappings Mappings
 
+-- \xa [n]
+---@tag dn_utils.<Leader>xa
+---@brief [[
+---This mapping calls the function |dn_utils.test| in mode "n".
+---@brief ]]
+vim.keymap.set("n", "<Leader>xa", dn_utils.test, { desc = "Generic test function" })
+
 -- \xc [n,v,i]
 ---@tag dn_utils.<Leader>xc
 ---@brief [[
@@ -1513,8 +1527,6 @@ vim.keymap.set(
   dn_utils.change_caps,
   { desc = "Change capitalisation of line or selection" }
 )
-
-vim.keymap.set({ "n" }, "<Leader>xa", dn_utils.test, { desc = "Generic test function" })
 
 ---@mod dn_utils.commands Commands
 
