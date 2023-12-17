@@ -1097,46 +1097,47 @@ end
 ---Select an option from a multi-level sequence or table menu.
 ---
 ---An optional [prompt] string can be provided to this function; the default
----value is "Select an option:". Empty strings are ignored. An empty menu causes
----an error.
+---value is "Select an option:". Empty strings are ignored. An empty menu
+---causes an error.
 ---
 ---The selected menu option (or its associated value) is returned, with a
 ---|luaref-nil| -indicating no item was selected.
 ---
----In the following discussion a "simple" menu is one without any submenus, and
----"simple" variables are string, number, boolean, and nil. A "simple" sequence
----has elements which are all either simple variables or single key-value
----dictionaries whose values are also simple variables. A "simple" table has
----values which are all simple variables.
+---In the following discussion a "simple" menu is one without any submenus,
+---and "simple" variables are string, number, boolean, and nil. A "simple"
+---sequence has elements which are all either simple variables or single
+---key-value dictionaries whose values are also simple variables. A "simple"
+---table has values which are all simple variables.
 ---
----If a simple sequence menu is provided, its simple elements are displayed in
----the menu and returned if selected. If a sequence item is a dictionary
+---If a simple sequence menu is provided, its simple elements are displayed
+---in the menu and returned if selected. If a sequence item is a dictionary
 ---containing one key-value pair, the key is displayed in the menu and, if
----selected, its value is returned. (It is a fatal error if a sequence item is a
----dictionary containing multiple key-value pairs.)
+---selected, its value is returned. (It is a fatal error if a sequence item
+---is a dictionary containing multiple key-value pairs.)
 ---
 ---If a simple dictionary menu is provided, its keys form the menu items and
 ---when an item is selected its corresponding value is returned. Because the
 ---order of key-value pairs in a dictionary is undefined, the order of menu
 ---items arising from a dictionary menu cannot be predicted.
 ---
----Submenus can be added to both sequence and dictionary menus. In such a case
----the header for the submenu, or child menu, is indicated in the parent menu by
----appending an arrow ( ->) to the header option in the parent menu. Adding a
----submenu Dict is easy - the new submenu is added as a new key-value pair to
----the parent menu. The new key is the submenu header in the parent menu while
----the new value is a sequence or dictionary defining the new submenu options.
+---Submenus can be added to both sequence and dictionary menus. In such a
+---case the header for the submenu, or child menu, is indicated in the parent
+---menu by appending an arrow ( ->) to the header option in the parent menu.
+---Adding a submenu Dict is easy - the new submenu is added as a new
+---key-value pair to the parent menu. The new key is the submenu header in
+---the parent menu while the new value is a sequence or dictionary defining
+---the new submenu options.
 ---
----A single menu can contain a mixture of sequence and dictionary elements, and
----multi-level menus can become complex.
+---A single menu can contain a mixture of sequence and dictionary elements,
+---and multi-level menus can become complex.
 ---
 ---Errors are thrown if a menu item is not a valid data type, if the menu is
 ---neither a sequence nor a dictionary, and if a menu has no items.
 ---
 ---The inbuilt vim |inputlist()| is used for small and medium sized lists of
 ---menu options (up to around 20 options). For menus with more options an
----embedded |python3| script is used that has a sole external dependency on the
----tkinter package (https://docs.python.org/3/library/tkinter.html).
+---embedded |python3| script is used that has a sole external dependency on
+---the tkinter package (https://docs.python.org/3/library/tkinter.html).
 ---@param menu table Menu items
 ---@param prompt string Prompt (optional, default: 'Select an option:')
 ---@return string _ Selected menu option
@@ -1288,7 +1289,8 @@ end
 -- split(str, [sep])
 ---Split a string on a separator character.
 ---@param str string String to split
----@param sep string|nil Separator which can be any valid lua pattern, default to lua character class "%s"
+---@param sep string|nil Separator which can be any valid lua pattern,
+---defaults to lua character class "%s"
 ---@return table _ Array of split items
 function dn_utils.split(str, sep)
   -- process args
@@ -1404,8 +1406,10 @@ end
 -- table_print(tbl, count, pad)
 ---Print prettified table to console.
 ---@param tbl table Table to convert to a string
----@param count number|nil Number of pads between string tokens (default=1)
----@param pad string|nil String to use for indenting and padding (default=<Tab>)
+---@param count number|nil Number of pads between string tokens
+---(default=1)
+---@param pad string|nil String to use for indenting and padding
+---(default=<Tab>)
 function dn_utils.table_print(tbl, count, pad)
   -- credit: https://gist.github.com/jackbritchford/5f0d5f6dbf694b44ef0cd7af952070c9
   print(_tbl_to_str(tbl, count, 0, pad))
@@ -1470,8 +1474,10 @@ end
 -- table_stringify(tbl, count, pad)
 ---Convert table to a prettified string.
 ---@param tbl table Table to convert to a string
----@param count number|nil Number of pads between string tokens (default=1)
----@param pad string|nil String to use for indenting and padding (default=<Tab>)
+---@param count number|nil Number of pads between string tokens
+---(default=1)
+---@param pad string|nil String to use for indenting and padding
+---(default=<Tab>)
 ---@return string _ Pretty printed table
 function dn_utils.table_stringify(tbl, count, pad)
   -- credit: https://gist.github.com/jackbritchford/5f0d5f6dbf694b44ef0cd7af952070c9
@@ -1484,6 +1490,28 @@ end
 ---@return nil _ No return value
 function dn_utils.test()
   -- stub
+end
+
+-- trim_char(str [, char])
+---Remove leading and trailing character from a string.
+---@param str string String to trim
+---@param char string|nil Characters to trim from each end of string
+---(default=<Space>)
+---@return string _ Trimmed string
+function dn_utils.trim_char(str, char)
+  -- process params
+  assert(type(str) == "string", "Expected string, got " .. type(str))
+  if char then
+    assert(type(char) == "string", "Expected string, got " .. type(char))
+    assert(char:len() > 0, "Expected character, got empty string")
+    assert(char:len() == 1, "Expected character, got string: '" .. char .. "'")
+  else
+    char = "%s"
+  end
+  -- trim string
+  local pattern = "^" .. char .. "*(.-)" .. char .. "*$"
+  local trimmed, _ = str:gsub(pattern, "%1")
+  return trimmed
 end
 
 -- valid_pos_int(var)

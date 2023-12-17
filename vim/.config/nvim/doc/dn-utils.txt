@@ -1,5 +1,3 @@
-*dn-utils-nvim.txt*   For Neovim version 0.9   Last change: 2023 November 19
-
 ==============================================================================
 Table of Contents                                            *dn_utils.contents*
 
@@ -77,6 +75,7 @@ Programming
 • |dn#util#exceptionError|    extract error message from exception
 • |dn#util#scriptNumber|      get SID of given script
 • |dn#util#filetypes|         get list of available filetypes
+• |dn_utils.sleep|            pause script execution for defined time
 • |dn_utils.setup|            initialise/set up plugin
 • |dn#util#showFiletypes|     display list of available filetypes
 • |dn#util#runtimepaths|      get list of runtime paths
@@ -122,12 +121,12 @@ Tables
 • |dn_utils.table_stringify|  prettify table
 
 Numbers
-• |dn#util#validPosInt|       check whether input is valid positive int
+• |dn_utils.valid_pos_int|    check whether input is valid positive int
 
 Miscellaneous
 • |dn#util#selectWord|        select |<cword>| under cursor
 • |dn#util#varType|           get variable type
-• |dn#util#testFn|            utility function used for testing only
+• |dn_utils.test|             utility function used for testing only
 
 ==============================================================================
 Functions                                                   *dn_utils.functions*
@@ -228,46 +227,47 @@ dn_utils.menu_select({menu}, {prompt})                    *dn_utils.menu_select*
     Select an option from a multi-level sequence or table menu.
 
     An optional [prompt] string can be provided to this function; the default
-    value is "Select an option:". Empty strings are ignored. An empty menu causes
-    an error.
+    value is "Select an option:". Empty strings are ignored. An empty menu
+    causes an error.
 
     The selected menu option (or its associated value) is returned, with a
     |luaref-nil| -indicating no item was selected.
 
-    In the following discussion a "simple" menu is one without any submenus, and
-    "simple" variables are string, number, boolean, and nil. A "simple" sequence
-    has elements which are all either simple variables or single key-value
-    dictionaries whose values are also simple variables. A "simple" table has
-    values which are all simple variables.
+    In the following discussion a "simple" menu is one without any submenus,
+    and "simple" variables are string, number, boolean, and nil. A "simple"
+    sequence has elements which are all either simple variables or single
+    key-value dictionaries whose values are also simple variables. A "simple"
+    table has values which are all simple variables.
 
-    If a simple sequence menu is provided, its simple elements are displayed in
-    the menu and returned if selected. If a sequence item is a dictionary
+    If a simple sequence menu is provided, its simple elements are displayed
+    in the menu and returned if selected. If a sequence item is a dictionary
     containing one key-value pair, the key is displayed in the menu and, if
-    selected, its value is returned. (It is a fatal error if a sequence item is a
-    dictionary containing multiple key-value pairs.)
+    selected, its value is returned. (It is a fatal error if a sequence item
+    is a dictionary containing multiple key-value pairs.)
 
     If a simple dictionary menu is provided, its keys form the menu items and
     when an item is selected its corresponding value is returned. Because the
     order of key-value pairs in a dictionary is undefined, the order of menu
     items arising from a dictionary menu cannot be predicted.
 
-    Submenus can be added to both sequence and dictionary menus. In such a case
-    the header for the submenu, or child menu, is indicated in the parent menu by
-    appending an arrow ( ->) to the header option in the parent menu. Adding a
-    submenu Dict is easy - the new submenu is added as a new key-value pair to
-    the parent menu. The new key is the submenu header in the parent menu while
-    the new value is a sequence or dictionary defining the new submenu options.
+    Submenus can be added to both sequence and dictionary menus. In such a
+    case the header for the submenu, or child menu, is indicated in the parent
+    menu by appending an arrow ( ->) to the header option in the parent menu.
+    Adding a submenu Dict is easy - the new submenu is added as a new
+    key-value pair to the parent menu. The new key is the submenu header in
+    the parent menu while the new value is a sequence or dictionary defining
+    the new submenu options.
 
-    A single menu can contain a mixture of sequence and dictionary elements, and
-    multi-level menus can become complex.
+    A single menu can contain a mixture of sequence and dictionary elements,
+    and multi-level menus can become complex.
 
     Errors are thrown if a menu item is not a valid data type, if the menu is
     neither a sequence nor a dictionary, and if a menu has no items.
 
     The inbuilt vim |inputlist()| is used for small and medium sized lists of
     menu options (up to around 20 options). For menus with more options an
-    embedded |python3| script is used that has a sole external dependency on the
-    tkinter package (https://docs.python.org/3/library/tkinter.html).
+    embedded |python3| script is used that has a sole external dependency on
+    the tkinter package (https://docs.python.org/3/library/tkinter.html).
 
     Parameters: ~
         {menu}    (table)   Menu items
@@ -309,12 +309,23 @@ dn_utils.setup({opts})                                          *dn_utils.setup*
         (nil)  No return value
 
 
+dn_utils.sleep({sec})                                           *dn_utils.sleep*
+    Pause script for a specified number of seconds.
+
+    Parameters: ~
+        {sec}  (number)  Number of seconds to pause script execution
+
+    Returns: ~
+        (nil)  No return value
+
+
 dn_utils.split({str}, {sep})                                    *dn_utils.split*
     Split a string on a separator character.
 
     Parameters: ~
         {str}  (string)      String to split
-        {sep}  (string|nil)  Separator which can be any valid lua pattern, default to lua character class "%s"
+        {sep}  (string|nil)  Separator which can be any valid lua pattern,
+                             defaults to lua character class "%s"
 
     Returns: ~
         (table)  Array of split items
@@ -363,8 +374,10 @@ dn_utils.table_print({tbl}, {count}, {pad})
 
     Parameters: ~
         {tbl}    (table)       Table to convert to a string
-        {count}  (number|nil)  Number of pads between string tokens (default=1)
-        {pad}    (string|nil)  String to use for indenting and padding (default=<Tab>)
+        {count}  (number|nil)  Number of pads between string tokens
+                               (default=1)
+        {pad}    (string|nil)  String to use for indenting and padding
+                               (default=<Tab>)
 
 
                                          *dn_utils.table_remove_empty_end_items*
@@ -397,11 +410,42 @@ dn_utils.table_stringify({tbl}, {count}, {pad})
 
     Parameters: ~
         {tbl}    (table)       Table to convert to a string
-        {count}  (number|nil)  Number of pads between string tokens (default=1)
-        {pad}    (string|nil)  String to use for indenting and padding (default=<Tab>)
+        {count}  (number|nil)  Number of pads between string tokens
+                               (default=1)
+        {pad}    (string|nil)  String to use for indenting and padding
+                               (default=<Tab>)
 
     Returns: ~
         (string)  Pretty printed table
+
+
+dn_utils.test()                                                  *dn_utils.test*
+    Function used for testing. It's interface is not stable.
+
+    Returns: ~
+        (nil)  No return value
+
+
+dn_utils.trim_char({str}, {char})                           *dn_utils.trim_char*
+    Remove leading and trailing character from a string.
+
+    Parameters: ~
+        {str}   (string)      String to trim
+        {char}  (string|nil)  Characters to trim from each end of string
+                              (default=<Space>)
+
+    Returns: ~
+        (string)  Trimmed string
+
+
+dn_utils.valid_pos_int({var})                           *dn_utils.valid_pos_int*
+    Check whether variable is a positive (non-zero) integer.
+
+    Parameters: ~
+        {var}  (any)  Variable to check
+
+    Returns: ~
+        (boolean)  Whether variable is a positive integer
 
 
 dn_utils.warning({...})                                       *dn_utils.warning*
@@ -416,6 +460,9 @@ dn_utils.warning({...})                                       *dn_utils.warning*
 
 ==============================================================================
 Mappings                                                     *dn_utils.mappings*
+
+                                                           *dn_utils.<Leader>xa*
+This mapping calls the function |dn_utils.test| in mode "n".
 
                                                            *dn_utils.<Leader>xc*
 This mapping calls the function |dn_utils.change_caps| in modes "n", "v" and
