@@ -363,7 +363,7 @@ function _menu_normalise(menu)
   local normalised = {}
   -- set initial state
   local state, items
-  if dn_utils.is_table_sequence(menu) then
+  if vim.tbl_islist(menu) then
     state = "seq_expecting-option"
     items = vim.deepcopy(menu)
   else
@@ -818,8 +818,6 @@ end
 ---• |dn#util#wrap|              wrap string sensibly
 ---
 ---Tables
----• |dn_utils.is_table_sequence|
----                              check whether var is a table sequence
 ---• |dn_utils.is_table_value|   check whether var is a value in table
 ---• |dn_utils.pairs_by_keys|    iterate through table key-value pairs
 ---• |dn_utils.table_remove_empty_end_items|
@@ -1025,40 +1023,6 @@ end
 function dn_utils.info(...)
   local msgs = table.concat({ ... }, "\n")
   vim.api.nvim_echo({ { msgs } }, true, {})
-end
-
--- is_table_sequence(tbl)
--- credit: https://github.com/xfbs/PiL3/blob/master/20TableLibrary/sequence.lua
----Test whether a table is a sequence.
----A valid sequence "seq" has elements from 1 to #seq without any gaps (nils)
----in between.
----Throws error if supplied variable is not a table.
----@param tbl table Table to be tested
----@return boolean _ Whether the table is a sequence
-function dn_utils.is_table_sequence(tbl)
-  -- has to be a table
-  assert(type(tbl) == "table", "Expected a table, got a " .. type(tbl))
-
-  local max = dn_utils.table_size(tbl)
-
-  -- traverse table to see if any indexes do
-  -- not fall into the valid sequence
-  for index, _ in pairs(tbl) do
-    if type(index) ~= "number" then
-      return false
-    elseif index < 1 or index > max then
-      return false
-    end
-  end
-
-  -- traverse array to see if there are embedded nils
-  for i = 1, max do
-    if tbl[i] == nil then
-      return false
-    end
-  end
-
-  return true
 end
 
 -- is_table_value(tbl, str)
@@ -1425,7 +1389,7 @@ function dn_utils.table_remove_empty_end_items(source)
 
   -- process param
   assert(type(source) == "table", "Expected table, got " .. type(source))
-  assert(dn_utils.is_table_sequence(source), "Table is not a sequence")
+  assert(vim.tbl_islist(source), "Table is not a sequence")
   -- copy items except for empty end items
   -- but this reverses order of sequence
   local reversed = {}
