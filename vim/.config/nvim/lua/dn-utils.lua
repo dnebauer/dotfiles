@@ -195,15 +195,9 @@ function _change_caps(str, cap_type)
     "yet",
   }
   local temp = {}
-  for _, v in ipairs(articles) do
-    table.insert(temp, v)
-  end
-  for _, v in ipairs(prepositions) do
-    table.insert(temp, v)
-  end
-  for _, v in ipairs(conjunctions) do
-    table.insert(temp, v)
-  end
+  vim.list_extend(temp, articles)
+  vim.list_extend(temp, prepositions)
+  vim.list_extend(temp, conjunctions)
   -- • merge all words not capitalised in title case
   -- • weed out duplicates for aesthetic reasons
   local title_lowercase = {}
