@@ -8,7 +8,6 @@
 --         * show_filetypes()
 --           * filetypes()
 --           * list_to_screen_columns()
---             * trim_char()
 --         * show_runtime_paths()
 --           * runtimepaths()
 --           * echo_wrap()
@@ -1506,7 +1505,12 @@ function dn_utils.trim_char(str, char)
     assert(char:len() > 0, "Expected character, got empty string")
     assert(char:len() == 1, "Expected character, got string: '" .. char .. "'")
   else
+    -- default char
     char = "%s"
+  end
+  if not char:find("%w") then
+    -- escape all non-alphanumeric chars to be safe
+    char = "%" .. char
   end
   -- trim string
   local pattern = "^" .. char .. "*(.-)" .. char .. "*$"
