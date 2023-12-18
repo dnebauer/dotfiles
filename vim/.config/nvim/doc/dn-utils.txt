@@ -394,6 +394,8 @@ dn_utils.table_remove_empty_end_items({source})
 
 dn_utils.table_size({tbl})                                 *dn_utils.table_size*
     Determine the number of elements in a table (sequence or dictionary).
+    Includes nil values. Compare with |vim.tbl_count()| which excludes nil
+    values from its count.
 
     A fatal error is raised if the parameter is not a table.
 

@@ -1457,6 +1457,8 @@ end
 
 -- table_size(tbl)
 ---Determine the number of elements in a table (sequence or dictionary).
+---Includes nil values. Compare with |vim.tbl_count()| which excludes nil
+---values from its count.
 ---
 ---A fatal error is raised if the parameter is not a table.
 ---@param tbl table Table to analyse
