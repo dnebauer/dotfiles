@@ -202,7 +202,7 @@ function _change_caps(str, cap_type)
   -- • weed out duplicates for aesthetic reasons
   local title_lowercase = {}
   for _, item in ipairs(temp) do
-    if not dn_utils.is_table_value(title_lowercase, item) then
+    if not vim.list_contains(title_lowercase, item) then
       table.insert(title_lowercase, item)
     end
   end
