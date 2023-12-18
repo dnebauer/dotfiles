@@ -1459,6 +1459,8 @@ end
 
 -- trim_char(str [, char])
 ---Remove leading and trailing character from a string.
+---Note that |vim.trim()| can be used to remove leading and trailing
+---whitespace from a string.
 ---@param str string String to trim
 ---@param char string|nil Characters to trim from each end of string
 ---(default=<Space>)

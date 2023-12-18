@@ -110,8 +110,6 @@ String manipulation
 • |dn#util#wrap|              wrap string sensibly
 
 Tables
-• |dn_utils.is_table_sequence|
-                              check whether var is a table sequence
 • |dn_utils.is_table_value|   check whether var is a value in table
 • |dn_utils.pairs_by_keys|    iterate through table key-value pairs
 • |dn_utils.table_remove_empty_end_items|
@@ -195,19 +193,6 @@ dn_utils.info({...})                                             *dn_utils.info*
 
     Returns: ~
         (nil)  No return value
-
-
-dn_utils.is_table_sequence({tbl})                   *dn_utils.is_table_sequence*
-    Test whether a table is a sequence.
-    A valid sequence "seq" has elements from 1 to #seq without any gaps (nils)
-    in between.
-    Throws error if supplied variable is not a table.
-
-    Parameters: ~
-        {tbl}  (table)  Table to be tested
-
-    Returns: ~
-        (boolean)  Whether the table is a sequence
 
 
 dn_utils.is_table_value({tbl}, {str})                  *dn_utils.is_table_value*
@@ -430,6 +415,8 @@ dn_utils.test()                                                  *dn_utils.test*
 
 dn_utils.trim_char({str}, {char})                           *dn_utils.trim_char*
     Remove leading and trailing character from a string.
+    Note that |vim.trim()| can be used to remove leading and trailing
+    whitespace from a string.
 
     Parameters: ~
         {str}   (string)      String to trim
