@@ -479,6 +479,9 @@ $if(logo)$
 \logo{\includegraphics{$logo$}}
 $endif$
 $endif$
+% support for tomduck pandoc-{fig,table,eq,sec}nos
+\usepackage{caption}
+\usepackage{cleveref}
 
 %%%
 %%% CONTENT
