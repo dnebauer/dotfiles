@@ -1467,7 +1467,7 @@ function dn_utils.table_stringify(tbl, count, pad)
 end
 
 -- test()
----Function used for testing. It's interface is not stable.
+---Function used for testing. Its interface is not stable.
 ---@return nil _ No return value
 function dn_utils.test()
   -- stub

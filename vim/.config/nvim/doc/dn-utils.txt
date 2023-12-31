@@ -415,7 +415,7 @@ dn_utils.table_stringify({tbl}, {count}, {pad})
 
 
 dn_utils.test()                                                  *dn_utils.test*
-    Function used for testing. It's interface is not stable.
+    Function used for testing. Its interface is not stable.
 
     Returns: ~
         (nil)  No return value
