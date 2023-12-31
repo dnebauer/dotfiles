@@ -16,7 +16,6 @@
 --             * wrap()
 --               * _wrap_fmt()
 --               * _wrap_manual()
---         * scriptnames()
 --
 --       * dn-perl:
 --         * get_rtp_file()
