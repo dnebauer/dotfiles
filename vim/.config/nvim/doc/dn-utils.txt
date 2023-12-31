@@ -284,6 +284,14 @@ dn_utils.pairs_by_keys({tbl}, {sort_fn})                *dn_utils.pairs_by_keys*
 <
 
 
+dn_utils.scriptnames()                                    *dn_utils.scriptnames*
+    Display the output of the `scriptnames` command in a location list for the
+    current window.
+
+    Returns: ~
+        (nil)  No return value
+
+
 dn_utils.setup({opts})                                          *dn_utils.setup*
     Called explicitly by users to configure this plugin.
 
@@ -464,4 +472,5 @@ Commands                                                     *dn_utils.commands*
 Replaces smart quotes with plain ascii "straight" single quotes (apostrophes)
 and double quotes. Calls function |dn_utils.dumbify_quotes|.
 
+                                                          *dn_utils.scriptnames*
 vim:tw=78:ts=8:noet:ft=help:norl:

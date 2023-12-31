@@ -1216,6 +1216,28 @@ function dn_utils.pairs_by_keys(tbl, sort_fn)
   return iter
 end
 
+-- scriptnames()
+---Display the output of the `scriptnames` command in a location list for the
+---current window.
+---@return nil _ No return value
+function dn_utils.scriptnames()
+  -- get output from ":scriptnames" command
+  local output_str = vim.api.nvim_cmd({ cmd = "scriptnames" }, { output = true })
+  local output_lines = dn_utils.split(output_str, "\n")
+  -- build list of items for location list
+  local list = {}
+  for _, script in ipairs(output_lines) do
+    local elements = dn_utils.split(script, ":")
+    local text = vim.fn.trim(elements[1])
+    local filename = vim.fn.trim(elements[2])
+    local item = { text = text, filename = filename }
+    table.insert(list, item)
+  end
+  -- display location list
+  vim.fn.setloclist(0, list)
+  vim.cmd.lopen()
+end
+
 -- setup(opts)
 ---Called explicitly by users to configure this plugin.
 ---@param opts table Plugin options
@@ -1533,5 +1555,14 @@ vim.keymap.set(
 vim.api.nvim_create_user_command("XDumbifyQuotes", function()
   dn_utils.dumbify_quotes()
 end, { desc = "Replace smart quotes in buffer with plain ascii 'straight' quotes" })
+
+-- XScriptnames
+---@tag dn_utils.scriptnames
+---@brief [[
+---Displays output of `scriptnames` command in a location list. Calls function
+---|dn_utils.scriptnames|.
+vim.api.nvim_create_user_command("XScriptnames", function()
+  dn_utils.scriptnames()
+end, { desc = "Display output of scriptnames command in a loclist" })
 
 return dn_utils
