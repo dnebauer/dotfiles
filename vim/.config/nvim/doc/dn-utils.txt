@@ -70,13 +70,14 @@ Lists
 Programming
 • |dn#util#unusedFunctions|   checks for uncalled functions
 • |dn#util#insertMode|        switch to insert mode
-• |dn#util#executeShellCommand|
+• |dn_utils.execute_shell_command|
                               execute shell command
 • |dn#util#exceptionError|    extract error message from exception
 • |dn_utils.scriptnames|      display scripts in location list
 • |dn#util#filetypes|         get list of available filetypes
 • |dn_utils.sleep|            pause script execution for defined time
 • |dn_utils.setup|            initialise/set up plugin
+• |dn_utils.shell_escape|     escape shell command
 • |dn#util#showFiletypes|     display list of available filetypes
 • |dn#util#runtimepaths|      get list of runtime paths
 • |dn#util#showRuntimepaths|  display list of runtime paths
@@ -183,6 +184,21 @@ dn_utils.error({...})                                           *dn_utils.error*
 
     Returns: ~
         (nil)  No return value
+
+
+dn_utils.execute_shell_command({...})           *dn_utils.execute_shell_command*
+    Execute shell command. Note that the shell command is escaped prior to
+    execution.
+
+    Parameters: ~
+        {...}  (string)  Elements of shell command to execute,
+                         e.g., "ls", "-lA"
+
+    Returns: ~
+        (string)  The escaped shell command that was executed
+        (number)  Shell command exit code
+        (string)  Shell command standard output
+        (string)  Shell command standard error
 
 
 dn_utils.info({...})                                             *dn_utils.info*
@@ -300,6 +316,16 @@ dn_utils.setup({opts})                                          *dn_utils.setup*
 
     Returns: ~
         (nil)  No return value
+
+
+dn_utils.shell_escape({...})                             *dn_utils.shell_escape*
+    Escape shell command elements.
+
+    Parameters: ~
+        {...}  (string)  Shell command elements
+
+    Returns: ~
+        (string)  Assembled escaped shell command
 
 
 dn_utils.sleep({sec})                                           *dn_utils.sleep*

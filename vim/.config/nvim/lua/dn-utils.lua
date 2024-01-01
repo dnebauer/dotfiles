@@ -96,6 +96,7 @@ local _menu_ui_select_inputlist
 local _menu_ui_select_pythontk
 local _t
 local _tbl_to_str
+local _wrap_fmt
 local _wrap_manual
 
 -- _change_caps(string, case_type)
@@ -733,6 +734,72 @@ function _tbl_to_str(tbl, count, indent, pad)
   return out
 end
 
+-- wrap_fmt(message[, width])
+---@private
+---Processes a message string through "fmt". This is a utility which is found
+---on all *nix systems as a core utility, and there are versions available for
+---other operating systems. The "fmt" utility is primarily intended for
+---formatting C/C++ and has been extended to other languages. It does a good
+---job of wrapping plain text, hence its use in this function. The standard
+---"fmt" utilty on *nix systems strives for a goal width of 93% of the maximum
+---width provided.
+---@param message string String to be formatted, may contain newlines
+---@param opts table|nil Optional configuration options
+---• {width} (number) Column to wrap at. Must be
+---  a positive integer. If it is set to zero the
+---  message string is returned without
+---  alteration. If it is less than 10, and not
+---  zero, it is set to 10.
+function _wrap_fmt(message, opts)
+  -- process parameters
+  -- • message
+  assert(type(message) == "string", "Expected string, got " .. type(message))
+  if message:len() == 0 then
+    return message
+  end
+  -- • opts
+  opts = opts or {}
+  assert(type(opts) == "table", "Expected table, got " .. type(opts))
+  local valid_opts = { "width", "hang" }
+  for opt, _ in pairs(opts) do
+    assert(dn_utils.is_table_value(valid_opts, opt), "Invalid option: " .. opt)
+  end
+  -- • width
+  local width = opts.width or 79
+  assert(
+    dn_utils.valid_non_negative_int(width),
+    "Expected non-negative integer, got " .. type(width) .. " " .. tostring(width)
+  )
+  if width == 0 then
+    return message
+  end
+  if width < 10 then
+    width = 10
+  end
+  -- write message to temporary file
+  local message_file = os.tmpname()
+  local message_fh = assert(io.open(message_file, "w"))
+  message_fh:write(message)
+  message_fh:close()
+  -- process file with 'fmt' utility
+  local shell_cmd, exit_status, stdout, stderr =
+    dn_utils.execute_shell_command("fmt", "--width=" .. width, message_file)
+  os.remove(message_file)
+  -- handle error
+  if exit_status ~= 0 then
+    local errmsg = 'command: "' .. shell_cmd .. '" failed, '
+    if stderr:len() > 0 then
+      stderr = stderr:gsub("\n$", "")
+      errmsg = errmsg .. 'with error output: "' .. stderr .. '"'
+    else
+      errmsg = errmsg .. "with no error output"
+    end
+    error(errmsg)
+  end
+  -- return wrapped text
+  return stdout
+end
+
 -- _wrap_manual(message[, opts])
 ---@private
 ---Wraps a message string sensibly at a specific column. The message must be a
@@ -882,13 +949,14 @@ end
 ---Programming
 ---• |dn#util#unusedFunctions|   checks for uncalled functions
 ---• |dn#util#insertMode|        switch to insert mode
----• |dn#util#executeShellCommand|
+---• |dn_utils.execute_shell_command|
 ---                              execute shell command
 ---• |dn#util#exceptionError|    extract error message from exception
 ---• |dn_utils.scriptnames|      display scripts in location list
 ---• |dn#util#filetypes|         get list of available filetypes
 ---• |dn_utils.sleep|            pause script execution for defined time
 ---• |dn_utils.setup|            initialise/set up plugin
+---• |dn_utils.shell_escape|     escape shell command
 ---• |dn#util#showFiletypes|     display list of available filetypes
 ---• |dn#util#runtimepaths|      get list of runtime paths
 ---• |dn#util#showRuntimepaths|  display list of runtime paths
@@ -1126,6 +1194,42 @@ function dn_utils.error(...)
     end
   end
   vim.api.nvim_err_writeln(table.concat(messages, "\n"))
+end
+
+-- execute_shell_command(...)
+---Execute shell command. Note that the shell command is escaped prior to
+---execution.
+---@param ... string Elements of shell command to execute,
+---e.g., "ls", "-lA"
+---@return string _ The escaped shell command that was executed
+---@return number _ Shell command exit code
+---@return string _ Shell command standard output
+---@return string _ Shell command standard error
+function dn_utils.execute_shell_command(...)
+  -- credit: https://stackoverflow.com/a/42644964
+  local stdout_file = os.tmpname()
+  local stderr_file = os.tmpname()
+
+  -- ignore spurious param-type-mismatch errors for following line
+  local shell_command = dn_utils.shell_escape({ ... })
+
+  local exit_status = os.execute(shell_command .. " > " .. stdout_file .. " 2> " .. stderr_file)
+
+  local stdout_fh = assert(io.open(stdout_file, "r"))
+  local stdout = stdout_fh:read("*all")
+
+  local stderr_fh = assert(io.open(stderr_file, "r"))
+  local stderr = stderr_fh:read("*all")
+
+  stdout_fh:close()
+  stderr_fh:close()
+
+  os.remove(stdout_file)
+  os.remove(stderr_file)
+
+  -- ignore spurious return-type-mismatch errors for 'exit_status'
+  -- in following line
+  return shell_command, exit_status, stdout, stderr
 end
 
 -- info(messages)
@@ -1378,6 +1482,23 @@ function dn_utils.setup(opts)
   --vim.api.nvim_create_user_command("MyUtilsGreeting", dn_utils.greet, {})
 end
 
+-- shell_escape(...)
+---Escape shell command elements.
+---@param ... string Shell command elements
+---@return string _ Assembled escaped shell command
+function dn_utils.shell_escape(...)
+  local args = vim.fn.flattennew({ ... })
+  local escaped = {}
+  for _, arg in ipairs(args) do
+    local str = tostring(arg)
+    if str:match("[^A-Za-z0-9_/:=-]") then
+      str = "'" .. str:gsub("'", "'\\''") .. "'"
+    end
+    table.insert(escaped, str)
+  end
+  return table.concat(escaped, " ")
+end
+
 -- sleep(sec)
 ---Pause script for a specified number of seconds.
 ---@param sec number Number of seconds to pause script execution
@@ -1600,7 +1721,7 @@ end
 ---Function used for testing. Its interface is not stable.
 ---@return nil _ No return value
 function dn_utils.test()
-  --stub
+  -- stub
 end
 
 -- trim_char(str [, char])
