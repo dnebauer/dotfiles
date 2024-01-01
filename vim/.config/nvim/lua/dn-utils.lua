@@ -14,7 +14,6 @@
 --             * _wrap_params()
 --               * var_type()
 --             * wrap()
---               * _wrap_fmt()
 --
 --       * dn-perl:
 --         * get_rtp_file()
