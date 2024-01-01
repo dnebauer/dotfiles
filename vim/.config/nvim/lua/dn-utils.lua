@@ -15,7 +15,6 @@
 --               * var_type()
 --             * wrap()
 --               * _wrap_fmt()
---               * _wrap_manual()
 --
 --       * dn-perl:
 --         * get_rtp_file()
@@ -97,6 +96,7 @@ local _menu_ui_select_inputlist
 local _menu_ui_select_pythontk
 local _t
 local _tbl_to_str
+local _wrap_manual
 
 -- _change_caps(string, case_type)
 ---@private
@@ -733,6 +733,117 @@ function _tbl_to_str(tbl, count, indent, pad)
   return out
 end
 
+-- _wrap_manual(message[, opts])
+---@private
+---Wraps a message string sensibly at a specific column. The message must be a
+---string and can contain newlines. It can be zero length.
+---@param message string The message to wrap
+---@param opts table|nil Optional configuration options
+---• {width} (number) Column to wrap at. Must be
+---  a positive integer. If it is set to zero the
+---  message string is returned without
+---  alteration. If it is less than 10, and not
+---  zero, it is set to 10.
+---• {hang} (number) Size of the hanging indent
+---  in spaces. Must be a positive integer. If it
+---  is set to zero there is no hanging indent.
+---  The wrap width must be greater than than the
+---  hanging indent by at least 10.
+---@return string _ Wrapped message string
+function _wrap_manual(message, opts)
+  -- process parameters
+  -- • message
+  assert(type(message) == "string", "Expected string, got " .. type(message))
+  if message:len() == 0 then
+    return message
+  end
+  -- • opts
+  opts = opts or {}
+  assert(type(opts) == "table", "Expected table, got " .. type(opts))
+  local valid_opts = { "width", "hang" }
+  for opt, _ in pairs(opts) do
+    assert(dn_utils.is_table_value(valid_opts, opt), "Invalid option: " .. opt)
+  end
+  -- • width
+  local width = opts.width or 79
+  assert(
+    dn_utils.valid_non_negative_int(width),
+    "Expected non-negative integer, got " .. type(width) .. " " .. tostring(width)
+  )
+  if width == 0 then
+    return message
+  end
+  if width < 10 then
+    width = 10
+  end
+  -- • hang
+  local hang = opts.hang or 0
+  assert(
+    dn_utils.valid_non_negative_int(hang),
+    "Expected non-negative integer, got " .. type(hang) .. " " .. tostring(hang)
+  )
+  assert((width - hang) >= 10, "Width (" .. width .. ") must be at least 10 larger than indent (" .. hang .. ")")
+  local hanging_indent = string.rep(" ", hang)
+  -- respect multiple newlines, but not single newlines
+  -- • remove spaces before newlines
+  -- •• because later converting newlines to spaces
+  --    and want to avoid multiple consecutive spaces
+  -- •• must use spaces instead of %s because %s consumes newlines
+  message = message:gsub(" +\n", "\n")
+  -- • convert newlines to U00F1 (Information Separator One) placeholders
+  message = message:gsub("\n", "")
+  -- • convert single newlines to spaces
+  message = message:gsub("([^])([^])", "%1 %2")
+  -- • convert remaining (multiple consecutive) placeholders to newlines
+  message = message:gsub("", "\n")
+  -- wrap string manually
+  local wrapped = {}
+  local lines = dn_utils.split(message, "\n")
+  for _, line in ipairs(lines) do
+    -- cater for empty lines
+    if line:match("^%s*$") then
+      table.insert(wrapped, "")
+    else
+      -- process line
+      while line:len() > 0 do
+        -- exit on last output line
+        if line:len() <= width then
+          table.insert(wrapped, line)
+          break
+        end
+        -- find wrap point
+        local wrap = -1
+        local count = 1
+        local finished = false
+        while not finished do
+          local index, _ = line:find("[%p%s]", count)
+          if index == nil then
+            finished = true
+          elseif index < width then
+            wrap = index
+          end
+          count = count + 1
+        end
+        -- if no wrap point then have ugly situation where no breakpoint
+        -- exists so just output whole thing (ick!)
+        if wrap == -1 then
+          table.insert(wrapped, line)
+          break
+        end
+        -- let's wrap!
+        local output = line:sub(1, wrap)
+        table.insert(wrapped, output)
+        line = line:sub(wrap + 1)
+        -- if broke line on punctuation mark may now have leading space
+        line = vim.fn.trim(line, " ", 1)
+        -- add hanging indent to all subsequent lines
+        line = hanging_indent .. line
+      end
+    end
+  end
+  return table.concat(wrapped, "\n")
+end
+
 -- PUBLIC FUNCTIONS
 
 ---@mod dn_utils.funclist Function List
@@ -774,7 +885,7 @@ end
 ---• |dn#util#executeShellCommand|
 ---                              execute shell command
 ---• |dn#util#exceptionError|    extract error message from exception
----• |dn#util#scriptNumber|      get SID of given script
+---• |dn_utils.scriptnames|      display scripts in location list
 ---• |dn#util#filetypes|         get list of available filetypes
 ---• |dn_utils.sleep|            pause script execution for defined time
 ---• |dn_utils.setup|            initialise/set up plugin
@@ -1006,7 +1117,15 @@ end
 ---@param ... string Error messages to display.
 ---@return nil _ No return value
 function dn_utils.error(...)
-  vim.api.nvim_err_writeln(table.concat({ ... }, "\n"))
+  local messages = {}
+  for _, message in ipairs({ ... }) do
+    if type({ message }) == "string" then
+      table.insert(messages, message)
+    else
+      table.insert(messages, dn_utils.stringify(message))
+    end
+  end
+  vim.api.nvim_err_writeln(table.concat(messages, "\n"))
 end
 
 -- info(messages)
@@ -1014,8 +1133,16 @@ end
 ---@param ... string Messages to display.
 ---@return nil _ No return value
 function dn_utils.info(...)
-  local msgs = table.concat({ ... }, "\n")
-  vim.api.nvim_echo({ { msgs } }, true, {})
+  local messages = {}
+  for _, message in ipairs({ ... }) do
+    if type({ message }) == "string" then
+      table.insert(messages, message)
+    else
+      table.insert(messages, dn_utils.stringify(message))
+    end
+  end
+  local output = table.concat(messages, "\n")
+  vim.api.nvim_echo({ { output } }, true, {})
 end
 
 -- is_table_value(tbl, str)
@@ -1216,8 +1343,8 @@ function dn_utils.pairs_by_keys(tbl, sort_fn)
 end
 
 -- scriptnames()
----Display the output of the `scriptnames` command in a location list for the
----current window.
+---Display the output of `:scriptnames` in a location list for the current
+---window.
 ---@return nil _ No return value
 function dn_utils.scriptnames()
   -- get output from ":scriptnames" command
@@ -1266,25 +1393,29 @@ end
 
 -- split(str, [sep])
 ---Split a string on a separator character.
----@param str string String to split
----@param sep string|nil Separator which can be any valid lua pattern,
----defaults to lua character class "%s"
+---@param inputstr string String to split
+---@param sep string|nil Separator which can be any valid
+---|luaref-patterns|, defaults to lua character
+---class "%s"
 ---@return table _ Array of split items
-function dn_utils.split(str, sep)
+function dn_utils.split(inputstr, sep)
   -- process args
-  assert(type(str) == "string", "Expected string, got " .. type(str))
+  assert(type(inputstr) == "string", "Expected string, got " .. type(inputstr))
   sep = sep or "%s"
   assert(type(sep) == "string", "Expected string, got " .. type(sep))
 
   -- perform split
-  local items = {}
-  local store_item = function(item)
-    table.insert(items, item)
+  local t = {}
+  for field, s in inputstr:gmatch("([^" .. sep .. "]*)(" .. sep .. "?)") do
+    table.insert(t, field)
+    if s == "" then
+      return t
+    end
   end
-  -- • assign return value to dummy variable to prevent warning message
-  _ = str:gsub("[^" .. sep .. "]+", store_item)
 
-  return items
+  -- this return is redundant because function exits in 'for' loop above
+  -- this return is needed to avoid linter complaint about missing 'return'
+  return t
 end
 
 -- stringify(var)
@@ -1469,7 +1600,7 @@ end
 ---Function used for testing. Its interface is not stable.
 ---@return nil _ No return value
 function dn_utils.test()
-  -- stub
+  --stub
 end
 
 -- trim_char(str [, char])
@@ -1501,14 +1632,38 @@ function dn_utils.trim_char(str, char)
   return trimmed
 end
 
+-- valid_non_negative_int(var)
+---Check whether variable is a non-negative integer. The integer can be zero or
+---greater.
+---@param var any Variable to check
+---@return boolean _ Whether variable is a non-negative integer
+function dn_utils.valid_non_negative_int(var)
+  -- must be number
+  if type(var) ~= "number" then
+    return false
+  end
+  -- must be non-negative
+  if var < 0 then
+    return false
+  end
+  -- must be integer
+  return (var % 1) == 0
+end
+
 -- valid_pos_int(var)
 ---Check whether variable is a positive (non-zero) integer.
 ---@param var any Variable to check
 ---@return boolean _ Whether variable is a positive integer
 function dn_utils.valid_pos_int(var)
+  -- must be number
   if type(var) ~= "number" then
     return false
   end
+  -- must be greater than zero
+  if var <= 0 then
+    return false
+  end
+  -- must be integer
   return (var % 1) == 0
 end
 
@@ -1517,8 +1672,16 @@ end
 ---@param ... string Warning messages to display.
 ---@return nil _ No return value
 function dn_utils.warning(...)
-  local msgs = table.concat({ ... }, "\n")
-  vim.api.nvim_echo({ { msgs, "WarningMsg" } }, true, {})
+  local messages = {}
+  for _, message in ipairs({ ... }) do
+    if type({ message }) == "string" then
+      table.insert(messages, message)
+    else
+      table.insert(messages, dn_utils.stringify(message))
+    end
+  end
+  local output = table.concat(messages, "\n")
+  vim.api.nvim_echo({ { output, "WarningMsg" } }, true, {})
 end
 
 ---@mod dn_utils.mappings Mappings

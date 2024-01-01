@@ -73,7 +73,7 @@ Programming
 • |dn#util#executeShellCommand|
                               execute shell command
 • |dn#util#exceptionError|    extract error message from exception
-• |dn#util#scriptNumber|      get SID of given script
+• |dn_utils.scriptnames|      display scripts in location list
 • |dn#util#filetypes|         get list of available filetypes
 • |dn_utils.sleep|            pause script execution for defined time
 • |dn_utils.setup|            initialise/set up plugin
@@ -285,8 +285,8 @@ dn_utils.pairs_by_keys({tbl}, {sort_fn})                *dn_utils.pairs_by_keys*
 
 
 dn_utils.scriptnames()                                    *dn_utils.scriptnames*
-    Display the output of the `scriptnames` command in a location list for the
-    current window.
+    Display the output of `:scriptnames` in a location list for the current
+    window.
 
     Returns: ~
         (nil)  No return value
@@ -312,13 +312,14 @@ dn_utils.sleep({sec})                                           *dn_utils.sleep*
         (nil)  No return value
 
 
-dn_utils.split({str}, {sep})                                    *dn_utils.split*
+dn_utils.split({inputstr}, {sep})                               *dn_utils.split*
     Split a string on a separator character.
 
     Parameters: ~
-        {str}  (string)      String to split
-        {sep}  (string|nil)  Separator which can be any valid lua pattern,
-                             defaults to lua character class "%s"
+        {inputstr}  (string)      String to split
+        {sep}       (string|nil)  Separator which can be any valid
+                                  |luaref-patterns|, defaults to lua character
+                                  class "%s"
 
     Returns: ~
         (table)  Array of split items
@@ -433,6 +434,17 @@ dn_utils.trim_char({str}, {char})                           *dn_utils.trim_char*
 
     Returns: ~
         (string)  Trimmed string
+
+
+dn_utils.valid_non_negative_int({var})         *dn_utils.valid_non_negative_int*
+    Check whether variable is a non-negative integer. The integer can be zero or
+    greater.
+
+    Parameters: ~
+        {var}  (any)  Variable to check
+
+    Returns: ~
+        (boolean)  Whether variable is a non-negative integer
 
 
 dn_utils.valid_pos_int({var})                           *dn_utils.valid_pos_int*
