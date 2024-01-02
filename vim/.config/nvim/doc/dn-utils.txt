@@ -78,7 +78,7 @@ Programming
 • |dn_utils.setup|            initialise/set up plugin
 • |dn_utils.shell_escape|     escape shell command
 • |dn#util#showFiletypes|     display list of available filetypes
-• |dn#util#runtimepaths|      get list of runtime paths
+• |dn_utils.runtimepaths|     get list of runtime paths
 • |dn#util#showRuntimepaths|  display list of runtime paths
 • |dn#util#isMappedTo|        find mode mappings for given |{rhs}|
 • |dn#util#updateUserHelpTags|
@@ -346,6 +346,13 @@ dn_utils.shell_escape({...})                             *dn_utils.shell_escape*
 >lua
         local cmd_str = dn_utils.shell_escape("ls", "-lA")
 <
+
+
+dn_utils.show_runtimepaths()                        *dn_utils.show_runtimepaths*
+    Display runtime paths, one per line. Attempts to wrap the output sensibly.
+
+    Returns: ~
+        (nil)  No return value
 
 
 dn_utils.sleep({sec})                                           *dn_utils.sleep*

@@ -8,8 +8,6 @@
 --         * show_filetypes()
 --           * filetypes()
 --           * list_to_screen_columns()
---         * show_runtime_paths()
---           * runtimepaths()
 --
 --       * dn-perl:
 --         * get_rtp_file()
@@ -952,8 +950,8 @@ end
 ---• |dn_utils.setup|            initialise/set up plugin
 ---• |dn_utils.shell_escape|     escape shell command
 ---• |dn#util#showFiletypes|     display list of available filetypes
----• |dn#util#runtimepaths|      get list of runtime paths
----• |dn#util#showRuntimepaths|  display list of runtime paths
+---• |dn_utils.runtimepaths|     get list of runtime paths
+---• |dn_utils.showRuntimepaths| display runtime paths
 ---• |dn#util#isMappedTo|        find mode mappings for given |{rhs}|
 ---• |dn#util#updateUserHelpTags|
 ---                              rebuild help tags in rtp "doc" subdirs
@@ -1512,6 +1510,17 @@ function dn_utils.shell_escape(...)
     table.insert(escaped, str)
   end
   return table.concat(escaped, " ")
+end
+
+-- show_runtimepaths()
+---Display runtime paths, one per line. Attempts to wrap the output sensibly.
+---@return nil _ No return value
+function dn_utils.show_runtimepaths()
+  local winwidth = vim.api.nvim_win_get_width(0) - 1
+  local paths = dn_utils.runtimepaths()
+  for _, path in ipairs(paths) do
+    dn_utils.info(dn_utils.wrap(path, { width = winwidth }))
+  end
 end
 
 -- sleep(sec)
