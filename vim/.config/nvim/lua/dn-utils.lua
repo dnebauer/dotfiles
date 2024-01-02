@@ -781,12 +781,12 @@ function _wrap_fmt(message, opts)
   message_fh:write(message)
   message_fh:close()
   -- process file with 'fmt' utility
-  local shell_cmd, exit_status, stdout, stderr =
-    dn_utils.execute_shell_command("fmt", "--width=" .. width, message_file)
+  local ret = dn_utils.execute_shell_command("fmt", "--width=" .. width, message_file)
   os.remove(message_file)
   -- handle error
-  if exit_status ~= 0 then
-    local errmsg = 'command: "' .. shell_cmd .. '" failed, '
+  if ret.exit_status ~= 0 then
+    local errmsg = 'command: "' .. ret.command .. '" failed, '
+    local stderr = ret.stderr
     if stderr:len() > 0 then
       stderr = stderr:gsub("\n$", "")
       errmsg = errmsg .. 'with error output: "' .. stderr .. '"'
@@ -796,7 +796,7 @@ function _wrap_fmt(message, opts)
     error(errmsg)
   end
   -- return wrapped text
-  return stdout
+  return ret.stdout
 end
 
 -- _wrap_manual(message[, opts])
@@ -1200,13 +1200,16 @@ end
 ---execution.
 ---@param ... string Elements of shell command to execute,
 ---e.g., "ls", "-lA"
----@return string _ The escaped shell command that was executed
----@return number _ Shell command exit code
----@return string _ Shell command standard output
----@return string _ Shell command standard error
+---@return table _ Dictionary containing information about execution, with keys:
+---• command: (string) Command executed by the shell
+---• exit_code: (number) Shell command exit code
+---• stdout: (string) Shell command standard output
+---• stderr: (string) Shell command standard error
 ---@usage [[
----local cmd, exit, stdout, stderr
----  = dn_utils.execute_shell_command("ls", "-lA")
+---local ret = dn_utils.execute_shell_command("ls", "-lA")
+---if ret.exit_status ~= 0 then
+---  error(ret.stderr)
+---end
 ---@usage ]]
 function dn_utils.execute_shell_command(...)
   -- credit: https://stackoverflow.com/a/42644964
@@ -1214,9 +1217,9 @@ function dn_utils.execute_shell_command(...)
   local stderr_file = os.tmpname()
 
   -- ignore spurious param-type-mismatch errors for following line
-  local shell_command = dn_utils.shell_escape({ ... })
+  local command = dn_utils.shell_escape({ ... })
 
-  local exit_status = os.execute(shell_command .. " > " .. stdout_file .. " 2> " .. stderr_file)
+  local exit_status = os.execute(command .. " > " .. stdout_file .. " 2> " .. stderr_file)
 
   local stdout_fh = assert(io.open(stdout_file, "r"))
   local stdout = stdout_fh:read("*all")
@@ -1232,7 +1235,8 @@ function dn_utils.execute_shell_command(...)
 
   -- ignore spurious return-type-mismatch errors for 'exit_status'
   -- in following line
-  return shell_command, exit_status, stdout, stderr
+  local retval = { command = command, exit_status = exit_status, stdout = stdout, stderr = stderr }
+  return retval
 end
 
 -- info(messages)

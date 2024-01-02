@@ -195,15 +195,18 @@ dn_utils.execute_shell_command({...})           *dn_utils.execute_shell_command*
                          e.g., "ls", "-lA"
 
     Returns: ~
-        (string)  The escaped shell command that was executed
-        (number)  Shell command exit code
-        (string)  Shell command standard output
-        (string)  Shell command standard error
+        (table)  Dictionary containing information about execution, with keys:
+                 • command: (string) Command executed by the shell
+                 • exit_code: (number) Shell command exit code
+                 • stdout: (string) Shell command standard output
+                 • stderr: (string) Shell command standard error
 
     Usage: ~
 >lua
-        local cmd, exit, stdout, stderr
-          = dn_utils.execute_shell_command("ls", "-lA")
+        local ret = dn_utils.execute_shell_command("ls", "-lA")
+        if ret.exit_status ~= 0 then
+          error(ret.stderr)
+        end
 <
 
 
