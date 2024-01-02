@@ -108,7 +108,7 @@ String manipulation
 • |dn#util#substitute|        perform global substitution in file
 • |dn_utils.change_caps       changes capitalisation of line/selection
 • |dn_utils.split|            split string on separator
-• |dn#util#wrap|              wrap string sensibly
+• |dn_utils.wrap|             wrap string sensibly
 
 Tables
 • |dn_utils.is_table_value|   check whether var is a value in table
@@ -505,6 +505,43 @@ dn_utils.warning({...})                                       *dn_utils.warning*
 
     Returns: ~
         (nil)  No return value
+
+
+dn_utils.wrap({message}, {opts})                                 *dn_utils.wrap*
+    Wraps a message string sensibly at a specified column. The message must be
+    a string and can contain newlines. It can be zero length. Both the wrap
+    width and a hanging indent can be specified.
+
+    If no hanging indent is specified, this function first attempts to wrap
+    the message string using the system utility "fmt". (This is a utility
+    which is found on all *nix systems as a core utility, and there are
+    versions available for other operating systems. Although primarily
+    intended for formatting C/C++, it does a good job of wrapping plain text.)
+    If "fmt" is unavailable or unable to wrap the message string, this
+    function performs the wrapping itself.
+
+    Parameters: ~
+        {message}  (string)     Message to wrap
+        {opts}     (table|nil)  Optional configuration options:
+                                • {width} (number) Column to wrap at. Must be
+                                  a positive integer. If it is set to zero the
+                                  message string is returned without
+                                  alteration. If it is less than 10, and not
+                                  zero, it is set to 10.
+                                • {hang} (number) Size of the hanging indent
+                                  in spaces. Must be a positive integer. If it
+                                  is set to zero there is no hanging indent.
+                                  The wrap width must be greater than than the
+                                  hanging indent by at least 10.
+
+    Returns: ~
+        (string)  Wrapped message string
+
+    Usage: ~
+>lua
+        local winwidth = vim.api.nvim_win_get_width(0) - 1
+        local wrapped = dn_utils.wrap(message, {width = winwidth})
+<
 
 
 ==============================================================================

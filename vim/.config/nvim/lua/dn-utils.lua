@@ -13,7 +13,6 @@
 --           * echo_wrap()
 --             * _wrap_params()
 --               * var_type()
---             * wrap()
 --
 --       * dn-perl:
 --         * get_rtp_file()
@@ -986,7 +985,7 @@ end
 ---• |dn#util#substitute|        perform global substitution in file
 ---• |dn_utils.change_caps       changes capitalisation of line/selection
 ---• |dn_utils.split|            split string on separator
----• |dn#util#wrap|              wrap string sensibly
+---• |dn_utils.wrap|             wrap string sensibly
 ---
 ---Tables
 ---• |dn_utils.is_table_value|   check whether var is a value in table
@@ -1813,6 +1812,80 @@ function dn_utils.warning(...)
   end
   local output = table.concat(messages, "\n")
   vim.api.nvim_echo({ { output, "WarningMsg" } }, true, {})
+end
+
+-- wrap(message[, opts])    {{{1
+---Wraps a message string sensibly at a specified column. The message must be
+---a string and can contain newlines. It can be zero length. Both the wrap
+---width and a hanging indent can be specified.
+---
+---If no hanging indent is specified, this function first attempts to wrap
+---the message string using the system utility "fmt". (This is a utility
+---which is found on all *nix systems as a core utility, and there are
+---versions available for other operating systems. Although primarily
+---intended for formatting C/C++, it does a good job of wrapping plain text.)
+---If "fmt" is unavailable or unable to wrap the message string, this
+---function performs the wrapping itself.
+---@param message string Message to wrap
+---@param opts table|nil Optional configuration options:
+---• {width} (number) Column to wrap at. Must be
+---  a positive integer. If it is set to zero the
+---  message string is returned without
+---  alteration. If it is less than 10, and not
+---  zero, it is set to 10.
+---• {hang} (number) Size of the hanging indent
+---  in spaces. Must be a positive integer. If it
+---  is set to zero there is no hanging indent.
+---  The wrap width must be greater than than the
+---  hanging indent by at least 10.
+---@return string _ Wrapped message string
+---@usage [[
+---local winwidth = vim.api.nvim_win_get_width(0) - 1
+---local wrapped = dn_utils.wrap(message, {width = winwidth})
+---@usage ]]
+function dn_utils.wrap(message, opts)
+  -- process parameters
+  -- • message
+  assert(type(message) == "string", "Expected string, got " .. type(message))
+  if message:len() == 0 then
+    return message
+  end
+  -- • opts
+  opts = opts or {}
+  assert(type(opts) == "table", "Expected table, got " .. type(opts))
+  local valid_opts = { "width", "hang" }
+  for opt, _ in pairs(opts) do
+    assert(dn_utils.is_table_value(valid_opts, opt), "Invalid option: " .. opt)
+  end
+  -- • width
+  local width = opts.width or 79
+  assert(
+    dn_utils.valid_non_negative_int(width),
+    "Expected non-negative integer, got " .. type(width) .. " " .. tostring(width)
+  )
+  if width == 0 then
+    return message
+  end
+  if width < 10 then
+    width = 10
+  end
+  -- • hang
+  local hang = opts.hang or 0
+  assert(
+    dn_utils.valid_non_negative_int(hang),
+    "Expected non-negative integer, got " .. type(hang) .. " " .. tostring(hang)
+  )
+  assert((width - hang) >= 10, "Width (" .. width .. ") must be at least 10 larger than indent (" .. hang .. ")")
+  -- try to wrap using "fmt" if no hanging indent
+  if hang == 0 then
+    local ok, output = pcall(_wrap_fmt, { width = width })
+    if ok then
+      return output
+    end
+  end
+  -- fall back to manual wrapping
+  local wrapped = _wrap_manual(message, { width = width, hang = hang })
+  return wrapped
 end
 
 ---@mod dn_utils.mappings Mappings
