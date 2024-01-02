@@ -1448,6 +1448,16 @@ function dn_utils.pairs_by_keys(tbl, sort_fn)
   return iter
 end
 
+-- runtimepaths()
+---Get a list of vim's runtimepath directories.
+---@return table _ List of runtimepath directories
+function dn_utils.runtimepaths()
+  -- rtp is a global option
+  local val = vim.api.nvim_get_option_value("runtimepath", { scope = "global" })
+  local paths = dn_utils.split(val, ",")
+  return paths
+end
+
 -- scriptnames()
 ---Display the output of `:scriptnames` in a location list for the current
 ---window.

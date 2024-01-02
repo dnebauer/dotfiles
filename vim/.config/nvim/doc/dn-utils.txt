@@ -54,7 +54,6 @@ User interaction
 • |dn_utils.info|             display message to user
 • |dn_utils.warn|             display warning message
 • |dn#util#prompt|            display prompt message
-• |dn#util#echoWrap|          echoes text but wraps it sensibly
 • |dn_utils.menu_select|      select item from menu
 • |dn#util#help|              user can select from help topics
 • |dn#util#getSelection|      returns currently selected text
@@ -307,6 +306,13 @@ dn_utils.pairs_by_keys({tbl}, {sort_fn})                *dn_utils.pairs_by_keys*
           print(name, line)
         end
 <
+
+
+dn_utils.runtimepaths()                                  *dn_utils.runtimepaths*
+    Get a list of vim's runtimepath directories.
+
+    Returns: ~
+        (table)  List of runtimepath directories
 
 
 dn_utils.scriptnames()                                    *dn_utils.scriptnames*
