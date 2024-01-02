@@ -200,6 +200,12 @@ dn_utils.execute_shell_command({...})           *dn_utils.execute_shell_command*
         (string)  Shell command standard output
         (string)  Shell command standard error
 
+    Usage: ~
+>lua
+        local cmd, exit, stdout, stderr
+          = dn_utils.execute_shell_command("ls", "-lA")
+<
+
 
 dn_utils.info({...})                                             *dn_utils.info*
     Display messages(s).
@@ -326,6 +332,11 @@ dn_utils.shell_escape({...})                             *dn_utils.shell_escape*
 
     Returns: ~
         (string)  Assembled escaped shell command
+
+    Usage: ~
+>lua
+        local cmd_str = dn_utils.shell_escape("ls", "-lA")
+<
 
 
 dn_utils.sleep({sec})                                           *dn_utils.sleep*

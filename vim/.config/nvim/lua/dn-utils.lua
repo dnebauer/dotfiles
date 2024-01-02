@@ -1204,6 +1204,10 @@ end
 ---@return number _ Shell command exit code
 ---@return string _ Shell command standard output
 ---@return string _ Shell command standard error
+---@usage [[
+---local cmd, exit, stdout, stderr
+---  = dn_utils.execute_shell_command("ls", "-lA")
+---@usage ]]
 function dn_utils.execute_shell_command(...)
   -- credit: https://stackoverflow.com/a/42644964
   local stdout_file = os.tmpname()
@@ -1485,6 +1489,9 @@ end
 ---Escape shell command elements.
 ---@param ... string Shell command elements
 ---@return string _ Assembled escaped shell command
+---@usage [[
+---local cmd_str = dn_utils.shell_escape("ls", "-lA")
+---@usage ]]
 function dn_utils.shell_escape(...)
   local args = vim.fn.flattennew({ ... })
   local escaped = {}
