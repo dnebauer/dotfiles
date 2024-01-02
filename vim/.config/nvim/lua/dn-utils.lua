@@ -10,9 +10,6 @@
 --           * list_to_screen_columns()
 --         * show_runtime_paths()
 --           * runtimepaths()
---           * echo_wrap()
---             * _wrap_params()
---               * var_type()
 --
 --       * dn-perl:
 --         * get_rtp_file()
@@ -931,7 +928,6 @@ end
 ---• |dn_utils.info|             display message to user
 ---• |dn_utils.warn|             display warning message
 ---• |dn#util#prompt|            display prompt message
----• |dn#util#echoWrap|          echoes text but wraps it sensibly
 ---• |dn_utils.menu_select|      select item from menu
 ---• |dn#util#help|              user can select from help topics
 ---• |dn#util#getSelection|      returns currently selected text
