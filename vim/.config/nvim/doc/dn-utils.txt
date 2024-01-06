@@ -46,7 +46,7 @@ Files and directories
 • |dn#util#getFileDir|        get directory of file being edited
 • |dn#util#getFileName|       get name of file being edited
 • |dn#util#getRtpDir|         finds directory from runtimepath
-• |dn#util#getRtpFile|        finds file(s) in directories under 'rtp'
+• |dn_utils.get_rtp_file|     finds file(s) in directories under 'rtp'
 
 User interaction
 • |dn_utils.clear_prompt      clear command line
@@ -79,7 +79,7 @@ Programming
 • |dn_utils.shell_escape|     escape shell command
 • |dn#util#showFiletypes|     display list of available filetypes
 • |dn_utils.runtimepaths|     get list of runtime paths
-• |dn#util#showRuntimepaths|  display list of runtime paths
+• |dn_utils.showRuntimepaths| display runtime paths
 • |dn#util#isMappedTo|        find mode mappings for given |{rhs}|
 • |dn#util#updateUserHelpTags|
                               rebuild help tags in rtp "doc" subdirs
@@ -207,6 +207,20 @@ dn_utils.execute_shell_command({...})           *dn_utils.execute_shell_command*
           error(ret.stderr)
         end
 <
+
+
+dn_utils.get_rtp_file({filename})                        *dn_utils.get_rtp_file*
+    Finds a file if it is located anywhere under the directories in
+    runtimepath. Both regular files and symlinks will match.
+    Returns a table sequence with all matching filepaths.
+    The table is empty if no matching files were found.
+    An empty table is returned if the filename is a zero-length string.
+
+    Parameters: ~
+        {filename}  (string)  Name of file to search for
+
+    Returns: ~
+        (table)  Sequence of matching filepaths (may be empty)
 
 
 dn_utils.info({...})                                             *dn_utils.info*

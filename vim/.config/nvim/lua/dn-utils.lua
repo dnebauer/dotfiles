@@ -5,7 +5,6 @@
 -- TODO: Implement these functions:
 --
 --       * dn-perl:
---         * get_rtp_file()
 --         * get_file_dir()
 --
 --       * dn-latex:
@@ -15,7 +14,7 @@
 --         * get_rtp_dir()
 
 ---@brief [[https://www.reddit.com/r/neovim/comments/w4r2de/comment/ih46dhl/
----*dn-utils-nvim.txt*   For Neovim version 0.9   Last change: 2023 November 19
+---*dn-utils-nvim.txt*   For Neovim version 0.9   Last change: 2024 January 06
 ---@brief ]]
 
 ---@toc dn_utils.contents
@@ -913,7 +912,7 @@ end
 ---• |dn#util#getFileDir|        get directory of file being edited
 ---• |dn#util#getFileName|       get name of file being edited
 ---• |dn#util#getRtpDir|         finds directory from runtimepath
----• |dn#util#getRtpFile|        finds file(s) in directories under 'rtp'
+---• |dn_utils.get_rtp_file|     finds file(s) in directories under 'rtp'
 ---
 ---User interaction
 ---• |dn_utils.clear_prompt      clear command line
@@ -1225,6 +1224,53 @@ function dn_utils.execute_shell_command(...)
   -- in following line
   local retval = { command = command, exit_status = exit_status, stdout = stdout, stderr = stderr }
   return retval
+end
+
+-- get_rtp_file(filename)
+
+---Finds a file if it is located anywhere under the directories in
+---runtimepath. Both regular files and symlinks will match.
+---Returns a table sequence with all matching filepaths.
+---The table is empty if no matching files were found.
+---An empty table is returned if the filename is a zero-length string.
+---@param filename string Name of file to search for
+---@return table _ Sequence of matching filepaths (may be empty)
+function dn_utils.get_rtp_file(filename)
+  assert(type(filename) == "string", "Expected string, got " .. type(filename))
+  if filename:len() == 0 then
+    return {}
+  end
+
+  local matches = {}
+
+  local _scandir
+  _scandir = function(_dir)
+    local handle = vim.loop.fs_scandir(_dir)
+    assert(handle ~= nil, "got nil handle on dir: " .. _dir)
+    while true do
+      local item, item_type = vim.loop.fs_scandir_next(handle)
+      if not item then
+        break
+      end
+      local item_path = string.format("%s/%s", _dir, item)
+      if item_type == "directory" then
+        _scandir(item_path)
+      elseif item_type == "file" or item_type == "link" then
+        if item == filename then
+          table.insert(matches, item_path)
+        end
+      else
+        error("unknown scandir item type: " .. item_type)
+      end
+    end
+  end
+
+  local paths = dn_utils.runtimepaths()
+  for _, path in ipairs(paths) do
+    _scandir(path)
+  end
+
+  return matches
 end
 
 -- info(messages)
