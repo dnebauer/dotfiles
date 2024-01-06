@@ -4,9 +4,6 @@
 -- TODO: What is return value of functions with no explicit return value
 -- TODO: Implement these functions:
 --
---       * dn-perl:
---         * get_file_dir()
---
 --       * dn-latex:
 --         * pad_internal()
 --         * match_count()
@@ -909,13 +906,13 @@ end
 ---Files and directories
 ---• |dn#util#fileExists|        whether file exists (uses |glob()|)
 ---• |dn#util#getFilePath|       get filepath of file being edited
----• |dn#util#getFileDir|        get directory of file being edited
+---• |dn_utils.get_file_dir|     get directory of file being edited
 ---• |dn#util#getFileName|       get name of file being edited
 ---• |dn#util#getRtpDir|         finds directory from runtimepath
 ---• |dn_utils.get_rtp_file|     finds file(s) in directories under 'rtp'
 ---
 ---User interaction
----• |dn_utils.clear_prompt      clear command line
+---• |dn_utils.clear_prompt|     clear command line
 ---• |dn_utils.error|            display error message
 ---• |dn_utils.info|             display message to user
 ---• |dn_utils.warn|             display warning message
@@ -929,14 +926,14 @@ end
 ---• |dn#util#listSubtract|      subtract one list from another
 ---• |dn#util#listToScreen|      formats list for screen display
 ---• |dn#util#listToScreenColumns|
----                              formats list for columnar screen display
+---                            formats list for columnar screen display
 ---• |dn#util#listToText|        convert list to text fragment
 ---
 ---Programming
 ---• |dn#util#unusedFunctions|   checks for uncalled functions
 ---• |dn#util#insertMode|        switch to insert mode
 ---• |dn_utils.execute_shell_command|
----                              execute shell command
+---                            execute shell command
 ---• |dn#util#exceptionError|    extract error message from exception
 ---• |dn_utils.scriptnames|      display scripts in location list
 ---• |dn#util#filetypes|         get list of available filetypes
@@ -948,7 +945,7 @@ end
 ---• |dn_utils.showRuntimepaths| display runtime paths
 ---• |dn#util#isMappedTo|        find mode mappings for given |{rhs}|
 ---• |dn#util#updateUserHelpTags|
----                              rebuild help tags in rtp "doc" subdirs
+---                            rebuild help tags in rtp "doc" subdirs
 ---• |dn#util#os|                determine operating system family
 ---• |dn#utilis#isWindows|       determine whether using windows OS
 ---• |dn#utilis#isUnix|          determine whether using unix-like OS
@@ -956,7 +953,7 @@ end
 ---Version control
 ---• |dn#util#localGitRepoFetch| perform a fetch on a local git repository
 ---• |dn#util#localGitRepoUpdatedRecently|
----                              check that local repo is updated
+---                            check that local repo is updated
 ---
 ---String manipulation
 ---• |dn#util#stripLastChar|     removes last character from string
@@ -971,7 +968,7 @@ end
 ---• |dn#util#padLeft|           left pad string
 ---• |dn#util#padRight|          right pad string
 ---• |dn#util#substitute|        perform global substitution in file
----• |dn_utils.change_caps       changes capitalisation of line/selection
+---• |dn_utils.change_caps|      changes capitalisation of line/selection
 ---• |dn_utils.split|            split string on separator
 ---• |dn_utils.wrap|             wrap string sensibly
 ---
@@ -979,7 +976,7 @@ end
 ---• |dn_utils.is_table_value|   check whether var is a value in table
 ---• |dn_utils.pairs_by_keys|    iterate through table key-value pairs
 ---• |dn_utils.table_remove_empty_end_items|
----                              remove empty lines from end of sequence
+---                            remove empty lines from end of sequence
 ---• |dn_utils.table_print|      print prettified table
 ---• |dn_utils.table_size|       get item or key-value pair count
 ---• |dn_utils.table_stringify|  prettify table
@@ -1224,6 +1221,23 @@ function dn_utils.execute_shell_command(...)
   -- in following line
   local retval = { command = command, exit_status = exit_status, stdout = stdout, stderr = stderr }
   return retval
+end
+
+-- get_file_dir()
+
+---Get directory of file being edited.
+---Returns empty string if the buffer is not associated with a file.
+---@return string _ Directory path
+function dn_utils.get_file_dir()
+  -- get file path
+  local path = vim.api.nvim_buf_get_name(0)
+  if path:len() == 0 then
+    return ""
+  end
+  -- extract directory component
+  -- • based on https://stackoverflow.com/a/12191225
+  local dir = path:match("(.-)[^\\/]-%.?[^%.\\/]*$")
+  return dir
 end
 
 -- get_rtp_file(filename)
