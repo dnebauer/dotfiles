@@ -1165,7 +1165,9 @@ end
 
 -- error(messages)
 ---Display error messages(s).
----@param ... string Error messages to display.
+---While string values are expected, any non-string values are stringified by
+---|dn_utils.stringify|.
+---@param ... string|any Error messages to display.
 ---@return nil _ No return value
 function dn_utils.error(...)
   local messages = {}
@@ -1289,7 +1291,9 @@ end
 
 -- info(messages)
 ---Display messages(s).
----@param ... string Messages to display.
+---While string values are expected, any non-string values are stringified by
+---|dn_utils.stringify|.
+---@param ... string|any Messages to display.
 ---@return nil _ No return value
 function dn_utils.info(...)
   local messages = {}
@@ -1869,7 +1873,9 @@ end
 
 -- warning(messages)
 ---Display warning messages(s).
----@param ... string Warning messages to display.
+---While string values are expected, any non-string values are stringified by
+---|dn_utils.stringify|.
+---@param ... string|any Warning messages to display.
 ---@return nil _ No return value
 function dn_utils.warning(...)
   local messages = {}

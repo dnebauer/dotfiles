@@ -177,9 +177,11 @@ dn_utils.dumbify_quotes()                              *dn_utils.dumbify_quotes*
 
 dn_utils.error({...})                                           *dn_utils.error*
     Display error messages(s).
+    While string values are expected, any non-string values are stringified by
+    |dn_utils.stringify|.
 
     Parameters: ~
-        {...}  (string)  Error messages to display.
+        {...}  (string|any)  Error messages to display.
 
     Returns: ~
         (nil)  No return value
@@ -233,9 +235,11 @@ dn_utils.get_rtp_file({filename})                        *dn_utils.get_rtp_file*
 
 dn_utils.info({...})                                             *dn_utils.info*
     Display messages(s).
+    While string values are expected, any non-string values are stringified by
+    |dn_utils.stringify|.
 
     Parameters: ~
-        {...}  (string)  Messages to display.
+        {...}  (string|any)  Messages to display.
 
     Returns: ~
         (nil)  No return value
@@ -534,9 +538,11 @@ dn_utils.valid_pos_int({var})                           *dn_utils.valid_pos_int*
 
 dn_utils.warning({...})                                       *dn_utils.warning*
     Display warning messages(s).
+    While string values are expected, any non-string values are stringified by
+    |dn_utils.stringify|.
 
     Parameters: ~
-        {...}  (string)  Warning messages to display.
+        {...}  (string|any)  Warning messages to display.
 
     Returns: ~
         (nil)  No return value
