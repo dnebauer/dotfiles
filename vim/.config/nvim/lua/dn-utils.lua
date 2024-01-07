@@ -2,11 +2,6 @@
 
 -- TODO: Check whether functions every return nil return value
 -- TODO: What is return value of functions with no explicit return value
--- TODO: Implement these functions:
---
---       * dn-latex:
---         * insert_string()
---         * get_rtp_dir()
 
 ---@brief [[https://www.reddit.com/r/neovim/comments/w4r2de/comment/ih46dhl/
 ---*dn-utils-nvim.txt*   For Neovim version 0.9   Last change: 2024 January 06
@@ -902,11 +897,8 @@ end
 ---function name to jump to detailed help on it.
 ---
 ---Files and directories
----• |dn#util#fileExists|        whether file exists (uses |glob()|)
----• |dn#util#getFilePath|       get filepath of file being edited
 ---• |dn_utils.get_file_dir|     get directory of file being edited
----• |dn#util#getFileName|       get name of file being edited
----• |dn#util#getRtpDir|         finds directory from runtimepath
+---• |dn_utils.get_rtp_dir|      finds directory under runtimepath
 ---• |dn_utils.get_rtp_file|     finds file(s) in directories under 'rtp'
 ---
 ---User interaction
@@ -914,58 +906,23 @@ end
 ---• |dn_utils.error|            display error message
 ---• |dn_utils.info|             display message to user
 ---• |dn_utils.warn|             display warning message
----• |dn#util#prompt|            display prompt message
 ---• |dn_utils.menu_select|      select item from menu
----• |dn#util#help|              user can select from help topics
----• |dn#util#getSelection|      returns currently selected text
----
----Lists
----• |dn#util#listExchangeItems| exchange two elements in the same list
----• |dn#util#listSubtract|      subtract one list from another
----• |dn#util#listToScreen|      formats list for screen display
----• |dn#util#listToScreenColumns|
----                            formats list for columnar screen display
----• |dn#util#listToText|        convert list to text fragment
 ---
 ---Programming
----• |dn#util#unusedFunctions|   checks for uncalled functions
----• |dn#util#insertMode|        switch to insert mode
 ---• |dn_utils.execute_shell_command|
 ---                            execute shell command
----• |dn#util#exceptionError|    extract error message from exception
 ---• |dn_utils.scriptnames|      display scripts in location list
----• |dn#util#filetypes|         get list of available filetypes
 ---• |dn_utils.sleep|            pause script execution for defined time
 ---• |dn_utils.setup|            initialise/set up plugin
 ---• |dn_utils.shell_escape|     escape shell command
----• |dn#util#showFiletypes|     display list of available filetypes
 ---• |dn_utils.runtimepaths|     get list of runtime paths
 ---• |dn_utils.showRuntimepaths| display runtime paths
----• |dn#util#isMappedTo|        find mode mappings for given |{rhs}|
----• |dn#util#updateUserHelpTags|
----                            rebuild help tags in rtp "doc" subdirs
----• |dn#util#os|                determine operating system family
----• |dn#utilis#isWindows|       determine whether using windows OS
----• |dn#utilis#isUnix|          determine whether using unix-like OS
----
----Version control
----• |dn#util#localGitRepoFetch| perform a fetch on a local git repository
----• |dn#util#localGitRepoUpdatedRecently|
----                            check that local repo is updated
 ---
 ---String manipulation
----• |dn#util#stripLastChar|     removes last character from string
----• |dn#util#insertString|      insert string at current cursor location
----• |dn#util#trimChar|          removes leading and trailing chars
----• |dn#util#entitise|          replace special html chars with entities
----• |dn#util#deentitise|        replace html entities with characters
 ---• |dn_utils.dumbify_quotes|   replace smart quotes with straight quotes
 ---• |dn_utils.stringify|        convert variable to string
 ---• |dn_utils.match_count|      finds number of occurrences of string
 ---• |dn_utils.pad_internal|     pad string at internal location
----• |dn#util#padLeft|           left pad string
----• |dn#util#padRight|          right pad string
----• |dn#util#substitute|        perform global substitution in file
 ---• |dn_utils.change_caps|      changes capitalisation of line/selection
 ---• |dn_utils.split|            split string on separator
 ---• |dn_utils.wrap|             wrap string sensibly
@@ -983,8 +940,6 @@ end
 ---• |dn_utils.valid_pos_int|    check whether input is valid positive int
 ---
 ---Miscellaneous
----• |dn#util#selectWord|        select |<cword>| under cursor
----• |dn#util#varType|           get variable type
 ---• |dn_utils.test|             utility function used for testing only
 ---@brief ]]
 
@@ -1238,6 +1193,50 @@ function dn_utils.get_file_dir()
   -- • based on https://stackoverflow.com/a/12191225
   local dir = path:match("(.-)[^\\/]-%.?[^%.\\/]*$")
   return dir
+end
+
+-- get_rtp_dir(dirname)
+
+---Finds a subdirectory if it is located anywhere under the directories in
+---runtimepath.
+---Returns a table sequence with all matching subdirectories.
+---The table is empty if no matching subdirectories were found.
+---An empty table is returned if the directory name is a zero-length string.
+---@param dirname string Name of subdirectory to search for
+---@return table _ Sequence of matching subdirectory paths (may be empty)
+function dn_utils.get_rtp_dir(dirname)
+  assert(type(dirname) == "string", "Expected string, got " .. type(dirname))
+  if dirname:len() == 0 then
+    return {}
+  end
+
+  local matches = {}
+
+  local _scandir
+  _scandir = function(_dir)
+    local handle = vim.loop.fs_scandir(_dir)
+    assert(handle ~= nil, "got nil handle on dir: " .. _dir)
+    local item, item_type = vim.loop.fs_scandir_next(handle)
+    while item do
+      local item_path = sf("%s/%s", _dir, item)
+      -- process type: directory
+      -- ignore types: file, link, socket, block, fifo, char, unknown
+      if item_type == "directory" then
+        if item == dirname then
+          table.insert(matches, item_path)
+        end
+        _scandir(item_path)
+      end
+      item, item_type = vim.loop.fs_scandir_next(handle)
+    end
+  end
+
+  local paths = dn_utils.runtimepaths()
+  for _, path in ipairs(paths) do
+    _scandir(path)
+  end
+
+  return matches
 end
 
 -- get_rtp_file(filename)
