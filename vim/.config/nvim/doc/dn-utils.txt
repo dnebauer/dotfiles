@@ -100,7 +100,7 @@ String manipulation
 • |dn#util#deentitise|        replace html entities with characters
 • |dn_utils.dumbify_quotes|   replace smart quotes with straight quotes
 • |dn_utils.stringify|        convert variable to string
-• |dn#util#matchCount|        finds number of occurrences of string
+• |dn_utils.match_count|      finds number of occurrences of string
 • |dn_utils.pad_internal|     pad string at internal location
 • |dn#util#padLeft|           left pad string
 • |dn#util#padRight|          right pad string
@@ -256,6 +256,19 @@ dn_utils.is_table_value({tbl}, {str})                  *dn_utils.is_table_value*
 
     Returns: ~
         (boolean)  Whether the table contains the provided string as a value
+
+
+                                                          *dn_utils.match_count*
+dn_utils.match_count({haystack}, {needle})
+    Finds number of occurrences of a substring (needle) in a string
+    (haystack).
+
+    Parameters: ~
+        {haystack}  (string)  String to be searched
+        {needle}    (string)  Substring to search for
+
+    Returns: ~
+        (number)  Number of occurrences found
 
 
 dn_utils.menu_select({menu}, {prompt})                    *dn_utils.menu_select*

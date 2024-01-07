@@ -5,7 +5,6 @@
 -- TODO: Implement these functions:
 --
 --       * dn-latex:
---         * match_count()
 --         * insert_string()
 --         * get_rtp_dir()
 
@@ -962,7 +961,7 @@ end
 ---• |dn#util#deentitise|        replace html entities with characters
 ---• |dn_utils.dumbify_quotes|   replace smart quotes with straight quotes
 ---• |dn_utils.stringify|        convert variable to string
----• |dn#util#matchCount|        finds number of occurrences of string
+---• |dn_utils.match_count|      finds number of occurrences of string
 ---• |dn_utils.pad_internal|     pad string at internal location
 ---• |dn#util#padLeft|           left pad string
 ---• |dn#util#padRight|          right pad string
@@ -1332,6 +1331,25 @@ function dn_utils.is_table_value(tbl, str)
   end
 
   return found
+end
+
+-- match_count(haystack, needle)
+
+---Finds number of occurrences of a substring (needle) in a string
+---(haystack).
+---@param haystack string String to be searched
+---@param needle string Substring to search for
+---@return number _ Number of occurrences found
+function dn_utils.match_count(haystack, needle)
+  -- params
+  assert(type(haystack) == "string", "Expected string, got " .. type(haystack))
+  assert(type(needle) == "string", "Expected string, got " .. type(needle))
+  if haystack:len() == 0 or needle:len() == 0 then
+    return 0
+  end
+  -- get count
+  local _, count = haystack:gsub(needle, " ")
+  return count
 end
 
 -- menu_select(menu[, prompt[, recursive]])
