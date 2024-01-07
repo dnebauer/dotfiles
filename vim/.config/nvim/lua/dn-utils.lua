@@ -5,7 +5,6 @@
 -- TODO: Implement these functions:
 --
 --       * dn-latex:
---         * pad_internal()
 --         * match_count()
 --         * insert_string()
 --         * get_rtp_dir()
@@ -964,7 +963,7 @@ end
 ---• |dn_utils.dumbify_quotes|   replace smart quotes with straight quotes
 ---• |dn_utils.stringify|        convert variable to string
 ---• |dn#util#matchCount|        finds number of occurrences of string
----• |dn#util#padInternal|       pad string at internal location
+---• |dn_utils.pad_internal|     pad string at internal location
 ---• |dn#util#padLeft|           left pad string
 ---• |dn#util#padRight|          right pad string
 ---• |dn#util#substitute|        perform global substitution in file
@@ -1268,7 +1267,7 @@ function dn_utils.get_rtp_file(filename)
       if not item then
         break
       end
-      local item_path = string.format("%s/%s", _dir, item)
+      local item_path = sf("%s/%s", _dir, item)
       if item_type == "directory" then
         _scandir(item_path)
       elseif item_type == "file" or item_type == "link" then
@@ -1459,6 +1458,51 @@ function dn_utils.menu_select(menu, prompt, recursive)
       return selection
     end
   end
+end
+
+-- pad-internal(str, start, finish[, char])
+
+---Insert a character into a string at the given start position until the
+---initial location is shifted to the desired finish location. If start and
+---finish values are not sensible the string is returned unchanged.
+---@param str string String to be padded
+---@param start number Integer position in string to pad from
+---@param finish number Integer position in string to pad to
+---@param char string|nil Single character to pad with
+---@return string _ Padded string
+---@usage [[
+---local unpadded = 'Column Twenty & Column Twenty One'
+---print(dn_utils.pad_internal(unpadded, 15, 20)
+----- "Column Twenty & Column Twenty One"
+----- to
+----- "Column Twenty      & Column Twenty One"
+---@usage ]]
+function dn_utils.pad_internal(str, start, finish, char)
+  -- params
+  -- • str
+  assert(type(str) == "string", "Expected string, got " .. type(str))
+  local str_len = str:len()
+  if str_len == 0 then
+    return str
+  end
+  -- • start, finish
+  assert(dn_utils.valid_pos_int(start), sf("Expected positive integer, got %s (%s)", type(start), tostring(start)))
+  assert(dn_utils.valid_pos_int(finish), sf("Expected positive integer, got %s (%s)", type(finish), tostring(finish)))
+  if start >= str_len or finish >= str_len or start >= finish then
+    return str
+  end
+  -- • char
+  char = char or " "
+  assert(type(char) == "string", "Expected string, got " .. type(char))
+  local char_len = char:len()
+  assert(char_len > 0, "Expected single char, got zero-length string")
+  assert(char_len == 1, sf("Expected single char, got a %d character string", char_len))
+  -- build internal pad
+  local pad_len = finish - start
+  local pad = char:rep(pad_len)
+  -- construct padded string
+  local padded = sf("%s%s%s", str:sub(1, start - 1), pad, str:sub(start))
+  return padded
 end
 
 -- pairs_by_key(tbl, [sort_fn])
@@ -1808,11 +1852,11 @@ function dn_utils.test()
 end
 
 -- trim_char(str [, char])
----Remove leading and trailing character from a string.
+---Remove leading and trailing characters from a string.
 ---Note that |vim.trim()| can be used to remove leading and trailing
 ---whitespace from a string.
 ---@param str string String to trim
----@param char string|nil Characters to trim from each end of string
+---@param char string|nil Character to trim from each end of string
 ---(default=<Space>)
 ---@return string _ Trimmed string
 function dn_utils.trim_char(str, char)

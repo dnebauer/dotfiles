@@ -101,7 +101,7 @@ String manipulation
 • |dn_utils.dumbify_quotes|   replace smart quotes with straight quotes
 • |dn_utils.stringify|        convert variable to string
 • |dn#util#matchCount|        finds number of occurrences of string
-• |dn#util#padInternal|       pad string at internal location
+• |dn_utils.pad_internal|     pad string at internal location
 • |dn#util#padLeft|           left pad string
 • |dn#util#padRight|          right pad string
 • |dn#util#substitute|        perform global substitution in file
@@ -312,6 +312,31 @@ dn_utils.menu_select({menu}, {prompt})                    *dn_utils.menu_select*
         (string)  Selected menu option
 
 
+                                                         *dn_utils.pad_internal*
+dn_utils.pad_internal({str}, {start}, {finish}, {char})
+    Insert a character into a string at the given start position until the
+    initial location is shifted to the desired finish location. If start and
+    finish values are not sensible the string is returned unchanged.
+
+    Parameters: ~
+        {str}     (string)      String to be padded
+        {start}   (number)      Integer position in string to pad from
+        {finish}  (number)      Integer position in string to pad to
+        {char}    (string|nil)  Single character to pad with
+
+    Returns: ~
+        (string)  Padded string
+
+    Usage: ~
+>lua
+        local unpadded = 'Column Twenty & Column Twenty One'
+        print(dn_utils.pad_internal(unpadded, 15, 20)
+        -- "Column Twenty & Column Twenty One"
+        -- to
+        -- "Column Twenty      & Column Twenty One"
+<
+
+
 dn_utils.pairs_by_keys({tbl}, {sort_fn})                *dn_utils.pairs_by_keys*
     Iterator returning key-value pairs in order of sorted keys. If no sort
     function is provided the default sort method for the lua table.sort
@@ -502,13 +527,13 @@ dn_utils.test()                                                  *dn_utils.test*
 
 
 dn_utils.trim_char({str}, {char})                           *dn_utils.trim_char*
-    Remove leading and trailing character from a string.
+    Remove leading and trailing characters from a string.
     Note that |vim.trim()| can be used to remove leading and trailing
     whitespace from a string.
 
     Parameters: ~
         {str}   (string)      String to trim
-        {char}  (string|nil)  Characters to trim from each end of string
+        {char}  (string|nil)  Character to trim from each end of string
                               (default=<Space>)
 
     Returns: ~
