@@ -1262,21 +1262,19 @@ function dn_utils.get_rtp_file(filename)
   _scandir = function(_dir)
     local handle = vim.loop.fs_scandir(_dir)
     assert(handle ~= nil, "got nil handle on dir: " .. _dir)
-    while true do
-      local item, item_type = vim.loop.fs_scandir_next(handle)
-      if not item then
-        break
-      end
+    local item, item_type = vim.loop.fs_scandir_next(handle)
+    while item do
       local item_path = sf("%s/%s", _dir, item)
+      -- process types: directory, file, link
+      -- ignore types: socket, block, fifo, char, unknown
       if item_type == "directory" then
         _scandir(item_path)
       elseif item_type == "file" or item_type == "link" then
         if item == filename then
           table.insert(matches, item_path)
         end
-      else
-        error("unknown scandir item type: " .. item_type)
       end
+      item, item_type = vim.loop.fs_scandir_next(handle)
     end
   end
 
