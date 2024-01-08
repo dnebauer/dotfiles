@@ -1,3 +1,5 @@
+*dn-md-utils-nvim.txt*  For Neovim version 0.9  Last change: 2024 January 08
+
 ==============================================================================
 Table of Contents                                         *dn_md_utils.contents*
 
@@ -5,6 +7,7 @@ Introduction ·································�
 Dependencies ·············································· |dn_md_utils.depend|
 Features ················································ |dn_md_utils.features|
 Variables ·············································· |dn_md_utils.variables|
+Functions ·············································· |dn_md_utils.functions|
 Mappings ················································ |dn_md_utils.mappings|
 Commands ················································ |dn_md_utils.commands|
 
@@ -244,9 +247,30 @@ method to set or alter these options is through the |dn_md_utils.setup| method.
 Change them in any other way at your own risk!
 
 ==============================================================================
+Functions                                                *dn_md_utils.functions*
+
+dn_md_utils.insert_figure()                          *dn_md_utils.insert_figure*
+    Inserts a figure link on a new line.
+    A reference link definition is added to the end of the file in its own
+    line.
+
+    Returns: ~
+        (nil)  No return value
+
+
+==============================================================================
 Mappings                                                  *dn_md_utils.mappings*
+
+                                                       *dn_md_utils.<Leader>xfi*
+This mapping calls the function |dn_md_utils.insert_figure| in modes "n"
+and "i".
 
 ==============================================================================
 Commands                                                  *dn_md_utils.commands*
+
+                                                      *dn_utils.XMUInsertFigure*
+Calls function |dn_md_utils.insert_figure| to insert a figure link on the
+following line and a corresponding link definition is added to the bottom
+of the document.
 
 vim:tw=78:ts=8:noet:ft=help:norl:

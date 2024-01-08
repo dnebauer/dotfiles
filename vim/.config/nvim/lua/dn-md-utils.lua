@@ -267,72 +267,138 @@ dn_md_utils.options = {
 
 -- PUBLIC FUNCTIONS
 
+---@mod dn_md_utils.functions Functions
 -- insert_figure()
 
----Inserts a figure on a new line. A reference link definition is added to the
----end of the file in its own line.
+---Inserts a figure link on a new line.
+---A reference link definition is added to the end of the file in its own
+---line.
+---@return nil _ No return value
 function dn_md_utils.insert_figure()
-  -- get_id/label
-  local _if_get_id_label
-  _if_get_id_label = function(user_input)
-    util.info(util.stringify(user_input))
-    --local default = s:make_into_id_value(l:caption)
-    --" lowercase only
-    --let l:value = tolower(a:value)
-    --" remove illegal characters
-    --let l:value = substitute(l:value, '[^a-z0-9_-]', '-', 'g')
-    --" remove leading dashes
-    --let l:value = substitute(l:value, '^-\+', '', '')
-    --" remove trailing dashes
-    --let l:value = substitute(l:value, '-\+$', '', '')
-    --" collapse sequential dashes into single dash
-    --let l:value = substitute(l:value, '-\{2,\}', '-', 'g')
-    --let l:prompt  = 'Enter figure id (empty to abort): '
-    --while 1
-    --    let l:id = input(l:prompt, l:default)
-    --    echo ' '  | " ensure move to a new line
-    --    " empty value means aborting
-    --    if empty(l:id) | return '' | endif
-    --    " must be legal id
-    --    if !s:is_valid_id_value(l:id)
-    --        call dn#util#warn('Ids contain only a-z, 0-9, _ and -')
-    --        continue
-    --    endif
-    --    " ok, if here must be legal
-    --    break
-    --endwhile
-  end
+  -- WARNING: if editing this function note that it consists of a chain of
+  --          local functions called in turn through callbacks in
+  --          |vim.ui.input()| calls; this makes the function inherently
+  --          fragile and easy to break
 
-  -- get image caption
-  local _if_get_caption
-  _if_get_caption = function(user_input)
-    vim.ui.input({ "Enter image caption (empty to abort): " }, function(input)
-      if input then
-        user_input.caption = input
-        _if_get_id_label(user_input)
-      end
-    end)
-  end
+  -- pre-declare local functions
+  local _fig_get_caption
+  local _fig_get_id_label
+  local _fig_get_width
+  local _fig_insert
+
+  -- variables used in multiple local functions
+  local prompt, default
 
   -- get image filepath
-  vim.ui.input({ prompt = "Enter image filepath (empty to abort): ", completion = "file" }, function(input)
-    if input then
+  prompt = "Enter image filepath (empty to abort): "
+  vim.ui.input({ prompt = prompt, completion = "file" }, function(input)
+    if input and input:len() ~= 0 then
       if not util.file_readable(input) then
         util.warning(sf("File '%s' is not readable", input))
       end
       local user_input = {}
-      user_input.file = input
-      _if_get_caption(user_input)
+      user_input.path = input
+      _fig_get_caption(user_input)
     end
   end)
+
+  -- get image caption
+  _fig_get_caption = function(user_input)
+    prompt = "Enter image caption (empty to abort): "
+    vim.ui.input({ prompt = prompt }, function(input)
+      if input and input:len() ~= 0 then
+        user_input.caption = input
+        _fig_get_id_label(user_input)
+      end
+    end)
+  end
+
+  -- get_id/label
+  _fig_get_id_label = function(user_input)
+    -- derive default id from caption
+    -- • make lowercase
+    default = string.lower(user_input.caption)
+    -- • remove illegal characters (%w = alphanumeric)
+    default = default:gsub("[^%w_]", "-")
+    -- • remove leading and trailing dashes
+    default = util.trim_char(default, "-")
+    -- • collapse multiple sequential dashes
+    default = default:gsub("%-+", "%-")
+    -- get id
+    prompt = "Enter figure id (empty to abort): "
+    vim.ui.input({ prompt = prompt, default = default }, function(input)
+      if input and input:len() ~= 0 then
+        if not input:match("^[a-z_-]+$") then
+          util.error("Figure ids can contain only a-z, 0-9, _ and -")
+          return
+        end
+        user_input.id = input
+        _fig_get_width(user_input)
+      end
+    end)
+  end
+
+  -- get width class (optional)
+  _fig_get_width = function(user_input)
+    prompt = "Enter image width (optional): "
+    default = "80%"
+    vim.ui.input({ prompt = prompt, default = default }, function(input)
+      if input and input:len() ~= 0 then
+        user_input.width = input
+      end
+      _fig_insert(user_input)
+    end)
+  end
+
+  -- insert figure link and link definition
+  _fig_insert = function(user_input)
+    -- assemble link
+    local link = sf("![%s][%s]", user_input.caption, user_input.id)
+    -- assemble link definition
+    local width = ""
+    if user_input.width and user_input.width:len() ~= 0 then
+      width = sf(" .class %s", user_input.width)
+    end
+    local id, path, caption = user_input.id, user_input.path, user_input.caption
+    local definition = sf('   [%s]: %s "%s" {#fig:%s%s}', id, path, caption, id, width)
+    -- insert link
+    local link_lines = { link, "" }
+    vim.api.nvim_put(link_lines, "l", true, true)
+    -- insert definition
+    local definition_lines = { "", definition }
+    local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local last_line = vim.fn.line("$")
+    vim.api.nvim_win_set_cursor(0, { last_line, 1 })
+    vim.api.nvim_put(definition_lines, "l", true, false)
+    vim.api.nvim_win_set_cursor(0, { line, col })
+  end
 end
 
 -- MAPPINGS
 
 ---@mod dn_md_utils.mappings Mappings
 
+-- \xfi [n,i]
+---@tag dn_md_utils.<Leader>xfi
+---@brief [[
+---This mapping calls the function |dn_md_utils.insert_figure| in modes "n"
+---and "i".
+---@brief ]]
+vim.keymap.set({ "n", "i" }, "<Leader>xfi", dn_md_utils.insert_figure, { desc = "Insert figure link and definition" })
+
 -- COMMANDS
 
 ---@mod dn_md_utils.commands Commands
+
+-- XMUInsertFigure
+---@tag dn_utils.XMUInsertFigure
+---@brief [[
+---Calls function |dn_md_utils.insert_figure| to insert a figure link on the
+---following line and a corresponding link definition is added to the bottom
+---of the document.
+---@brief ]]
+vim.api.nvim_create_user_command("XMUInsertFigure", function()
+  dn_md_utils.insert_figure()
+end, { desc = "Insert figure link and definition" })
 
 return dn_md_utils
