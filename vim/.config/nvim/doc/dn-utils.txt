@@ -1,3 +1,5 @@
+*dn-utils-nvim.txt*   For Neovim version 0.9   Last change: 2024 January 06
+
 ==============================================================================
 Table of Contents                                            *dn_utils.contents*
 
@@ -14,8 +16,8 @@ Introduction                                                    *dn_utils.intro*
 
 A plugin to provide useful generic functions. It is intended to be available
 to all files being edited. These functions were developed over time by the
-author and later combined into a library. Some |commands| and |mappings| are
-provided.
+author and later combined into a library. Some |dn_utils.commands| and
+|dn_utils.mappings| are provided.
 
 ==============================================================================
 External requirements                                    *dn_utils.requirements*
@@ -36,9 +38,10 @@ Change them in any other way at your own risk!
 ==============================================================================
 Function List                                                *dn_utils.funclist*
 
-This is a list of functions grouped by what they are used for. An alphabetical
-list of function descriptions is located at |functions|. Use CTRL-] on the
-function name to jump to detailed help on it.
+This is a list of functions grouped by what they are used for. An
+alphabetical list of function descriptions is located at
+|dn_utils.functions|. Use CTRL-] on the function name to jump to detailed
+help on it.
 
 Files and directories
 • |dn_utils.get_file_dir|     get directory of file being edited
@@ -528,8 +531,8 @@ dn_utils.trim_char({str}, {char})                           *dn_utils.trim_char*
 
 
 dn_utils.valid_non_negative_int({var})         *dn_utils.valid_non_negative_int*
-    Check whether variable is a non-negative integer. The integer can be zero or
-    greater.
+    Check whether variable is a non-negative integer. The integer can be zero
+    or greater.
 
     Parameters: ~
         {var}  (any)  Variable to check

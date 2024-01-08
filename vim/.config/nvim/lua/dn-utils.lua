@@ -3,7 +3,7 @@
 -- TODO: Check whether functions every return nil return value
 -- TODO: What is return value of functions with no explicit return value
 
----@brief [[https://www.reddit.com/r/neovim/comments/w4r2de/comment/ih46dhl/
+---@brief [[
 ---*dn-utils-nvim.txt*   For Neovim version 0.9   Last change: 2024 January 06
 ---@brief ]]
 
@@ -13,8 +13,8 @@
 ---@brief [[
 ---A plugin to provide useful generic functions. It is intended to be available
 ---to all files being edited. These functions were developed over time by the
----author and later combined into a library. Some |commands| and |mappings| are
----provided.
+---author and later combined into a library. Some |dn_utils.commands| and
+---|dn_utils.mappings| are provided.
 ---@brief ]]
 
 ---@mod dn_utils.requirements External requirements
@@ -428,15 +428,15 @@ end
 ---@private
 ---This is a helper function for the |dn_utils.menu_select| function. That
 ---function receives a user {prompt}. It also receives a multi-level sequence or
----dictionary menu variable, normalises the menu (using the |_menu_normalise|
+---dictionary menu variable, normalises the menu (using the "_menu_normalise"
 ---function, builds parallel lists of {options} and {return_values}, and then
 ---calls on a subsidiary function to get the user to select a value.
 ---
 ---WARNING: The calling function is responsible for checking that the
 ---         parameters passed to this function are valid
 ---
----This function calls either |_menu_ui_select_inputlist()| or
----|_menu_ui_select_pythontk()| depending on menu size and window height. The
+---This function calls either "_menu_ui_select_inputlist()" or
+---"_menu_ui_select_pythontk()" depending on menu size and window height. The
 ---latter function uses an embedded |python3| script is used that has a sole
 ---external dependency on the tkinter package
 ---(https://docs.python.org/3/library/tkinter.html).
@@ -462,7 +462,7 @@ end
 ---This is a helper function for the |dn_utils.menu_select| function. That
 ---function receives a user {prompt}. It also receives a multi-level sequence
 ---or dictionary menu variable, normalises the menu (using the
----|_menu_normalise| function, builds parallel lists of {options} and
+---"_menu_normalise" function, builds parallel lists of {options} and
 ---{return_values}, and then calls on a subsidiary function to get the user to
 ---select a value.
 ---
@@ -490,7 +490,7 @@ end
 ---This is a helper function for the |dn_utils.menu_select| function. That
 ---function receives a user {prompt}. It also receives a multi-level sequence
 ---or dictionary menu variable, normalises the menu (using the
----|_menu_normalise| function, builds parallel lists of {options} and
+---"_menu_normalise" function, builds parallel lists of {options} and
 ---{return_values}, and then calls on subsidiary functions to get the user to
 ---select a value.
 ---
@@ -892,9 +892,10 @@ end
 
 ---@mod dn_utils.funclist Function List
 ---@brief [[
----This is a list of functions grouped by what they are used for. An alphabetical
----list of function descriptions is located at |functions|. Use CTRL-] on the
----function name to jump to detailed help on it.
+---This is a list of functions grouped by what they are used for. An
+---alphabetical list of function descriptions is located at
+---|dn_utils.functions|. Use CTRL-] on the function name to jump to detailed
+---help on it.
 ---
 ---Files and directories
 ---• |dn_utils.get_file_dir|     get directory of file being edited
@@ -1896,8 +1897,8 @@ function dn_utils.trim_char(str, char)
 end
 
 -- valid_non_negative_int(var)
----Check whether variable is a non-negative integer. The integer can be zero or
----greater.
+---Check whether variable is a non-negative integer. The integer can be zero
+---or greater.
 ---@param var any Variable to check
 ---@return boolean _ Whether variable is a non-negative integer
 function dn_utils.valid_non_negative_int(var)
