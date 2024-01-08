@@ -290,7 +290,7 @@ function dn_md_utils.insert_figure()
   local prompt, default
 
   -- get image filepath
-  prompt = "Enter image filepath (empty to abort): "
+  prompt = "Enter image filepath (empty to abort)"
   vim.ui.input({ prompt = prompt, completion = "file" }, function(input)
     if input and input:len() ~= 0 then
       if not util.file_readable(input) then
@@ -304,7 +304,7 @@ function dn_md_utils.insert_figure()
 
   -- get image caption
   _fig_get_caption = function(user_input)
-    prompt = "Enter image caption (empty to abort): "
+    prompt = "Enter image caption (empty to abort)"
     vim.ui.input({ prompt = prompt }, function(input)
       if input and input:len() ~= 0 then
         user_input.caption = input
@@ -325,7 +325,7 @@ function dn_md_utils.insert_figure()
     -- • collapse multiple sequential dashes
     default = default:gsub("%-+", "%-")
     -- get id
-    prompt = "Enter figure id (empty to abort): "
+    prompt = "Enter figure id (empty to abort "
     vim.ui.input({ prompt = prompt, default = default }, function(input)
       if input and input:len() ~= 0 then
         if not input:match("^[a-z_-]+$") then
@@ -340,7 +340,7 @@ function dn_md_utils.insert_figure()
 
   -- get width class (optional)
   _fig_get_width = function(user_input)
-    prompt = "Enter image width (optional): "
+    prompt = "Enter image width (optional)"
     default = "80%"
     vim.ui.input({ prompt = prompt, default = default }, function(input)
       if input and input:len() ~= 0 then
