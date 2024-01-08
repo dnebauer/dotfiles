@@ -898,6 +898,7 @@ end
 ---help on it.
 ---
 ---Files and directories
+---• |dn_utils.file_readable|    whether a file is readable
 ---• |dn_utils.get_file_dir|     get directory of file being edited
 ---• |dn_utils.get_rtp_dir|      finds directory under runtimepath
 ---• |dn_utils.get_rtp_file|     finds file(s) in directories under 'rtp'
@@ -1177,6 +1178,23 @@ function dn_utils.execute_shell_command(...)
   -- in following line
   local retval = { command = command, exit_status = exit_status, stdout = stdout, stderr = stderr }
   return retval
+end
+
+-- file_readable(filepath)
+
+---Determine whether a file is readable.
+---Returns false for directory paths.
+---@param filepath string File to check
+---@return boolean _ Whether file is readable
+function dn_utils.file_readable(filepath)
+  -- credit: https://stackoverflow.com/a/4991602
+  local fh = io.open(filepath, "r")
+  if fh ~= nil then
+    io.close(fh)
+    return true
+  else
+    return false
+  end
 end
 
 -- get_file_dir()

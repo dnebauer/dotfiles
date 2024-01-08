@@ -44,6 +44,7 @@ alphabetical list of function descriptions is located at
 help on it.
 
 Files and directories
+• |dn_utils.file_readable|    whether a file is readable
 • |dn_utils.get_file_dir|     get directory of file being edited
 • |dn_utils.get_rtp_dir|      finds directory under runtimepath
 • |dn_utils.get_rtp_file|     finds file(s) in directories under 'rtp'
@@ -172,6 +173,17 @@ dn_utils.execute_shell_command({...})           *dn_utils.execute_shell_command*
           error(ret.stderr)
         end
 <
+
+
+dn_utils.file_readable({filepath})                      *dn_utils.file_readable*
+    Determine whether a file is readable.
+    Returns false for directory paths.
+
+    Parameters: ~
+        {filepath}  (string)  File to check
+
+    Returns: ~
+        (boolean)  Whether file is readable
 
 
 dn_utils.get_file_dir()                                  *dn_utils.get_file_dir*
