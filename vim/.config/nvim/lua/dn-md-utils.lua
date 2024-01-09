@@ -1,5 +1,12 @@
 -- DOCUMENTATION
 
+-- TODO:add:
+-- • insert_table_definition
+-- • insert_file
+-- • clean_buffer|all_buffers (include autocmds)
+-- • add_boilerplate
+-- • newline mapping
+
 ---@brief [[
 ---*dn-md-utils-nvim.txt*  For Neovim version 0.9  Last change: 2024 January 08
 ---@brief ]]
@@ -65,11 +72,6 @@
 ---called using the command |dn_md_utils.MUAddBoilerplate| and mappings
 ---|dn_md_utils.<Leader>ab|.
 ---
----Previously created markdown files have yaml metadata blocks that do not
----use pander. Those metadata blocks can be "panderified" using the function
----|dn_md_utils.panderify_metadata|, which can be called using the command
----|dn_md_utils.MUPanderifyMetadata| and mapping |dn_md_utils.<Leader>pm|.
----
 ---Images ~
 ---
 ---A helper function, mapping and command are provided to assist with adding
@@ -114,8 +116,9 @@
 ---the definition is "Table: A simple table. {#tbl:simple}".
 ---
 ---The definition is inserted on the following line using the
----|dn_md_utils.insert_table| function, which can be called using the command
----|dn_md_utils.MUInsertTable| and mapping |dn_md_utils.<Leader>tbl|.
+---|dn_md_utils.insert_table_definition| function, which can be called using
+---the command |dn_md_utils.MUInsertTable| and mapping
+---|dn_md_utils.<Leader>tbl|.
 ---
 ---Include Files ~
 ---
@@ -374,6 +377,72 @@ function dn_md_utils.insert_figure()
   end
 end
 
+-- insert_table_definition()
+
+---Inserts a table caption and id line as expected by pandoc-tablenos to
+---follow a table.
+---@return nil _ No return value
+function dn_md_utils.insert_table_definition()
+  -- WARNING: if editing this function note that it consists of a chain of
+  --          local functions called in turn through callbacks in
+  --          |vim.ui.input()| calls; this makes the function inherently
+  --          fragile and easy to break
+
+  -- pre-declare local functions
+  local _tbl_get_id_label
+  local _tbl_definition_insert
+
+  -- variables used in multiple local functions
+  local prompt, default
+
+  -- get table caption
+  prompt = "Enter table caption (empty to abort)"
+  vim.ui.input({ prompt = prompt }, function(input)
+    if input and input:len() ~= 0 then
+      local user_input = {}
+      user_input.caption = input
+      -- remove trailing periods as terminal period added later
+      user_input.caption = user_input.caption:gsub("%.+$", "")
+      _tbl_get_id_label(user_input)
+    end
+  end)
+
+  -- get_id/label
+  _tbl_get_id_label = function(user_input)
+    -- derive default id from caption
+    -- • make lowercase
+    default = string.lower(user_input.caption)
+    -- • remove illegal characters (%w = alphanumeric)
+    default = default:gsub("[^%w_]", "-")
+    -- • remove leading and trailing dashes
+    default = util.trim_char(default, "-")
+    -- • collapse multiple sequential dashes
+    default = default:gsub("%-+", "%-")
+    -- get id
+    prompt = "Enter table id (empty to abort "
+    vim.ui.input({ prompt = prompt, default = default }, function(input)
+      if input and input:len() ~= 0 then
+        if not input:match("^[a-z_-]+$") then
+          util.error("Table ids can contain only a-z, 0-9, _ and -")
+          return
+        end
+        user_input.id = input
+        _tbl_definition_insert(user_input)
+      end
+    end)
+  end
+
+  -- insert table definition
+  _tbl_definition_insert = function(user_input)
+    -- assemble table definition
+    local caption, id = user_input.caption, user_input.id
+    local definition = sf("Table: %s. {#tbl:%s}", caption, id)
+    -- insert table definition
+    local definition_lines = { definition }
+    vim.api.nvim_put(definition_lines, "l", true, true)
+  end
+end
+
 -- MAPPINGS
 
 ---@mod dn_md_utils.mappings Mappings
@@ -385,6 +454,14 @@ end
 ---and "i".
 ---@brief ]]
 vim.keymap.set({ "n", "i" }, "<Leader>xfi", dn_md_utils.insert_figure, { desc = "Insert figure link and definition" })
+
+-- \xtb [n,i]
+---@tag dn_md_utils.<Leader>xtb
+---@brief [[
+---This mapping calls the function |dn_md_utils.insert_table_definition| in
+---modes "n" and "i".
+---@brief ]]
+vim.keymap.set({ "n", "i" }, "<Leader>xtb", dn_md_utils.insert_table_definition, { desc = "Insert table definition" })
 
 -- COMMANDS
 
@@ -400,5 +477,15 @@ vim.keymap.set({ "n", "i" }, "<Leader>xfi", dn_md_utils.insert_figure, { desc = 
 vim.api.nvim_create_user_command("XMUInsertFigure", function()
   dn_md_utils.insert_figure()
 end, { desc = "Insert figure link and definition" })
+
+-- XMUInsertTable
+---@tag dn_utils.XMUInsertTable
+---@brief [[
+---Calls function |dn_md_utils.insert_table_definition| to insert a table
+---caption and id on the following line.
+---@brief ]]
+vim.api.nvim_create_user_command("XMUInsertTable", function()
+  dn_md_utils.insert_table_definition()()
+end, { desc = "Insert table definition" })
 
 return dn_md_utils

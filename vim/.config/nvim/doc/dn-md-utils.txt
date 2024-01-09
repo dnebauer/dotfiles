@@ -71,11 +71,6 @@ document by the function |dn_md_utils.add_boilerplate|, which can be
 called using the command |dn_md_utils.MUAddBoilerplate| and mappings
 |dn_md_utils.<Leader>ab|.
 
-Previously created markdown files have yaml metadata blocks that do not
-use pander. Those metadata blocks can be "panderified" using the function
-|dn_md_utils.panderify_metadata|, which can be called using the command
-|dn_md_utils.MUPanderifyMetadata| and mapping |dn_md_utils.<Leader>pm|.
-
 Images ~
 
 A helper function, mapping and command are provided to assist with adding
@@ -120,8 +115,9 @@ this example:
 the definition is "Table: A simple table. {#tbl:simple}".
 
 The definition is inserted on the following line using the
-|dn_md_utils.insert_table| function, which can be called using the command
-|dn_md_utils.MUInsertTable| and mapping |dn_md_utils.<Leader>tbl|.
+|dn_md_utils.insert_table_definition| function, which can be called using
+the command |dn_md_utils.MUInsertTable| and mapping
+|dn_md_utils.<Leader>tbl|.
 
 Include Files ~
 
@@ -258,12 +254,24 @@ dn_md_utils.insert_figure()                          *dn_md_utils.insert_figure*
         (nil)  No return value
 
 
+dn_md_utils.insert_table_definition()      *dn_md_utils.insert_table_definition*
+    Insert table definition, that is, the caption and identification line
+    expected by pandoc-tablenos to follow the table.
+
+    Returns: ~
+        (nil)  No return value
+
+
 ==============================================================================
 Mappings                                                  *dn_md_utils.mappings*
 
                                                        *dn_md_utils.<Leader>xfi*
 This mapping calls the function |dn_md_utils.insert_figure| in modes "n"
 and "i".
+
+                                                       *dn_md_utils.<Leader>xtb*
+This mapping calls the function |dn_md_utils.insert_table_definition| in
+modes "n" and "i".
 
 ==============================================================================
 Commands                                                  *dn_md_utils.commands*
@@ -272,5 +280,9 @@ Commands                                                  *dn_md_utils.commands*
 Calls function |dn_md_utils.insert_figure| to insert a figure link on the
 following line and a corresponding link definition is added to the bottom
 of the document.
+
+                                                       *dn_utils.XMUInsertTable*
+Calls function |dn_md_utils.insert_table_definition| to insert a table
+caption and id on the following line.
 
 vim:tw=78:ts=8:noet:ft=help:norl:
