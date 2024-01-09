@@ -254,9 +254,16 @@ dn_md_utils.insert_figure()                          *dn_md_utils.insert_figure*
         (nil)  No return value
 
 
+dn_md_utils.insert_file()                              *dn_md_utils.insert_file*
+    Inserts an include directive on a new line.
+
+    Returns: ~
+        (nil)  No return value
+
+
 dn_md_utils.insert_table_definition()      *dn_md_utils.insert_table_definition*
-    Insert table definition, that is, the caption and identification line
-    expected by pandoc-tablenos to follow the table.
+    Inserts a table caption and id line as expected by pandoc-tablenos to
+    follow a table.
 
     Returns: ~
         (nil)  No return value
@@ -265,8 +272,12 @@ dn_md_utils.insert_table_definition()      *dn_md_utils.insert_table_definition*
 ==============================================================================
 Mappings                                                  *dn_md_utils.mappings*
 
-                                                       *dn_md_utils.<Leader>xfi*
+                                                       *dn_md_utils.<Leader>xfg*
 This mapping calls the function |dn_md_utils.insert_figure| in modes "n"
+and "i".
+
+                                                       *dn_md_utils.<Leader>xfl*
+This mapping calls the function |dn_md_utils.insert_file| in modes "n"
 and "i".
 
                                                        *dn_md_utils.<Leader>xtb*
@@ -280,6 +291,10 @@ Commands                                                  *dn_md_utils.commands*
 Calls function |dn_md_utils.insert_figure| to insert a figure link on the
 following line and a corresponding link definition is added to the bottom
 of the document.
+
+                                                        *dn_utils.XMUInsertFile*
+Calls function |dn_md_utils.insert_file| to insert an include directive
+on the following line.
 
                                                        *dn_utils.XMUInsertTable*
 Calls function |dn_md_utils.insert_table_definition| to insert a table

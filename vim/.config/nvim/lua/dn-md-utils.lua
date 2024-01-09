@@ -377,6 +377,72 @@ function dn_md_utils.insert_figure()
   end
 end
 
+-- insert_file()
+
+---Inserts an include directive on a new line.
+---@return nil _ No return value
+function dn_md_utils.insert_file()
+  -- WARNING: if editing this function note that it consists of a chain of
+  --          local functions called in turn through callbacks in
+  --          |vim.ui.input()| calls; this makes the function inherently
+  --          fragile and easy to break
+
+  -- pre-declare local functions
+  local _fil_get_shift
+  local _fil_insert
+
+  -- variable used in multiple local functions
+  local prompt
+
+  -- get filepath
+  prompt = "Enter filepath (empty to abort)"
+  vim.ui.input({ prompt = prompt, completion = "file" }, function(input)
+    if input and input:len() ~= 0 then
+      if not util.file_readable(input) then
+        util.warning(sf("File '%s' is not readable", input))
+      end
+      local user_input = {}
+      user_input.path = input
+      _fil_get_shift(user_input)
+    end
+  end)
+
+  -- get header shift value (optional)
+  _fil_get_shift = function(user_input)
+    prompt = "Enter header shift value (optional)"
+    vim.ui.input({ prompt = prompt }, function(input)
+      if input and input:len() ~= 0 then
+        input = tonumber(input)
+        if (not input) or (not util.valid_pos_int(input)) then
+          util.error("Header shift value must be a non-zero integer")
+          return
+        end
+        user_input.shift = input
+      end
+      _fil_insert(user_input)
+    end)
+  end
+
+  -- insert directive
+  _fil_insert = function(user_input)
+    -- assemble directive
+    local path, shift = user_input.path, user_input.shift
+    local directive = {}
+    local opening = "```{.include"
+    if shift then
+      opening = opening .. " shift-heading-level-by=" .. tostring(shift)
+    end
+    opening = opening .. "}"
+    table.insert(directive, opening)
+    table.insert(directive, path)
+    table.insert(directive, "```")
+    table.insert(directive, "")
+    table.insert(directive, "")
+    -- insert directive
+    vim.api.nvim_put(directive, "l", true, true)
+  end
+end
+
 -- insert_table_definition()
 
 ---Inserts a table caption and id line as expected by pandoc-tablenos to
@@ -447,13 +513,21 @@ end
 
 ---@mod dn_md_utils.mappings Mappings
 
--- \xfi [n,i]
----@tag dn_md_utils.<Leader>xfi
+-- \xfg [n,i]
+---@tag dn_md_utils.<Leader>xfg
 ---@brief [[
 ---This mapping calls the function |dn_md_utils.insert_figure| in modes "n"
 ---and "i".
 ---@brief ]]
-vim.keymap.set({ "n", "i" }, "<Leader>xfi", dn_md_utils.insert_figure, { desc = "Insert figure link and definition" })
+vim.keymap.set({ "n", "i" }, "<Leader>xfg", dn_md_utils.insert_figure, { desc = "Insert figure link and definition" })
+
+-- \xfl [n,i]
+---@tag dn_md_utils.<Leader>xfl
+---@brief [[
+---This mapping calls the function |dn_md_utils.insert_file| in modes "n"
+---and "i".
+---@brief ]]
+vim.keymap.set({ "n", "i" }, "<Leader>xfl", dn_md_utils.insert_file, { desc = "Insert an include directive" })
 
 -- \xtb [n,i]
 ---@tag dn_md_utils.<Leader>xtb
@@ -477,6 +551,16 @@ vim.keymap.set({ "n", "i" }, "<Leader>xtb", dn_md_utils.insert_table_definition,
 vim.api.nvim_create_user_command("XMUInsertFigure", function()
   dn_md_utils.insert_figure()
 end, { desc = "Insert figure link and definition" })
+
+-- XMUInsertFile
+---@tag dn_utils.XMUInsertFile
+---@brief [[
+---Calls function |dn_md_utils.insert_file| to insert an include directive
+---on the following line.
+---@brief ]]
+vim.api.nvim_create_user_command("XMUInsertFile", function()
+  dn_md_utils.insert_file()
+end, { desc = "Insert an include directive" })
 
 -- XMUInsertTable
 ---@tag dn_utils.XMUInsertTable
