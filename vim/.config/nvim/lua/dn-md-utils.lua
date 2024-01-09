@@ -1,10 +1,7 @@
 -- DOCUMENTATION
 
 -- TODO:add:
--- • insert_table_definition
--- • insert_file
 -- • clean_buffer|all_buffers (include autocmds)
--- • add_boilerplate
 -- • newline mapping
 
 ---@brief [[
@@ -271,6 +268,37 @@ dn_md_utils.options = {
 -- PUBLIC FUNCTIONS
 
 ---@mod dn_md_utils.functions Functions
+-- add_boilerplate()
+
+---Adds pander/markdown boilerplate to the top and bottom of the document.
+---@return nil _ No return value
+function dn_md_utils.add_boilerplate()
+  -- remember where we parked
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  -- metadata to be inserted at top of file
+  local metadata = {
+    "---",
+    'title: "[][source]"',
+    'author: "[][author]"',
+    'date: ""',
+    "style: [Standard, Latex14pt]",
+    "       # Latex8-12|14|17|20pt, SectNewPage, PageBreak, Include",
+    "---",
+    "",
+  }
+  -- comment block to be inserted at bottom of file
+  local comment_block = { "", "[command]: # (URLs)", "", "   [author]: ", "", "   [source]: " }
+  -- insert content
+  vim.api.nvim_win_set_cursor(0, { 1, 1 })
+  vim.api.nvim_put(metadata, "l", false, false)
+  local last_line = vim.fn.line("$")
+  vim.api.nvim_win_set_cursor(0, { last_line, 1 })
+  vim.api.nvim_put(comment_block, "l", true, false)
+  -- return to where we parked
+  line = line + #metadata
+  vim.api.nvim_win_set_cursor(0, { line, col })
+end
+
 -- insert_figure()
 
 ---Inserts a figure link on a new line.
@@ -513,6 +541,19 @@ end
 
 ---@mod dn_md_utils.mappings Mappings
 
+-- \xab [n,i]
+---@tag dn_md_utils.<Leader>xab
+---@brief [[
+---This mapping calls the function |dn_md_utils.add_boilerplate| in modes
+---"n" and "i".
+---@brief ]]
+vim.keymap.set(
+  { "n", "i" },
+  "<Leader>xab",
+  dn_md_utils.add_boilerplate,
+  { desc = "Insert pander/markdown boilerplate" }
+)
+
 -- \xfg [n,i]
 ---@tag dn_md_utils.<Leader>xfg
 ---@brief [[
@@ -540,6 +581,17 @@ vim.keymap.set({ "n", "i" }, "<Leader>xtb", dn_md_utils.insert_table_definition,
 -- COMMANDS
 
 ---@mod dn_md_utils.commands Commands
+
+-- XMUAddBoilerplate
+---@tag dn_utils.XMUAddBoilerplate
+---@brief [[
+---Calls function |dn_md_utils.add_boilerplate| to add a metadata header
+---template, including title, author, date, and (pander) styles, and a
+---footer template for url reference links.
+---@brief ]]
+vim.api.nvim_create_user_command("XMUAddBoilerplate", function()
+  dn_md_utils.add_boilerplate()
+end, { desc = "Insert pander/markdown boilerplate" })
 
 -- XMUInsertFigure
 ---@tag dn_utils.XMUInsertFigure

@@ -245,6 +245,13 @@ Change them in any other way at your own risk!
 ==============================================================================
 Functions                                                *dn_md_utils.functions*
 
+dn_md_utils.add_boilerplate()                      *dn_md_utils.add_boilerplate*
+    Adds pander/markdown boilerplate to the top and bottom of the document.
+
+    Returns: ~
+        (nil)  No return value
+
+
 dn_md_utils.insert_figure()                          *dn_md_utils.insert_figure*
     Inserts a figure link on a new line.
     A reference link definition is added to the end of the file in its own
@@ -272,6 +279,10 @@ dn_md_utils.insert_table_definition()      *dn_md_utils.insert_table_definition*
 ==============================================================================
 Mappings                                                  *dn_md_utils.mappings*
 
+                                                       *dn_md_utils.<Leader>xab*
+This mapping calls the function |dn_md_utils.add_boilerplate| in modes
+"n" and "i".
+
                                                        *dn_md_utils.<Leader>xfg*
 This mapping calls the function |dn_md_utils.insert_figure| in modes "n"
 and "i".
@@ -286,6 +297,11 @@ modes "n" and "i".
 
 ==============================================================================
 Commands                                                  *dn_md_utils.commands*
+
+                                                    *dn_utils.XMUAddBoilerplate*
+Calls function |dn_md_utils.add_boilerplate| to add a metadata header
+template, including title, author, date, and (pander) styles, and a
+footer template for url reference links.
 
                                                       *dn_utils.XMUInsertFigure*
 Calls function |dn_md_utils.insert_figure| to insert a figure link on the
