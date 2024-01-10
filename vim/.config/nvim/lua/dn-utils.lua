@@ -721,7 +721,7 @@ end
 ---"fmt" utilty on *nix systems strives for a goal width of 93% of the maximum
 ---width provided.
 ---@param message string String to be formatted, may contain newlines
----@param opts table|nil Optional configuration options
+---@param opts table|nil Optional configuration options:
 ---• {width} (number) Column to wrap at. Must be
 ---  a positive integer. If it is set to zero the
 ---  message string is returned without
@@ -782,7 +782,7 @@ end
 ---Wraps a message string sensibly at a specific column. The message must be a
 ---string and can contain newlines. It can be zero length.
 ---@param message string The message to wrap
----@param opts table|nil Optional configuration options
+---@param opts table|nil Optional configuration options:
 ---• {width} (number) Column to wrap at. Must be
 ---  a positive integer. If it is set to zero the
 ---  message string is returned without
@@ -1733,7 +1733,7 @@ end
 ---@param pattern string The |pattern| to replace
 ---@param replace string The replacement string (can
 ---be |sub-replace-special|)
----@param opts table|nil Optional configuration options
+---@param opts table|nil Optional configuration options:
 ---• {flags} (string) Search flags, see |:s_flags|
 ---  (default= "egi")
 ---• {firstline} (number) First line of

@@ -457,7 +457,7 @@ dn_utils.substitute({pattern}, {replace}, {opts})
         {pattern}  (string)     The |pattern| to replace
         {replace}  (string)     The replacement string (can
                                 be |sub-replace-special|)
-        {opts}     (table|nil)  Optional configuration options
+        {opts}     (table|nil)  Optional configuration options:
                                 • {flags} (string) Search flags, see |:s_flags|
                                   (default= "egi")
                                 • {firstline} (number) First line of
