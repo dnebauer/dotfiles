@@ -361,6 +361,25 @@ dn_utils.pairs_by_keys({tbl}, {sort_fn})                *dn_utils.pairs_by_keys*
 <
 
 
+dn_utils.parse_filepath({fp})                          *dn_utils.parse_filepath*
+    Splits a filepath into its component parts: directory, file name, base
+    name, and file extension.
+    If a filepath does not have a part then that part is returned as a nil.
+    For example, if the file name has no extension then a nil value is
+    returned for the extension part.
+    Hidden files are handled correctly.
+
+    Parameters: ~
+        {fp}  (string)  Filepath to parse
+
+    Returns: ~
+        (table)  Dictionary containing parts of filepath, with keys:
+                 • dir: (string|nil) Directory part of filepath
+                 • file: (string|nil) File name part of filepath
+                 • base: (string|nil) Base name part of file name
+                 • ext: (string|nil) Extension part of file name
+
+
 dn_utils.runtimepaths()                                  *dn_utils.runtimepaths*
     Get a list of vim's runtimepath directories.
 

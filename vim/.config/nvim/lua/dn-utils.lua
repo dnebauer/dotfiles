@@ -1127,7 +1127,7 @@ end
 function dn_utils.error(...)
   local messages = {}
   for _, message in ipairs({ ... }) do
-    if type({ message }) == "string" then
+    if type(message) == "string" then
       table.insert(messages, message)
     else
       table.insert(messages, dn_utils.stringify(message))
@@ -1312,7 +1312,7 @@ end
 function dn_utils.info(...)
   local messages = {}
   for _, message in ipairs({ ... }) do
-    if type({ message }) == "string" then
+    if type(message) == "string" then
       table.insert(messages, message)
     else
       table.insert(messages, dn_utils.stringify(message))
@@ -1581,6 +1581,63 @@ function dn_utils.pairs_by_keys(tbl, sort_fn)
     end
   end
   return iter
+end
+
+-- parse_filepath(fp)
+
+---Splits a filepath into its component parts: directory, file name, base
+---name, and file extension.
+---If a filepath does not have a part then that part is returned as a nil.
+---For example, if the file name has no extension then a nil value is
+---returned for the extension part.
+---Hidden files are handled correctly.
+---@param fp string Filepath to parse
+---@return table _ Dictionary containing parts of filepath, with keys:
+---• dir: (string|nil) Directory part of filepath
+---• file: (string|nil) File name part of filepath
+---• base: (string|nil) Base name part of file name
+---• ext: (string|nil) Extension part of file name
+function dn_utils.parse_filepath(fp)
+  -- credit: https://stackoverflow.com/a/12191225
+  -- check param
+  assert(type(fp) == "string", "Expected string, got " .. type(fp))
+  assert(fp:len() > 0, "Expected string, got empty string")
+  -- split filepath into dirpath, file name and file extension
+  local dir, file, base, ext
+  -- first get dirpath and filename
+  dir, file, _ = fp:match("(.-)([^\\/]-%.?([^%.\\/]*))$")
+  -- now extract basename and fileext from filename
+  if file:len() > 0 then
+    -- first deal with file names without dots
+    if not file:match("%.") then
+      base = file
+    -- now deal with hidden files
+    elseif file:sub(1, 1) == "." then
+      if not file:sub(2):match("%.") then
+        base = file
+      else
+        base, ext = file:match("^(%..*)%.(.-)$")
+      end
+    -- now deal with 'ordinary' file names
+    else
+      base, ext = file:match("^(.*)%.(.-)$")
+    end
+  end
+  -- return nil values rather than empty strings
+  if dir and dir:len() == 0 then
+    dir = nil
+  end
+  if file and file:len() == 0 then
+    file = nil
+  end
+  if base and base:len() == 0 then
+    base = nil
+  end
+  if ext and ext:len() == 0 then
+    ext = nil
+  end
+  -- return results
+  return { dir = dir, file = file, base = base, ext = ext }
 end
 
 -- runtimepaths()
@@ -1958,7 +2015,7 @@ end
 function dn_utils.warning(...)
   local messages = {}
   for _, message in ipairs({ ... }) do
-    if type({ message }) == "string" then
+    if type(message) == "string" then
       table.insert(messages, message)
     else
       table.insert(messages, dn_utils.stringify(message))
