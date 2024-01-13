@@ -911,14 +911,15 @@ end
 ---• |dn_utils.menu_select|      select item from menu
 ---
 ---Programming
+---• |dn_utils.dir_contents|     get files and subdirs in directory
 ---• |dn_utils.execute_shell_command|
 ---                            execute shell command
+---• |dn_utils.runtimepaths|     get list of runtime paths
 ---• |dn_utils.scriptnames|      display scripts in location list
----• |dn_utils.sleep|            pause script execution for defined time
 ---• |dn_utils.setup|            initialise/set up plugin
 ---• |dn_utils.shell_escape|     escape shell command
----• |dn_utils.runtimepaths|     get list of runtime paths
 ---• |dn_utils.showRuntimepaths| display runtime paths
+---• |dn_utils.sleep|            pause script execution for defined time
 ---
 ---String manipulation
 ---• |dn_utils.dumbify_quotes|   replace smart quotes with straight quotes
@@ -1095,6 +1096,45 @@ end
 ---@return nil _ No return value
 function dn_utils.clear_prompt()
   vim.api.nvim_command("normal! :")
+end
+
+-- dir_contents(dirpath)
+---Get files and subdirectories in a specified directory.
+---Absolute directory paths are handled correctly, including those starting
+---with "~".
+---Relative directory paths are handled correctly, including those that
+---contain "." and "..".
+---@param dirpath string Directory to analyse
+---@return table _ Dictionary containing directory contents, with keys:
+---• files: (sequence) List of file names
+---• dirs: (sequence) List of subdirectory names
+function dn_utils.dir_contents(dirpath)
+  -- param
+  assert(type(dirpath) == "string", "Expected string, got " .. type(dirpath))
+  assert(dirpath:len() ~= 0, "Expected directory path, got a zero-length string")
+  -- • handle '~' as shortcut for hom directory
+  if dirpath:sub(1, 1) == "~" then
+    dirpath = sf("%s/%s", os.getenv("HOME"), dirpath:sub(2))
+  end
+  local realpath = vim.loop.fs_realpath(dirpath)
+  assert(realpath ~= nil, sf("Unable to convert '%s' to a directory path", dirpath))
+  -- get directory content
+  local files, dirs = {}, {}
+  local handle = vim.loop.fs_scandir(realpath)
+  assert(handle ~= nil, "got nil handle on dir: " .. realpath)
+  local item, item_type = vim.loop.fs_scandir_next(handle)
+  while item do
+    -- process type: file, link, directory
+    -- ignore types: socket, block, fifo, char, unknown
+    if item_type == "file" or item_type == "link" then
+      table.insert(files, item)
+    elseif item_type == "directory" then
+      table.insert(dirs, item)
+    end
+    item, item_type = vim.loop.fs_scandir_next(handle)
+  end
+  -- return contents
+  return { files = files, dirs = dirs }
 end
 
 -- dumbify_quotes()

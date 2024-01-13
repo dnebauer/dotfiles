@@ -57,14 +57,15 @@ User interaction
 • |dn_utils.menu_select|      select item from menu
 
 Programming
+• |dn_utils.dir_contents|     get files and subdirs in directory
 • |dn_utils.execute_shell_command|
                             execute shell command
+• |dn_utils.runtimepaths|     get list of runtime paths
 • |dn_utils.scriptnames|      display scripts in location list
-• |dn_utils.sleep|            pause script execution for defined time
 • |dn_utils.setup|            initialise/set up plugin
 • |dn_utils.shell_escape|     escape shell command
-• |dn_utils.runtimepaths|     get list of runtime paths
 • |dn_utils.showRuntimepaths| display runtime paths
+• |dn_utils.sleep|            pause script execution for defined time
 
 String manipulation
 • |dn_utils.dumbify_quotes|   replace smart quotes with straight quotes
@@ -119,6 +120,22 @@ dn_utils.clear_prompt()                                  *dn_utils.clear_prompt*
 
     Returns: ~
         (nil)  No return value
+
+
+dn_utils.dir_contents({dirpath})                         *dn_utils.dir_contents*
+    Get files and subdirectories in a specified directory.
+    Absolute directory paths are handled correctly, including those starting
+    with "~".
+    Relative directory paths are handled correctly, including those that
+    contain "." and "..".
+
+    Parameters: ~
+        {dirpath}  (string)  Directory to analyse
+
+    Returns: ~
+        (table)  Dictionary containing directory contents, with keys:
+                 • files: (sequence) List of file names
+                 • dirs: (sequence) List of subdirectory names
 
 
 dn_utils.dumbify_quotes()                              *dn_utils.dumbify_quotes*
