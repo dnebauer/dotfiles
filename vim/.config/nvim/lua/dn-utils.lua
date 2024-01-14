@@ -1811,7 +1811,6 @@ function dn_utils.remove_dir(dirpath, opts)
   local _remove_item
   local no_errors = true
   _remove_item = function(_item)
-    dn_utils.info("removing: " .. _item)
     local ok, err = os.remove(_item)
     if not ok then
       no_errors = false
@@ -1832,7 +1831,6 @@ function dn_utils.remove_dir(dirpath, opts)
       -- process type: file, link, directory
       -- ignore types: socket, block, fifo, char, unknown
       if item_type == "directory" then
-        dn_utils.warning("recursing: " .. item_path)
         _remove_dir(item_path)
       end
       if item_type == "file" or item_type == "link" or item_type == "directory" then
