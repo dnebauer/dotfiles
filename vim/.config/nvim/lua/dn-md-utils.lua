@@ -263,11 +263,144 @@ dn_md_utils.options = {
 -- PRIVATE FUNCTIONS
 
 -- forward declarations
---local _change_caps
+local _clean_output
+
+-- _clean_output(opts)
+
+---@private
+---Deletes common output artefacts: output files with extensions like "html"
+---and "pdf", and temporary directories like ".tmp". (See function
+---|dn_md_utils.clean_buffer| for a complete list.)
+---
+---Obtains file path associated with the provided buffer number. This file
+---path is used to obtain the file directory and basename of output files.
+---It is up to the calling function to ensure the buffer is not hidden,
+---associated with a file, and of filetype markdown -- specifying a buffer
+---that does not meet these criteria will likely cause a cryptic error.
+---@param opts table|nil Configuration options:
+---• {bufnr} {number} Integer number of buffer
+---  whose associated file's output artefacts are
+---  to be cleaned. Required.
+---• {confirm} {boolean} Whether to confirm with
+---  user before anything is deleted.
+---  Optional. Default=false.
+---• {pause_end} {boolean} Whether to pause after
+---  action is taken. Optional. Default=false.
+---• {say_none} {bool} Whether to display a
+---  message if no output artefacts are detected.
+---  Optional. Default=false.
+---@return boolean _ Whether any output artefacts were deleted
+function _clean_output(opts)
+  -- get associated file
+  opts = opts or {}
+  assert(opts.bufnr ~= nil, "Expected non-nil bufnr, got nil")
+  assert(
+    util.valid_non_negative_int(opts.bufnr),
+    sf("Expected non-negative integer, got %s (%s)", type(opts.bufnr), tostring(opts.bufnr))
+  )
+  local md_fp = vim.api.nvim_buf_get_name(opts.bufnr)
+  assert(md_fp:len() > 0, "No associated filename")
+  -- vars
+  local msg
+  -- identify deletion candidates
+  local md_fp_parts = util.parse_filepath(md_fp)
+  -- • get directory contents
+  local contents = util.dir_contents(md_fp_parts.dir)
+  local files, dirs = contents.files, contents.dirs
+  -- • get candidate output artefacts
+  local clean_suffixes = { "htm", "html", "pdf", "epub", "mobi" }
+  local clean_subdirs = { ".tmp" }
+  local candidate = {}
+  candidate.files = vim.tbl_map(function(suffix)
+    return sf("%s.%s", md_fp_parts.base, suffix)
+  end, clean_suffixes)
+  candidate.subdirs = vim.tbl_map(function(subdir)
+    return sf("%s", subdir)
+  end, clean_subdirs)
+  -- • get candidate output artefacts that are present
+  local artefacts = { files = {}, dirs = {} }
+  for _, file in ipairs(candidate.files) do
+    if util.is_table_value(files, file) then
+      table.insert(artefacts.files, file)
+    end
+  end
+  for _, dir in ipairs(candidate.subdirs) do
+    if util.is_table_value(dirs, dir) then
+      table.insert(artefacts.dirs, dir)
+    end
+  end
+  if #artefacts.files == 0 and #artefacts.dirs == 0 then
+    if opts.say_none then
+      util.info("No output to clean up")
+    end
+    return false
+  end
+  -- confirm deletions if necessary
+  if opts.confirm then
+    local output_list = {}
+    for _, file in ipairs(artefacts.files) do
+      table.insert(output_list, file)
+    end
+    for _, dir in ipairs(artefacts.dirs) do
+      table.insert(output_list, dir)
+    end
+    msg = sf("Delete %s output (%s) [y/N]", md_fp_parts.file, table.concat(output_list, ", "))
+    vim.api.nvim_echo({ { msg, "Question" } }, true, {})
+    local answer = string.lower(vim.fn.nr2char(vim.fn.getchar()))
+    vim.api.nvim_out_write(answer)
+    if answer ~= "y" then
+      return false
+    end
+  end
+  -- delete output artefacts
+  local deleted, failed = {}, {}
+  for _, file in ipairs(artefacts.files) do
+    if os.remove(file) then
+      table.insert(deleted, file)
+    else
+      table.insert(failed, file)
+    end
+  end
+  for _, dir in ipairs(artefacts.dirs) do
+    if util.remove_dir(dir) then
+      table.insert(deleted, dir)
+    else
+      table.insert(failed, dir)
+    end
+  end
+  -- report outcome
+  local retval
+  local ui_output = {}
+  if #deleted > 0 then
+    retval = true
+    msg = "Deleted " .. table.concat(deleted, ", ") .. "\n"
+    table.insert(ui_output, { msg })
+  end
+  if #failed > 0 then
+    retval = false
+    msg = "Errors occurred trying to delete:"
+    for _, file in ipairs(failed) do
+      msg = msg .. "\n- " .. file
+    end
+    msg = msg .. "\n"
+    table.insert(ui_output, { msg, "ErrorMsg" })
+  end
+  if opts.pause_end then
+    local prompt = "Press any key to continue"
+    table.insert(ui_output, { prompt, "MoreMsg" })
+  end
+  vim.api.nvim_echo(ui_output, true, {})
+  if opts.pause_end then
+    local _ = string.lower(vim.fn.nr2char(vim.fn.getchar()))
+    vim.cmd.echo("\n")
+  end
+  return retval
+end
 
 -- PUBLIC FUNCTIONS
 
 ---@mod dn_md_utils.functions Functions
+
 -- add_boilerplate()
 
 ---Adds pander/markdown boilerplate to the top and bottom of the document.
@@ -297,6 +430,130 @@ function dn_md_utils.add_boilerplate()
   -- return to where we parked
   line = line + #metadata
   vim.api.nvim_win_set_cursor(0, { line, col })
+end
+
+-- clean_all_buffers([opts])
+
+---Deletes common output artefacts: output files with extensions "htm",
+---"html", "pdf", "epub", and "mobi"; and temporary directories named
+---".tmp".
+---
+---Searches sequentially through all buffers that are both associated with a
+---file name and have a markdown file type.
+---@param opts table|nil Optional configuration options:
+---• {confirm} (boolean) Whether to confirm with
+---  user before anything is deleted.
+---  Default=false.
+---• {pause_end} (boolean) Whether to pause after
+---  action is taken. Default=false.
+---• {say_none} (boolean) Whether to display a
+---  message if no output artefacts are detected.
+---  Default=false.
+---@return nil _ No return value
+function dn_md_utils.clean_all_buffers(opts)
+  -- disable Noice
+  vim.api.nvim_cmd({ cmd = "NoiceDisable" }, {})
+  -- process options
+  opts = opts or {}
+  assert(type(opts) == "table", "Expected table, got " .. type(opts))
+  local valid_options = { "confirm", "pause_end", "say_none" }
+  local invalid_options = {}
+  for option, _ in pairs(opts) do
+    if not util.is_table_value(valid_options, option) then
+      table.insert(invalid_options, option)
+    end
+  end
+  if #invalid_options > 0 then
+    util.error("Invalid option(s): " .. table.concat(invalid_options, ","))
+    return
+  end
+  opts.confirm = opts.confirm or false
+  assert(type(opts.confirm) == "boolean", "Expected boolean 'confirm' option, got " .. type(opts.confirm))
+  opts.pause_end = opts.pause_end or false
+  assert(type(opts.pause_end) == "boolean", "Expected boolean 'pause_end' option, got " .. type(opts.pause_end))
+  opts.say_none = opts.say_none or false
+  assert(type(opts.say_none) == "boolean", "Expected boolean 'say_none' option, got " .. type(opts.say_none))
+  opts.caller = opts.caller or "clean_all_buffers"
+  -- find buffers associated with markdown files
+  local md_bufnrs = {}
+  local md_filetypes = { "markdown", "pandoc", "markdown.pandoc" }
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    -- must be loaded
+    if vim.api.nvim_buf_is_loaded(bufnr) then
+      -- must have associated file
+      local filename = vim.api.nvim_buf_get_name(bufnr)
+      if filename:len() ~= 0 then
+        -- must be markdown filetype
+        local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+        if util.is_table_value(md_filetypes, filetype) then
+          table.insert(md_bufnrs, bufnr)
+        end
+      end
+    end
+  end
+  -- clean each markdown file buffer in turn
+  for _, md_bufnr in ipairs(md_bufnrs) do
+    opts.bufnr = md_bufnr
+    -- ignore return value from _clean_output
+    _clean_output(opts)
+  end
+end
+
+-- clean_buffer([opts])
+
+---Deletes common output artefacts: output files with extensions "htm",
+---"html", "pdf", "epub", and "mobi"; and temporary directories named
+---".tmp".
+---@param opts table|nil Optional configuration options:
+---• {bufnr} (number) Number of buffer to process.
+---  Default=0.
+---• {confirm} (boolean) Whether to confirm with
+---  user before anything is deleted.
+---  Default=false.
+---• {pause_end} (boolean) Whether to pause after
+---  action is taken. Default=false.
+---• {say_none} (boolean) Whether to display a
+---  message if no output artefacts are detected.
+---  Default=false.
+---@return nil _ No return value
+function dn_md_utils.clean_buffer(opts)
+  -- disable Noice
+  vim.api.nvim_cmd({ cmd = "NoiceDisable" }, {})
+  -- process options
+  opts = opts or {}
+  assert(type(opts) == "table", "Expected table, got " .. type(opts))
+  local valid_options = { "bufnr", "confirm", "pause_end", "say_none" }
+  local invalid_options = {}
+  for option, _ in pairs(opts) do
+    if not util.is_table_value(valid_options, option) then
+      table.insert(invalid_options, option)
+    end
+  end
+  if #invalid_options > 0 then
+    util.error("Invalid option(s): " .. table.concat(invalid_options, ","))
+    return
+  end
+  opts.bufnr = opts.bufnr or 0
+  assert(util.valid_pos_int(opts.bufnr), "Expected integer 'bufnr' option, got " .. tostring(opts.bufnr))
+  opts.confirm = opts.confirm or false
+  assert(type(opts.confirm) == "boolean", "Expected boolean 'confirm' option, got " .. type(opts.confirm))
+  opts.pause_end = opts.pause_end or false
+  assert(type(opts.pause_end) == "boolean", "Expected boolean 'pause_end' option, got " .. type(opts.pause_end))
+  opts.say_none = opts.say_none or false
+  assert(type(opts.say_none) == "boolean", "Expected boolean 'say_none' option, got " .. type(opts.say_none))
+  opts.caller = opts.caller or "clean_buffer"
+  -- clean if buffer is associated with markdown file
+  local md_filetypes = { "markdown", "pandoc", "markdown.pandoc" }
+  local filename = vim.api.nvim_buf_get_name(opts.bufnr)
+  if filename:len() ~= 0 then
+    local filetype = vim.api.nvim_get_option_value("filetype", { buf = opts.bufnr })
+    if util.is_table_value(md_filetypes, filetype) then
+      -- ignore return value from _clean_output
+      _clean_output(opts)
+    end
+  end
+  -- enable Noice
+  --vim.api.nvim_cmd({ cmd = "NoiceEnable" }, {})
 end
 
 -- insert_figure()
@@ -542,6 +799,7 @@ end
 ---@mod dn_md_utils.mappings Mappings
 
 -- \xab [n,i]
+
 ---@tag dn_md_utils.<Leader>xab
 ---@brief [[
 ---This mapping calls the function |dn_md_utils.add_boilerplate| in modes
@@ -555,6 +813,7 @@ vim.keymap.set(
 )
 
 -- \xfg [n,i]
+
 ---@tag dn_md_utils.<Leader>xfg
 ---@brief [[
 ---This mapping calls the function |dn_md_utils.insert_figure| in modes "n"
@@ -563,6 +822,7 @@ vim.keymap.set(
 vim.keymap.set({ "n", "i" }, "<Leader>xfg", dn_md_utils.insert_figure, { desc = "Insert figure link and definition" })
 
 -- \xfl [n,i]
+
 ---@tag dn_md_utils.<Leader>xfl
 ---@brief [[
 ---This mapping calls the function |dn_md_utils.insert_file| in modes "n"
@@ -571,6 +831,7 @@ vim.keymap.set({ "n", "i" }, "<Leader>xfg", dn_md_utils.insert_figure, { desc = 
 vim.keymap.set({ "n", "i" }, "<Leader>xfl", dn_md_utils.insert_file, { desc = "Insert an include directive" })
 
 -- \xtb [n,i]
+
 ---@tag dn_md_utils.<Leader>xtb
 ---@brief [[
 ---This mapping calls the function |dn_md_utils.insert_table_definition| in
@@ -583,7 +844,8 @@ vim.keymap.set({ "n", "i" }, "<Leader>xtb", dn_md_utils.insert_table_definition,
 ---@mod dn_md_utils.commands Commands
 
 -- XMUAddBoilerplate
----@tag dn_utils.XMUAddBoilerplate
+
+---@tag dn_md_utils.XMUAddBoilerplate
 ---@brief [[
 ---Calls function |dn_md_utils.add_boilerplate| to add a metadata header
 ---template, including title, author, date, and (pander) styles, and a
@@ -594,7 +856,8 @@ vim.api.nvim_create_user_command("XMUAddBoilerplate", function()
 end, { desc = "Insert pander/markdown boilerplate" })
 
 -- XMUInsertFigure
----@tag dn_utils.XMUInsertFigure
+
+---@tag dn_md_utils.XMUInsertFigure
 ---@brief [[
 ---Calls function |dn_md_utils.insert_figure| to insert a figure link on the
 ---following line and a corresponding link definition is added to the bottom
@@ -605,7 +868,8 @@ vim.api.nvim_create_user_command("XMUInsertFigure", function()
 end, { desc = "Insert figure link and definition" })
 
 -- XMUInsertFile
----@tag dn_utils.XMUInsertFile
+
+---@tag dn_md_utils.XMUInsertFile
 ---@brief [[
 ---Calls function |dn_md_utils.insert_file| to insert an include directive
 ---on the following line.
@@ -615,7 +879,8 @@ vim.api.nvim_create_user_command("XMUInsertFile", function()
 end, { desc = "Insert an include directive" })
 
 -- XMUInsertTable
----@tag dn_utils.XMUInsertTable
+
+---@tag dn_md_utils.XMUInsertTable
 ---@brief [[
 ---Calls function |dn_md_utils.insert_table_definition| to insert a table
 ---caption and id on the following line.

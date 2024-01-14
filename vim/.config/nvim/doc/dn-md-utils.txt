@@ -252,6 +252,51 @@ dn_md_utils.add_boilerplate()                      *dn_md_utils.add_boilerplate*
         (nil)  No return value
 
 
+dn_md_utils.clean_all_buffers({opts})            *dn_md_utils.clean_all_buffers*
+    Deletes common output artefacts: output files with extensions "htm",
+    "html", "pdf", "epub", and "mobi"; and temporary directories named
+    ".tmp".
+
+    Searches sequentially through all buffers that are both associated with a
+    file name and have a markdown file type.
+
+    Parameters: ~
+        {opts}  (table|nil)  Optional configuration options:
+                             • {confirm} (boolean) Whether to confirm with
+                               user before anything is deleted.
+                               Default=false.
+                             • {pause_end} (boolean) Whether to pause after
+                               action is taken. Default=false.
+                             • {say_none} (boolean) Whether to display a
+                               message if no output artefacts are detected.
+                               Default=false.
+
+    Returns: ~
+        (nil)  No return value
+
+
+dn_md_utils.clean_buffer({opts})                      *dn_md_utils.clean_buffer*
+    Deletes common output artefacts: output files with extensions "htm",
+    "html", "pdf", "epub", and "mobi"; and temporary directories named
+    ".tmp".
+
+    Parameters: ~
+        {opts}  (table|nil)  Optional configuration options:
+                             • {bufnr} (number) Number of buffer to process.
+                               Default=0.
+                             • {confirm} (boolean) Whether to confirm with
+                               user before anything is deleted.
+                               Default=false.
+                             • {pause_end} (boolean) Whether to pause after
+                               action is taken. Default=false.
+                             • {say_none} (boolean) Whether to display a
+                               message if no output artefacts are detected.
+                               Default=false.
+
+    Returns: ~
+        (nil)  No return value
+
+
 dn_md_utils.insert_figure()                          *dn_md_utils.insert_figure*
     Inserts a figure link on a new line.
     A reference link definition is added to the end of the file in its own
@@ -298,21 +343,21 @@ modes "n" and "i".
 ==============================================================================
 Commands                                                  *dn_md_utils.commands*
 
-                                                    *dn_utils.XMUAddBoilerplate*
+                                                 *dn_md_utils.XMUAddBoilerplate*
 Calls function |dn_md_utils.add_boilerplate| to add a metadata header
 template, including title, author, date, and (pander) styles, and a
 footer template for url reference links.
 
-                                                      *dn_utils.XMUInsertFigure*
+                                                   *dn_md_utils.XMUInsertFigure*
 Calls function |dn_md_utils.insert_figure| to insert a figure link on the
 following line and a corresponding link definition is added to the bottom
 of the document.
 
-                                                        *dn_utils.XMUInsertFile*
+                                                     *dn_md_utils.XMUInsertFile*
 Calls function |dn_md_utils.insert_file| to insert an include directive
 on the following line.
 
-                                                       *dn_utils.XMUInsertTable*
+                                                    *dn_md_utils.XMUInsertTable*
 Calls function |dn_md_utils.insert_table_definition| to insert a table
 caption and id on the following line.
 
