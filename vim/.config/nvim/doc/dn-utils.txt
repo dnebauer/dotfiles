@@ -44,10 +44,14 @@ alphabetical list of function descriptions is located at
 help on it.
 
 Files and directories
+• |dn_utils.dir_contents|     get files and subdirs in directory
 • |dn_utils.file_readable|    whether a file is readable
 • |dn_utils.get_file_dir|     get directory of file being edited
 • |dn_utils.get_rtp_dir|      finds directory under runtimepath
 • |dn_utils.get_rtp_file|     finds file(s) in directories under 'rtp'
+• |dn_utils.parent_dir|       get parent directory
+• |dn_utils.path_exists|      check whether file or directory exists
+• |dn_utils.remove_dir|       delete directory and contents recursively
 
 User interaction
 • |dn_utils.clear_prompt|     clear command line
@@ -57,7 +61,6 @@ User interaction
 • |dn_utils.menu_select|      select item from menu
 
 Programming
-• |dn_utils.dir_contents|     get files and subdirs in directory
 • |dn_utils.execute_shell_command|
                             execute shell command
 • |dn_utils.runtimepaths|     get list of runtime paths
@@ -325,7 +328,7 @@ dn_utils.menu_select({menu}, {prompt})                    *dn_utils.menu_select*
 
     Parameters: ~
         {menu}    (table)   Menu items
-        {prompt}  (string)  Prompt (optional, default: 'Select an option:')
+        {prompt}  (string)  Prompt (optional, default="Select an option:")
 
     Returns: ~
         (string)  Selected menu option
@@ -378,6 +381,16 @@ dn_utils.pairs_by_keys({tbl}, {sort_fn})                *dn_utils.pairs_by_keys*
 <
 
 
+dn_utils.parent_dir({path})                                *dn_utils.parent_dir*
+    Get parent directory for file or subdirectory.
+
+    Parameters: ~
+        {path}  (string)  Path to analyse
+
+    Returns: ~
+        (string)  Directory path
+
+
 dn_utils.parse_filepath({fp})                          *dn_utils.parse_filepath*
     Splits a filepath into its component parts: directory, file name, base
     name, and file extension.
@@ -395,6 +408,44 @@ dn_utils.parse_filepath({fp})                          *dn_utils.parse_filepath*
                  • file: (string|nil) File name part of filepath
                  • base: (string|nil) Base name part of file name
                  • ext: (string|nil) Extension part of file name
+
+
+dn_utils.path_exists({path})                              *dn_utils.path_exists*
+    Determine whether file or directory path exists.
+    Handles:
+    • absolute paths (including those starting with "~")
+    • relative paths
+    • paths containing "." and ".."
+    • path containing symlinks.
+
+    Parameters: ~
+        {path}  (string)  File or directory path to check
+
+    Returns: ~
+        (boolean)  Whether file or directory exists
+
+
+dn_utils.remove_dir({dirpath}, {opts})                     *dn_utils.remove_dir*
+    Deletes the specified directory and all contained files and
+    subdirectories.
+    The subsidiary files and subdirectories are deleted one by one. Warnings
+    are issued for any deletion operations that fail, but this behaviour can
+    be changed to issue a fatal error on the first failed delete operation.
+    Handles:
+    • absolute paths (including those starting with "~")
+    • relative paths
+    • paths containing "." and ".."
+    • path containing symlinks.
+
+    Parameters: ~
+        {dirpath}  (string)     Directory to be deleted
+        {opts}     (table|nil)  Optional configuration values:
+                                • {error} (boolean) Whether to issue fatal
+                                  error instead of warning for failed deletion
+                                  operations (optional, delete=false)
+
+    Returns: ~
+        (boolean)  Whether removal occurred without error
 
 
 dn_utils.runtimepaths()                                  *dn_utils.runtimepaths*
