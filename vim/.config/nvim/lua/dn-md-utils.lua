@@ -889,4 +889,73 @@ vim.api.nvim_create_user_command("XMUInsertTable", function()
   dn_md_utils.insert_table_definition()()
 end, { desc = "Insert table definition" })
 
+-- AUTOCOMMANDS
+
+---@mod dn_md_utils.autocmds Autocommands
+
+---@tag dn_md_utils.augroup_dn_markdown
+---@brief [[
+---All autocmds defined by this ftplugin are part of the "dn_markdown" group.
+---@brief ]]
+
+local dn_markdown_augroup = vim.api.nvim_create_augroup("dn_markdown2", { clear = true })
+
+-- if run DisableNoice command in autocmd-called function it does not take
+-- effect until *after* function runs, so run from its own autocmd that is
+-- called *before* the autocmd that calls the function
+
+---@tag dn_md_utils.autocmd_BufDelete
+---@brief [[
+---At buffer deletion the |dn_md_utils.clean_buffer| function is run to
+---optionally delete output artefacts (file and directories) if the buffer
+---has a markdown filetype and is associated with a file.
+---Noice has to be disabled before running this function because if it is
+---running during the BufDelete event it will prevent display of the
+---function's user feedback.
+---@brief ]]
+
+vim.api.nvim_create_autocmd("BufDelete", {
+  group = dn_markdown_augroup,
+  pattern = "*.md",
+  callback = function()
+    vim.api.nvim_cmd({ cmd = "NoiceDisable" }, {})
+  end,
+  desc = "Disable Noice when buffer deleted",
+})
+
+vim.api.nvim_create_autocmd("BufDelete", {
+  group = dn_markdown_augroup,
+  pattern = "*.md",
+  callback = function(args)
+    require("dn-md-utils").clean_buffer({ bufnr = args.buf, confirm = true })
+  end,
+  desc = "Delete markdown output artefacts when buffer deleted",
+})
+
+---@tag dn_md_utils.autocmd_VimLeavePre
+---@brief [[
+---During vim exit the |dn_md_utils.clean_all_buffers| function is run to
+---optionally delete output artefacts (file and directories) from all
+---markdown buffers associated with files.
+---Noice has to be disabled before running this function because if it is
+---running during the VimLeavePre event it will prevent display of the
+---function's user feedback.
+---@brief ]]
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = dn_markdown_augroup,
+  callback = function()
+    vim.api.nvim_cmd({ cmd = "NoiceDisable" }, {})
+  end,
+  desc = "Disable Noice when exiting vim",
+})
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = dn_markdown_augroup,
+  callback = function()
+    require("dn-md-utils").clean_all_buffers({ confirm = true, pause_end = true })
+  end,
+  desc = "Delete markdown output artefacts when exiting vim",
+})
+
 return dn_md_utils

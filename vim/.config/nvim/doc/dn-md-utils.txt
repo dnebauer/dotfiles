@@ -10,6 +10,7 @@ Variables ···································
 Functions ·············································· |dn_md_utils.functions|
 Mappings ················································ |dn_md_utils.mappings|
 Commands ················································ |dn_md_utils.commands|
+Autocommands ············································ |dn_md_utils.autocmds|
 
 ==============================================================================
 Introduction                                                 *dn_md_utils.intro*
@@ -360,5 +361,27 @@ on the following line.
                                                     *dn_md_utils.XMUInsertTable*
 Calls function |dn_md_utils.insert_table_definition| to insert a table
 caption and id on the following line.
+
+==============================================================================
+Autocommands                                              *dn_md_utils.autocmds*
+
+                                               *dn_md_utils.augroup_dn_markdown*
+All autocmds defined by this ftplugin are part of the "dn_markdown" group.
+
+                                                 *dn_md_utils.autocmd_BufDelete*
+At buffer deletion the |dn_md_utils.clean_buffer| function is run to
+optionally delete output artefacts (file and directories) if the buffer
+has a markdown filetype and is associated with a file.
+Noice has to be disabled before running this function because if it is
+running during the BufDelete event it will prevent display of the
+function's user feedback.
+
+                                               *dn_md_utils.autocmd_VimLeavePre*
+During vim exit the |dn_md_utils.clean_all_buffers| function is run to
+optionally delete output artefacts (file and directories) from all
+markdown buffers associated with files.
+Noice has to be disabled before running this function because if it is
+running during the VimLeavePre event it will prevent display of the
+function's user feedback.
 
 vim:tw=78:ts=8:noet:ft=help:norl:
