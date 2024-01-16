@@ -24,6 +24,10 @@ end
 if vim.fn.exists("g:tex_flavor") == 0 then
   vim.g.tex_flavor = "latex"
 end
+local perl_exe = "/usr/bin/perl"
+if vim.fn.filereadable(perl_exe) == 1 then
+  vim.g.perl_host_prog = perl_exe
+end
 
 --[[ options ]]
 
