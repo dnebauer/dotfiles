@@ -9,7 +9,6 @@ local augroup_create
 local autocmd_create
 local mail_md_mode
 local option_local_append
---local option_local_get
 local option_local_set
 local text_editing_settings
 local var_buf_exists
@@ -73,11 +72,6 @@ end
 option_local_append = function(name, new_item)
   vim.opt_local[name]:append(new_item)
 end
-
----- option_local_get(name) {{{1
---option_local_get = function(name)
---  return vim.opt_local[name]:get()
---end
 
 -- option_local_set(option, value) {{{1
 option_local_set = function(option, value)
