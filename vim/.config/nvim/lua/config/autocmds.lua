@@ -177,7 +177,7 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
       return
     end -- check buffer associated with file
     -- only check normal buffer (buftype == "")
-    if vim.opt_local.buftype:get():len() == 0 then
+    if vim.opt_local.buftype:get():len() ~= 0 then
       return
     end
     -- do simple check for whether file is a symlink
