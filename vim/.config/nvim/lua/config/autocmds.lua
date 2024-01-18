@@ -150,18 +150,6 @@ autocmd_create("BufWritePre", {
   desc = "Remove trailing whitespace on buffer save",
 })
 
--- capture initial filepath {{{1
-autocmd_create({ "BufNewFile", "BufReadPost" }, {
-  group = augroup_create("my_initial_filepath", { clear = true }),
-  pattern = "*",
-  callback = function()
-    local expanded = vim.api.nvim_call_function("expand", { "%" })
-    local simplified = vim.api.nvim_call_function("simplify", { expanded })
-    var_buf_set("my_initial_cfp", simplified)
-  end,
-  desc = "Capture initial filepath",
-})
-
 -- warn on opening a symlink {{{1
 autocmd_create({ "BufNewFile", "BufReadPost" }, {
   group = augroup_create("my_warn_symlink", { clear = true }),
@@ -175,50 +163,29 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
     -- only buffers associated with a file name (bufname ~= "")
     if vim.api.nvim_buf_get_name(0):len() == 0 then
       return
-    end -- check buffer associated with file
+    end
     -- only check normal buffer (buftype == "")
     if vim.opt_local.buftype:get():len() ~= 0 then
       return
     end
-    -- do simple check for whether file is a symlink
-    local file_path = vim.api.nvim_buf_get_name(0)
-    local file_name = vim.api.nvim_call_function("fnamemodify", { file_path, ":t" })
-    local real_path
-    if vim.api.nvim_call_function("getftype", { file_path }) == "link" then
-      real_path = vim.api.nvim_call_function("resolve", { file_path })
+    -- full_fp makes use of semi-broken nature of nvim_buf_get_name():
+    -- • if the file is a symlink this expands to the full symlink path
+    --     (with no symlinks resolved)
+    -- • if the file is real but the dirpath includes a symlink,
+    --     this expands to the full true filepath (with symlinks resolved)
+    local full_fp = vim.api.nvim_buf_get_name(0)
+    -- real_fp is the full true filepath of init_fp, with symlinks resolved
+    local real_fp = vim.loop.fs_realpath(full_fp)
+    -- check whether file is a symlink
+    local is_symlink = vim.loop.fs_readlink(full_fp)
+    if is_symlink then
+      local file_name = vim.api.nvim_call_function("fnamemodify", { real_fp, ":t" })
       vim.api.nvim_echo({
-        { "Buffer file is a symlink\n", "WarningMsg" },
-        { "- file path: " .. file_path .. "\n", "WarningMsg" },
-        { "- real path: " .. real_path .. "\n", "WarningMsg" },
+        { file_name .. " is a symlink:\n", "WarningMsg" },
+        { "- file path = " .. full_fp .. "\n", "WarningMsg" },
+        { "- real path = " .. real_fp .. "\n", "WarningMsg" },
       }, true, {})
       return
-    end
-    -- if file is not symlink, check for symlink in full file path
-    -- requires b:my_initial_cfp
-    -- b:my_initial_cfp is set by augroup 'my_initial_filepath'
-    if var_buf_exists("my_initial_cfp") then
-      return
-    end
-    -- if current directory has been changed requires b:my_initial_cwd
-    -- b:my_initial_cwd is set by augroup 'my_local_dir'
-    file_path = ""
-    if vim.api.nvim_call_function("haslocaldir", {}) == 1 then
-      -- then initial cwd was changed with :lcd or :tcd
-      if not var_buf_exists("my_initial_cwd") then
-        return
-      end
-      file_path = var_buf_get("my_initial_cwd") .. "/" .. file_name
-    else
-      -- initial cwd has not been altered
-      file_path = vim.api.nvim_call_function("getcwd", {}) .. "/" .. file_name
-    end
-    real_path = vim.api.nvim_call_function("resolve", { file_path })
-    if file_path ~= real_path then
-      vim.api.nvim_echo({
-        { "Buffer file path includes at least one symlink", "WarningMsg" },
-        { "- file path: " .. file_path .. "\n", "WarningMsg" },
-        { "- real path: " .. real_path .. "\n", "WarningMsg" },
-      }, true, {})
     end
   end,
   desc = "Display warning if opening a file that is a symlink",
