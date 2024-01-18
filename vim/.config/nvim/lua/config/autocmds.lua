@@ -9,34 +9,35 @@ local augroup_create
 local autocmd_create
 local mail_md_mode
 local option_local_append
+local option_local_get
 local option_local_set
 local text_editing_settings
-local var_buf_exists
-local var_buf_get
-local var_buf_remove
-local var_buf_set
+local var_buffer_exists
+local var_buffer_remove
+local var_buffer_set
+local var_global_set
 
 -- augroup_create(name, {opts}) {{{1
 augroup_create = vim.api.nvim_create_augroup
 
--- autocmd_create(event, opts) {{{1
+-- autocmd_create(event, {opts}) {{{1
 autocmd_create = vim.api.nvim_create_autocmd
 
 -- mail_md_mode(mode) {{{1
 -- • format mail message body as markdown
 mail_md_mode = function()
   -- only do this once
-  if var_buf_exists("mail_mode_done") then
+  if var_buffer_exists("mail_mode_done") then
     return
   end
-  var_buf_set("mail_mode_done", 1)
+  var_buffer_set("mail_mode_done", 1)
   -- define syntax group list '@synMailIncludeMarkdown'
   -- • add 'contained' flag to all syntax items in 'syntax/markdown.vim'
   -- • add top-level syntax items in 'syntax/markdown.vim' to
   --   '@synMailIncludeMarkdown' syntax group list
-  var_buf_remove("current_syntax")
+  var_buffer_remove("current_syntax")
   vim.api.nvim_exec2("syntax include @synMailIncludeMarkdown syntax/markdown.vim", {})
-  var_buf_set("current_syntax", "mail")
+  var_buffer_set("current_syntax", "mail")
   -- apply markdown region
   --       keepend: a match with an end pattern truncates any contained
   --                matches
@@ -73,9 +74,14 @@ option_local_append = function(name, new_item)
   vim.opt_local[name]:append(new_item)
 end
 
+-- option_local_get(option) {{{1
+option_local_get = function(option)
+  vim.api.nvim_buf_get_option(0, option)
+end
+
 -- option_local_set(option, value) {{{1
 option_local_set = function(option, value)
-  vim.api.nvim_set_option_value(option, value, { scope = "local" })
+  vim.api.nvim_buf_set_option(0, option, value)
 end
 
 -- text_editing_settings() {{{1
@@ -92,25 +98,25 @@ text_editing_settings = function()
   vim.keymap.set("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
 end
 
--- var_buf_exists(name) {{{1
-var_buf_exists = function(name)
+-- var_buffer_exists(name) {{{1
+var_buffer_exists = function(name)
   local ok, _ = pcall(vim.api.nvim_buf_get_var, 0, name)
   return ok
 end
 
--- var_buf_get(name) {{{1
-var_buf_get = function(name)
-  vim.api.nvim_buf_get_var(0, name)
-end
-
--- var_buf_remove(name) {{{1
-var_buf_remove = function(name)
+-- var_buffer_remove(name) {{{1
+var_buffer_remove = function(name)
   vim.api.nvim_buf_del_var(0, name)
 end
 
--- var_buf_set(name, value) {{{1
-var_buf_set = function(name, value)
+-- var_buffer_set(name, value) {{{1
+var_buffer_set = function(name, value)
   vim.api.nvim_buf_set_var(0, name, value)
+end
+
+-- var_global_set(name, value)
+var_global_set = function(name, value)
+  vim.api.nvim_set_var(name, value)
 end
 -- }}}1
 
@@ -156,16 +162,17 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
   pattern = "*",
   callback = function()
     -- only do this once
-    if var_buf_exists("my_checked_symlink") then
+    if var_buffer_exists("my_checked_symlink") then
       return
     end
-    var_buf_set("my_checked_symlink", 1)
+    var_buffer_set("my_checked_symlink", 1)
     -- only buffers associated with a file name (bufname ~= "")
     if vim.api.nvim_buf_get_name(0):len() == 0 then
       return
     end
-    -- only check normal buffer (buftype == "")
-    if vim.opt_local.buftype:get():len() ~= 0 then
+    -- only check normal buffer (buftype == ""),
+    -- noting option_local_get() returns nil for an empty string
+    if option_local_get("buftype") then
       return
     end
     -- full_fp makes use of semi-broken nature of nvim_buf_get_name():
@@ -257,14 +264,14 @@ autocmd_create("FileType", {
   pattern = { "markdown", "markdown.pandoc", "pandoc" },
   callback = function()
     -- customise plugin 'echasnovski/mini.surround'
-    local settings = {
+    local opts = {
       custom_surroundings = {
         b = { output = { left = "__", right = "__" } }, -- bold (strong emphasis)
         i = { output = { left = "_", right = "_" } }, -- italic (emphasis)
         ["`"] = { output = { left = "`", right = "`" } }, -- inline code
       },
     }
-    var_buf_set("minisurround_config", settings)
+    var_buffer_set("minisurround_config", opts)
     -- text edit settings
     text_editing_settings()
   end,
@@ -314,11 +321,11 @@ autocmd_create("FileType", {
     -- • enclose tag names containing spaces in doubled square brackets
     -- • added to tiddler when converting from 'tid' to 'tiddler' style files
     -- • using TWTidToTiddler command from tiddlywiki ftplugin
-    vim.g.default_tiddler_tags = "[[Computing]] [[Software]]"
+    var_global_set("default_tiddler_tags", "[[Computing]] [[Software]]")
     -- default tiddler creator
     -- • added to tiddler when converting from 'tid' to 'tiddler' style files
     -- • using TWTidToTiddler command from tiddlywiki ftplugin
-    vim.g.default_tiddler_creator = "David Nebauer"
+    var_global_set("default_tiddler_creator", "David Nebauer")
   end,
   desc = "Support for tiddlywiki filetype",
 })
