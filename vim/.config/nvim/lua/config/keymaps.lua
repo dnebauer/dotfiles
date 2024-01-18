@@ -8,13 +8,20 @@ local option_local_get
 local option_local_set
 
 -- option_local_get(option)
+---Get the value of a buffer/local option.
+---@param name string Option name
+---@return any _ Option value
 option_local_get = function(name)
   return vim.opt_local[name]:get()
 end
 
--- option_local_set(option, value)
-option_local_set = function(option, value)
-  vim.api.nvim_set_option_value(option, value, { scope = "local" })
+-- option_local_set(name, value)
+---Set a buffer/local option value.
+---@param name string Option name
+---@param value any Value to set the option to
+---@return nil _ No return value
+option_local_set = function(name, value)
+  vim.api.nvim_buf_set_option(0, name, value)
 end
 
 -- [[ keymaps ]]

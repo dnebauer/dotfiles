@@ -14,26 +14,47 @@ local var_exists
 local var_set
 
 -- fn_filereadable(file)
+---Check whether a file is readable.
+---@param file string File to check for
+---@return boolean _ Whether file is readable
 fn_filereadable = function(file)
   return vim.api.nvim_call_function("filereadable", { file }) ~= 0
 end
 
 -- fn_stdpath(what)
+---Get paths of various default files and directories.
+---@param what string The file or directory to get the path to
+---@return string _ Path to file or directory
 fn_stdpath = function(what)
   return vim.api.nvim_call_function("stdpath", { what })
 end
 
 -- option_append(name, value)
+---Add a value to a list- or dictionary-type option.
+---@param name string Option name
+---@param value any Value to set option to
+---@return nil _ No return value
 option_append = function(name, value)
   vim.opt[name]:append(value)
 end
 
 -- option_remove(name, value)
+---Remove a value from a list- or dictionary-type option.
+---@param name string Option name
+---@param value any Value to remove from option
+---@return nil _ No return value
 option_remove = function(name, value)
   vim.opt[name]:remove(value)
 end
 
 -- option_set(name, value, {opts})
+---Set an option to a given value.
+---@param name string Option name
+---@param value any Value to set option to
+---@param opts table|nil Optiona configuration parameters:
+---• {scope} (string): Set to "global" or "local"
+---  (optional, default = set both global and local values)
+---@return nil _ No return value
 option_set = function(name, value, opts)
   opts = opts or {}
   -- have to use vim.opts interface for table values
@@ -52,12 +73,19 @@ option_set = function(name, value, opts)
 end
 
 -- var_exists(name)
+---Determine whether a global variable exists.
+---@param name string Variable to check for
+---@return boolean _ Whether the variable exists
 var_exists = function(name)
   local ok, _ = pcall(vim.api.nvim_get_var, name)
   return ok
 end
 
 -- var_set(name, value)
+---Set a global variable to specified value.
+---@param name string Name of variable
+---@param value any Value to set variable to
+---@return nil _ No return value
 var_set = function(name, value)
   vim.api.nvim_set_var(name, value)
 end

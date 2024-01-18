@@ -18,13 +18,59 @@ local var_buffer_set
 local var_global_set
 
 -- augroup_create(name, {opts}) {{{1
-augroup_create = vim.api.nvim_create_augroup
+---Create an autocommand group.
+---This is a thin wrapper around |nvim_create_augroup()|.
+---@param name string Name of the group
+---@param opts table|nil Optional configuration parameters:
+---• {clear} (boolean): Clear existing commands
+---  if the group exists (optional, default=true)
+---@return number _ Integer id of the created group
+augroup_create = function(name, opts)
+  opts = opts or {}
+  return vim.api.nvim_create_augroup(name, opts)
+end
 
 -- autocmd_create(event, {opts}) {{{1
-autocmd_create = vim.api.nvim_create_autocmd
+---Create an autocommand event handler.
+---This is a thin wrapper around |nvim_create_autocmd()|.
+---@param event string|table Event(s) that will trugger the handler.
+---@param opts table|nil Optional configuration parameters:
+---• {group} (string|integer) optional: autocommand group name or
+---  id to match against.
+---• {pattern} (string|array) optional: pattern(s) to match
+---  literally |autocmd-pattern|.
+---• {buffer} (integer) optional: buffer number for buffer-local
+---  autocommands |autocmd-buflocal|. Cannot be used with
+---  {pattern}.
+---• {desc} (string) optional: description (for documentation and
+---  troubleshooting).
+---• {callback} (function|string) optional: Lua function (or
+---  Vimscript function name, if string) called when the
+---  event(s) is triggered. Lua callback can return true to
+---  delete the autocommand, and receives a table argument with
+---  these keys:
+---  • {id}: (number) autocommand id
+---  • {event}: (string) name of the triggered event
+---  • {group}: (number|nil) autocommand group id, if any
+---  • {match}: (string) expanded value of |<amatch>|
+---  • {buf}: (number) expanded value of |<abuf>|
+---  • {file}: (string) expanded value of |<afile>|
+---  • {data}: (any) arbitrary data passed from
+---• {command} (string) optional: Vim command to execute on event.
+---  Cannot be used with {callback}
+---• {once} (boolean) optional: defaults to false. Run the
+---  autocommand only once |autocmd-once|.
+---• {nested} (boolean) optional: defaults to false. Run nested
+---  autocommands |autocmd-nested|.
+---@return number _ Autocommand id
+autocmd_create = function(event, opts)
+  opts = opts or {}
+  return vim.api.nvim_create_autocmd(event, opts)
+end
 
 -- mail_md_mode(mode) {{{1
--- • format mail message body as markdown
+---Format mail message body as markdown.
+---@return nil _ No return value
 mail_md_mode = function()
   -- only do this once
   if var_buffer_exists("mail_mode_done") then
@@ -69,22 +115,35 @@ mail_md_mode = function()
   vim.api.nvim_echo({ { "Using markdown syntax for mail body" } }, true, {})
 end
 
--- option_local_append(name, new_item) {{{1
-option_local_append = function(name, new_item)
-  vim.opt_local[name]:append(new_item)
+-- option_local_append(name, value) {{{1
+---Append a value to a buffer/local option.
+---@param name string Option name
+---@param value any Value to append to the option
+---@return nil _ No return value
+option_local_append = function(name, value)
+  vim.opt_local[name]:append(value)
 end
 
--- option_local_get(option) {{{1
-option_local_get = function(option)
-  vim.api.nvim_buf_get_option(0, option)
+-- option_local_get(name) {{{1
+---Get the value of a buffer/local option.
+---@param name string Option name
+---@return any _ Option value
+option_local_get = function(name)
+  vim.api.nvim_buf_get_option(0, name)
 end
 
--- option_local_set(option, value) {{{1
-option_local_set = function(option, value)
-  vim.api.nvim_buf_set_option(0, option, value)
+-- option_local_set(name, value) {{{1
+---Set a buffer/local option value.
+---@param name string Option name
+---@param value any Value to set the option to
+---@return nil _ No return value
+option_local_set = function(name, value)
+  vim.api.nvim_buf_set_option(0, name, value)
 end
 
 -- text_editing_settings() {{{1
+---Common settings to apply to text file types.
+---@return nil _ No return value
 text_editing_settings = function()
   -- sentence-based text objects are more sensible
   -- plugin: preservim/vim-textobj-sentence
@@ -99,22 +158,36 @@ text_editing_settings = function()
 end
 
 -- var_buffer_exists(name) {{{1
+---Determine whether a buffer variable exists.
+---@param name string Variable to check for
+---@return boolean _ Whether the variable exists
 var_buffer_exists = function(name)
   local ok, _ = pcall(vim.api.nvim_buf_get_var, 0, name)
   return ok
 end
 
 -- var_buffer_remove(name) {{{1
+---Remove a buffer variable.
+---@param name string Name of variable (exclude "b:" prefix)
+---@return nil _ No return value
 var_buffer_remove = function(name)
   vim.api.nvim_buf_del_var(0, name)
 end
 
 -- var_buffer_set(name, value) {{{1
+---Set a buffer variable to specified value.
+---@param name string Name of variable
+---@param value any Value to set variable to
+---@return nil _ No return value
 var_buffer_set = function(name, value)
   vim.api.nvim_buf_set_var(0, name, value)
 end
 
 -- var_global_set(name, value)
+---Set a global variable to specified value.
+---@param name string Name of variable
+---@param value any Value to set variable to
+---@return nil _ No return value
 var_global_set = function(name, value)
   vim.api.nvim_set_var(name, value)
 end
