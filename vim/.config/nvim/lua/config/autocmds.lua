@@ -9,6 +9,7 @@ local augroup_create
 local autocmd_create
 local fn
 local mail_md_mode
+local map
 local option
 local text_editing_settings
 local variable
@@ -98,6 +99,18 @@ mail_md_mode = function()
   )
   -- notify user
   vim.api.nvim_echo({ { "Using markdown syntax for mail body" } }, true, {})
+end
+
+-- map(mode, lhs, rhs, opts)
+---Thin wrapper for |vim.keymap.set| using the same function parameters.
+---@param mode table|string Mode short name (see |nvim_set_keymap()|), can
+---also be list of modes
+---@param lhs string Left-hand side |{lhs}| of the mapping
+---@param rhs string|function Right-hand side |{rhs}| of the mapping, can be
+---a Lua function
+---@param opts table|nil Table of |:map-arguments| as per |vim.keymap.set()|
+map = function(mode, lhs, rhs, opts)
+  vim.keymap.set(mode, lhs, rhs, opts)
 end
 
 -- option("get", name, {opts})
@@ -216,12 +229,12 @@ text_editing_settings = function()
   -- plugin: preservim/vim-textobj-sentence
   fn("textobj#sentence#init")
   -- rewrap paragraph using <M-q>, i.e., <Alt-q, {})
-  vim.keymap.set("n", "<M-q>", '{gq}<Bar>:echo "Rewrapped paragraph"<CR>', { remap = false, silent = true })
-  vim.keymap.set("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true })
+  map("n", "<M-q>", '{gq}<Bar>:echo "Rewrapped paragraph"<CR>', { remap = false, silent = true })
+  map("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true })
   -- sensible formatting
   option("set", "formatexpr", "tqna1", { scope = "local" })
   -- autolist
-  vim.keymap.set("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
+  map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
 end
 
 -- variable(operation, scope, name, [value])
@@ -414,7 +427,7 @@ autocmd_create("FileType", {
     -- text edit settings
     text_editing_settings()
     -- set mapping to turn on markdown highlighting in message body
-    vim.keymap.set({ "n", "i" }, "<Leader>md", mail_md_mode, { buffer = 0, silent = true })
+    map({ "n", "i" }, "<Leader>md", mail_md_mode, { buffer = 0, silent = true })
   end,
   desc = "Support for mail filetype",
 })
