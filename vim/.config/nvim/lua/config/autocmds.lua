@@ -8,9 +8,7 @@
 local augroup_create
 local autocmd_create
 local mail_md_mode
-local option_local_append
-local option_local_get
-local option_local_set
+local option
 local text_editing_settings
 local var_buffer_exists
 local var_buffer_remove
@@ -33,35 +31,8 @@ end
 -- autocmd_create(event, {opts}) {{{1
 ---Create an autocommand event handler.
 ---This is a thin wrapper around |nvim_create_autocmd()|.
----@param event string|table Event(s) that will trugger the handler.
----@param opts table|nil Optional configuration parameters:
----• {group} (string|integer) optional: autocommand group name or
----  id to match against.
----• {pattern} (string|array) optional: pattern(s) to match
----  literally |autocmd-pattern|.
----• {buffer} (integer) optional: buffer number for buffer-local
----  autocommands |autocmd-buflocal|. Cannot be used with
----  {pattern}.
----• {desc} (string) optional: description (for documentation and
----  troubleshooting).
----• {callback} (function|string) optional: Lua function (or
----  Vimscript function name, if string) called when the
----  event(s) is triggered. Lua callback can return true to
----  delete the autocommand, and receives a table argument with
----  these keys:
----  • {id}: (number) autocommand id
----  • {event}: (string) name of the triggered event
----  • {group}: (number|nil) autocommand group id, if any
----  • {match}: (string) expanded value of |<amatch>|
----  • {buf}: (number) expanded value of |<abuf>|
----  • {file}: (string) expanded value of |<afile>|
----  • {data}: (any) arbitrary data passed from
----• {command} (string) optional: Vim command to execute on event.
----  Cannot be used with {callback}
----• {once} (boolean) optional: defaults to false. Run the
----  autocommand only once |autocmd-once|.
----• {nested} (boolean) optional: defaults to false. Run nested
----  autocommands |autocmd-nested|.
+---@param event string|table Event(s) that will trugger the handler
+---@param opts table|nil Optional configuration dictionary
 ---@return number _ Autocommand id
 autocmd_create = function(event, opts)
   opts = opts or {}
@@ -115,30 +86,112 @@ mail_md_mode = function()
   vim.api.nvim_echo({ { "Using markdown syntax for mail body" } }, true, {})
 end
 
--- option_local_append(name, value) {{{1
----Append a value to a buffer/local option.
----@param name string Option name
----@param value any Value to append to the option
----@return nil _ No return value
-option_local_append = function(name, value)
-  vim.opt_local[name]:append(value)
-end
-
--- option_local_get(name) {{{1
----Get the value of a buffer/local option.
----@param name string Option name
----@return any _ Option value
-option_local_get = function(name)
-  vim.api.nvim_buf_get_option(0, name)
-end
-
--- option_local_set(name, value) {{{1
----Set a buffer/local option value.
----@param name string Option name
----@param value any Value to set the option to
----@return nil _ No return value
-option_local_set = function(name, value)
-  vim.api.nvim_buf_set_option(0, name, value)
+-- option("get", name, {opts})
+-- option("set|append|prepend|remove", name, value, {opts}) {{{1
+---Universal function for option manipulation. There are 2 function
+---signatures: one for a get operation, and another for set, append, prepend,
+---and remove operations.
+---
+---The "get" operation returns a table for list- and map-style options, as
+---per |vim.opt|. The remaining operations accept table values as per
+---|vim.opt|.
+---@param operation string Operation to perform (get|set|append|prepend|remove)
+---@param name string Name of option to operate upon
+---@param arg3 table|string|number|boolean|nil Depends on operation:
+---• "get": Optional configuration dict
+---• other: Value to set, append, prepend, or remove
+---@param arg4 table|string|number|boolean|nil Depends on operation:
+---• "get": Not used
+---• other: Optional configuration dict
+---
+---The optional configuration dict has only 1 valid key:
+---• {scope} (string): Can be "local" (behaves as `:setlocal`),
+---  "global" (behaves as `:setglobal`), or
+---  nil (behaves as ":set", see |set-args|)
+---@return any|nil _ Depends on operation:
+---• "get": Value of option
+---• other: nil
+option = function(operation, name, arg3, arg4)
+  -- functions
+  -- • check param is a non-empty string
+  local _check_string_param = function(_name)
+    assert(
+      type(_name) == "string" and string.len(_name) > 0,
+      "Expected non-empty string, got " .. type(_name) .. ": " .. tostring(_name)
+    )
+  end
+  -- • check option name
+  local _check_option_name = function(_name)
+    local ok = pcall(function()
+      local _ = vim.opt[name]
+    end)
+    assert(ok, "Invalid option name: " .. name)
+  end
+  -- check params
+  -- • operation
+  assert(type(operation) == "string", "Expected string, got " .. type(string))
+  local valid_operations = { "get", "set", "append", "prepend", "remove" }
+  assert(vim.tbl_contains(valid_operations, operation), "Invalid operation: " .. operation)
+  -- • name
+  _check_string_param(name)
+  _check_option_name(name)
+  -- • arg3 ('value' or 'opts')
+  local opts, value = {}, nil
+  local value_types = { "table", "number", "integer", "string", "boolean", "nil" }
+  if operation == "get" then
+    -- arg3 is 'opts'
+    opts = opts or {}
+    local valid_arg3_types = { "table", "nil" }
+    assert(vim.tbl_contains(valid_arg3_types, type(arg3)), "Expected table, got " .. type(arg3))
+    if type(arg3) == "table" then
+      for key, val in ipairs(arg3) do
+        opts[key] = val
+      end
+    end
+  else
+    -- arg3 is 'value'
+    assert(vim.tbl_contains(value_types, type(arg3)), "Invalid option value type: " .. type(arg3))
+    value = arg3
+  end
+  -- • arg4 ('opts' or nil)
+  if vim.tbl_contains({ "set", "append", "prepend", "remove" }, operation) then
+    -- arg4 is 'opts'
+    opts = opts or {}
+    local valid_arg4_types = { "table", "nil" }
+    assert(vim.tbl_contains(valid_arg4_types, type(arg4)), "Expected table, got " .. type(arg4))
+    if type(arg4) == "table" then
+      for key, val in ipairs(arg4) do
+        opts[key] = val
+      end
+    end
+  end
+  -- • opts
+  for key, val in pairs(opts) do
+    if key == "scope" then
+      local valid_scopes = { "local", "global" }
+      assert(type(val) == "string", "Expected string scope, got " .. type(val))
+      assert(vim.tbl_contains(valid_scopes, val), "Invalid scope: " .. val)
+    else
+      error("Invalid configuration option: " .. key)
+    end
+  end
+  -- get option verb
+  local opt_verb = "opt"
+  if opts.scope then
+    opt_verb = opts.scope
+  end
+  -- perform operations
+  if operation == "get" then
+    return vim[opt_verb][name]:get()
+  elseif operation == "set" then
+    vim[opt_verb][name] = value
+  elseif operation == "append" then
+    vim[opt_verb][name]:append(value)
+  elseif operation == "prepend" then
+    vim[opt_verb][name]:prepend(value)
+  elseif operation == "remove" then
+    vim[opt_verb][name]:remove(value)
+  end
 end
 
 -- text_editing_settings() {{{1
@@ -152,7 +205,7 @@ text_editing_settings = function()
   vim.keymap.set("n", "<M-q>", '{gq}<Bar>:echo "Rewrapped paragraph"<CR>', { remap = false, silent = true })
   vim.keymap.set("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true })
   -- sensible formatting
-  option_local_set("formatexpr", "tqna1")
+  option("set", "formatexpr", "tqna1", { scope = "local" })
   -- autolist
   vim.keymap.set("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
 end
@@ -244,8 +297,8 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
       return
     end
     -- only check normal buffer (buftype == ""),
-    -- noting option_local_get() returns nil for an empty string
-    if option_local_get("buftype") then
+    local opt_buftype = option("get", "buftype")
+    if opt_buftype:len() ~= 0 then
       return
     end
     -- full_fp makes use of semi-broken nature of nvim_buf_get_name():
@@ -279,7 +332,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   group = augroup_create("my_conf_support", { clear = true }),
   pattern = "*.conf",
   callback = function()
-    option_local_set("filetype", "dosini")
+    option("set", "filetype", "dosini", { scope = "local" })
   end,
   desc = "Force filetype for *.conf to 'dosini' for syntax support",
 })
@@ -289,7 +342,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   group = augroup_create("my_gnuplot_support", { clear = true }),
   pattern = "*.plt",
   callback = function()
-    option_local_set("filetype", "gnuplot")
+    option("set", "filetype", "gnuplot", { scope = "local" })
   end,
   desc = "Force filetype for *.plt to 'gnuplot' for syntax support",
 })
@@ -299,7 +352,7 @@ autocmd_create("FileType", {
   group = augroup_create("my_json_support", { clear = true }),
   pattern = { "json", "jsonl", "jsonp" },
   callback = function()
-    option_local_set("foldmethod", "syntax")
+    option("set", "foldmethod", "syntax", { scope = "local" })
   end,
   desc = "Fold json files on {} and [] blocks",
 })
@@ -312,17 +365,22 @@ autocmd_create("FileType", {
     -- re-flow text support
     -- • set parameters to be consistent with re-flowing content
     --   e.g., in neomutt setting text_flowed to true
-    option_local_set("textwidth", 72)
-    option_local_append("formatoptions", "q")
-    option_local_append("comments", "nb:>")
+    option("set", "textwidth", 72, { scope = "local" })
+    option("append", "formatoptions", "q", { scope = "local" })
+    option("append", "comments", "nb:>", { scope = "local" })
     -- fold quoted text
     -- • taken from 'mutt-trim' github repo README file
     --   (https://github.com/Konfekt/mutt-trim)
-    option_local_set("foldexpr", "strlen(substitute(matchstr(getline(v:lnum),'\\v^\\s*%(\\>\\s*)+'),'\\s','','g'))")
-    option_local_set("foldmethod", "expr")
-    option_local_set("foldlevel", 1)
-    option_local_set("foldminlines", 2)
-    option_local_set("colorcolumn", "72")
+    option(
+      "set",
+      "foldexpr",
+      "strlen(substitute(matchstr(getline(v:lnum),'\\v^\\s*%(\\>\\s*)+'),'\\s','','g'))",
+      { scope = "local" }
+    )
+    option("set", "foldmethod", "expr", { scope = "local" })
+    option("set", "foldlevel", 1, { scope = "local" })
+    option("set", "foldminlines", 2, { scope = "local" })
+    option("set", "colorcolumn", "72", { scope = "local" })
     -- text edit settings
     text_editing_settings()
     -- set mapping to turn on markdown highlighting in message body
@@ -371,7 +429,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   group = augroup_create("my_nsis_support", { clear = true }),
   pattern = "*.nsh",
   callback = function()
-    option_local_set("filetype", "nsis")
+    option("set", "filetype", "nsis", { scope = "local" })
   end,
   desc = "Force filetype for nsis header files",
 })
@@ -408,7 +466,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   group = augroup_create("my_txt2tags_support", { clear = true }),
   pattern = "*.t2t",
   callback = function()
-    option_local_set("filetype", "txt2tags")
+    option("set", "filetype", "txt2tags", { scope = "local" })
   end,
   desc = "Force filetype for txt2tags syntax support",
 })
@@ -418,7 +476,7 @@ autocmd_create("FileType", {
   group = augroup_create("my_xml_support", { clear = true }),
   pattern = "xml",
   callback = function()
-    option_local_set("foldmethod", "syntax")
+    option("set", "foldmethod", "syntax", { scope = "local" })
   end,
   desc = "Support for xml files",
 })

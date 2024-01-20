@@ -7,9 +7,7 @@
 -- predeclare functions
 local fn_filereadable
 local fn_stdpath
-local option_append
-local option_remove
-local option_set
+local option
 local var_exists
 local var_set
 
@@ -29,46 +27,111 @@ fn_stdpath = function(what)
   return vim.api.nvim_call_function("stdpath", { what })
 end
 
--- option_append(name, value)
----Add a value to a list- or dictionary-type option.
----@param name string Option name
----@param value any Value to set option to
----@return nil _ No return value
-option_append = function(name, value)
-  vim.opt[name]:append(value)
-end
-
--- option_remove(name, value)
----Remove a value from a list- or dictionary-type option.
----@param name string Option name
----@param value any Value to remove from option
----@return nil _ No return value
-option_remove = function(name, value)
-  vim.opt[name]:remove(value)
-end
-
--- option_set(name, value, {opts})
----Set an option to a given value.
----@param name string Option name
----@param value any Value to set option to
----@param opts table|nil Optiona configuration parameters:
----• {scope} (string): Set to "global" or "local"
----  (optional, default = set both global and local values)
----@return nil _ No return value
-option_set = function(name, value, opts)
-  opts = opts or {}
-  -- have to use vim.opts interface for table values
-  if type(value) == "table" then
-    vim.opt[name] = value
-    return true
+-- option("get", name, {opts})
+-- option("set|append|prepend|remove", name, value, {opts}) {{{1
+---Universal function for option manipulation. There are 2 function
+---signatures: one for a get operation, and another for set, append, prepend,
+---and remove operations.
+---
+---The "get" operation returns a table for list- and map-style options, as
+---per |vim.opt|. The remaining operations accept table values as per
+---|vim.opt|.
+---@param operation string Operation to perform (get|set|append|prepend|remove)
+---@param name string Name of option to operate upon
+---@param arg3 table|string|number|boolean|nil Depends on operation:
+---• "get": Optional configuration dict
+---• other: Value to set, append, prepend, or remove
+---@param arg4 table|string|number|boolean|nil Depends on operation:
+---• "get": Not used
+---• other: Optional configuration dict
+---
+---The optional configuration dict has only 1 valid key:
+---• {scope} (string): Can be "local" (behaves as `:setlocal`),
+---  "global" (behaves as `:setglobal`), or
+---  nil (behaves as ":set", see |set-args|)
+---@return any|nil _ Depends on operation:
+---• "get": Value of option
+---• other: nil
+option = function(operation, name, arg3, arg4)
+  -- functions
+  -- • check param is a non-empty string
+  local _check_string_param = function(_name)
+    assert(
+      type(_name) == "string" and string.len(_name) > 0,
+      "Expected non-empty string, got " .. type(_name) .. ": " .. tostring(_name)
+    )
   end
-  -- now handle regular values
-  if opts.scope == "global" then
-    vim.api.nvim_set_option(name, value)
-  elseif opts.scope == "local" then
-    vim.api.nvim_buf_set_option(0, name, value)
+  -- • check option name
+  local _check_option_name = function(_name)
+    local ok = pcall(function()
+      local _ = vim.opt[name]
+    end)
+    assert(ok, "Invalid option name: " .. name)
+  end
+  -- check params
+  -- • operation
+  assert(type(operation) == "string", "Expected string, got " .. type(string))
+  local valid_operations = { "get", "set", "append", "prepend", "remove" }
+  assert(vim.tbl_contains(valid_operations, operation), "Invalid operation: " .. operation)
+  -- • name
+  _check_string_param(name)
+  _check_option_name(name)
+  -- • arg3 ('value' or 'opts')
+  local opts, value = {}, nil
+  local value_types = { "table", "number", "integer", "string", "boolean", "nil" }
+  if operation == "get" then
+    -- arg3 is 'opts'
+    opts = opts or {}
+    local valid_arg3_types = { "table", "nil" }
+    assert(vim.tbl_contains(valid_arg3_types, type(arg3)), "Expected table, got " .. type(arg3))
+    if type(arg3) == "table" then
+      for key, val in ipairs(arg3) do
+        opts[key] = val
+      end
+    end
   else
-    vim.api.nvim_set_option_value(name, value, {})
+    -- arg3 is 'value'
+    assert(vim.tbl_contains(value_types, type(arg3)), "Invalid option value type: " .. type(arg3))
+    value = arg3
+  end
+  -- • arg4 ('opts' or nil)
+  if vim.tbl_contains({ "set", "append", "prepend", "remove" }, operation) then
+    -- arg4 is 'opts'
+    opts = opts or {}
+    local valid_arg4_types = { "table", "nil" }
+    assert(vim.tbl_contains(valid_arg4_types, type(arg4)), "Expected table, got " .. type(arg4))
+    if type(arg4) == "table" then
+      for key, val in ipairs(arg4) do
+        opts[key] = val
+      end
+    end
+  end
+  -- • opts
+  for key, val in pairs(opts) do
+    if key == "scope" then
+      local valid_scopes = { "local", "global" }
+      assert(type(val) == "string", "Expected string scope, got " .. type(val))
+      assert(vim.tbl_contains(valid_scopes, val), "Invalid scope: " .. val)
+    else
+      error("Invalid configuration option: " .. key)
+    end
+  end
+  -- get option verb
+  local opt_verb = "opt"
+  if opts.scope then
+    opt_verb = opts.scope
+  end
+  -- perform operations
+  if operation == "get" then
+    return vim[opt_verb][name]:get()
+  elseif operation == "set" then
+    vim[opt_verb][name] = value
+  elseif operation == "append" then
+    vim[opt_verb][name]:append(value)
+  elseif operation == "prepend" then
+    vim[opt_verb][name]:prepend(value)
+  elseif operation == "remove" then
+    vim[opt_verb][name]:remove(value)
   end
 end
 
@@ -126,18 +189,18 @@ end
 
 -- tabs, indenting
 local tab_size = 2
-option_set("tabstop", tab_size) -- number of spaces inserted by tab
-option_set("softtabstop", 0) -- do NOT insert mix of {tabs,spaces} when tab while editing
-option_set("shiftwidth", tab_size) -- number of spaces for autoindent
-option_set("expandtab", true) -- expand tabs to this many spaces
-option_set("autoindent", true) -- copy indent from current line to new
-option_set("smartindent", true) -- attempt intelligent indenting
+option("set", "tabstop", tab_size) -- number of spaces inserted by tab
+option("set", "softtabstop", 0) -- do NOT insert mix of {tabs,spaces} when tab while editing
+option("set", "shiftwidth", tab_size) -- number of spaces for autoindent
+option("set", "expandtab", true) -- expand tabs to this many spaces
+option("set", "autoindent", true) -- copy indent from current line to new
+option("set", "smartindent", true) -- attempt intelligent indenting
 
 -- encoding for new files
-option_set("fileencoding", "utf-8", { scope = "global" })
+option("set", "fileencoding", "utf-8", { scope = "global" })
 
 -- files to ignore when file matching
-option_set("suffixes", ".bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc")
+option("set", "suffixes", ".bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc")
 
 -- clipboard
 --[[
@@ -151,61 +214,61 @@ The PRIMARY X11 selection is used by middle mouse button.
 The CLIPBOARD X11 selection is used by X11 cut, copy, paste operations,
 e.g., (Ctrl-c, Ctrl-v).
 ]]
-option_set("clipboard", "unnamed,unnamedplus")
+option("set", "clipboard", "unnamed,unnamedplus")
 
 -- treat all numerals as decimal
-option_set("nrformats", "")
+option("set", "nrformats", "")
 
 -- save undo history in a file
-option_set("undofile", true)
+option("set", "undofile", true)
 
 -- change to file directory
-option_set("autochdir", true)
+option("set", "autochdir", true)
 
 -- case sensitivity
-option_set("ignorecase", true) -- case insensitive matching if all lowercase
-option_set("smartcase", true) -- case sensitive matching if any capital letters
-option_set("infercase", true) -- intelligent case selection in autocompletion
+option("set", "ignorecase", true) -- case insensitive matching if all lowercase
+option("set", "smartcase", true) -- case sensitive matching if any capital letters
+option("set", "infercase", true) -- intelligent case selection in autocompletion
 
 -- 'g' flag now considered on by search/replace
 -- using 'g' now toggles option off
-option_set("gdefault", true)
+option("set", "gdefault", true)
 
 -- progressive match with incremental search
-option_set("incsearch", true)
+option("set", "incsearch", true)
 
 -- spelling
-option_set("spell", false) -- initially spelling is off
-option_set("spelllang", "en_au")
+option("set", "spell", false) -- initially spelling is off
+option("set", "spelllang", "en_au")
 local dictionaries = { "/usr/share/dict/words" }
 for _, dict in ipairs(dictionaries) do
   if fn_filereadable(dict) then
-    option_remove("dictionary", dict)
-    option_append("dictionary", dict)
+    option("remove", "dictionary", dict)
+    option("append", "dictionary", dict)
   end
 end
 local thesauruses = { fn_stdpath("config") .. "/thes/mthesaur.txt" }
 for _, thes in ipairs(thesauruses) do
   if fn_filereadable(thes) then
-    option_remove("thesaurus", thes)
-    option_append("thesaurus", thes)
+    option("remove", "thesaurus", thes)
+    option("append", "thesaurus", thes)
   end
 end
 
 -- autoinsert comment headers
-option_append("formatoptions", "ro")
+option("append", "formatoptions", "ro")
 
 -- enable word wrap
-option_set("linebreak", true)
+option("set", "linebreak", true)
 
 -- don't wrap words by default
-option_set("textwidth", 0)
+option("set", "textwidth", 0)
 
 -- don't jump to start of line after move commands
-option_set("startofline", false)
+option("set", "startofline", false)
 
 -- show matching brackets
-option_set("showmatch", true)
+option("set", "showmatch", true)
 
 -- non-visible characters
 --[[ ‹-› = U+2039-U+203a, single [left|right]-pointing angle quotation mark
@@ -214,7 +277,7 @@ option_set("showmatch", true)
       «  = U+00ab, left-pointing double angle quotation mark
       •  = U+2022, bullet
 --]]
-option_set("list", true)
-option_set("listchars", { tab = "‹-›", trail = "★", extends = "»", precedes = "«", nbsp = "•" })
+option("set", "list", true)
+option("set", "listchars", { tab = "‹-›", trail = "★", extends = "»", precedes = "«", nbsp = "•" })
 
 -- vim:foldmethod=marker:
