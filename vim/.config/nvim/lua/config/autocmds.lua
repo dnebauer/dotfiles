@@ -7,6 +7,7 @@
 -- predeclare function names {{{1
 local augroup_create
 local autocmd_create
+local fn
 local mail_md_mode
 local option
 local text_editing_settings
@@ -37,6 +38,22 @@ end
 autocmd_create = function(event, opts)
   opts = opts or {}
   return vim.api.nvim_create_autocmd(event, opts)
+end
+
+-- fn(name, {args})
+---Call a function and return result.
+---@param string name Function name
+---@param args table Function arguments
+---@return any|nil Return value from function
+fn = function(name, args)
+  -- check args
+  assert(type(name) == "string", "Expected string, got " .. type(name))
+  assert(name:len() > 0, "Got a zero-length string for function name")
+  args = args or {}
+  assert(type(args) == "table", "Expected table, got " .. type(args))
+  assert(vim.tbl_islist(args), "Expected list table, got a map table")
+  -- call function
+  return vim.fn[name](unpack(args))
 end
 
 -- mail_md_mode(mode) {{{1
@@ -265,10 +282,10 @@ autocmd_create({ "CursorMoved", "CursorMovedI" }, {
   group = augroup_create("my_vert_centre", { clear = true }),
   callback = function()
     -- use brute force to ensure cursor column does not change
-    local pos = vim.fn.getpos(".") -- (buf, line, col, offset)
+    local pos = fn("getpos", { "." }) -- (buf, line, col, offset)
     local cursor_args = { pos[2], pos[3] }
     vim.api.nvim_exec2("normal! zz", {})
-    vim.fn.cursor(cursor_args) -- (line, column)
+    fn("cursor", { cursor_args }) -- (line, column)
   end,
   desc = "Centre current line vertically after cursor moves",
 })
@@ -312,7 +329,7 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
     -- check whether file is a symlink
     local is_symlink = vim.loop.fs_readlink(full_fp)
     if is_symlink then
-      local file_name = vim.fn.fnamemodify(real_fp, ":t")
+      local file_name = fn("fnamemodify", { real_fp, ":t" })
       vim.api.nvim_echo({
         { file_name .. " is a symlink:\n", "WarningMsg" },
         { "- file path = " .. full_fp .. "\n", "WarningMsg" },

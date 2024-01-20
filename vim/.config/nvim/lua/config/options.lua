@@ -5,9 +5,26 @@
 -- functions {{{1
 
 -- predeclare functions
+local fn
 local option
 local var_exists
 local var_set
+
+-- fn(name, {args})
+---Call a function and return result.
+---@param string name Function name
+---@param args table Function arguments
+---@return any|nil Return value from function
+fn = function(name, args)
+  -- check args
+  assert(type(name) == "string", "Expected string, got " .. type(name))
+  assert(name:len() > 0, "Got a zero-length string for function name")
+  args = args or {}
+  assert(type(args) == "table", "Expected table, got " .. type(args))
+  assert(vim.tbl_islist(args), "Expected list table, got a map table")
+  -- call function
+  return vim.fn[name](unpack(args))
+end
 
 -- option("get", name, {opts})
 -- option("set|append|prepend|remove", name, value, {opts}) {{{1
@@ -144,11 +161,11 @@ var_set("mapleader", "\\")
 
 -- checkhealth command recommends using g:python[3]_host_prog
 local python2 = "/usr/bin/python2"
-if vim.fn.filereadable(python2) then
+if fn("filereadable", { python2 }) then
   var_set("python_host_prog", python2)
 end
 local python3 = "/usr/bin/python3"
-if vim.fn.filereadable(python3) then
+if fn("filereadable", { python3 }) then
   var_set("python3_host_prog", python3)
 end
 
@@ -159,7 +176,7 @@ end
 
 -- checkhealth recommends setting perl host (but it does not work!)
 local perl = "/usr/bin/perl"
-if vim.fn.filereadable(perl) then
+if fn("filereadable", { perl }) then
   var_set("perl_host_prog", perl)
 end
 
@@ -224,14 +241,14 @@ option("set", "spell", false) -- initially spelling is off
 option("set", "spelllang", "en_au")
 local dictionaries = { "/usr/share/dict/words" }
 for _, dict in ipairs(dictionaries) do
-  if vim.fn.filereadable(dict) then
+  if fn("filereadable", { dict }) then
     option("remove", "dictionary", dict)
     option("append", "dictionary", dict)
   end
 end
-local thesauruses = { vim.fn.stdpath("config") .. "/thes/mthesaur.txt" }
+local thesauruses = { fn("stdpath", { "config" }) .. "/thes/mthesaur.txt" }
 for _, thes in ipairs(thesauruses) do
-  if vim.fn.filereadable(thes) then
+  if fn("filereadable", { thes }) then
     option("remove", "thesaurus", thes)
     option("append", "thesaurus", thes)
   end
