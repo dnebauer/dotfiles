@@ -4,10 +4,11 @@
 
 --[[ functions ]]
 
+-- predeclare functions {{{1
 local map
 local option
 
--- map(mode, lhs, rhs, opts)
+-- map(mode, lhs, rhs, opts) {{{1
 ---Thin wrapper for |vim.keymap.set| using the same function parameters.
 ---@param mode table|string Mode short name (see |nvim_set_keymap()|), can
 ---also be list of modes
@@ -19,8 +20,8 @@ map = function(mode, lhs, rhs, opts)
   vim.keymap.set(mode, lhs, rhs, opts)
 end
 
--- option("get", name, {opts})
--- option("set|append|prepend|remove", name, value, {opts}) {{{1
+-- option("get", name, opts) {{{1
+-- option("set|append|prepend|remove", name, value, opts) {{{1
 ---Universal function for option manipulation. There are 2 function
 ---signatures: one for a get operation, and another for set, append, prepend,
 ---and remove operations.
@@ -126,6 +127,7 @@ option = function(operation, name, arg3, arg4)
     vim[opt_verb][name]:remove(value)
   end
 end
+-- }}}1
 
 -- [[ keymaps ]]
 
@@ -213,3 +215,5 @@ map("v", "p", '"_dP', { desc = "paste over visual selection without yanking it" 
 -- better escape using jk in insert and terminal mode
 map("i", "jk", "<ESC>", { desc = "alternative escape in insert mode" })
 map("t", "jk", "<C-\\><C-n>", { desc = "alternative escape in terminal mode" })
+
+-- vim:foldmethod=marker:

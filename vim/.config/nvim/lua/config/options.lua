@@ -2,15 +2,14 @@
 -- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 -- Add any additional options here
 
--- functions {{{1
+--[[ functions ]]
 
--- predeclare functions
+-- predeclare functions {{{1
 local fn
 local option
-local var_exists
-local var_set
+local variable
 
--- fn(name, {args})
+-- fn(name, args) {{{1
 ---Call a function and return result.
 ---@param string name Function name
 ---@param args table|nil Function arguments
@@ -26,8 +25,8 @@ fn = function(name, args)
   return vim.fn[name](unpack(args))
 end
 
--- option("get", name, {opts})
--- option("set|append|prepend|remove", name, value, {opts}) {{{1
+-- option("get", name, opts)
+-- option("set|append|prepend|remove", name, value, opts) {{{1
 ---Universal function for option manipulation. There are 2 function
 ---signatures: one for a get operation, and another for set, append, prepend,
 ---and remove operations.
@@ -134,50 +133,84 @@ option = function(operation, name, arg3, arg4)
   end
 end
 
--- var_exists(name)
----Determine whether a global variable exists.
----@param name string Variable to check for
----@return boolean _ Whether the variable exists
-var_exists = function(name)
-  local ok, _ = pcall(vim.api.nvim_get_var, name)
-  return ok
-end
-
--- var_set(name, value)
----Set a global variable to specified value.
----@param name string Name of variable
----@param value any Value to set variable to
----@return nil _ No return value
-var_set = function(name, value)
-  vim.api.nvim_set_var(name, value)
+-- variable(operation, scope, name, [value]) {{{1
+---Universal function for vaariable manipulation.
+---@param operation string Operation to perform on variable (get, set, exists, remove)
+---@param scope string Variable scope (only 'buffer' and 'global' supported)
+---@param name string Variable name
+---@param value any|nil Variable value (set only)
+---@return any|nil _ Return value depends on operation:
+---• 'get': any
+---• other: nil
+variable = function(operation, scope, name, value)
+  -- functions
+  -- • check param is a non-empty string
+  local _check_string_param = function(_name)
+    assert(
+      type(_name) == "string" and string.len(_name) > 0,
+      "Expected non-empty string, got " .. type(_name) .. ": " .. tostring(_name)
+    )
+  end
+  -- check params
+  -- • operation
+  _check_string_param(operation)
+  local valid_operations = { "get", "set", "exists", "remove" }
+  assert(vim.tbl_contains(valid_operations, operation), "Invalid operation: " .. operation)
+  -- • scope
+  _check_string_param(scope)
+  local valid_scopes = { "buffer", "global" }
+  assert(vim.tbl_contains(valid_scopes, scope), "Invalid operation: " .. scope)
+  -- • name
+  _check_string_param(name)
+  -- • value
+  if operation ~= "set" and value ~= nil then
+    error("Non-nil value provided for variable" .. operation .. " operation")
+  end
+  -- perform operation
+  local scope_char = { buffer = "b", global = "g" }
+  if operation == "get" then
+    return vim[scope_char[scope]][name]
+  elseif operation == "set" then
+    vim[scope_char[scope]][name] = value
+  elseif operation == "exists" then
+    if scope == "buffer" then
+      local ok, _ = pcall(vim.api.nvim_buf_get_var, 0, name)
+      return ok
+    elseif scope == "global" then
+      local ok, _ = pcall(vim.api.nvim_get_var, name)
+      return ok
+    end
+  elseif operation == "remove" then
+    vim[scope_char[scope]][name] = nil
+  end
 end
 -- }}}1
 
 --[[ mapleader ]]
 
-var_set("mapleader", "\\")
+variable("set", "global", "mapleader", "\\")
 
 --[[ variables ]]
 
 -- checkhealth command recommends using g:python[3]_host_prog
 local python2 = "/usr/bin/python2"
 if fn("filereadable", { python2 }) then
-  var_set("python_host_prog", python2)
+  variable("set", "global", "python_host_prog", python2)
 end
 local python3 = "/usr/bin/python3"
 if fn("filereadable", { python3 }) then
-  var_set("python3_host_prog", python3)
+  variable("set", "global", "python3_host_prog", python3)
 end
 
 -- vimtex issues warning if tex_flavor not set
-if var_exists("tex_flavor") then
-  var_set("tex_flavor", "latex")
+if variable("exists", "global", "tex_flavor") then
+  variable("set", "global", "tex_flavor", "latex")
 end
 
 -- checkhealth recommends setting perl host (but it does not work!)
 local perl = "/usr/bin/perl"
 if fn("filereadable", { perl }) then
-  var_set("perl_host_prog", perl)
+  variable("set", "global", "perl_host_prog", perl)
 end
 
 --[[ options ]]

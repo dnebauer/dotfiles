@@ -101,8 +101,8 @@ mail_md_mode = function()
   vim.api.nvim_echo({ { "Using markdown syntax for mail body" } }, true, {})
 end
 
--- map(mode, lhs, rhs, opts)
----Thin wrapper for |vim.keymap.set| using the same function parameters.
+-- map(mode, lhs, rhs, opts) {{{1
+---Thin wrapper for |vim.keymap.set()|.
 ---@param mode table|string Mode short name (see |nvim_set_keymap()|), can
 ---also be list of modes
 ---@param lhs string Left-hand side |{lhs}| of the mapping
@@ -114,7 +114,7 @@ map = function(mode, lhs, rhs, opts)
 end
 
 -- option("get", name, {opts})
--- option("set|append|prepend|remove", name, value, {opts}) {{{1
+-- option(operation, name, value|opts, [opts]) {{{1
 ---Universal function for option manipulation. There are 2 function
 ---signatures: one for a get operation, and another for set, append, prepend,
 ---and remove operations.
@@ -237,7 +237,7 @@ text_editing_settings = function()
   map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
 end
 
--- variable(operation, scope, name, [value])
+-- variable(operation, scope, name, [value]) {{{1
 ---Universal function for vaariable manipulation.
 ---@param operation string Operation to perform on variable (get, set, exists, remove)
 ---@param scope string Variable scope (only 'buffer' and 'global' supported)
@@ -288,6 +288,7 @@ variable = function(operation, scope, name, value)
     vim[scope_char[scope]][name] = nil
   end
 end
+-- }}}1
 
 --[[ global ]]
 
