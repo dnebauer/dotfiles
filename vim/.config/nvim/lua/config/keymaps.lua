@@ -142,8 +142,8 @@ vim.keymap.set("c", "%s/", "%s/\\m", { desc = "force magic regex during search [
 -- spelling
 local spell_status = function()
   local msg = { "spell checking is" }
-  if vim.opt.spell:get() then
-    table.insert(msg, "ON (lang = " .. table.concat(vim.opt.spelllang:get(), ",") .. ")")
+  if option("get", "spell") then
+    table.insert(msg, "ON (lang = " .. table.concat(option("get", "spelllang"), ",") .. ")")
   else
     table.insert(msg, "OFF")
   end

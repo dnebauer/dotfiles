@@ -11,10 +11,7 @@ local fn
 local mail_md_mode
 local option
 local text_editing_settings
-local var_buffer_exists
-local var_buffer_remove
-local var_buffer_set
-local var_global_set
+local variable
 
 -- augroup_create(name, {opts}) {{{1
 ---Create an autocommand group.
@@ -42,8 +39,8 @@ end
 
 -- fn(name, {args})
 ---Call a function and return result.
----@param string name Function name
----@param args table Function arguments
+---@param name string Function name
+---@param args table|any Function arguments
 ---@return any|nil Return value from function
 fn = function(name, args)
   -- check args
@@ -61,17 +58,17 @@ end
 ---@return nil _ No return value
 mail_md_mode = function()
   -- only do this once
-  if var_buffer_exists("mail_mode_done") then
+  if variable("exists", "buffer", "mail_mode_done") then
     return
   end
-  var_buffer_set("mail_mode_done", 1)
+  variable("set", "buffer", "mail_mode_done", 1)
   -- define syntax group list '@synMailIncludeMarkdown'
   -- • add 'contained' flag to all syntax items in 'syntax/markdown.vim'
   -- • add top-level syntax items in 'syntax/markdown.vim' to
   --   '@synMailIncludeMarkdown' syntax group list
-  var_buffer_remove("current_syntax")
+  variable("remove", "buffer", "current_syntax")
   vim.api.nvim_exec2("syntax include @synMailIncludeMarkdown syntax/markdown.vim", {})
-  var_buffer_set("current_syntax", "mail")
+  variable("set", "buffer", "current_syntax", "mail")
   -- apply markdown region
   --       keepend: a match with an end pattern truncates any contained
   --                matches
@@ -140,7 +137,7 @@ option = function(operation, name, arg3, arg4)
   -- • check option name
   local _check_option_name = function(_name)
     local ok = pcall(function()
-      local _ = vim.opt[name]
+      local _ = vim.opt[_name]
     end)
     assert(ok, "Invalid option name: " .. name)
   end
@@ -217,7 +214,7 @@ end
 text_editing_settings = function()
   -- sentence-based text objects are more sensible
   -- plugin: preservim/vim-textobj-sentence
-  vim.fn["textobj#sentence#init"]()
+  fn("textobj#sentence#init")
   -- rewrap paragraph using <M-q>, i.e., <Alt-q, {})
   vim.keymap.set("n", "<M-q>", '{gq}<Bar>:echo "Rewrapped paragraph"<CR>', { remap = false, silent = true })
   vim.keymap.set("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true })
@@ -227,41 +224,57 @@ text_editing_settings = function()
   vim.keymap.set("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
 end
 
--- var_buffer_exists(name) {{{1
----Determine whether a buffer variable exists.
----@param name string Variable to check for
----@return boolean _ Whether the variable exists
-var_buffer_exists = function(name)
-  local ok, _ = pcall(vim.api.nvim_buf_get_var, 0, name)
-  return ok
+-- variable(operation, scope, name, [value])
+---Universal function for vaariable manipulation.
+---@param operation string Operation to perform on variable (get, set, exists, remove)
+---@param scope string Variable scope (only 'buffer' and 'global' supported)
+---@param name string Variable name
+---@param value any|nil Variable value (set only)
+---@return any|nil _ Return value depends on operation:
+---• 'get': any
+---• other: nil
+variable = function(operation, scope, name, value)
+  -- functions
+  -- • check param is a non-empty string
+  local _check_string_param = function(_name)
+    assert(
+      type(_name) == "string" and string.len(_name) > 0,
+      "Expected non-empty string, got " .. type(_name) .. ": " .. tostring(_name)
+    )
+  end
+  -- check params
+  -- • operation
+  _check_string_param(operation)
+  local valid_operations = { "get", "set", "exists", "remove" }
+  assert(vim.tbl_contains(valid_operations, operation), "Invalid operation: " .. operation)
+  -- • scope
+  _check_string_param(scope)
+  local valid_scopes = { "buffer", "global" }
+  assert(vim.tbl_contains(valid_scopes, scope), "Invalid operation: " .. scope)
+  -- • name
+  _check_string_param(name)
+  -- • value
+  if operation ~= "set" and value ~= nil then
+    error("Non-nil value provided for variable" .. operation .. " operation")
+  end
+  -- perform operation
+  local scope_char = { buffer = "b", global = "g" }
+  if operation == "get" then
+    return vim[scope_char[scope]][name]
+  elseif operation == "set" then
+    vim[scope_char[scope]][name] = value
+  elseif operation == "exists" then
+    if scope == "buffer" then
+      local ok, _ = pcall(vim.api.nvim_buf_get_var, 0, name)
+      return ok
+    elseif scope == "global" then
+      local ok, _ = pcall(vim.api.nvim_get_var, name)
+      return ok
+    end
+  elseif operation == "remove" then
+    vim[scope_char[scope]][name] = nil
+  end
 end
-
--- var_buffer_remove(name) {{{1
----Remove a buffer variable.
----@param name string Name of variable (exclude "b:" prefix)
----@return nil _ No return value
-var_buffer_remove = function(name)
-  vim.api.nvim_buf_del_var(0, name)
-end
-
--- var_buffer_set(name, value) {{{1
----Set a buffer variable to specified value.
----@param name string Name of variable
----@param value any Value to set variable to
----@return nil _ No return value
-var_buffer_set = function(name, value)
-  vim.api.nvim_buf_set_var(0, name, value)
-end
-
--- var_global_set(name, value)
----Set a global variable to specified value.
----@param name string Name of variable
----@param value any Value to set variable to
----@return nil _ No return value
-var_global_set = function(name, value)
-  vim.api.nvim_set_var(name, value)
-end
--- }}}1
 
 --[[ global ]]
 
@@ -305,10 +318,10 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
   pattern = "*",
   callback = function()
     -- only do this once
-    if var_buffer_exists("my_checked_symlink") then
+    if variable("exists", "buffer", "my_checked_symlink") then
       return
     end
-    var_buffer_set("my_checked_symlink", 1)
+    variable("set", "buffer", "my_checked_symlink", 1)
     -- only buffers associated with a file name (bufname ~= "")
     if vim.api.nvim_buf_get_name(0):len() == 0 then
       return
@@ -419,7 +432,7 @@ autocmd_create("FileType", {
         ["`"] = { output = { left = "`", right = "`" } }, -- inline code
       },
     }
-    var_buffer_set("minisurround_config", opts)
+    variable("set", "buffer", "minisurround_config", opts)
     -- text edit settings
     text_editing_settings()
   end,
@@ -469,11 +482,11 @@ autocmd_create("FileType", {
     -- • enclose tag names containing spaces in doubled square brackets
     -- • added to tiddler when converting from 'tid' to 'tiddler' style files
     -- • using TWTidToTiddler command from tiddlywiki ftplugin
-    var_global_set("default_tiddler_tags", "[[Computing]] [[Software]]")
+    variable("set", "global", "default_tiddler_tags", "[[Computing]] [[Software]]")
     -- default tiddler creator
     -- • added to tiddler when converting from 'tid' to 'tiddler' style files
     -- • using TWTidToTiddler command from tiddlywiki ftplugin
-    var_global_set("default_tiddler_creator", "David Nebauer")
+    variable("set", "global", "default_tiddler_creator", "David Nebauer")
   end,
   desc = "Support for tiddlywiki filetype",
 })

@@ -13,7 +13,7 @@ local var_set
 -- fn(name, {args})
 ---Call a function and return result.
 ---@param string name Function name
----@param args table Function arguments
+---@param args table|nil Function arguments
 ---@return any|nil Return value from function
 fn = function(name, args)
   -- check args
