@@ -5,27 +5,9 @@
 -- functions {{{1
 
 -- predeclare functions
-local fn_filereadable
-local fn_stdpath
 local option
 local var_exists
 local var_set
-
--- fn_filereadable(file)
----Check whether a file is readable.
----@param file string File to check for
----@return boolean _ Whether file is readable
-fn_filereadable = function(file)
-  return vim.api.nvim_call_function("filereadable", { file }) ~= 0
-end
-
--- fn_stdpath(what)
----Get paths of various default files and directories.
----@param what string The file or directory to get the path to
----@return string _ Path to file or directory
-fn_stdpath = function(what)
-  return vim.api.nvim_call_function("stdpath", { what })
-end
 
 -- option("get", name, {opts})
 -- option("set|append|prepend|remove", name, value, {opts}) {{{1
@@ -162,11 +144,11 @@ var_set("mapleader", "\\")
 
 -- checkhealth command recommends using g:python[3]_host_prog
 local python2 = "/usr/bin/python2"
-if fn_filereadable(python2) then
+if vim.fn.filereadable(python2) then
   var_set("python_host_prog", python2)
 end
 local python3 = "/usr/bin/python3"
-if fn_filereadable(python3) then
+if vim.fn.filereadable(python3) then
   var_set("python3_host_prog", python3)
 end
 
@@ -177,7 +159,7 @@ end
 
 -- checkhealth recommends setting perl host (but it does not work!)
 local perl = "/usr/bin/perl"
-if fn_filereadable(perl) then
+if vim.fn.filereadable(perl) then
   var_set("perl_host_prog", perl)
 end
 
@@ -242,14 +224,14 @@ option("set", "spell", false) -- initially spelling is off
 option("set", "spelllang", "en_au")
 local dictionaries = { "/usr/share/dict/words" }
 for _, dict in ipairs(dictionaries) do
-  if fn_filereadable(dict) then
+  if vim.fn.filereadable(dict) then
     option("remove", "dictionary", dict)
     option("append", "dictionary", dict)
   end
 end
-local thesauruses = { fn_stdpath("config") .. "/thes/mthesaur.txt" }
+local thesauruses = { vim.fn.stdpath("config") .. "/thes/mthesaur.txt" }
 for _, thes in ipairs(thesauruses) do
-  if fn_filereadable(thes) then
+  if vim.fn.filereadable(thes) then
     option("remove", "thesaurus", thes)
     option("append", "thesaurus", thes)
   end

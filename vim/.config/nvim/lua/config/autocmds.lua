@@ -200,7 +200,7 @@ end
 text_editing_settings = function()
   -- sentence-based text objects are more sensible
   -- plugin: preservim/vim-textobj-sentence
-  vim.api.nvim_call_function("textobj#sentence#init", {})
+  vim.fn["textobj#sentence#init"]()
   -- rewrap paragraph using <M-q>, i.e., <Alt-q, {})
   vim.keymap.set("n", "<M-q>", '{gq}<Bar>:echo "Rewrapped paragraph"<CR>', { remap = false, silent = true })
   vim.keymap.set("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true })
@@ -265,10 +265,10 @@ autocmd_create({ "CursorMoved", "CursorMovedI" }, {
   group = augroup_create("my_vert_centre", { clear = true }),
   callback = function()
     -- use brute force to ensure cursor column does not change
-    local pos = vim.api.nvim_call_function("getpos", { "." }) -- (buf, line, col, offset)
+    local pos = vim.fn.getpos(".") -- (buf, line, col, offset)
     local cursor_args = { pos[2], pos[3] }
     vim.api.nvim_exec2("normal! zz", {})
-    vim.api.nvim_call_function("cursor", { cursor_args }) -- (line, column)
+    vim.fn.cursor(cursor_args) -- (line, column)
   end,
   desc = "Centre current line vertically after cursor moves",
 })
@@ -312,7 +312,7 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
     -- check whether file is a symlink
     local is_symlink = vim.loop.fs_readlink(full_fp)
     if is_symlink then
-      local file_name = vim.api.nvim_call_function("fnamemodify", { real_fp, ":t" })
+      local file_name = vim.fn.fnamemodify(real_fp, ":t")
       vim.api.nvim_echo({
         { file_name .. " is a symlink:\n", "WarningMsg" },
         { "- file path = " .. full_fp .. "\n", "WarningMsg" },
