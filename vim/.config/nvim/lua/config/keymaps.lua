@@ -195,21 +195,6 @@ map("n", "<S-Tab>", "<Cmd>bprevious<CR>", { silent = true, desc = "cycle backwar
 -- switch between alternate buffers with <BS>
 map("n", "<BS>", ":b#<CR>", { silent = true, desc = "switch between alternate buffers [n]" })
 
--- always centre cursor line vertically
---map("n", "<C-d>", "<C-d>zz", { desc = "centre cursor line vertically after jump [n]" })
---map("n", "<C-u>", "<C-u>zz", { desc = "centre cursor line vertically after jump [n]" })
---map("n", "{", "{zz", { desc = "centre cursor line vertically after jump [n]" })
---map("n", "}", "}zz", { desc = "centre cursor line vertically after jump [n]" })
---map("n", "n", "nzz", { desc = "centre cursor line vertically after jump [n]" })
---map("n", "N", "Nzz", { desc = "centre cursor line vertically after jump [n]" })
---map("n", "G", "Gzz", { desc = "centre cursor line vertically after jump [n]" })
---map("n", "i", "zzi", { desc = "centre current line vertically before operation [n]" })
---map("n", "I", "zzI", { desc = "centre current line vertically before operation [n]" })
---map("n", "o", "zzo", { desc = "centre current line vertically before operation [n]" })
---map("n", "O", "zzO", { desc = "centre current line vertically before operation [n]" })
---map("n", "a", "zza", { desc = "centre current line vertically before operation [n]" })
---map("n", "A", "zzA", { desc = "centre current line vertically before operation [n]" })
-
 -- move highlighted text vertically
 map("v", "J", ":move '>+1<CR>gv==kgvo<esc>=kgvo", { desc = "move highlighted text down" })
 map("v", "K", ":move '<-2<CR>gv==jgvo<esc>=jgvo", { desc = "move highlighted text up" })
