@@ -304,7 +304,8 @@ autocmd_create("TextYankPost", {
   desc = "Overwrite lazyvim autocmd|augroup to increase timeout from default 150 to 500 ms",
 })
 
--- centre current line vertically after cursor moves {{{1
+-- centre current line vertically after cursor moves [disabled] {{{1
+--[[
 autocmd_create({ "CursorMoved", "CursorMovedI" }, {
   group = augroup_create("my_vert_centre", { clear = true }),
   callback = function()
@@ -316,6 +317,7 @@ autocmd_create({ "CursorMoved", "CursorMovedI" }, {
   end,
   desc = "Centre current line vertically after cursor moves",
 })
+--]]
 
 -- remove end-of-line whitespace on save {{{1
 autocmd_create("BufWritePre", {
