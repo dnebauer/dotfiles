@@ -150,7 +150,7 @@ map({ "n", "v" }, "<Space>", "<PageDown>", { desc = "<Space> = PageDown [n,v]" }
 map(
   { "i", "n" },
   "<Esc>",
-  "<Cmd>noh<CR><Cmd>NoiceDismiss<CR><Esc>",
+  "<Esc><Cmd>noh<CR><Cmd>NoiceDismiss<CR>",
   { desc = "Escape, clear hlsearch, dismiss Noice messages" }
 )
 
