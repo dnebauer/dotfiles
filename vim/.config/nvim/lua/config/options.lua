@@ -11,7 +11,7 @@ local variable
 
 -- fn(name, args) {{{1
 ---Call a function and return result.
----@param string name Function name
+---@param name string Function name
 ---@param args table|nil Function arguments
 ---@return any|nil Return value from function
 fn = function(name, args)
