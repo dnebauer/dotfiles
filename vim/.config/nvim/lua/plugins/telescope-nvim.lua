@@ -19,6 +19,9 @@ return {
         },
       },
     },
+    config = function()
+      require("telescope").load_extension("noice")
+    end,
     keys = {
       {
         "<Leader>fs",
