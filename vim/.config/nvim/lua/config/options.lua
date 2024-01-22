@@ -62,7 +62,7 @@ option = function(operation, name, arg3, arg4)
   -- • check option name
   local _check_option_name = function(_name)
     local ok = pcall(function()
-      local _ = vim.opt[name]
+      local _ = vim.opt[_name]
     end)
     assert(ok, "Invalid option name: " .. name)
   end
