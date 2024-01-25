@@ -3,11 +3,12 @@
 return {
   "gaoDean/autolist.nvim",
   ft = {
+    "mail",
     "markdown",
-    "text",
-    "tex",
-    "plaintex",
     "norg",
+    "plaintex",
+    "tex",
+    "text",
   },
   config = function()
     require("autolist").setup()
