@@ -8,7 +8,6 @@
 local augroup_create
 local autocmd_create
 local fn
-local mail_md_mode
 local map
 local option
 local text_editing_settings
@@ -52,53 +51,6 @@ fn = function(name, args)
   assert(vim.tbl_islist(args), "Expected list table, got a map table")
   -- call function
   return vim.fn[name](unpack(args))
-end
-
--- mail_md_mode(mode) {{{1
----Format mail message body as markdown.
----@return nil _ No return value
-mail_md_mode = function()
-  -- only do this once
-  if variable("exists", "buffer", "mail_mode_done") then
-    return
-  end
-  variable("set", "buffer", "mail_mode_done", 1)
-  -- define syntax group list '@synMailIncludeMarkdown'
-  -- • add 'contained' flag to all syntax items in 'syntax/markdown.vim'
-  -- • add top-level syntax items in 'syntax/markdown.vim' to
-  --   '@synMailIncludeMarkdown' syntax group list
-  variable("remove", "buffer", "current_syntax")
-  vim.api.nvim_exec2("syntax include @synMailIncludeMarkdown syntax/markdown.vim", {})
-  variable("set", "buffer", "current_syntax", "mail")
-  -- apply markdown region
-  --       keepend: a match with an end pattern truncates any contained
-  --                matches
-  --         start: markdown region starts after first empty line
-  --                • '\n' is newline [see ':h /\n']
-  --                • '\_^$' is empty line [see ':h /\_^', ':h /$']
-  --                • '\@1<=' means:
-  --                  - must still match preceding ('\n') and following
-  --                    ('\_^$') atoms in sequence
-  --                  - the '1' means only search backwards 1 character for
-  --                    the previous match
-  --                  - although the following atom is required for a match,
-  --                    the match is actually deemed to end before it begins
-  --                    [see ':h /zero-width']
-  --           end: markdown region ends at end of file
-  --   containedin: markdown region can be included in any syntax group in
-  --                'mail'
-  --      contains: syntax group '@synMailIncludeMarkdown' is allowed to
-  --                begin inside region
-  --
-  -- warning: keep syntax command below enclosed in [[]] rather than "",
-  --          because using "" causes the command to fail and markdown syntax
-  --          is not applied
-  vim.api.nvim_exec2(
-    [[syntax region synMailIncludeMarkdown keepend start='\n\@1<=\_^$' end='\%$' containedin=ALL contains=@synMailIncludeMarkdown]],
-    {}
-  )
-  -- notify user
-  vim.api.nvim_echo({ { "Using markdown syntax for mail body" } }, true, {})
 end
 
 -- map(mode, lhs, rhs, opts) {{{1
@@ -401,38 +353,6 @@ autocmd_create("FileType", {
     option("set", "foldmethod", "syntax", { scope = "local" })
   end,
   desc = "Fold json files on {} and [] blocks",
-})
-
--- mail {{{1
-autocmd_create("FileType", {
-  pattern = "mail",
-  group = augroup_create("my_mail_support", { clear = true }),
-  callback = function()
-    -- re-flow text support
-    -- • set parameters to be consistent with re-flowing content
-    --   e.g., in neomutt setting text_flowed to true
-    option("set", "textwidth", 72, { scope = "local" })
-    option("append", "formatoptions", "q", { scope = "local" })
-    option("append", "comments", "nb:>", { scope = "local" })
-    -- fold quoted text
-    -- • taken from 'mutt-trim' github repo README file
-    --   (https://github.com/Konfekt/mutt-trim)
-    option(
-      "set",
-      "foldexpr",
-      "strlen(substitute(matchstr(getline(v:lnum),'\\v^\\s*%(\\>\\s*)+'),'\\s','','g'))",
-      { scope = "local" }
-    )
-    option("set", "foldmethod", "expr", { scope = "local" })
-    option("set", "foldlevel", 1, { scope = "local" })
-    option("set", "foldminlines", 2, { scope = "local" })
-    option("set", "colorcolumn", "72", { scope = "local" })
-    -- text edit settings
-    text_editing_settings()
-    -- set mapping to turn on markdown highlighting in message body
-    map({ "n", "i" }, "<Leader>md", mail_md_mode, { buffer = 0, silent = true })
-  end,
-  desc = "Support for mail filetype",
 })
 
 -- markdown/pandoc {{{1
