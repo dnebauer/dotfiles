@@ -147,12 +147,11 @@ map({ "i", "v" }, "ZQ", "<Esc>ZQ", { desc = "quit without saving [i,v]" })
 map({ "n", "v" }, "<Space>", "<PageDown>", { desc = "<Space> = PageDown [n,v]" })
 
 -- expand <Esc> functionality to dismiss Noice messages as well as clear hlsearch
-map(
-  { "i", "n" },
-  "<Esc>",
-  "<Esc><Cmd>noh<CR><Cmd>NoiceDismiss<CR>",
-  { desc = "Escape, clear hlsearch, dismiss Noice messages" }
-)
+map({ "i", "n" }, "<Esc>", function()
+  vim.cmd.nohlsearch()
+  vim.cmd.NoiceDismiss()
+  return "<Esc>"
+end, { desc = "Escape, clear hlsearch, dismiss Noice messages" })
 
 -- toggle undo map (plugin = sjl/gundo.vim)
 map("n", "<Leader>u", "<Cmd>GundoToggle<CR>", { desc = "toggle undo map" })
