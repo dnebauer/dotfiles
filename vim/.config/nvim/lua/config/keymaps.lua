@@ -9,13 +9,14 @@ local map
 local option
 
 -- map(mode, lhs, rhs, opts) {{{1
----Thin wrapper for |vim.keymap.set| using the same function parameters.
+---Thin wrapper for |vim.keymap.set()| using the same function parameters.
 ---@param mode table|string Mode short name (see |nvim_set_keymap()|), can
 ---also be list of modes
 ---@param lhs string Left-hand side |{lhs}| of the mapping
 ---@param rhs string|function Right-hand side |{rhs}| of the mapping, can be
 ---a Lua function
 ---@param opts table|nil Table of |:map-arguments| as per |vim.keymap.set()|
+---@return nil _ No return value
 map = function(mode, lhs, rhs, opts)
   vim.keymap.set(mode, lhs, rhs, opts)
 end
@@ -147,11 +148,12 @@ map({ "i", "v" }, "ZQ", "<Esc>ZQ", { desc = "quit without saving [i,v]" })
 map({ "n", "v" }, "<Space>", "<PageDown>", { desc = "<Space> = PageDown [n,v]" })
 
 -- expand <Esc> functionality to dismiss Noice messages as well as clear hlsearch
-map({ "i", "n" }, "<Esc>", function()
-  vim.cmd.nohlsearch()
-  vim.cmd.NoiceDismiss()
-  return "<Esc>"
-end, { desc = "Escape, clear hlsearch, dismiss Noice messages" })
+map(
+  { "i", "n" },
+  "<Esc>",
+  "<Esc><Cmd>noh<CR><Cmd>NoiceDismiss<CR>",
+  { desc = "Escape, clear hlsearch, dismiss Noice messages" }
+)
 
 -- toggle undo map (plugin = sjl/gundo.vim)
 map("n", "<Leader>u", "<Cmd>GundoToggle<CR>", { desc = "toggle undo map" })
