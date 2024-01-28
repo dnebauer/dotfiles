@@ -159,8 +159,10 @@ map(
 map("n", "<Leader>u", "<Cmd>GundoToggle<CR>", { desc = "toggle undo map" })
 
 -- force magic regex during search
-map({ "n", "v" }, "/", "/\\m", { desc = "force magic regex during forward search [n,v]" })
-map({ "n", "v" }, "?", "?\\m", { desc = "force magic regex during backward search [n,v]" })
+map("n", "/", "/\\m", { desc = "force magic regex during forward search [n]" })
+map("v", "/", 'y/\\m<C-R>"', { desc = "force magic regex during forward search for selected text [v]" })
+map("n", "?", "?\\m", { desc = "force magic regex during backward search [n]" })
+map("v", "?", 'y?\\m<C-R>"', { desc = "force magic regex during backward search for selected text [v]" })
 map("c", "%s/", "%s/\\m", { desc = "force magic regex during search [c]" })
 
 -- spelling
