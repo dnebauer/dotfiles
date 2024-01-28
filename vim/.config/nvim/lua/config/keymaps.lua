@@ -164,30 +164,8 @@ map({ "n", "v" }, "?", "?\\m", { desc = "force magic regex during backward searc
 map("c", "%s/", "%s/\\m", { desc = "force magic regex during search [c]" })
 
 -- spelling
-local spell_status = function()
-  local msg = { "spell checking is" }
-  if option("get", "spell") then
-    table.insert(msg, "ON (lang = " .. table.concat(option("get", "spelllang"), ",") .. ")")
-  else
-    table.insert(msg, "OFF")
-  end
-  vim.api.nvim_echo({ { table.concat(msg, " ") } }, true, {})
-end
--- \st = toggle spellcheck
-map("n", "<Leader>st", function()
-  if option("get", "spell", { scope = "local" }) then
-    option("set", "spell", false, { scope = "local" })
-  else
-    option("set", "spell", true, { scope = "local" })
-  end
-  vim.api.nvim_exec2("redraw", {})
-  spell_status()
-end, { desc = "toggle spellcheck [n]" })
--- \ss = show spellcheck status
-map("n", "<Leader>ss", function()
-  spell_status()
-end, { desc = "show spellcheck status [n]" })
--- ]=,[= : correct next/previous bad word
+-- • on/off/toggle with [os/]os/yos mappings from unimpaired.nvim plugin
+-- • ]=,[= : correct next/previous bad word
 map("n", "]=", "]sz=", { desc = "jump to next bad word [n]" })
 map("n", "[=", "[sz=", { desc = "jump to previous bad word [n]" })
 

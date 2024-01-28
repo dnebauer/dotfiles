@@ -19,10 +19,34 @@ return {
         },
       },
     },
+    -- setting up noice as a dependency results in the following error on executing "Telescope noice":
+    -- > Error executing Lua callback:
+    -- > ...nvim/lazy/noice.nvim/lua/telescope/_extensions/noice.lua:30:
+    -- > attempt to index field 'commands' (a nil value)
+    -- so define it here instead                                                                                                                           │(a nil value)
     config = function()
       require("telescope").load_extension("noice")
     end,
     keys = {
+      -- disable these plugin key mappings
+      { "<Leader>,", false },
+      { "<Leader><Space>", false },
+      { "<Leader>fc", false },
+      { "<Leader>fF", false },
+      { "<Leader>fR", false },
+      { "<Leader>sa", false },
+      { "<Leader>sb", false },
+      { "<Leader>sC", false },
+      { "<Leader>sd", false },
+      { "<Leader>sD", false },
+      { "<Leader>sg", false },
+      { "<Leader>sG", false },
+      { "<Leader>sH", false },
+      { "<Leader>ss", false },
+      { "<Leader>sS", false },
+      -- reassign "<Leader>sC" action to "<Leader>sc"
+      { "<leader>sc", "<cmd>Telescope commands<cr>", desc = "Commands" },
+      -- add this plugin key mapping
       {
         "<Leader>fs",
         "<Cmd>Telescope builtin<CR>",
@@ -30,30 +54,25 @@ return {
       },
     },
     dependencies = {
-      -- file finder based on frequency and recency
+      -- ctags outline
       {
-        "nvim-telescope/telescope-frecency.nvim",
-        config = function(_, opts)
-          require("telescope").load_extension("frecency")
-        end,
-      },
-      -- software licenses
-      {
-        "chip/telescope-software-licenses.nvim",
-        dependencies = { "nvim-lua/plenary.nvim" },
+        "fcying/telescope-ctags-outline.nvim",
         config = function()
-          require("telescope").load_extension("software-licenses")
+          require("telescope").load_extension("ctags_outline")
         end,
-      },
-      -- symbols
-      {
-        "nvim-telescope/telescope-symbols.nvim",
       },
       -- emojis
       {
         "xiyaowong/telescope-emoji.nvim",
         config = function()
           require("telescope").load_extension("emoji")
+        end,
+      },
+      -- file finder based on frequency and recency
+      {
+        "nvim-telescope/telescope-frecency.nvim",
+        config = function(_, opts)
+          require("telescope").load_extension("frecency")
         end,
       },
       -- glyphs
@@ -70,11 +89,11 @@ return {
           require("telescope").load_extension("heading")
         end,
       },
-      -- ctags outline
+      -- notify
       {
-        "fcying/telescope-ctags-outline.nvim",
+        "rcarriga/nvim-notify",
         config = function()
-          require("telescope").load_extension("ctags_outline")
+          require("telescope").load_extension("notify")
         end,
       },
       -- scriptnames
@@ -83,6 +102,18 @@ return {
         config = function()
           require("telescope").load_extension("scriptnames")
         end,
+      },
+      -- software licenses
+      {
+        "chip/telescope-software-licenses.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        config = function()
+          require("telescope").load_extension("software-licenses")
+        end,
+      },
+      -- symbols
+      {
+        "nvim-telescope/telescope-symbols.nvim",
       },
       -- undo
       {
