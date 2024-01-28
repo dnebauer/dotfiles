@@ -1,12 +1,12 @@
---[[ dnebauer/dn-md-utils.nvim : markdown utilities ]]
+--[[ dnebauer/dn-markdown.nvim : markdown utilities ]]
 
 return {
   {
-    "dnebauer/dn-md-utils.nvim",
+    "dnebauer/dn-markdown.nvim",
     ft = { "markdown", "markdown.pandoc", "pandoc" },
     dependencies = { "dnebauer/dn-utils.nvim" },
     config = function()
-      require("dn-md-utils")
+      require("dn-markdown")
     end,
   },
 }
