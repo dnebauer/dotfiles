@@ -115,6 +115,13 @@ return {
       {
         "nvim-telescope/telescope-symbols.nvim",
       },
+      -- toggleterm
+      {
+        "ryanmsnyder/toggleterm-manager.nvim",
+        config = function()
+          require("telescope").load_extension("toggleterm_manager")
+        end,
+      },
       -- undo
       {
         "debugloop/telescope-undo.nvim",
