@@ -22,17 +22,40 @@ return {
         ltex = {}, -- latex
         lua_ls = {}, -- lua
         marksman = {}, -- markdown
+        perlnavigator = {}, -- perl
         pylsp = {}, -- python
         raku_navigator = {}, -- raku
         taplo = {}, -- toml
         vimls = {}, -- vimscript
         yamlls = {}, -- yaml
       },
-    },
-    setup = {
-      jdtls = function()
-        return true -- avoid duplicate servers
-      end,
+      setup = {
+        jdtls = function()
+          return true -- avoid duplicate servers
+        end,
+        perlnavigator = function()
+          -- prevent autoformatting to >>require("lspconfig")<<
+          -- stylua: ignore
+          require'lspconfig'.perlnavigator.setup({
+            cmd = {
+              "/usr/bin/node",
+              "/home/david/.local/share/perlnavigator/PerlNavigator/server/out/server.js",
+              "--stdio",
+            },
+            settings = {
+              perlnavigator = {
+                perlPath = "/usr/bin/perl",
+                enableWarnings = true,
+                perltidyEnabled = true,
+                perltidyProfile = "/home/david/.perltidyrc",
+                perlcriticEnabled = true,
+                perlcriticProfile = "/home/david/.perlcriticrc",
+              },
+            },
+          })
+          return true
+        end,
+      },
     },
   },
 }

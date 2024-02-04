@@ -29,9 +29,11 @@ return {
         "vimls", -- vimscript
         "yamlls", -- yaml
       },
-      --automatic_installation = {
-      --exclude = { "solargraph" },
-      --},
+      --[[
+      automatic_installation = {
+        exclude = { "solargraph" },
+      },
+      --]]
     },
   },
 }
