@@ -400,6 +400,21 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   desc = "Force filetype for nsis header files",
 })
 
+-- perl {{{1
+autocmd_create("FileType", {
+  group = augroup_create("my_perl_support", { clear = true }),
+  pattern = { "perl" },
+  callback = function()
+    option(
+      "set",
+      "keywordprg",
+      "f(){perldoc -f $* || perldoc -v $* || perldoc $* || perldoc -q $*;}; f",
+      { scope = "local" }
+    )
+  end,
+  desc = "Change |K| to look in more locations",
+})
+
 -- text {{{1
 autocmd_create("FileType", {
   group = augroup_create("my_text_support", { clear = true }),
