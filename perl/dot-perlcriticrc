@@ -1,0 +1,16 @@
+## default settings for Perl::Critic
+
+severity = 1
+
+## module blocks
+
+[Modules::ProhibitExcessMainComplexity]
+max_mccabe = 100
+
+[TooMuchCode::ProhibitDuplicateLiteral]
+#    2: because it appears in "use strictures 2" which can occur multiple
+#       times if a file contains multiple packages
+#  q{}: cannot be refactored
+# 'ro': a Moo option 'is' type, and 1 file may have multiple options
+# 'rw': a Moo option 'is' type, and 1 file may have multiple options
+allowlist = 2 q{} 'ro' 'rw'
