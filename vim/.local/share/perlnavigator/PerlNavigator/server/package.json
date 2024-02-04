@@ -1,0 +1,34 @@
+{
+	"name": "perlnavigator-server",
+	"description": "Perl language server",
+	"version": "0.8.0",
+	"author": "bscan",
+	"license": "MIT",
+	"engines": {
+		"node": ">=15.0.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/bscan"
+	},
+	"dependencies": {
+		"vscode-languageserver": "^7.0.0",
+		"vscode-languageserver-textdocument": "^1.0.1",
+		"vscode-uri": "^1.0.1",
+		"lru-cache": "^6.0.0",
+		"nanoid": "^3.1.31",
+		"vscode-textmate": "^9.0.0",
+		"vscode-oniguruma": "^2.0.1"
+	},
+	"scripts": {},
+	"main": "./src/dist/serverMain.js",
+	"bin": {
+		"perlnavigator": "./bin/perlnavigator"
+	},
+	"devDependencies": {},
+	"keywords": [
+		"perl",
+		"lsp",
+		"languageserver"
+	]
+}

@@ -1,0 +1,197 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "information_for_contributors": [
+    "To modify the grammar, simply update the JSON run the extension. This file detects scope (e.g. is Moo active) and the individual files define the syntax of the scope"
+  ],
+  "scopeName": "source.perl.frameworks",
+  "injectionSelector": "L:source.perl -comment -string -text",
+  "patterns": [
+    {
+      "include": "#scope_defs"
+    }
+  ],
+  "repository": {
+    "source": {
+      "patterns": [
+        {
+          "include": "$self"
+        },
+        {
+          "include": "source.perl"
+        }
+      ]
+    },
+    "scope_defs": {
+      "patterns": [
+        {
+          "name": "meta.moose.perl",
+          "begin": "(?<=use)\\s+(?:Moose|Mouse|Moo)(?=[\\s;]|::)",
+          "end": "(\\b)(?=^\\s*package\\s*[\\w:]+\\s*;)",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "comment": "This matches feature bundle 5.10 to 5.35",
+          "name": "meta.v510.perl",
+          "begin": "(?<=use)\\s+(?=(?:v?5\\.0?(?:[1-2][0-9]|3[0-5])(?:\\.\\d+)?|feature\\s+[\"']:5\\.(?:[1-2][0-9]|3[0-5])[\"'])[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "comment": "This matches from 5.36 and up",
+          "name": "meta.v536.perl",
+          "begin": "(?<=use)\\s+(?=(?:v?5\\.0?(?:3[6-9]|4[0-9])(?:\\.\\d+)?|feature\\s+[\"']:5\\.(?:3[6-9]|4[0-9])[\"'])[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "comment": "TODO: Currently, these regexes do not allow for multiple features in 'feature qw(class try)' since the first one consumes it.",
+          "name": "meta.objectpad.perl",
+          "begin": "(?<=use)\\s+(?=(?:Object::Pad|feature\\s.*class.*|experimental\\s.*class.*|Feature::Compat::Class)[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+            "name": "meta.dataclass.perl",
+            "begin": "(?<=use)\\s+(?:Data::Class)(?=[\\s;])",
+            "patterns": [
+              {
+                "include": "#source"
+              }
+            ]
+        },
+        {
+          "name": "meta.moops.perl",
+          "begin": "(?<=use)\\s+(?:Moops)(?=[\\s;])",
+          "end": "(\\b)(?=^\\s*package\\s*[\\w:]+\\s*;)",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.zydeco.perl",
+          "begin": "(?<=use)\\s+(?:Zydeco)(?=[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.mars.perl",
+          "begin": "(?<=use)\\s+(?:Mars|Venus)(?=[\\s;:])",
+          "end": "(\\b)(?=^\\s*package\\s*[\\w:]+\\s*;)",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.async.perl",
+          "begin": "(?<=use)\\s+(?=(?:\\w+::AsyncAwait|Mojo::Base.*-async_await.*)[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.trycatch.perl",
+          "begin": "(?<=use)\\s+(?=(?:Syntax::Keyword::Try|Feature::Compat::Try|Syntax::Feature::Try|Try::Tiny|TryCatch|Try|feature\\s.*try.*|experimental\\s.*try.*)[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.defer.perl",
+          "begin": "(?<=use)\\s+(?=(?:feature\\s.*\\bdefer\\b.*|Syntax::Keyword::Defer)[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.dynamically.perl",
+          "begin": "(?<=use)\\s+(?=Syntax::Keyword::Dynamically[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.isa.perl",
+          "begin": "(?<=use)\\s+(?=(?:feature\\s.*\\bisa\\b.*)[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.state.perl",
+          "begin": "(?<=use)\\s+(?=(?:feature\\s.*\\bstate\\b.*)[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.match.perl",
+          "begin": "(?<=use)\\s+(?=(?:Syntax::Keyword::Match)[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.funcparams.perl",
+          "begin": "(?<=use)\\s+(?:Function::Parameters)(?=[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.dios.perl",
+          "begin": "(?<=use)\\s+(?:Dios)(?=[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        },
+        {
+          "name": "meta.dancer.perl",
+          "begin": "(?<=use)\\s+(?:Dancer2?)(?=[\\s;])",
+          "patterns": [
+            {
+              "include": "#source"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

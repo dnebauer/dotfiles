@@ -1,10 +1,9 @@
 ---
-title:  "PerlNavigator: Perl language server"
+title: "PerlNavigator: Perl language server"
 author: "David Nebauer"
-date:   "3 February 2024"
-style:  [Standard, Latex14pt]
-        # Latex8-12|14|17|20pt; SectNewpage; PageBreak; Include
-...
+date: "3 February 2024"
+style: [Standard, Latex14pt]
+---
 
 This is local installation of the [PerlNavigator perl language server][github].
 
@@ -19,9 +18,12 @@ cd server/
 npx tsc
 ```
 
-Please note the `npm` command appeared to hang for several minutes before
-successfully completing.
+Please note:
 
-[comment]: # (URLs)
+- The `npm` command appeared to hang for several minutes before successfully
+  completing.
+- If adding to a git repository, remove the `PerlNavigator/.git` subdirectory
+  to avoid inadvertently adding the subtree as a submodule.
 
-   [github]: https://github.com/bscan/PerlNavigator
+[comment]: # "URLs"
+[github]: https://github.com/bscan/PerlNavigator

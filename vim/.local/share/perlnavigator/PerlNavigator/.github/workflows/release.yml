@@ -1,0 +1,87 @@
+name: release
+on:
+  push:
+    tags:
+      - 'v[0-9]+.*'
+
+jobs:
+  create-release:
+    name: create-release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.release.outputs.upload_url }}
+    steps:
+      - name: Get the release version from the tag
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF#*/*/}
+      - name: Create GitHub release
+        id: release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+
+  build-release:
+
+    runs-on: ubuntu-latest
+    needs: [create-release]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install NPM dependencies
+      run: npm install
+    - name: Build project assets
+      run: npm run build-binary
+
+    - name: Compress Linux binary
+      run: mkdir perlnavigator-linux-x86_64 && cp -a dist/perlnavigator-linux perlnavigator-linux-x86_64/perlnavigator && zip -r perlnavigator-linux-x86_64.zip perlnavigator-linux-x86_64
+    - name: Upload Linux binary
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: perlnavigator-linux-x86_64.zip
+        asset_name: perlnavigator-linux-x86_64.zip
+        asset_content_type: application/octet-stream      
+
+    - name: Compress MacOS binary
+      run: mkdir perlnavigator-macos-x86_64 && cp -a dist/perlnavigator-macos perlnavigator-macos-x86_64/perlnavigator && zip -r perlnavigator-macos-x86_64.zip perlnavigator-macos-x86_64
+    - name: Upload MacOS binary
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: perlnavigator-macos-x86_64.zip
+        asset_name: perlnavigator-macos-x86_64.zip
+        asset_content_type: application/octet-stream      
+
+    - name: Compress Windows binary
+      run: mkdir perlnavigator-win-x86_64 && cp -a dist/perlnavigator-win.exe perlnavigator-win-x86_64/perlnavigator.exe && zip -r perlnavigator-win-x86_64.zip perlnavigator-win-x86_64
+    - name: Upload Windows binary
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: perlnavigator-win-x86_64.zip
+        asset_name: perlnavigator-win-x86_64.zip
+        asset_content_type: application/octet-stream      
+  
+  publish-release:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
+        registry-url: 'https://registry.npmjs.org'
+    - run: npm ci
+    - run: tsc -b
+    - run: npm publish server/
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
