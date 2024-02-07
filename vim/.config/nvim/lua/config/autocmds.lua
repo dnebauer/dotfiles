@@ -321,6 +321,18 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
   end,
   desc = "Display warning if opening a file that is a symlink",
 })
+
+-- delete K mapping if LSP provides hover {{{1
+autocmd_create("LspAttach", {
+  group = augroup_create("my_delete_k_mapping", { clear = true }),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client.server_capabilities.hoverProvider then
+      vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = args.buf })
+    end
+  end,
+  desc = "Delete K mapping if LSP provides hover",
+})
 -- }}}1
 
 -- [[ filetypes ]]
@@ -398,21 +410,6 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
     option("set", "filetype", "nsis", { scope = "local" })
   end,
   desc = "Force filetype for nsis header files",
-})
-
--- perl {{{1
-autocmd_create("FileType", {
-  group = augroup_create("my_perl_support", { clear = true }),
-  pattern = { "perl" },
-  callback = function()
-    option(
-      "set",
-      "keywordprg",
-      "f(){perldoc -f $* || perldoc -v $* || perldoc $* || perldoc -q $*;}; f",
-      { scope = "local" }
-    )
-  end,
-  desc = "Change |K| to look in more locations",
 })
 
 -- text {{{1
