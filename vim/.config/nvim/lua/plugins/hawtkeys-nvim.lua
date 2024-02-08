@@ -7,5 +7,5 @@ return {
   -- need 'config = true' or 'config = {}' command, or
   -- you get an error like this when using a plugin command:
   -- "Command `HawtkeysAll` not found after loading `hawtkeys.nvim`"
-  config = {},
+  opts = {},
 }
