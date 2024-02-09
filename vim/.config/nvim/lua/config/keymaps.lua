@@ -96,4 +96,9 @@ map("v", "p", '"_dP', { desc = "paste over visual selection without yanking it" 
 map("i", "jk", "<ESC>", { desc = "alternative escape in insert mode" })
 map("t", "jk", "<C-\\><C-n>", { desc = "alternative escape in terminal mode" })
 
--- vim:foldmethod=marker:
+-- use alexghergh/nvim-tmux-navigation for nvim/tmux navigation
+vim.keymap.set({ "n", "t" }, "<C-h>", "<Cmd>NvimTmuxNavigateLeft<CR>", { silent = true })
+vim.keymap.set({ "n", "t" }, "<C-j>", "<Cmd>NvimTmuxNavigateDown<CR>", { silent = true })
+vim.keymap.set({ "n", "t" }, "<C-k>", "<Cmd>NvimTmuxNavigateUp<CR>", { silent = true })
+vim.keymap.set({ "n", "t" }, "<C-l>", "<Cmd>NvimTmuxNavigateRight<CR>", { silent = true })
+vim.keymap.set({ "n", "t" }, "<C-\\>", "<Cmd>NvimTmuxNavigateLastActive<CR>", { silent = true })
