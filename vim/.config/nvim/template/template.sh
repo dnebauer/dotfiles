@@ -22,6 +22,7 @@ set -o pipefail
 
 msg="Loading libraries"
 echo -ne "\\033[1;37;41m${msg}\\033[0m"
+# shellcheck disable=SC1091
 source "@libexec_dir@/libdncommon-bash/liball" # supplies functions
 dnEraseText "${msg}"
 # provided by libdncommon-bash: dn_self,dn_divider[_top|_bottom]
@@ -64,7 +65,7 @@ function checkPrereqs() {
 	if [[ ${#missing[@]} -ne 0 ]]; then
 		local msg
 		msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
-		echo "$msg" >/dev/stderr
+		echo "$dn_self: $msg" >/dev/stderr
 		# cannot use 'log' function here:
 		# - options have not yet been processed
 		logger --priority "user.err" --tag "$dn_self" "$msg"
@@ -86,7 +87,7 @@ ${dn_self}: <BRIEF>
 ${usage} ${dn_self} ${parameters}
        ${dn_self} -h
 
-Options: -x OPT  = 
+Options: -x OPT  =
          -v      = print input lines as they are read
                    (equivalent to 'set -o verbose')
          -d      = print input lines after command expansion
@@ -110,7 +111,7 @@ processConfigFiles() {
 	# process config files
 	for conf in "${system_conf}" "${local_conf}"; do
 		if [ -r "${conf}" ]; then
-			while read name val; do
+			while read -r name val; do
 				if [ -n "${val}" ]; then
 					# remove enclosing quotes if present
 					val="$(dnStripEnclosingQuotes "${val}")"
@@ -135,17 +136,17 @@ processConfigFiles() {
 #           remaining command line args (after options removed)
 processOptions() {
 	# read the command line options
-	local OPTIONS="$(
+	local OPTIONS
+	if ! OPTIONS="$(
 		getopt \
 			--options hvdx: \
 			--long xoption:,help,verbose,debug \
 			--name "${BASH_SOURCE[0]}" \
 			-- "${@}"
-	)"
-	[[ ${?} -eq 0 ]] || {
-		echo 'Invalid command line options' 1>&2
+	)"; then
+		# getopt displays errors
 		exit 1
-	}
+	fi
 	eval set -- "${OPTIONS}"
 	while true; do
 		case "${1}" in
