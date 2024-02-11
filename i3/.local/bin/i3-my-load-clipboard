@@ -20,20 +20,20 @@ set -o pipefail
 
 # VARIABLES    {{{1
 
-self="$(basename $0)"
+self="$(basename "$0")"
 # required tools findable on system path
 required_system_tools=(
-    alacritty
-    cat
-    getopt
-    mktemp
+	alacritty
+	cat
+	getopt
+	mktemp
 )
 required_local_tools=(
-    $HOME/.local/libexec/i3-my-load-clipboard-engine
+	"$HOME/.local/libexec/i3-my-load-clipboard-engine"
 )
 engine="$HOME/.local/libexec/i3-my-load-clipboard-engine"
 temp_file="$(mktemp)"
-trap "[[ -f \"$temp_file\" ]] && rm -f \"$temp_file\"" EXIT
+trap '[[ -f "$temp_file" ]] && rm -f "$temp_file"' EXIT
 # }}}1
 
 # PROCEDURES
@@ -43,30 +43,40 @@ trap "[[ -f \"$temp_file\" ]] && rm -f \"$temp_file\"" EXIT
 #   params: nil
 #   prints: error message if tool(s) missing
 #   return: n/a, aborts scipts on failure
-function checkPrereqs () {
-    local missing tool
-    missing=()
-    # these tools can be found on the base system path
-    for tool in "${required_system_tools[@]}" ; do
-        command -v "$tool" &>/dev/null || missing+=("$tool")
-    done
-    # these tools are specified by absolute path
-    for tool in "${required_local_tools[@]}" ; do
-        [[ -x "$tool" ]] || missing+=("$tool")
-    done
-    if [[ ${#missing[@]} -ne 0 ]] ; then
-        echo "$msg" >/dev/stderr
-        exit 1
-    fi
-    unset required_system_tools
+function checkPrereqs() {
+	local missing tool
+	missing=()
+	# these tools can be found on the base system path
+	for tool in "${required_system_tools[@]}"; do
+		command -v "$tool" &>/dev/null || missing+=("$tool")
+	done
+	# these tools are specified by absolute path
+	for tool in "${required_local_tools[@]}"; do
+		[[ -x "$tool" ]] || missing+=("$tool")
+	done
+	local num_missing=${#missing[@]}
+	if [[ $num_missing -ne 0 ]]; then
+		local msg
+		if [[ $num_missing -eq 1 ]]; then
+			msg="$self: fatal error: cannot find tool: ${missing[0]}"
+		else
+			msg="$self: fatal error: cannot find tools:"
+			for tool in "${missing[@]}"; do
+				msg="$msg\n- $tool"
+			done
+		fi
+		echo -e "$msg" >/dev/stderr
+		exit 1
+	fi
+	unset required_system_tools
 }
 # displayUsage()    {{{1
 #   intent: display usage information
 #   params: nil
 #   prints: nil
 #   return: nil
-displayUsage () {
-cat << _USAGE
+displayUsage() {
+	cat <<_USAGE
 ${self}: load user-selected value into the system clipboard
 
 The user selects from menus of pre-defined options. The
@@ -100,30 +110,42 @@ _USAGE
 #   return: nil
 #   note:   after execution variable @ARGS contains
 #           remaining command line args (after options removed)
-processOptions () {
-    # read the command line options
-    local OPTIONS="$(                      \
-        getopt                             \
-            --options hvds                 \
-            --long    help,verbose,debug   \
-            --name    "${BASH_SOURCE[0]}"  \
-            -- "${@}"                      \
-    )"
-    [[ ${?} -eq 0 ]] || {
-        echo 'Invalid command line options' 1>&2
-        exit 1
-    }
-    eval set -- "${OPTIONS}"
-    while true ; do
-        case "${1}" in
-        -h | --help    ) displayUsage   ; exit 0  ;;
-        -v | --verbose ) set -o verbose ; shift 1 ;;
-        -d | --debug   ) set -o xtrace  ; shift 1 ;;
-        --             ) shift ; break ;;
-        *              ) break ;;
-        esac
-    done
-    ARGS=("${@}")  # remaining arguments
+processOptions() {
+	# read the command line options
+	local OPTIONS
+	if ! OPTIONS="$(
+		getopt \
+			--options hvds \
+			--long help,verbose,debug \
+			--name "${BASH_SOURCE[0]}" \
+			-- "${@}"
+	)"; then
+		# getopt displays errors
+		exit 1
+	fi
+	eval set -- "${OPTIONS}"
+	while true; do
+		case "${1}" in
+		-h | --help)
+			displayUsage
+			exit 0
+			;;
+		-v | --verbose)
+			set -o verbose
+			shift 1
+			;;
+		-d | --debug)
+			set -o xtrace
+			shift 1
+			;;
+		--)
+			shift
+			break
+			;;
+		*) break ;;
+		esac
+	done
+	#ARGS=("${@}") # remaining arguments are not used
 }
 # joinBy($delim, @items)    {{{1
 #   intent: join all items using delimiter
@@ -131,13 +153,13 @@ processOptions () {
 #           items - items to be joined
 #   prints: string containing joined items
 #   return: nil
-function joinBy () {
-    local delimiter first_item
-    delimiter="${1:-}"
-    shift
-    first_item="${1:-}"
-    shift
-    printf %b%s "$first_item" "${@/#/$delimiter}"
+function joinBy() {
+	local delimiter first_item
+	delimiter="${1:-}"
+	shift
+	first_item="${1:-}"
+	shift
+	printf %b%s "$first_item" "${@/#/$delimiter}"
 }
 # }}}1
 
@@ -147,18 +169,18 @@ function joinBy () {
 checkPrereqs
 
 # process command line options    {{{1
-processOptions "${@}"  # leaves ${ARGS[@]} holding positional arguments
+processOptions "${@}" # leaves ${ARGS[@]} holding positional arguments
 
 # launch engine script in alacritty    {{{1
 cmd=(
-    $engine
-    --temp_file
-    $temp_file
+	"$engine"
+	--temp_file
+	"$temp_file"
 )
 alacritty \
-    --title   'Clipboard Loader' \
-    --class   'Clipboard_Loader,Clipboard_Loader' \
-    --command ${cmd[@]}
+	--title 'Clipboard Loader' \
+	--class 'Clipboard_Loader,Clipboard_Loader' \
+	--command "${cmd[@]}"
 
 # retrieve and copy selected value    {{{1
 value="$(cat "$temp_file")"
