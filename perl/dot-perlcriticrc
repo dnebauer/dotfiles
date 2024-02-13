@@ -14,3 +14,7 @@ max_mccabe = 100
 # 'ro': a Moo option 'is' type, and 1 file may have multiple options
 # 'rw': a Moo option 'is' type, and 1 file may have multiple options
 allowlist = 2 q{} 'ro' 'rw'
+
+## disable modules
+
+[-Subroutines::ProhibitSubroutinePrototypes]
