@@ -6,6 +6,7 @@
 # - duplicate labels not allowed
 
 target_dir: lacie@@@/mnt/lacie-d2-pro/
+target_dir: 1touch@@@/mnt/seagate-1-touch/
 
 # source files
 # - no duplicates allowed
@@ -16,6 +17,8 @@ source_file: /home/david/.abcde.conf
 source_file: /home/david/.bash_history
 source_file: /home/david/.bash_logout
 source_file: /home/david/.bashrc_OLD
+source_file: /home/david/.commitlint.js
+source_file: /home/david/.czrc
 source_file: /home/david/.dmrc
 source_file: /home/david/.esniper
 source_file: /home/david/.fasd
@@ -46,6 +49,7 @@ source_file: /home/david/.zsh_history
 
 source_dir: /home/david/.FBReader/
 source_dir: /home/david/.aptitude/
+source_dir: /home/david/.cargo/
 source_dir: /home/david/.clui_dir/
 source_dir: /home/david/.config/
 source_dir: /home/david/.cpanm/
@@ -58,6 +62,7 @@ source_dir: /home/david/.get_iplayer/
 source_dir: /home/david/.gnome/
 source_dir: /home/david/.gnupg/
 source_dir: /home/david/.java/
+source_dir: /home/david/.julia/
 source_dir: /home/david/.kde/
 source_dir: /home/david/.keys/
 source_dir: /home/david/.local/
@@ -67,6 +72,7 @@ source_dir: /home/david/.npm/
 source_dir: /home/david/.offlineimap/
 source_dir: /home/david/.oh-my-zsh/
 source_dir: /home/david/.password-store/
+source_dir: /home/david/.pki/
 source_dir: /home/david/.pstill/
 source_dir: /home/david/.recoll/
 source_dir: /home/david/.recoll-context-mail/
@@ -123,6 +129,7 @@ source_dir: /home/david/data/travel/
 source_dir: /home/david/games/
 source_dir: /home/david/go/
 source_dir: /home/david/log/
+source_dir: /home/david/snap/
 source_dir: /home/david/storage/
 source_dir: /home/david/tmp/
 source_dir: /etc/
