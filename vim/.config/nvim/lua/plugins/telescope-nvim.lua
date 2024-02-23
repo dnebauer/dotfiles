@@ -68,13 +68,6 @@ return {
           require("telescope").load_extension("emoji")
         end,
       },
-      -- file finder based on frequency and recency
-      {
-        "nvim-telescope/telescope-frecency.nvim",
-        config = function(_, opts)
-          require("telescope").load_extension("frecency")
-        end,
-      },
       -- glyphs
       {
         "ghassan0/telescope-glyph.nvim",
