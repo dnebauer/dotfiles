@@ -22,7 +22,6 @@ set -o pipefail
 # VARIABLES    {{{1
 
 self="$(basename "$0")"
-dlg_title='i3 session setup'
 # at startup i3 uses path that does not contain ~/.local/bin
 # - these tools can be found on base system path
 required_system_tools=(
@@ -70,6 +69,7 @@ function applyLayout1() {
 	# apply layout
 	#i3-msg 'workspace 1:term; append_layout ~/.config/i3/sessions/workspace_2.json'
 	local layout_file
+	# shellcheck disable=SC2088
 	layout_file='~/.config/i3/sessions/workspace_1.json'
 	i3-msg "workspace 1:term; append_layout $layout_file"
 
@@ -99,6 +99,7 @@ function applyLayout2() {
 	# apply layout
 	#i3-msg 'workspace 2:mail; append_layout ~/.config/i3/sessions/workspace_2.json'
 	local layout_file
+	# shellcheck disable=SC2088
 	layout_file='~/.config/i3/sessions/workspace_2.json'
 	i3-msg "workspace 2:mail; append_layout $layout_file"
 
@@ -126,8 +127,8 @@ function applyLayout3() {
 	notifyMessage 'Applying layout 3...'
 
 	# apply layout
-	#i3-msg 'workspace 3:chrome; append_layout ~/.config/i3/sessions/workspace_3.json'
 	local layout_file
+	# shellcheck disable=SC2088
 	layout_file='~/.config/i3/sessions/workspace_3.json'
 	i3-msg "workspace 3:chrome; append_layout $layout_file"
 
@@ -157,6 +158,7 @@ function applyLayout4() {
 	# apply layout
 	#i3-msg 'workspace 4:qute; append_layout ~/.config/i3/sessions/workspace_4.json'
 	local layout_file
+	# shellcheck disable=SC2088
 	layout_file='~/.config/i3/sessions/workspace_4.json'
 	i3-msg "workspace 4:qute; append_layout $layout_file"
 
@@ -186,6 +188,7 @@ function applyLayout5() {
 	# apply layout
 	#i3-msg 'workspace 5:wiki; append_layout ~/.config/i3/sessions/workspace_5.json'
 	local layout_file
+	# shellcheck disable=SC2088
 	layout_file='~/.config/i3/sessions/workspace_5.json'
 	i3-msg "workspace 5:wiki; append_layout $layout_file"
 
@@ -230,7 +233,7 @@ function assignWorkspaces() {
 	##for workspace in "${primary_workspaces[@]}" ; do
 	##    i3-msg workspace "$workspace" output $primary_monitor
 	##done
-	: this task is done in the i3 config file
+	: "this task is done in the i3 config file"
 }
 # checkPrereqs()    {{{1
 #   intent: check for required tools
@@ -562,7 +565,7 @@ function launchTiddlywiki() {
 	alacritty \
 		--title launcher_tiddlywiki \
 		--option env.TIDDLYWIKI_PLUGIN_PATH=$plugin_path \
-		--command $tiddlywiki $HOME/data/misc/auxiliary-memory \
+		--command "$tiddlywiki" "$HOME/data/misc/auxiliary-memory" \
 		--listen port=10744 &
 	sleep $delay_post_launch
 
@@ -646,7 +649,7 @@ function notifyCleanup() {
 	exec 4>&-
 	# kill yad processed
 	for notify_pid in "${notify_pids[@]}"; do
-		kill -9 $notify_pid || true
+		kill -9 "$notify_pid" || true
 	done
 }
 # notifyCompletion()    {{{1
@@ -682,7 +685,7 @@ function notifyDisplay() {
 
 	# construct text-info pane
 	mkfifo "$notify_text_pipe"
-	exec 3<>$notify_text_pipe
+	exec 3<>"$notify_text_pipe"
 	yad \
 		--plug="$fkey" \
 		--tabnum=1 \
@@ -696,7 +699,7 @@ function notifyDisplay() {
 
 	# construct progress bar pane
 	mkfifo "$notify_progress_pipe"
-	exec 4<>$notify_progress_pipe
+	exec 4<>"$notify_progress_pipe"
 	yad \
 		--plug="$fkey" \
 		--tabnum=2 \
@@ -744,17 +747,17 @@ function notifyMessage() {
 #           remaining command line args (after options removed)
 function processOptions() {
 	# read the command line options
-	local OPTIONS="$(
+	local OPTIONS
+	if ! OPTIONS="$(
 		getopt \
 			--options nhvd \
 			--long no-log,help,verbose,debug \
 			--name "${BASH_SOURCE[0]}" \
 			-- "$@"
-	)"
-	[[ $? -eq 0 ]] || {
+	)"; then
 		echo 'Invalid command line options' 1>&2
 		exit 1
-	}
+	fi
 	eval set -- "$OPTIONS"
 	while true; do
 		case "$1" in
@@ -781,7 +784,6 @@ function processOptions() {
 		*) break ;;
 		esac
 	done
-	ARGS="$@" # remaining arguments
 }
 # qutebrowserCommand(window_id, command)    {{{1
 #   params: 1 - window id
@@ -796,13 +798,13 @@ function qutebrowserCommand() {
 	gui_pause=0.5
 
 	# send command to nominated qutebrowser instance
-	xdotool windowactivate --sync $id
+	xdotool windowactivate --sync "$id"
 	sleep $gui_pause
-	xdotool key --window $id --clearmodifiers colon
+	xdotool key --window "$id" --clearmodifiers colon
 	sleep $gui_pause
-	xdotool type --window $id --clearmodifiers "$cmd"
+	xdotool type --window "$id" --clearmodifiers "$cmd"
 	sleep $gui_pause
-	xdotool key --window $id --clearmodifiers Return
+	xdotool key --window "$id" --clearmodifiers Return
 }
 # reloadWikiQutebrowserTab()    {{{1
 #   intent: reload tiddlywiki browser tab on assumption that tiddlywiki
@@ -832,7 +834,8 @@ function reloadWikiQutebrowserTab() {
 		log 'Cannot locate tiddlywiki qutebrowser instance' 'crit'
 		notifyCritical
 	else
-		wiki_ids=($(xdotool search --name 'qutebrowser/wiki'))
+		#wiki_ids=($(xdotool search --name 'qutebrowser/wiki'))
+		mapfile -t wiki_ids < <(xdotool search --name 'qutebrowser/wiki')
 		if [[ ${#wiki_ids[@]} -gt 1 ]]; then
 			log 'Located multiple tiddlywiki qutebrowser instances' 'crit'
 			notifyCritical
@@ -883,7 +886,8 @@ function resetQutebrowserDownloadDirectory() {
 		notifyCritical
 	else
 		local cmd msg window_count window_ids window_number
-		window_ids=($(xdotool search --class qutebrowser))
+		#window_ids=($(xdotool search --class qutebrowser))
+		mapfile -t window_ids < <(xdotool search --class qutebrowser)
 		window_count=${#window_ids[@]}
 		cmd="set downloads.location.directory ~/Downloads"
 		window_number=1
@@ -935,7 +939,8 @@ function resetQutebrowserWindowTitles() {
 		notifyCritical
 	else
 		local cmd msg window_count title window_ids window_number
-		window_ids=($(xdotool search --class qutebrowser))
+		#window_ids=($(xdotool search --class qutebrowser))
+		mapfile -t window_ids < <(xdotool search --class qutebrowser)
 		window_count=${#window_ids[@]}
 		title='{perc}{current_title}{title_sep}qutebrowser'
 		cmd="set window.title_format $title"
@@ -1028,10 +1033,10 @@ function waitForAppsToLoad() {
 	# $delay_app_loading is set to 30 seconds
 	# - trial and error showed this is sufficient for the computer and
 	#   internet speeds in use at the time this script was written
-	for ((i = 1; i <= $delay_app_loading; i++)); do
+	for ((i = 1; i <= "$delay_app_loading"; i++)); do
 		percent=$(echo "$i*100/$delay_app_loading" | bc)
 		remaining=$((delay_app_loading - i))
-		echo $percent >&4
+		echo "$percent" >&4
 		echo "# Remaining delay: $remaining seconds" >&4
 		sleep 1
 	done
