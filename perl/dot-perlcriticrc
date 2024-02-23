@@ -2,19 +2,30 @@
 
 severity = 1
 
-## module blocks
+## configure modules
 
 [Modules::ProhibitExcessMainComplexity]
 max_mccabe = 100
 
 [TooMuchCode::ProhibitDuplicateLiteral]
-#    2: because it appears in "use strictures 2" which can occur multiple
-#       times if a file contains multiple packages
-#  q{}: cannot be refactored
-# 'ro': a Moo option 'is' type, and 1 file may have multiple options
-# 'rw': a Moo option 'is' type, and 1 file may have multiple options
-allowlist = 2 q{} 'ro' 'rw'
+# the command "use strictures 2" can occur multiple times if a file contains
+# multiple packages
+# --> 2
+# function signatures are misinterpreted as function prototypes, and the
+# signature arguments enclosed in parentheses are interpreted as a single
+# string
+# --> '', '$self', '$self, $dir', '$self, $filepath', '$self = undef'
+# Moo option 'is' types are used multiple times in a single package/file
+# --> 'lazy', 'ro', 'rw'
+allowlist = 2 '' 'lazy' 'ro' 'rw' '$self' '$self, $dir' '$self, $filepath' '$self = undef'
+
+[Variables::ProhibitPunctuationVars]
+allow = ${^CHILD_ERROR_NATIVE}
 
 ## disable modules
+
+[-CodeLayout::RequireTidyCode]
+
+[-Documentation::PodSpelling]
 
 [-Subroutines::ProhibitSubroutinePrototypes]
