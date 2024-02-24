@@ -48,6 +48,14 @@ notify_text_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
 notify_progress_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
 trap "notifyCleanup" EXIT
 notify_pids=()
+qutebrowser_sessions=(
+	'games'
+	'mail'
+	'music'
+	'porn'
+	'vim'
+	'wiki'
+)
 # }}}1
 
 # PROCEDURES
@@ -472,6 +480,43 @@ function launchQutebrowserPorn() {
 	local elapsed
 	elapsed="$(timer "${tmr}")"
 	log "  Elapsed time ${elapsed}"
+}
+# launchQutebrowserSessions()    {{{1
+#   intent: launch qutebrowser sessions
+#   params: nil
+#   prints: nil
+#   return: nil
+#   note:   the qutebrowser instances are launched with a unique
+#           window title string to enable i3's apply_layout mechanism
+#           to 'swallow' them into the correct containers -- the window
+#           titles are reset to the default value (which displays the
+#           active tab title) once they have all loaded
+#   note:   the qutebrowser session names are defined in
+#           script variable $qutebrowser_sessions
+function launchQutebrowserSessions() {
+	# loop throug session names
+	for session in "${qutebrowser_sessions[@]}"; do
+		# logging
+		local tmr
+		tmr="$(timer)"
+		local task
+		task="launching qutebrowser session '$session'"
+		log "Begin ${task}"
+		notifyMessage "Launnching qutebrowser session '$session'..."
+
+		# launch qutebrowser instance
+		$qutebrowser \
+			--set window.title_format "qutebrowser/$session" \
+			--restore "$session" &
+		sleep $delay_post_launch
+
+		# logging
+		if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+		log "  Finished ${task}"
+		local elapsed
+		elapsed="$(timer "${tmr}")"
+		log "  Elapsed time ${elapsed}"
+	done
 }
 # launchQutebrowserVim()    {{{1
 #   intent: launch qutebrowser instance for vim- and programming-related sites
@@ -1068,14 +1113,15 @@ assignWorkspaces # actually done in i3 config file (see function)
 applyLayouts
 launchNvimGui
 launchNeomutt
-launchQutebrowserWebmail
+#launchQutebrowserWebmail
 launchGoogleChrome
-launchQutebrowserPorn
-launchQutebrowserMusic
-launchQutebrowserVim
-launchQutebrowserGames
+#launchQutebrowserPorn
+#launchQutebrowserMusic
+#launchQutebrowserVim
+#launchQutebrowserGames
 launchTiddlywiki
-launchQutebrowserWiki
+#launchQutebrowserWiki
+launchQutebrowserSessions
 launchTmux
 waitForAppsToLoad        # must precede qutebrowser-modification tasks
 reloadWikiQutebrowserTab # must precede qutebrowser window titles reset
