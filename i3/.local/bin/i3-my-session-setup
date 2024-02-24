@@ -4,7 +4,7 @@
 # Author: David Nebauer (david at nebauer dot org)
 # Purpose: set up initial i3 session
 # Created: 2022-05-25
-# Last modified: 2022-08-31
+# Last modified: 2022-02-24
 
 # ERROR HANDLING    {{{1
 
@@ -25,7 +25,7 @@ self="$(basename "$0")"
 # at startup i3 uses path that does not contain ~/.local/bin
 # - these tools can be found on base system path
 required_system_tools=(
-	'alacritty' 'i3-msg' 'dn-neovide' 'xdotool'
+	'alacritty' 'i3-msg' 'dn-neovide'
 	'bc' 'logger' 'printf' 'yad'
 	'date' 'mkfifo' 'sleep'
 	'exec' 'mktemp' 'tmux'
@@ -42,193 +42,26 @@ required_local_tools=("$qutebrowser" "$tiddlywiki")
 # delay before the titling itself (even if there is no reasonable explanation
 # for that!)
 delay_post_launch=1
-delay_app_loading=30
+delay_app_loading=40
 # workspace names
-workspaces=(
-	'1:term'
-	'2:mail'
-	'3:chrome'
-	'4:qute'
-	'5:wiki'
-)
+workspaces=('1:term' '2:mail' '3:chrome' '4:qute' '5:wiki')
 # notification dialog named pipe handling
 notify_text_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
 notify_progress_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
 trap "notifyCleanup" EXIT
 notify_pids=()
 # qutebrowser sessions
-qutebrowser_sessions=(
-	'games'
-	'mail'
-	'music'
-	'porn'
-	'vim'
-	'wiki'
-)
+qutebrowser_sessions=('games' 'mail' 'music' 'porn' 'vim' 'wiki')
 # }}}1
 
 # PROCEDURES
 
-# applyLayout1()    {{{1
-#   intent: apply layout to workspace 1
-#   params: nil
-#   prints: nil
-#   return: n/a
-function applyLayout1() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='applying layout to workspace 1'
-	log "Begin ${task}"
-	notifyMessage 'Applying layout 1...'
-
-	# apply layout
-	#i3-msg 'workspace 1:term; append_layout ~/.config/i3/sessions/workspace_2.json'
-	local layout_file
-	# shellcheck disable=SC2088
-	layout_file='~/.config/i3/sessions/workspace_1.json'
-	i3-msg "workspace 1:term; append_layout $layout_file"
-
-	# layout defines the following marks: t=term, v=vim
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log " Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log " Elapsed time ${elapsed}"
-}
-# applyLayout2()    {{{1
-#   intent: apply layout to workspace 2
-#   params: nil
-#   prints: nil
-#   return: n/a
-function applyLayout2() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='applying layout to workspace 2'
-	log "Begin ${task}"
-	notifyMessage 'Applying layout 2...'
-
-	# apply layout
-	#i3-msg 'workspace 2:mail; append_layout ~/.config/i3/sessions/workspace_2.json'
-	local layout_file
-	# shellcheck disable=SC2088
-	layout_file='~/.config/i3/sessions/workspace_2.json'
-	i3-msg "workspace 2:mail; append_layout $layout_file"
-
-	# layout defines the following mark: m=alacritty/neomutt
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
-# applyLayout3()    {{{1
-#   intent: apply layout to workspace 3
-#   params: nil
-#   prints: nil
-#   return: n/a
-function applyLayout3() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='applying layout to workspace 3'
-	log "Begin ${task}"
-	notifyMessage 'Applying layout 3...'
-
-	# apply layout
-	local layout_file
-	# shellcheck disable=SC2088
-	layout_file='~/.config/i3/sessions/workspace_3.json'
-	i3-msg "workspace 3:chrome; append_layout $layout_file"
-
-	# layout defines the following mark: c=chrome
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
-# applyLayout4()    {{{1
-#   intent: apply layout to workspace 4
-#   params: nil
-#   prints: nil
-#   return: n/a
-function applyLayout4() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='applying layout to workspace 4'
-	log "Begin ${task}"
-	notifyMessage 'Applying layout 4...'
-
-	# apply layout
-	#i3-msg 'workspace 4:qute; append_layout ~/.config/i3/sessions/workspace_4.json'
-	local layout_file
-	# shellcheck disable=SC2088
-	layout_file='~/.config/i3/sessions/workspace_4.json'
-	i3-msg "workspace 4:qute; append_layout $layout_file"
-
-	# layout defines the following mark: g=games
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
-# applyLayout5()    {{{1
-#   intent: apply layout to workspace 5
-#   params: nil
-#   prints: nil
-#   return: n/a
-function applyLayout5() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='applying layout to workspace 5'
-	log "Begin ${task}"
-	notifyMessage 'Applying layout 5...'
-
-	# apply layout
-	#i3-msg 'workspace 5:wiki; append_layout ~/.config/i3/sessions/workspace_5.json'
-	local layout_file
-	# shellcheck disable=SC2088
-	layout_file='~/.config/i3/sessions/workspace_5.json'
-	i3-msg "workspace 5:wiki; append_layout $layout_file"
-
-	# layout defines the following mark: w=wiki
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
 # applyLayouts()    {{{1
 #   intent: apply layouts to workspaces
 #   params: nil
 #   prints: nil
 #   return: n/a
 function applyLayouts() {
-	##applyLayout1
-	##applyLayout2
-	##applyLayout3
-	##applyLayout4
-	##applyLayout5
 	local elapsed layout_file task tmr workspace_name workspace_number
 	for workspace in "${workspaces[@]}"; do
 		# extract workspace number and name
@@ -241,12 +74,9 @@ function applyLayouts() {
 		notifyMessage "Applying layout $workspace_number ($workspace_name)..."
 
 		# apply layout
-		#i3-msg 'workspace 1:term; append_layout ~/.config/i3/sessions/workspace_2.json'
 		# shellcheck disable=SC2088
 		layout_file="~/.config/i3/sessions/workspace_${workspace_number}.json"
 		i3-msg "workspace $workspace; append_layout $layout_file"
-
-		# layout defines the following marks: t=term, v=vim
 
 		# logging
 		if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
@@ -266,15 +96,6 @@ function assignWorkspaces() {
 	# - there appears to be no way to construct the workspace command in
 	#   shell script using i3-msg without i3 interpreting the workspace name
 	#   as being everything following the token 'workspace'
-	# - for posterity, what follows is the final attempt at setting
-	#   workspace 1:
-	##i3-msg workspace '1:term' output $primary_monitor
-	# - this was an earlier attempt (expand to include other workspaces and
-	#   the secondary monitor:
-	##primary_workspaces=(1:term)
-	##for workspace in "${primary_workspaces[@]}" ; do
-	##    i3-msg workspace "$workspace" output $primary_monitor
-	##done
 	: "this task is done in the i3 config file"
 }
 # checkPrereqs()    {{{1
@@ -436,85 +257,6 @@ function launchNvimGui() {
 	elapsed="$(timer "${tmr}")"
 	log "  Elapsed time ${elapsed}"
 }
-# launchQutebrowserGames()    {{{1
-#   intent: launch qutebrowser instance for game sites
-#   params: nil
-#   prints: nil
-#   return: nil
-function launchQutebrowserGames() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching qutebrowser for game sites'
-	log "Begin ${task}"
-	notifyMessage 'Launnching qutebrowser for game sites...'
-
-	# launch qutebrowser instance
-	$qutebrowser \
-		--set window.title_format 'qutebrowser/games' \
-		--restore games &
-	sleep $delay_post_launch
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
-# launchQutebrowserMusic()    {{{1
-#   intent: launch qutebrowser instance for music sites
-#   params: nil
-#   prints: nil
-#   return: nil
-function launchQutebrowserMusic() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching qutebrowser for music sites'
-	log "Begin ${task}"
-	notifyMessage 'Launching qutebrowser for music sites...'
-
-	# launch qutebrowser instance
-	$qutebrowser \
-		--set window.title_format 'qutebrowser/music' \
-		--restore music &
-	sleep $delay_post_launch
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
-# launchQutebrowserPorn()    {{{1
-#   intent: launch qutebrowser instance for porn sites
-#   params: nil
-#   prints: nil
-#   return: nil
-function launchQutebrowserPorn() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching qutebrowser for porn sites'
-	log "Begin ${task}"
-	notifyMessage 'Launching qutebrowser for porn sites...'
-
-	# launch qutebrowser instance
-	$qutebrowser --set window.title_format 'qutebrowser/porn' --restore porn &
-	sleep $delay_post_launch
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
 # launchQutebrowserSessions()    {{{1
 #   intent: launch qutebrowser sessions
 #   params: nil
@@ -551,87 +293,6 @@ function launchQutebrowserSessions() {
 		elapsed="$(timer "${tmr}")"
 		log "  Elapsed time ${elapsed}"
 	done
-}
-# launchQutebrowserVim()    {{{1
-#   intent: launch qutebrowser instance for vim- and programming-related sites
-#   params: nil
-#   prints: nil
-#   return: nil
-function launchQutebrowserVim() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching qutebrowser for vim/programming sites'
-	log "Begin ${task}"
-	notifyMessage 'Launching qutebrowser for vim/programming sites...'
-
-	# launch qutebrowser instance
-	$qutebrowser \
-		--set window.title_format 'qutebrowser/vim' \
-		--restore vim &
-	sleep $delay_post_launch
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
-# launchQutebrowserWebmail()    {{{1
-#   intent: launch qutebrowser instance for webmail (gmail, iprimus)
-#   params: nil
-#   prints: nil
-#   return: nil
-function launchQutebrowserWebmail() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching qutebrowser for webmail'
-	log "Begin ${task}"
-	notifyMessage 'Launching qutebrowser for webmail...'
-
-	# launch qutebrowser instance
-	$qutebrowser \
-		--set window.title_format 'qutebrowser/mail' \
-		--restore mail &
-	sleep $delay_post_launch
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
-}
-# launchQutebrowserWiki()    {{{1
-#   intent: launch qutebrowser instance for tiddlywiki
-#   params: nil
-#   prints: nil
-#   return: nil
-function launchQutebrowserWiki() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching qutebrowser for tiddlywiki'
-	log "Begin ${task}"
-	notifyMessage 'Launching qutebrowser for tiddlywiki...'
-
-	# launch qutebrowser instance
-	$qutebrowser \
-		--set window.title_format 'qutebrowser/wiki' \
-		--restore wiki &
-	sleep $delay_post_launch
-
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
 }
 # launchTiddlywiki()    {{{1
 #   intent: launch tiddlywiki
@@ -734,7 +395,7 @@ function notifyCleanup() {
 	# cancel redirections
 	exec 3>&-
 	exec 4>&-
-	# kill yad processed
+	# kill yad process
 	for notify_pid in "${notify_pids[@]}"; do
 		kill -9 "$notify_pid" || true
 	done
@@ -747,17 +408,6 @@ function notifyCleanup() {
 function notifyCompletion() {
 	notifyMessage 'Session setup complete'
 	sleep 3
-}
-# notifyCritical()    {{{1
-#   intent: warn user of critical error and refer them to system log
-#   params: nil
-#   prints: nil
-#   return: n/a
-function notifyCritical() {
-	local msg
-	msg='CRITICAL ERROR: see system log for details'
-	echo -e '\f' >&3
-	echo "$msg" >&3
 }
 # notifyDisplay()    {{{1
 #   intent: display multi-pane dialog with text and progress bar widgets
@@ -872,27 +522,6 @@ function processOptions() {
 		esac
 	done
 }
-# qutebrowserCommand(window_id, command)    {{{1
-#   params: 1 - window id
-#           2 - command
-#   prints: nil
-#   return: nil
-function qutebrowserCommand() {
-	# extract parameters
-	local id cmd
-	id=$1
-	cmd="$2"
-	gui_pause=0.5
-
-	# send command to nominated qutebrowser instance
-	xdotool windowactivate --sync "$id"
-	sleep $gui_pause
-	xdotool key --window "$id" --clearmodifiers colon
-	sleep $gui_pause
-	xdotool type --window "$id" --clearmodifiers "$cmd"
-	sleep $gui_pause
-	xdotool key --window "$id" --clearmodifiers Return
-}
 # reloadWikiQutebrowserTab()    {{{1
 #   intent: reload tiddlywiki browser tab on assumption that tiddlywiki
 #           server is now running
@@ -925,24 +554,6 @@ function reloadWikiQutebrowserTab() {
 	qutebrowser --basedir "$basedir" ':reload'
 	sleep 3
 	qutebrowser --basedir "$basedir" ":message-info 'Reloaded tiddlywiki tab'"
-	### - if no ids found 'xdotool search' fails rather than return 0
-	##if ! xdotool search --name 'qutebrowser/wiki' &>/dev/null; then
-	##	log 'Cannot locate tiddlywiki qutebrowser instance' 'crit'
-	##	notifyCritical
-	##else
-	##	#wiki_ids=($(xdotool search --name 'qutebrowser/wiki'))
-	##	mapfile -t wiki_ids < <(xdotool search --name 'qutebrowser/wiki')
-	##	if [[ ${#wiki_ids[@]} -gt 1 ]]; then
-	##		log 'Located multiple tiddlywiki qutebrowser instances' 'crit'
-	##		notifyCritical
-	##	else
-	##		wiki_id="${wiki_ids[0]}"
-	##		qutebrowserCommand "$wiki_id" 'tab-focus 1'
-	##		sleep 3
-	##		qutebrowserCommand "$wiki_id" 'reload'
-	##		sleep 3
-	##	fi
-	##fi
 
 	# logging
 	log "  Finished ${task}"
@@ -955,12 +566,6 @@ function reloadWikiQutebrowserTab() {
 #   params: nil
 #   prints: nil
 #   return: n/a
-#   note:   it appears all qutebrowser instances must finish loading in
-#           order for the 'set' command to execute correctly -- this is
-#           because it seems an actively loading qutebrowser window
-#           interferes with xdotool typing its keys, and it is
-#           unpredictable which keys are received by the window and
-#           which are 'lost'
 #   note:   the qutebrowser wrapper script used to launch qutebrowser
 #           causes the default download directory to be:
 #             /run/user/$(id -u)/qutebrowser/SESSION/download/
@@ -990,25 +595,6 @@ function resetQutebrowserDownloadDirectory() {
 		sleep 1
 		qutebrowser --basedir "$basedir" ":message-info 'Set download directory to ~/Downloads'"
 	done
-	### - if no ids found 'xdotool search' fails rather than return 0
-	##if ! xdotool search --class qutebrowser &>/dev/null; then
-	##	log 'Cannot locate any qutebrowser instances' 'crit'
-	##	notifyCritical
-	##else
-	##	local cmd msg window_count window_ids window_number
-	##	#window_ids=($(xdotool search --class qutebrowser))
-	##	mapfile -t window_ids < <(xdotool search --class qutebrowser)
-	##	window_count=${#window_ids[@]}
-	##	cmd="set downloads.location.directory ~/Downloads"
-	##	window_number=1
-	##	for window_id in "${window_ids[@]}"; do
-	##		msg='Resetting qutebrowser default download directory'
-	##		msg+=" ($window_number/$window_count)..."
-	##		notifyMessage "$msg"
-	##		qutebrowserCommand "$window_id" "$cmd"
-	##		((window_number++))
-	##	done
-	##fi
 
 	# logging
 	log "  Finished ${task}"
@@ -1022,12 +608,6 @@ function resetQutebrowserDownloadDirectory() {
 #   params: nil
 #   prints: nil
 #   return: n/a
-#   note:   it appears all qutebrowser instances must finish loading in
-#           order for the 'set' command to execute correctly -- this is
-#           because it seems an actively loading qutebrowser window
-#           interferes with xdotool typing its keys, and it is
-#           unpredictable which keys are received by the window and
-#           which are 'lost'
 #   note:   the qutebrowser instances were launched with a specified
 #           window title string to enable i3's apply_layout mechanism
 #           to 'swallow' them into the correct containers -- the window
@@ -1059,26 +639,6 @@ function resetQutebrowserWindowTitles() {
 		sleep 1
 		qutebrowser --basedir "$basedir" ":message-info 'Reset window title to default value'"
 	done
-	### - if no ids found 'xdotool search' fails rather than return 0
-	##if ! xdotool search --class qutebrowser &>/dev/null; then
-	##	log 'Cannot locate any qutebrowser instances to reset' 'crit'
-	##	notifyCritical
-	##else
-	##	local cmd msg window_count title window_ids window_number
-	##	#window_ids=($(xdotool search --class qutebrowser))
-	##	mapfile -t window_ids < <(xdotool search --class qutebrowser)
-	##	window_count=${#window_ids[@]}
-	##	title='{perc}{current_title}{title_sep}qutebrowser'
-	##	cmd="set window.title_format $title"
-	##	window_number=1
-	##	for window_id in "${window_ids[@]}"; do
-	##		msg='Resetting qutebrowser window title'
-	##		msg+=" ($window_number/$window_count)..."
-	##		notifyMessage "$msg"
-	##		qutebrowserCommand "$window_id" "$cmd"
-	##		((window_number++))
-	##	done
-	##fi
 
 	# logging
 	log "  Finished ${task}"
@@ -1186,14 +746,8 @@ assignWorkspaces # actually done in i3 config file (see function)
 applyLayouts
 launchNvimGui
 launchNeomutt
-#launchQutebrowserWebmail
 launchGoogleChrome
-#launchQutebrowserPorn
-#launchQutebrowserMusic
-#launchQutebrowserVim
-#launchQutebrowserGames
 launchTiddlywiki
-#launchQutebrowserWiki
 launchQutebrowserSessions
 launchTmux
 waitForAppsToLoad # must precede qutebrowser-modification tasks
