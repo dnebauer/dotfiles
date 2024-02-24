@@ -43,6 +43,14 @@ required_local_tools=("$qutebrowser" "$tiddlywiki")
 # for that!)
 delay_post_launch=1
 delay_app_loading=30
+# workspace names
+workspaces=(
+	'1:term'
+	'2:mail'
+	'3:chrome'
+	'4:qute'
+	'5:wiki'
+)
 # notification dialog named pipe handling
 notify_text_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
 notify_progress_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
@@ -216,11 +224,36 @@ function applyLayout5() {
 #   prints: nil
 #   return: n/a
 function applyLayouts() {
-	applyLayout1
-	applyLayout2
-	applyLayout3
-	applyLayout4
-	applyLayout5
+	##applyLayout1
+	##applyLayout2
+	##applyLayout3
+	##applyLayout4
+	##applyLayout5
+	local elapsed layout_file task tmr workspace_name workspace_number
+	for workspace in "${workspaces[@]}"; do
+		# extract workspace number and name
+		workspace_number="${workspace%:*}"
+		workspace_name="${workspace#*:}"
+		# logging
+		tmr="$(timer)"
+		task="applying layout to workspace $workspace_number ($workspace_name)"
+		log "Begin ${task}"
+		notifyMessage "Applying layout $workspace_number ($workspace_name)..."
+
+		# apply layout
+		#i3-msg 'workspace 1:term; append_layout ~/.config/i3/sessions/workspace_2.json'
+		# shellcheck disable=SC2088
+		layout_file="~/.config/i3/sessions/workspace_${workspace_number}.json"
+		i3-msg "workspace $workspace; append_layout $layout_file"
+
+		# layout defines the following marks: t=term, v=vim
+
+		# logging
+		if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+		log " Finished ${task}"
+		elapsed="$(timer "${tmr}")"
+		log " Elapsed time ${elapsed}"
+	done
 }
 # assignWorkspaces()    {{{1
 #   intent: check for required tools
