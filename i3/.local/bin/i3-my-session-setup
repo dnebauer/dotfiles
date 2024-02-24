@@ -409,7 +409,9 @@ function launchQutebrowserGames() {
 	notifyMessage 'Launnching qutebrowser for game sites...'
 
 	# launch qutebrowser instance
-	$qutebrowser --set window.title_format 'qutebrowser/games' --restore games &
+	$qutebrowser \
+		--set window.title_format 'qutebrowser/games' \
+		--restore games &
 	sleep $delay_post_launch
 
 	# logging
@@ -486,7 +488,9 @@ function launchQutebrowserVim() {
 	notifyMessage 'Launching qutebrowser for vim/programming sites...'
 
 	# launch qutebrowser instance
-	$qutebrowser --set window.title_format 'qutebrowser/vim' --restore vim &
+	$qutebrowser \
+		--set window.title_format 'qutebrowser/vim' \
+		--restore vim &
 	sleep $delay_post_launch
 
 	# logging
@@ -511,7 +515,9 @@ function launchQutebrowserWebmail() {
 	notifyMessage 'Launching qutebrowser for webmail...'
 
 	# launch qutebrowser instance
-	$qutebrowser --set window.title_format 'qutebrowser/mail' --restore mail &
+	$qutebrowser \
+		--set window.title_format 'qutebrowser/mail' \
+		--restore mail &
 	sleep $delay_post_launch
 
 	# logging
@@ -536,7 +542,9 @@ function launchQutebrowserWiki() {
 	notifyMessage 'Launching qutebrowser for tiddlywiki...'
 
 	# launch qutebrowser instance
-	$qutebrowser --set window.title_format 'qutebrowser/wiki' --restore wiki &
+	$qutebrowser \
+		--set window.title_format 'qutebrowser/wiki' \
+		--restore wiki &
 	sleep $delay_post_launch
 
 	# logging
