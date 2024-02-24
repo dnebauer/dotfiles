@@ -48,6 +48,7 @@ notify_text_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
 notify_progress_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
 trap "notifyCleanup" EXIT
 notify_pids=()
+# qutebrowser sessions
 qutebrowser_sessions=(
 	'games'
 	'mail'
@@ -494,7 +495,7 @@ function launchQutebrowserPorn() {
 #   note:   the qutebrowser session names are defined in
 #           script variable $qutebrowser_sessions
 function launchQutebrowserSessions() {
-	# loop throug session names
+	# loop through session names
 	for session in "${qutebrowser_sessions[@]}"; do
 		# logging
 		local tmr
@@ -869,9 +870,11 @@ function qutebrowserCommand() {
 #           because the server and browser client are started at the
 #           same time, the tiddlywiki client usually displays a
 #           page-not-found error on startup
-#   note:   this task must be done before qutebrowser window titles
-#           are reset because window title ('name') is used to identify
-#           the qutebrowser window showing the tiddlywiki client
+#   note:   the qutebrowser wrapper script used to launch qutebrowser
+#           causes the default base directory to be:
+#             /run/user/$(id -u)/qutebrowser/SESSION/
+#           which usually resolves to:
+#             /run/user/1000/qutebrowser/SESSION/
 function reloadWikiQutebrowserTab() {
 	# logging
 	local tmr
@@ -882,24 +885,31 @@ function reloadWikiQutebrowserTab() {
 	notifyMessage 'Reloading tiddlywiki client qutebrowser tab...'
 
 	# reload qutebrowser tab showing tiddlywiki client
-	# - if no ids found 'xdotool search' fails rather than return 0
-	if ! xdotool search --name 'qutebrowser/wiki' &>/dev/null; then
-		log 'Cannot locate tiddlywiki qutebrowser instance' 'crit'
-		notifyCritical
-	else
-		#wiki_ids=($(xdotool search --name 'qutebrowser/wiki'))
-		mapfile -t wiki_ids < <(xdotool search --name 'qutebrowser/wiki')
-		if [[ ${#wiki_ids[@]} -gt 1 ]]; then
-			log 'Located multiple tiddlywiki qutebrowser instances' 'crit'
-			notifyCritical
-		else
-			wiki_id="${wiki_ids[0]}"
-			qutebrowserCommand "$wiki_id" 'tab-focus 1'
-			sleep 3
-			qutebrowserCommand "$wiki_id" 'reload'
-			sleep 3
-		fi
-	fi
+	local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+	basedir="$runtime_dir/qutebrowser/wiki"
+	qutebrowser --basedir "$basedir" ':tab-focus 1'
+	sleep 2
+	qutebrowser --basedir "$basedir" ':reload'
+	sleep 3
+	qutebrowser --basedir "$basedir" ":message-info 'Reloaded tiddlywiki tab'"
+	### - if no ids found 'xdotool search' fails rather than return 0
+	##if ! xdotool search --name 'qutebrowser/wiki' &>/dev/null; then
+	##	log 'Cannot locate tiddlywiki qutebrowser instance' 'crit'
+	##	notifyCritical
+	##else
+	##	#wiki_ids=($(xdotool search --name 'qutebrowser/wiki'))
+	##	mapfile -t wiki_ids < <(xdotool search --name 'qutebrowser/wiki')
+	##	if [[ ${#wiki_ids[@]} -gt 1 ]]; then
+	##		log 'Located multiple tiddlywiki qutebrowser instances' 'crit'
+	##		notifyCritical
+	##	else
+	##		wiki_id="${wiki_ids[0]}"
+	##		qutebrowserCommand "$wiki_id" 'tab-focus 1'
+	##		sleep 3
+	##		qutebrowserCommand "$wiki_id" 'reload'
+	##		sleep 3
+	##	fi
+	##fi
 
 	# logging
 	log "  Finished ${task}"
@@ -920,6 +930,8 @@ function reloadWikiQutebrowserTab() {
 #           which are 'lost'
 #   note:   the qutebrowser wrapper script used to launch qutebrowser
 #           causes the default download directory to be:
+#             /run/user/$(id -u)/qutebrowser/SESSION/download/
+#           which usually resolves to:
 #             /run/user/1000/qutebrowser/SESSION/download/
 #           and this procedure resets it to:
 #             ~/Downloads/
@@ -932,26 +944,38 @@ function resetQutebrowserDownloadDirectory() {
 	log "Begin ${task}"
 	notifyMessage 'Resetting qutebrowser default download directories...'
 
-	# reset qutebrowser window titles
-	# - if no ids found 'xdotool search' fails rather than return 0
-	if ! xdotool search --class qutebrowser &>/dev/null; then
-		log 'Cannot locate any qutebrowser instances' 'crit'
-		notifyCritical
-	else
-		local cmd msg window_count window_ids window_number
-		#window_ids=($(xdotool search --class qutebrowser))
-		mapfile -t window_ids < <(xdotool search --class qutebrowser)
-		window_count=${#window_ids[@]}
-		cmd="set downloads.location.directory ~/Downloads"
-		window_number=1
-		for window_id in "${window_ids[@]}"; do
-			msg='Resetting qutebrowser default download directory'
-			msg+=" ($window_number/$window_count)..."
-			notifyMessage "$msg"
-			qutebrowserCommand "$window_id" "$cmd"
-			((window_number++))
-		done
-	fi
+	# reset qutebrowser download directories
+	local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+	# shellcheck disable=SC2088
+	local download_dir='~/Downloads'
+	local msg
+	for session in "${qutebrowser_sessions[@]}"; do
+		msg="Resetting qutebrowser download directory for session '$session'"
+		notifyMessage "$msg"
+		basedir="$runtime_dir/qutebrowser/$session"
+		qutebrowser --basedir "$basedir" ":set downloads.location.directory $download_dir"
+		sleep 1
+		qutebrowser --basedir "$basedir" ":message-info 'Set download directory to ~/Downloads'"
+	done
+	### - if no ids found 'xdotool search' fails rather than return 0
+	##if ! xdotool search --class qutebrowser &>/dev/null; then
+	##	log 'Cannot locate any qutebrowser instances' 'crit'
+	##	notifyCritical
+	##else
+	##	local cmd msg window_count window_ids window_number
+	##	#window_ids=($(xdotool search --class qutebrowser))
+	##	mapfile -t window_ids < <(xdotool search --class qutebrowser)
+	##	window_count=${#window_ids[@]}
+	##	cmd="set downloads.location.directory ~/Downloads"
+	##	window_number=1
+	##	for window_id in "${window_ids[@]}"; do
+	##		msg='Resetting qutebrowser default download directory'
+	##		msg+=" ($window_number/$window_count)..."
+	##		notifyMessage "$msg"
+	##		qutebrowserCommand "$window_id" "$cmd"
+	##		((window_number++))
+	##	done
+	##fi
 
 	# logging
 	log "  Finished ${task}"
@@ -976,6 +1000,11 @@ function resetQutebrowserDownloadDirectory() {
 #           to 'swallow' them into the correct containers -- the window
 #           titles are now reset to the default value (which displays
 #           the active tab title)
+#   note:   the qutebrowser wrapper script used to launch qutebrowser
+#           causes the default base directory to be:
+#             /run/user/$(id -u)/qutebrowser/SESSION/
+#           which usually resolves to:
+#             /run/user/1000/qutebrowser/SESSION/
 function resetQutebrowserWindowTitles() {
 	# logging
 	local tmr
@@ -986,26 +1015,37 @@ function resetQutebrowserWindowTitles() {
 	notifyMessage 'Resetting qutebrowser window titles...'
 
 	# reset qutebrowser window titles
-	# - if no ids found 'xdotool search' fails rather than return 0
-	if ! xdotool search --class qutebrowser &>/dev/null; then
-		log 'Cannot locate any qutebrowser instances to reset' 'crit'
-		notifyCritical
-	else
-		local cmd msg window_count title window_ids window_number
-		#window_ids=($(xdotool search --class qutebrowser))
-		mapfile -t window_ids < <(xdotool search --class qutebrowser)
-		window_count=${#window_ids[@]}
-		title='{perc}{current_title}{title_sep}qutebrowser'
-		cmd="set window.title_format $title"
-		window_number=1
-		for window_id in "${window_ids[@]}"; do
-			msg='Resetting qutebrowser window title'
-			msg+=" ($window_number/$window_count)..."
-			notifyMessage "$msg"
-			qutebrowserCommand "$window_id" "$cmd"
-			((window_number++))
-		done
-	fi
+	local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+	local title='{perc}{current_title}{title_sep}qutebrowser'
+	local msg
+	for session in "${qutebrowser_sessions[@]}"; do
+		msg="Resetting qutebrowser window title for session '$session'"
+		notifyMessage "$msg"
+		basedir="$runtime_dir/qutebrowser/$session"
+		qutebrowser --basedir "$basedir" ":set window.title_format $title"
+		sleep 1
+		qutebrowser --basedir "$basedir" ":message-info 'Reset window title to default value'"
+	done
+	### - if no ids found 'xdotool search' fails rather than return 0
+	##if ! xdotool search --class qutebrowser &>/dev/null; then
+	##	log 'Cannot locate any qutebrowser instances to reset' 'crit'
+	##	notifyCritical
+	##else
+	##	local cmd msg window_count title window_ids window_number
+	##	#window_ids=($(xdotool search --class qutebrowser))
+	##	mapfile -t window_ids < <(xdotool search --class qutebrowser)
+	##	window_count=${#window_ids[@]}
+	##	title='{perc}{current_title}{title_sep}qutebrowser'
+	##	cmd="set window.title_format $title"
+	##	window_number=1
+	##	for window_id in "${window_ids[@]}"; do
+	##		msg='Resetting qutebrowser window title'
+	##		msg+=" ($window_number/$window_count)..."
+	##		notifyMessage "$msg"
+	##		qutebrowserCommand "$window_id" "$cmd"
+	##		((window_number++))
+	##	done
+	##fi
 
 	# logging
 	log "  Finished ${task}"
@@ -1123,10 +1163,10 @@ launchTiddlywiki
 #launchQutebrowserWiki
 launchQutebrowserSessions
 launchTmux
-waitForAppsToLoad        # must precede qutebrowser-modification tasks
-reloadWikiQutebrowserTab # must precede qutebrowser window titles reset
+waitForAppsToLoad # must precede qutebrowser-modification tasks
 resetQutebrowserWindowTitles
 resetQutebrowserDownloadDirectory
+reloadWikiQutebrowserTab
 setInitialContainerFocus
 notifyCompletion
 log 'i3 setup: finished' # can't log till options processed
