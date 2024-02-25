@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+## no critic (ProhibitDuplicateLiteral)
+
 use strictures 2;
 use 5.006;
 use 5.022_001;
@@ -19,23 +21,23 @@ my $output  = $rtng->get_player_state;
 # decode JSON-like output to a list
 my $data_arrayref = JSON::MaybeXS::decode_json $output;
 my %data          = %{$data_arrayref};
-if ( not %data ) { die "No status data extracted\n"; }
+if (not %data) { die "No status data extracted\n"; }
 
 # construct status message
 my $msg;
-if ( $data{'state'} eq 'playing' ) {
-    $msg = sprintf "Streaming: %s\nPlaying: %s (%s)", $data{'station'},
-        $data{'title'}, $data{'artist'};
+if ($data{'state'} eq 'playing') {
+  $msg = sprintf "Streaming: %s\nPlaying: %s (%s)", $data{'station'},
+      $data{'title'}, $data{'artist'};
 }
-elsif ( $data{'state'} eq 'stopped' ) {
-    $msg = sprintf "Currently stopped\nLast station: %s", $data{'station'};
+elsif ($data{'state'} eq 'stopped') {
+  $msg = sprintf "Currently stopped\nLast station: %s", $data{'station'};
 }
 else {
-    die "Unknown player state: $data{'state'}\n";
+  die "Unknown player state: $data{'state'}\n";
 }
 
 # display message in dunst
-my @cmd = ( 'dunstify', 'Radiotray NG', $msg );
+my @cmd = ('dunstify', 'Radiotray NG', $msg);
 system @cmd;
 
 1;

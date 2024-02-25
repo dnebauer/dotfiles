@@ -549,11 +549,9 @@ function reloadWikiQutebrowserTab() {
 	# reload qutebrowser tab showing tiddlywiki client
 	local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
 	basedir="$runtime_dir/qutebrowser/wiki"
-	qutebrowser --basedir "$basedir" ':tab-focus 1'
+	qutebrowser --basedir "$basedir" ':tab-focus --no-last 1'
 	sleep 2
 	qutebrowser --basedir "$basedir" ':reload'
-	sleep 3
-	qutebrowser --basedir "$basedir" ":message-info 'Reloaded tiddlywiki tab'"
 
 	# logging
 	log "  Finished ${task}"
@@ -592,8 +590,6 @@ function resetQutebrowserDownloadDirectory() {
 		notifyMessage "$msg"
 		basedir="$runtime_dir/qutebrowser/$session"
 		qutebrowser --basedir "$basedir" ":set downloads.location.directory $download_dir"
-		sleep 1
-		qutebrowser --basedir "$basedir" ":message-info 'Set download directory to ~/Downloads'"
 	done
 
 	# logging
@@ -636,8 +632,6 @@ function resetQutebrowserWindowTitles() {
 		notifyMessage "$msg"
 		basedir="$runtime_dir/qutebrowser/$session"
 		qutebrowser --basedir "$basedir" ":set window.title_format $title"
-		sleep 1
-		qutebrowser --basedir "$basedir" ":message-info 'Reset window title to default value'"
 	done
 
 	# logging

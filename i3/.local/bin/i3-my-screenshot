@@ -22,25 +22,25 @@ set -o pipefail
 
 self="$(basename "$0")"
 required_tools=(
-    basename   kill          tee
-    cut        maim          trap
-    date       notify-send   xclip
-    feh        pidof         xrandr
-    getopt     ps            xdotool
-    grep       sed           zenity
-    i3-msg     sleep
+	basename kill tee
+	cut maim trap
+	date notify-send xclip
+	feh pidof xrandr
+	getopt ps xdotool
+	grep sed zenity
+	i3-msg sleep
 )
 to_clipboard=false
 to_file=false
-get_window=false     # window with focus
-get_region=false     # user selects region to copy
-get_screen=false     # get current screen
-get_desktop=false    # get all monitor screens
+get_window=false  # window with focus
+get_region=false  # user selects region to copy
+get_screen=false  # get current screen
+get_desktop=false # get all monitor screens
 save_name="$(date +%F_%H-%M-%S_%z).png"
-if [[ -d $HOME/Downloads ]] ; then
-    save_path="$HOME/Downloads"
+if [[ -d $HOME/Downloads ]]; then
+	save_path="$HOME/Downloads"
 else
-    save_path="$HOME"
+	save_path="$HOME"
 fi
 save_fp="$save_path/$save_name"
 # }}}1
@@ -51,8 +51,8 @@ save_fp="$save_path/$save_name"
 #   params: nil
 #   prints: nil
 #   return: nil
-displayUsage () {
-cat << _USAGE
+displayUsage() {
+	cat <<_USAGE
 ${self}: screenshot
 
 A utility for taking screenshots in i3.
@@ -120,115 +120,143 @@ _USAGE
 #   return: nil
 #   note:   after execution variable ARGS contains
 #           remaining command line args (after options removed)
-processOptions () {
-    # read the command line options
-    local LONG_OPTIONS="help,verbose,debug,clipboard,file,desktop"
-    LONG_OPTIONS="${LONG_OPTIONS},region,screen,window"
-    local OPTIONS="$(                             \
-        getopt                                    \
-            --options hvucfdrsw                   \
-            --long    $LONG_OPTIONS               \
-            --name    "${BASH_SOURCE[0]}"         \
-            -- "${@}"                             \
-    )"
-    [[ ${?} -eq 0 ]] || {
-        echo 'Invalid command line options' 1>&2
-        exit 1
-    }
-    eval set -- "${OPTIONS}"
-    while true ; do
-        case "${1}" in
-        -h | --help      ) displayUsage       ; exit 0  ;;
-        -v | --verbose   ) set -o verbose     ; shift 1 ;;
-        -u | --debug     ) set -o xtrace      ; shift 1 ;;
-        -c | --clipboard ) to_clipboard=true  ; shift 1 ;;
-        -f | --file      ) to_file=true       ; shift 1 ;;
-        -d | --desktop   ) get_desktop=true   ; shift 1 ;;
-        -r | --region    ) get_region=true    ; shift 1 ;;
-        -s | --screen    ) get_screen=true    ; shift 1 ;;
-        -w | --window    ) get_window=true    ; shift 1 ;;
-        --               ) shift ; break ;;
-        *                ) break ;;
-        esac
-    done
-    ARGS="${@}"  # remaining arguments
+processOptions() {
+	# read the command line options
+	local LONG_OPTIONS="help,verbose,debug,clipboard,file,desktop"
+	LONG_OPTIONS="${LONG_OPTIONS},region,screen,window"
+	local OPTIONS
+	if ! OPTIONS="$(
+		getopt \
+			--options hvucfdrsw \
+			--long $LONG_OPTIONS \
+			--name "${BASH_SOURCE[0]}" \
+			-- "${@}"
+	)"; then
+		echo 'Invalid command line options' 1>&2
+		exit 1
+	fi
+	eval set -- "${OPTIONS}"
+	while true; do
+		case "${1}" in
+		-h | --help)
+			displayUsage
+			exit 0
+			;;
+		-v | --verbose)
+			set -o verbose
+			shift 1
+			;;
+		-u | --debug)
+			set -o xtrace
+			shift 1
+			;;
+		-c | --clipboard)
+			to_clipboard=true
+			shift 1
+			;;
+		-f | --file)
+			to_file=true
+			shift 1
+			;;
+		-d | --desktop)
+			get_desktop=true
+			shift 1
+			;;
+		-r | --region)
+			get_region=true
+			shift 1
+			;;
+		-s | --screen)
+			get_screen=true
+			shift 1
+			;;
+		-w | --window)
+			get_window=true
+			shift 1
+			;;
+		--)
+			shift
+			break
+			;;
+		*) break ;;
+		esac
+	done
 }
 # Join items    {{{1
 #   params: 1  - delimiter
 #           2+ - items to be joined
 #   prints: string containing joined items
 #   return: nil
-function joinBy () {
-    local d=$1
-    shift
-    local f=$1
-    shift
-    printf %s "$f" "${@/#/$d}"
+function joinBy() {
+	local d=$1
+	shift
+	local f=$1
+	shift
+	printf %s "$f" "${@/#/$d}"
 }
 # Get screen geometry   {{{1
 #  params: nil
 #  prints: screen geometry
 #  return: nil
-function screen_geometry () {
-    local items
-    items=(                        \
-        $(                         \
-            xrandr --query |       \
-            grep "\bconnected\b" | \
-            sed "s/connected //" | \
-            sed "s/primary //" |   \
-            sed "s/(.*) //" |      \
-            sed "s/ x /x/"         \
-        )                          \
-    )
-    local geometry
-    geometry="$(zenity \
-        --list \
-        --text 'Select screen to capture' \
-        --print-column 2 \
-        --column 'Screen' --column 'Geometry' --column 'Size' \
-        "${items[@]}"\
-    )"
-    echo "$geometry"
+function screen_geometry() {
+	local items
+	mapfile -t items < <(
+		xrandr --query |
+			grep "\bconnected\b" |
+			sed "s/connected //" |
+			sed "s/primary //" |
+			sed "s/(.*) //" |
+			sed "s/ x /x/"
+	)
+	local geometry
+	geometry="$(
+		zenity \
+			--list \
+			--text 'Select screen to capture' \
+			--print-column 2 \
+			--column 'Screen' --column 'Geometry' --column 'Size' \
+			"${items[@]}"
+	)"
+	echo "$geometry"
 }
 # Move/rename image file    {{{1
 #  params: nil
 #  prints: nil
 #  return: nil
-move_image_file () {
-    local new_save_fp
-    new_save_fp="$(                     \
-        yad                             \
-            --file-selection            \
-            --title='Save image as'     \
-            --window-icon='filesaveas'  \
-            --file-selection            \
-            --save                      \
-            --filename="$save_fp"       \
-            --confirm-overwrite         \
-            --file-filter="*.png"       \
-    )"
-    if [[ -n "$new_save_fp" ]] && [[ "$new_save_fp" != "$save_fp" ]] ; then
-        mv --force "$save_fp" "$new_save_fp"
-    fi
+move_image_file() {
+	local new_save_fp
+	new_save_fp="$(
+		yad \
+			--file-selection \
+			--title='Save image as' \
+			--window-icon='filesaveas' \
+			--file-selection \
+			--save \
+			--filename="$save_fp" \
+			--confirm-overwrite \
+			--file-filter="*.png"
+	)"
+	if [[ -n "$new_save_fp" ]] && [[ "$new_save_fp" != "$save_fp" ]]; then
+		mv --force "$save_fp" "$new_save_fp"
+	fi
 }
 # Abort script    {{{1
 #  params: 1 - message
 #  prints: error message to console if no notify daemon
 #  return: n/a
-function abort () {
-    if command -v notify-send &>/dev/null ; then
-        notify-send                 \
-            --urgency='critical'    \
-            --expire-time=5000      \
-            --category='fatal'      \
-        'Screenshot capture failed' \
-        "$1"
-    else
-        echo 'Screenshot capture failed' > /dev/stderr
-        echo "$1" > /dev/stderr
-    fi
-    exit 1
+function abort() {
+	if command -v notify-send &>/dev/null; then
+		notify-send \
+			--urgency='critical' \
+			--expire-time=5000 \
+			--category='fatal' \
+			'Screenshot capture failed' \
+			"$1"
+	else
+		echo 'Screenshot capture failed' >/dev/stderr
+		echo "$1" >/dev/stderr
+	fi
+	exit 1
 }
 # }}}1
 
@@ -239,11 +267,11 @@ function abort () {
 # - check for required tools    {{{2
 
 missing=()
-for tool in "${required_tools[@]}" ; do
-    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+for tool in "${required_tools[@]}"; do
+	command -v "${tool}" &>/dev/null || missing+=("${tool}")
 done
-[[ ${#missing[@]} -eq 0 ]] \
-    || abort "Can't run without: $(joinBy ', ' "${missing[@]}")"
+[[ ${#missing[@]} -eq 0 ]] ||
+	abort "Can't run without: $(joinBy ', ' "${missing[@]}")"
 unset missing tools required_tools
 
 # - process command line options    {{{2
@@ -254,14 +282,18 @@ processOptions "${@}"
 
 # -- check that an output argument is supplied
 count=0
-for opt in $to_clipboard $to_file ; do
-    [[ $opt = true ]] && let "count += 1"
+for opt in $to_clipboard $to_file; do
+	# ((c++)) gives error status code when going from 0 to 1
+	# shellcheck disable=2015
+	[[ $opt = true ]] && ((count++)) || true
 done
 [[ $count -eq 0 ]] && abort "Must specify destination(s)\n['-c','-f']"
 # -- check only one selection method nominated
 count=0
-for opt in $get_desktop $get_region $get_screen $get_window ; do
-    [[ $opt = true ]] && let "count += 1"
+for opt in $get_desktop $get_region $get_screen $get_window; do
+	# ((c++)) gives error status code when going from 0 to 1
+	# shellcheck disable=2015
+	[[ $opt = true ]] && ((count++)) || true
 done
 [[ $count -eq 0 ]] && abort "Must specify a selection method\n[-d,-r,-s,-w]"
 [[ $count -gt 1 ]] && abort "Specify only 1 selection method\n[-d,-r,-s,-w]"
@@ -271,72 +303,72 @@ done
 # - stop oneko if running
 oneko_cmd='oneko -time 70000 -bg red -position -30+20'
 restart_oneko=false
-if command -v oneko &>/dev/null ; then
-    oneko_path="$(command -v oneko)"
-    oneko_pids=()
-    oneko_pid=$(pidof "$oneko_path") || true
-    if [[ -n "$oneko_pid" ]] ; then
-        oneko_pids+=($oneko_pid)
-        # after i3 startup oneko has parent process '/bin/sh oneko ...'
-        while true ; do
-            ppid=$(ps -o ppid= -p $oneko_pid)
-            # result is left-padded with spaces
-            ppid="${ppid#"${ppid%%[![:space:]]*}"}"
-            if [[ $ppid > 1 ]] ; then
-                oneko_pids+=($ppid)
-                oneko_pid=$ppid
-            else
-                break
-            fi
-        done
-        restart_oneko=true
-        # kill oneko
-        kill -TERM "${oneko_pids[@]}"
-        trap "i3-msg 'exec --no-startup-id $oneko_cmd' &>/dev/null" EXIT
-    fi
+if command -v oneko &>/dev/null; then
+	oneko_path="$(command -v oneko)"
+	oneko_pids=()
+	oneko_pid=$(pidof "$oneko_path") || true
+	if [[ -n "$oneko_pid" ]]; then
+		oneko_pids+=("$oneko_pid")
+		# after i3 startup oneko has parent process '/bin/sh oneko ...'
+		while true; do
+			ppid=$(ps -o ppid= -p "$oneko_pid")
+			# result is left-padded with spaces
+			ppid="${ppid#"${ppid%%[![:space:]]*}"}"
+			if [[ $ppid -gt 1 ]]; then
+				oneko_pids+=("$ppid")
+				oneko_pid=$ppid
+			else
+				break
+			fi
+		done
+		restart_oneko=true
+		# kill oneko
+		kill -TERM "${oneko_pids[@]}"
+		trap 'i3-msg "exec --no-startup-id $oneko_cmd" &>/dev/null' EXIT
+	fi
 fi
 
 # - for window capture need to sleep
-if [[ $get_window = true ]] ; then
-    sleep 5s
+if [[ $get_window = true ]]; then
+	sleep 5s
 fi
 
 # Set capture command options based on capture type    {{{1
 # - relies on previous arg-checking to ensure only 1 capture type selected
 
-[[ $get_desktop = true ]] && opts=( )
+[[ $get_desktop = true ]] && opts=()
 
-[[ $get_region  = true ]] && opts=( --select )
+[[ $get_region = true ]] && opts=(--select)
 
-[[ $get_screen  = true ]] && opts=( --geometry=$(screen_geometry) )
+[[ $get_screen = true ]] && opts=(--geometry="$(screen_geometry)")
 
-[[ $get_window  = true ]] && opts=( --window=$(xdotool getactivewindow) )
+[[ $get_window = true ]] && opts=(--window="$(xdotool getactivewindow)")
 
 # Execute capture command depending on destination    {{{1
 # - relies on options check at startup to ensure
 #   at least 1 image destination has been selected
 
-if [[ $to_clipboard = true ]] && [[ $to_file = true ]] ; then
-    maim "${opts[@]}" | tee "$save_fp" | xclip -sel clipboard -t image/png
+if [[ $to_clipboard = true ]] && [[ $to_file = true ]]; then
+	maim "${opts[@]}" | tee "$save_fp" | xclip -sel clipboard -t image/png
 
-elif [[ $to_clipboard = true ]] ; then
-    maim "${opts[@]}" | xclip -selection clipboard -t image/png
+elif [[ $to_clipboard = true ]]; then
+	maim "${opts[@]}" | xclip -selection clipboard -t image/png
 
-elif [[ $to_file = true ]] ; then
-    maim "${opts[@]}" "$save_fp"
+elif [[ $to_file = true ]]; then
+	maim "${opts[@]}" "$save_fp"
 fi
 
 # Post-capture tasks    {{{1
 
 # - optionally move/rename destination
-if [[ $to_file = true ]] ; then
-    move_image_file
+if [[ $to_file = true ]]; then
+	move_image_file
 fi
 
 # - restart oneko if originally running
-if [[ $restart_oneko = true ]] ; then
-    i3-msg "exec --no-startup-id $oneko_cmd" &>/dev/null
-    trap - EXIT
+if [[ $restart_oneko = true ]]; then
+	i3-msg "exec --no-startup-id $oneko_cmd" &>/dev/null
+	trap - EXIT
 fi
 # }}}1
 

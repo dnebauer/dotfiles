@@ -1,11 +1,13 @@
 #!/usr/bin/perl
 
+## no critic (ProhibitDuplicateLiteral)
+
 use strictures 2;
 use 5.006;
 use 5.022_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
-use IPC::Cmd qw(can_run run);
+use IPC::Cmd;
 use Net::DBus;
 
 # check for required tools
@@ -13,17 +15,17 @@ IPC::Cmd::can_run('pactl') or die "Cannot run without 'pactl'\n";
 
 # adjust volume
 sub run_cmd {
-    my $cmd    = shift;
-    my @output = IPC::Cmd::run( command => $cmd );
-    return;
+  my $cmd    = shift;
+  my @output = IPC::Cmd::run(command => $cmd);
+  return;
 }
 my $vol = '25%';
 ## no critic (RequireInterpolationOfMetachars)
-my @unmute  = ( 'pactl', 'set-sink-mute',   '@DEFAULT_SINK@', 'false' );
-my @set_vol = ( 'pactl', 'set-sink-volume', '@DEFAULT_SINK@', $vol );
+my @unmute  = ('pactl', 'set-sink-mute',   '@DEFAULT_SINK@', 'false');
+my @set_vol = ('pactl', 'set-sink-volume', '@DEFAULT_SINK@', $vol);
 ## use critic
-run_cmd( [@unmute] );
-run_cmd( [@set_vol] );
+run_cmd([@unmute]);
+run_cmd([@set_vol]);
 
 # play/pause using radiotry-ng dbus interface
 my $bus     = Net::DBus->session;
