@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# shellcheck disable=2317
+
 # File: i3-screenshot
 # Author: David Nebauer (david at nebauer dot org)
 # Purpose: Capture (part of) screen to file or clipboard
@@ -128,7 +130,7 @@ processOptions() {
 	if ! OPTIONS="$(
 		getopt \
 			--options hvucfdrsw \
-			--long $LONG_OPTIONS \
+			--long "$LONG_OPTIONS" \
 			--name "${BASH_SOURCE[0]}" \
 			-- "${@}"
 	)"; then
@@ -261,6 +263,42 @@ function abort() {
 # }}}1
 
 # MAIN
+
+# WARNING: disabling script due to fatal X error
+
+# in January 2024 this script began failing with the error:
+#    Maim encountered an error:
+#    Error: Failed to open X display: :0
+# troubleshooting failed to determine the cause or find a workaround,
+# although maim works fine when called directly from the command line;
+# so it is temporarily disabled
+summary='Screenshot Script Deactivated'
+body="Script '$self'
+is causing X to crash.
+
+Consider running maim directly, e.g.,
+<u>Super</u>+<u>d</u>, <u>Ctrl</u>+<u>Tab</u>, then something like:
+
+maim --select &#x5c;
+  $HOME/Downloads/screenshot.png
+
+(Do not use '~' shortcut for '$HOME')"
+if command -v notify-send &>/dev/null; then
+	# frcolor = frame colour = yellow (#FFFF00)
+	# bgcolor = background colour = light yellow (#FFFFE0)
+	# fgcolor = foreground (text) colour = black (#000000)
+	notify-send \
+		--urgency=critical \
+		--expire-time=30000 \
+		--hint 'string:frcolor:#FFFF00' \
+		--hint 'string:bgcolor:#FFFFE0' \
+		--hint 'string:fgcolor:#000000' \
+		"$summary" "$body"
+else
+	echo "$summary" 1>&2
+	echo "$body" 1>&2
+fi
+exit
 
 # Start up tasks    {{{1
 
