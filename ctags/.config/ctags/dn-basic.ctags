@@ -1,0 +1,5 @@
+--regex-C=/$x/x/x/e/    ****************************
+--regex-C=/$x/x/x/e/            BASIC OPTIONS
+--regex-C=/$x/x/x/e/    ****************************
+
+--exclude=.git

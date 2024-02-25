@@ -1,0 +1,58 @@
+--regex-C=/$x/x/x/e/ ****************************
+--regex-C=/$x/x/x/e/              PERL
+--regex-C=/$x/x/x/e/ ****************************
+
+--regex-C=/$x/x/x/e/ --langdef=perl
+--regex-C=/$x/x/x/e/ this command causes the warning:
+--regex-C=/$x/x/x/e/ 'Language "perl" already defined'
+
+--langmap=perl:.pm.pl
+
+--regex-perl=/$x/x/x/e/    ----------------------
+--regex-perl=/$x/x/x/e/     constants [c] <perl>
+--regex-perl=/$x/x/x/e/    ----------------------
+
+--regex-perl=/^\s*Readonly\s+my\s+\$(\S+)\s+/\1/c,constants/
+
+--regex-perl=/$x/x/x/e/  --------------------------
+--regex-perl=/$x/x/x/e/   *format*labels*packages*
+--regex-perl=/$x/x/x/e/  --------------------------
+
+--regex-perl=/$x/x/x/e/     --------------------
+--regex-perl=/$x/x/x/e/      extends [e] <perl>
+--regex-perl=/$x/x/x/e/     --------------------
+
+--regex-perl=/^\s*extends\s+(['"])(.+)\1/\2/e,extends/
+
+--regex-perl=/$x/x/x/e/       ----------------
+--regex-perl=/$x/x/x/e/        use [u] <perl>
+--regex-perl=/$x/x/x/e/       ----------------
+
+--regex-perl=/^\s*use\s+([^ ;]+)/\1/u,use/
+
+--regex-perl=/$x/x/x/e/      -----------------
+--regex-perl=/$x/x/x/e/       role [r] <perl>
+--regex-perl=/$x/x/x/e/      -----------------
+
+--regex-perl=/^\s*with\s+(['"])(.+)\1/\2/r,role/
+
+--regex-perl=/$x/x/x/e/    ---------------------
+--regex-perl=/$x/x/x/e/     subtypes [t] <perl>
+--regex-perl=/$x/x/x/e/    ---------------------
+
+--regex-perl=/^\s*subtype\s+['"]?([0-9a-zA-Z_]+)/\1/t,subtype/
+
+--regex-perl=/$x/x/x/e/   ------------------------
+--regex-perl=/$x/x/x/e/    subroutines [s] <perl>
+--regex-perl=/$x/x/x/e/   ------------------------
+
+--regex-perl=/^\s*method\s+['"]?([0-9a-zA-Z_]+)/\1/s,subroutine/
+--regex-perl=/^\s*func\s+['"]?([0-9a-zA-Z_]+)/\1/s,subroutine/
+
+--regex-perl=/$x/x/x/e/   -----------------------
+--regex-perl=/$x/x/x/e/    attributes [a] <perl>
+--regex-perl=/$x/x/x/e/   -----------------------
+
+--regex-perl=/^\s*has\s+['"]?([0-9a-zA-Z_]+)/\1/a,attribute/
+--regex-perl=/^\s*parameter\s+['"]?([0-9a-zA-Z_]+)/\1/a,attribute/
+--regex-perl=/^\s*option\s+['"]?([0-9a-zA-Z_]+)/\1/a,attribute/
