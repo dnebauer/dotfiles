@@ -3,33 +3,32 @@ package Dn::Package;
 use Moo;    # {{{1
 use strictures 2;
 use 5.006;
-use 5.22.1;
+use 5.036_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
 
 use autodie qw(open close);
-use Carp qw(croak);
+use Carp    qw(confess);
 use Const::Fast;
 use Dn::Common;
 use Dn::Error;
 use Dn::InteractiveIO;
-use Dn::Menu;
 use English qw(-no_match_vars);
-use Function::Parameters;
 use MooX::HandlesVia;
 use Path::Tiny;
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use Syntax::Keyword::Try;
 use Types::Standard;
-use experimental 'switch';
+
+with qw(Role::Utils::Dn);
 
 const my $TRUE  => 1;
 const my $FALSE => 0;
 my $cp = Dn::Common->new();
 my $io = Dn::InteractiveIO->new;
-Sys::Syslog::openlog( 'ident', 'user' );    # }}}1
-        # ident is prepended to every message - adapt to module
-        # user is the most commonly used facility - leave as is
+Sys::Syslog::openlog('ident', 'user');    # }}}1
+    # ident is prepended to every message - adapt to module
+    # user is the most commonly used facility - leave as is
 
 # debug
 use Data::Dumper::Simple;
@@ -38,39 +37,37 @@ use Data::Dumper::Simple;
 
 # log    {{{1
 has 'log' => (
-    is            => 'ro',
-    isa           => Types::Standard::Bool,
-    required      => $FALSE,
-    default       => $FALSE,
-    documentation => 'Whether to write status messages to system log',
+  is            => 'ro',
+  isa           => Types::Standard::Bool,
+  required      => $FALSE,
+  default       => $FALSE,
+  documentation => 'Whether to write status messages to system log',
 );
 
 # _attr_1    {{{1
 has '_attr_1' => (
-    is            => 'lazy',
-    isa           => Types::Standard::Str,
-    documentation => 'Insert here',
+  is            => 'ro',
+  isa           => Types::Standard::Str,
+  lazy          => $TRUE,
+  default       => sub { return My::App->new->get_value; },
+  documentation => 'Insert here',
 );
-
-method _build__attr_1 () {
-    return My::App->new->get_value;
-}
 
 # _attr_list    {{{1
 has '_attr_list' => (
-    is  => 'rw',
-    isa => Types::Standard::ArrayRef [
-        Types::Standard::InstanceOf ['Config::Simple']
-    ],
-    lazy        => $TRUE,
-    default     => sub { [] },
-    handles_via => 'Array',
-    handles     => {
-        _attrs    => 'elements',
-        _add_attr => 'push',
-        _has_attr => 'count',
-    },
-    documentation => 'Array of values',
+  is  => 'rw',
+  isa => Types::Standard::ArrayRef [
+    Types::Standard::InstanceOf ['Config::Simple'],
+  ],
+  lazy        => $TRUE,
+  default     => sub { [] },
+  handles_via => 'Array',
+  handles     => {
+    _attrs    => 'elements',
+    _add_attr => 'push',
+    _has_attr => 'count',
+  },
+  documentation => 'Array of values',
 );    # }}}1
 
 # methods
@@ -81,8 +78,9 @@ has '_attr_list' => (
 # params: $thing - for this [optional, default=grimm]
 # prints: nil
 # return: scalar boolean
-method my_method ($thing) {
-    $io->say('This is feedback');
+sub my_method ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  $io->say('This is feedback');
+  return $FALSE;
 }
 
 # _log($msg, [$type])    {{{1
@@ -95,26 +93,26 @@ method my_method ($thing) {
 # return: n/a, dies on failure
 # note:   appends most recent system error message for message types
 #         EMERG, ALERT, CRIT and ERR
-method _log ($msg, $type) {
+sub _log ($self, $msg, $type) { ## no critic (RequireInterpolationOfMetachars)
 
-    # only log if logging
-    return if not $self->log;
+  # only log if logging
+  return if not $self->log;
 
-    # check params
-    return if not defined $msg;
-    if ( not $type ) { $type = 'INFO'; }
-    my %valid_type = map { ( $_ => $TRUE ) }
-        qw(EMERG ALERT CRIT ERR WARNING NOTICE INFO DEBUG);
-    if ( not $valid_type{$type} ) { $self->_fail("Invalid type '$type'"); }
+  # check params
+  return if not defined $msg;
+  if (not $type) { $type = 'INFO'; }
+  my %valid_type = map { ($_ => $TRUE) }
+      qw(EMERG ALERT CRIT ERR WARNING NOTICE INFO DEBUG);
+  if (not $valid_type{$type}) { $self->_fail("Invalid type '$type'"); }
 
-    # display system error message for serious message types
-    my %error_type = map { ( $_ => $TRUE ) } qw(EMERG ALERT CRIT ERR);
-    if ( $error_type{$type} ) { $msg .= ': %m'; }
+  # display system error message for serious message types
+  my %error_type = map { ($_ => $TRUE) } qw(EMERG ALERT CRIT ERR);
+  if ($error_type{$type}) { $msg .= ': %m'; }
 
-    # log message
-    Sys::Syslog::syslog( $type, $msg );
+  # log message
+  Sys::Syslog::syslog($type, $msg);
 
-    return;
+  return;
 }
 
 # _fail($err)    {{{1
@@ -125,14 +123,14 @@ method _log ($msg, $type) {
 # params: $err - error message [scalar string, required]
 # prints: error message
 # return: n/a, dies on completion
-method _fail ($err) {
+sub _fail ($self, $err) {    ## no critic (RequireInterpolationOfMetachars)
 
-    # log error message (if logging)
-    $self->_log( $err, 'ERR' );
+  # log error message (if logging)
+  $self->_log($err, 'ERR');
 
-    # exit with failure status, printing stack trace if interactive
-    if   ( $io->interactive ) { confess $err; }
-    else                      { exit 1; }
+  # exit with failure status, printing stack trace if interactive
+  if   ($io->interactive) { confess $err; }
+  else                    { exit 1; }
 }
 
 # _other($err)    {{{1
@@ -142,13 +140,14 @@ method _fail ($err) {
 # params: nil
 # prints: error message
 # return: n/a, dies on completion
-method _other () {
-}    # }}}1
-
+sub _other ($self) {    ## no critic (RequireInterpolationOfMetachars)
+}                       # }}}1
 
 1;
 
 # POD    {{{1
+
+## no critic (RequirePodSections)
 
 __END__
 
@@ -214,9 +213,9 @@ There are no configuration files used. There are no module/role settings.
 =head2 Perl modules
 
 autodie, Carp, Const::Fast, Dn::InteractiveIO, Dn::Common, Dn::Menu, English,
-experimental, Function::Parameters, Moo, MooX::HandlesVia, namespace::clean,
-Path::Tiny, Sys::Syslog, strictures, Try::Tiny, Types::Common::Numeric,
-Types::Common::String, Types::Path::Tiny, Types::Standard, version.
+experimental, Moo, MooX::HandlesVia, namespace::clean, Path::Tiny, Sys::Syslog,
+strictures, Try::Tiny, Types::Common::Numeric, Types::Common::String,
+Types::Path::Tiny, Types::Standard, version.
 
 =head2 INCOMPATIBILITIES
 
