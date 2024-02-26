@@ -117,9 +117,9 @@ processConfigFiles() {
 					val="$(dnStripEnclosingQuotes "${val}")"
 					# load vars depending on name
 					case ${name} in
-					'key') key="${val}" ;;
-					'key') key="${val}" ;;
-					'key') key="${val}" ;;
+					'key1') key="${val}" ;;
+					'key2') key="${val}" ;;
+					'key3') key="${val}" ;;
 					esac
 				fi
 			done <"${conf}"
