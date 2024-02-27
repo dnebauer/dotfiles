@@ -33,13 +33,13 @@ required_tools=(
 # hardware- and xrandr-dependent:
 # - resolutions for each monitor named by xrandr
 declare -A resolution=(
-	[DVI - D - 0]="1920x1080"
-	[HDMI - A - 0]="3440x1440"
+	["DVI-D-0"]="1920x1080"
+	["HDMI-A-0"]="3440x1440"
 )
 # - directories containing wallpapers of given resolutions
 declare -A dir=(
-	[1920x1080]="/home/david/.config/wallpapers/1920x1080"
-	[3440x1440]="/home/david/.config/wallpapers/3440x1440"
+	["1920x1080"]="/home/david/.config/wallpapers/1920x1080"
+	["3440x1440"]="/home/david/.config/wallpapers/3440x1440"
 )
 # }}}1
 
@@ -167,11 +167,7 @@ done
 # Extract monitor information    {{{1
 # - load associative array with key=monitor number and value=monitor name
 declare -A monitor=()
-output="$(xrandr --listmonitors | grep -v "^Monitors: ")"
-old_IFS="$IFS"
-IFS=$'\n'
-lines=("$output")
-IFS="$old_IFS"
+mapfile -t lines < <(xrandr --listmonitors | grep -v "^Monitors: ")
 for line in "${lines[@]}"; do
 	# strip leading spaces
 	line="${line#"${line%%[![:space:]]*}"}"
