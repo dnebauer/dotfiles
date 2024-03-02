@@ -58,7 +58,7 @@ return {
       vim.g["pandoc#command#prefer_pdf"] = 1
       vim.g["pandoc#compiler#command"] = "pander"
       -- hashes at end as well as start of headings
-      vim.g["pandoc#keyboard#sections#header_style"] = 2
+      vim.g["pandoc#keyboard#sections#header_style"] = "a"
     end,
   },
 }
