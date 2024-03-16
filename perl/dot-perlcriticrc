@@ -23,6 +23,9 @@ max_mccabe = 100
 # --> 'elements', 'push', 'grep', 'first', 'get', 'count', 'is_empty', 'set', 'get', 'delete', 'kv'
 allowlist = 2 '' 'lazy' 'ro' 'rw' '$self' '$self, $dir' '$self, $filepath' '$self = undef' 'Array' 'Hash' 'elements' 'push' 'grep' 'first' 'get' 'count' 'is_empty' 'set' 'get' 'delete' 'kv'
 
+[Subroutines::ProhibitManyArgs]
+skip_objects = 1
+
 [Variables::ProhibitPunctuationVars]
 allow = ${^CHILD_ERROR_NATIVE}
 

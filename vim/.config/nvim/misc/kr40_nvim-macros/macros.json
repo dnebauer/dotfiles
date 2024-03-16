@@ -1,14 +1,1 @@
-{
-  "macros": [
-    {
-      "name": "Trim EmmyLua comments",
-      "raw": "MDc2bGdlYQ0tGw==",
-      "content": "076lgea<CR>-<Esc>"
-    },
-    {
-      "name": "Perl method to sub",
-      "raw": "MGNlc3ViG3d3YSRzZWxmLCAbJCJtcBs=",
-      "content": "0cesub<Esc>wwa$self,<Space><Esc>$\"mp<Esc>"
-    }
-  ]
-}
+jq: parse error: Invalid escape at line 1, column 412
