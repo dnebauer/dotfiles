@@ -260,7 +260,7 @@ exec_always --no-startup-id xrandr                \
     --output DVI-D-0          --mode 1920x1080    \
                               --pos 0x180         \
                               --rotate normal     \
-                              --left-of HDMI-A-0
+                              --right-of HDMI-A-0
 
 # screenlock    {{{2
 #
