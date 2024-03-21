@@ -35,4 +35,7 @@ allow = ${^CHILD_ERROR_NATIVE}
 
 [-Documentation::PodSpelling]
 
+# speed penalty avoided by use of '-no_match_vars' happens only in perl <= 5.18
+[-Modules::RequireNoMatchVarsWithUseEnglish]
+
 [-Subroutines::ProhibitSubroutinePrototypes]
