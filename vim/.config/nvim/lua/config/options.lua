@@ -213,6 +213,10 @@ if fn("filereadable", { perl }) then
   variable("set", "global", "perl_host_prog", perl)
 end
 
+-- for python linting use basedpyright instead of pyright
+-- • as per release notes for lzyvim 10.x
+variable("set", "global", "lazyvim_python_lsp", "basedpyright")
+
 --[[ options ]]
 
 -- colour column: managed by "ecthelionvi/NeoColumn.nvim" plugin
