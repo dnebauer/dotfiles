@@ -249,16 +249,16 @@ font pango:DejaVu Sans Mono, Terminus Bold Semi-Condensed 11
 
 # set screens with xrandr    {{{2
 
-exec_always --no-startup-id xrandr \
-    --output DisplayPort-0  --off \
-    --output DisplayPort-1  --off \
-    --output HDMI-A-0         --primary \
-                              --mode 3440x1440 \
-                              --pos 0x0 \
-                              --rotate normal \
-    --output HDMI-A-1       --off \
-    --output DVI-D-0          --mode 1920x1080 \
-                              --pos 3440x180 \
+exec_always --no-startup-id xrandr              \
+    --output DisplayPort-0  --off               \
+    --output DisplayPort-1  --off               \
+    --output HDMI-A-0         --primary         \
+                              --mode 3440x1440  \
+                              --pos 0x0         \
+                              --rotate normal   \
+    --output HDMI-A-1       --off               \
+    --output DVI-D-0          --mode 1920x1080  \
+                              --pos 3440x180    \
                               --rotate normal
 
 # screenlock    {{{2
@@ -1023,18 +1023,17 @@ include ~/.config/i3/config.d/*.conf
 #
 # - reset screens with xrandr (they can be changed by i3)
 
-exec_always --no-startup-id xrandr                \
-    --output DisplayPort-0  --off                 \
-    --output DisplayPort-1  --off                 \
-    --output HDMI-A-0         --primary           \
-                              --mode 3440x1440    \
-                              --pos 1920x0        \
-                              --rotate normal     \
-    --output HDMI-A-1       --off                 \
-    --output DVI-D-0          --mode 1920x1080    \
-                              --pos 0x180         \
-                              --rotate normal     \
-                              --left-of HDMI-A-0
+exec_always --no-startup-id xrandr              \
+    --output DisplayPort-0  --off               \
+    --output DisplayPort-1  --off               \
+    --output HDMI-A-0         --primary         \
+                              --mode 3440x1440  \
+                              --pos 0x0         \
+                              --rotate normal   \
+    --output HDMI-A-1       --off               \
+    --output DVI-D-0          --mode 1920x1080  \
+                              --pos 3440x180    \
+                              --rotate normal
 
 # - handled by custom script that assigns random image to each monitor
 exec --no-startup-id ~/.local/bin/i3-my-background-set
