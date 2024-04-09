@@ -39,3 +39,6 @@ allow = ${^CHILD_ERROR_NATIVE}
 [-Modules::RequireNoMatchVarsWithUseEnglish]
 
 [-Subroutines::ProhibitSubroutinePrototypes]
+
+# -----------
+# vim: wrap :
