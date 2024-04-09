@@ -21,7 +21,7 @@ max_mccabe = 100
 # --> Array, Hash
 # Moo native traits methods
 # --> 'elements', 'push', 'grep', 'first', 'get', 'count', 'is_empty', 'set', 'get', 'delete', 'kv'
-allowlist = 2 '' 'lazy' 'ro' 'rw' '$self' '$self, $dir' '$self, $filepath' '$self = undef' 'Array' 'Hash' 'elements' 'push' 'grep' 'first' 'get' 'count' 'is_empty' 'set' 'get' 'delete' 'kv'
+allowlist = 2 '' 'lazy' 'ro' 'rw' '$self' '$self, $dir' '$self, $filepath' '$self = undef' 'Array' 'Hash' 'elements' 'push' 'grep' 'first' 'get' 'count' 'is_empty' 'set' 'get' 'delete' 'kv' 'Dn::QkDeb::File' 'Debian build file'
 
 [Subroutines::ProhibitManyArgs]
 skip_objects = 1
