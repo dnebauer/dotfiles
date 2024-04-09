@@ -7,8 +7,8 @@
     },
     {
       "name": "Perl method to sub",
-      "raw": "MGNlc3ViG3d3YSRzZWxmLCAbJCJtcBs=",
-      "content": "0cesub<Esc>wwa$self,<Space><Esc>$\"mp<Esc>"
+      "raw": "XmNlc3ViG2YoYSRzZWxmLCAbQSMjIG5vIGNyaXRpYyAoUmVxdWlyZUludGVycG9sYXRpb25PZk1ldGFjaGFycxs=",
+      "content": "^cesub<Esc>f(a$self,<Space><Esc>A##<Space>no<Space>critic<Space>(RequireInterpolationOfMetachars<Esc>"
     }
   ]
 }
