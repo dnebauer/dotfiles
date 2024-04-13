@@ -19,7 +19,7 @@ sub run_cmd {
   my @output = IPC::Cmd::run(command => $cmd);
   return;
 }
-my $vol = '25%';
+my $vol = '20%';
 ## no critic (RequireInterpolationOfMetachars)
 my @unmute  = ('pactl', 'set-sink-mute',   '@DEFAULT_SINK@', 'false');
 my @set_vol = ('pactl', 'set-sink-volume', '@DEFAULT_SINK@', $vol);
