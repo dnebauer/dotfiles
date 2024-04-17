@@ -181,12 +181,17 @@ text_editing_settings = function()
   -- plugin: preservim/vim-textobj-sentence
   fn("textobj#sentence#init")
   -- rewrap paragraph using <M-q>, i.e., <Alt-q, {})
-  map("n", "<M-q>", '{gq}<Bar>:echo "Rewrapped paragraph"<CR>', { remap = false, silent = true })
-  map("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true })
+  map(
+    "n",
+    "<M-q>",
+    '{gq}<Bar>:echo "Rewrapped paragraph"<CR>',
+    { remap = false, silent = true, desc = "Rewrap paragraph" }
+  )
+  map("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true, desc = "Rewrap paragraph" })
   -- sensible formatting
   option("set", "formatexpr", "tqna1", { scope = "local" })
   -- autolist
-  map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>")
+  map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>", { desc = "New bullet on current line" })
 end
 
 -- variable(operation, scope, name, [value]) {{{1

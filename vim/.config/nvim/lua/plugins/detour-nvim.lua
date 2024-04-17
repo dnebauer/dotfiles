@@ -24,7 +24,7 @@ return {
       -- This can get in the way when interacting with TUIs.
       -- This maps the escape key back to itself (for this buffer) to fix this
       -- problem.
-      vim.keymap.set("t", "<Esc>", "<Esc>", { buffer = true })
+      vim.keymap.set("t", "<Esc>", "<Esc>", { buffer = true, desc = "Reset to default behaviour" })
 
       -- Go into insert mode.
       --

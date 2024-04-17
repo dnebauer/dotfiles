@@ -1,4 +1,5 @@
 --[[ gbprod/cutlass.nvim : delete without affecting yank ]]
+
 return {
   {
     "gbprod/cutlass.nvim",

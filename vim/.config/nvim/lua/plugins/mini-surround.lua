@@ -22,9 +22,14 @@ return {
       })
       -- these mappings cannot be configured by altering the plugin's configuration table:
       -- * remap adding surrounding to Visual mode selection
-      vim.keymap.set("x", "z", [[:<C-u>lua MiniSurround.add('visual')<CR>]], { silent = true })
+      vim.keymap.set(
+        "x",
+        "z",
+        [[:<C-u>lua MiniSurround.add('visual')<CR>]],
+        { silent = true, desc = "Add Surrounding to Selection" }
+      )
       -- * make special mapping for "add surrounding for line"
-      vim.keymap.set("n", "yzz", "yz_", { remap = true })
+      vim.keymap.set("n", "yzz", "yz_", { remap = true, desc = "Add Surrounding for Line" })
     end,
   },
 }

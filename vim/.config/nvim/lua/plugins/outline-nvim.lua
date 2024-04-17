@@ -4,7 +4,7 @@ return {
   {
     "hedyhli/outline.nvim",
     cmd = { "Outline", "OutlineOpen" },
-    keys = { { "<F5>", "<Cmd>Outline<CR>", desc = "Toggle outline" } },
+    keys = { { "<F5>", "<Cmd>Outline<CR>", desc = "Toggle Outline" } },
     opts = {},
   },
 }

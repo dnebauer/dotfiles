@@ -16,7 +16,7 @@ return {
     {
       "<Leader>td",
       "<Cmd>ToggleTerm direction=horizontal<CR>",
-      desc = "Open a horizontal terminal in the current directory",
+      desc = "Open Horizontal Terminal in CWD",
     },
   },
 }

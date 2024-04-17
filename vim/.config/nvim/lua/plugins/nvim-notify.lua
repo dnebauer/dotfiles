@@ -9,6 +9,7 @@ return {
       function()
         require("telescope").extensions.notify.notify()
       end,
+      desc = "Telescope Notify",
     },
   },
 }

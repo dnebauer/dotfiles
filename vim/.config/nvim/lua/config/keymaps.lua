@@ -27,16 +27,16 @@ end
 --       is the default with vim.keymap.set()
 
 -- <CR> to replace colon
-map({ "n", "v" }, "<CR>", ":", { desc = "use <CR> for : [n]" })
+map({ "n", "v" }, "<CR>", ":", { desc = "Use <CR> for ':'" })
 
 -- save and exit mappings
 -- * ZZ : save and exit
-map({ "i", "v" }, "ZZ", "<Esc>ZZ", { desc = "save changes and exit [i,v]" })
+map({ "i", "v" }, "ZZ", "<Esc>ZZ", { desc = "Save changes and exit" })
 -- * ZQ : quit without saving
-map({ "i", "v" }, "ZQ", "<Esc>ZQ", { desc = "quit without saving [i,v]" })
+map({ "i", "v" }, "ZQ", "<Esc>ZQ", { desc = "Quit without saving" })
 
 -- space is pagedown key
-map({ "n", "v" }, "<Space>", "<PageDown>", { desc = "<Space> = PageDown [n,v]" })
+map({ "n", "v" }, "<Space>", "<PageDown>", { desc = "Page down" })
 
 -- expand <Esc> functionality to dismiss Noice messages as well as clear hlsearch
 map(
@@ -47,58 +47,63 @@ map(
 )
 
 -- toggle undo map (plugin = sjl/gundo.vim)
-map("n", "<Leader>u", "<Cmd>GundoToggle<CR>", { desc = "toggle undo map" })
+map("n", "<Leader>u", "<Cmd>GundoToggle<CR>", { desc = "Toggle undo map" })
 
 -- force magic regex during search
-map("n", "/", "/\\m", { desc = "force magic regex during forward search [n]" })
-map("v", "/", 'y/\\m<C-R>"', { desc = "force magic regex during forward search for selected text [v]" })
-map("n", "?", "?\\m", { desc = "force magic regex during backward search [n]" })
-map("v", "?", 'y?\\m<C-R>"', { desc = "force magic regex during backward search for selected text [v]" })
-map("c", "%s/", "%s/\\m", { desc = "force magic regex during search [c]" })
+map("n", "/", "/\\m", { desc = "Force magic regex during forward search" })
+map("v", "/", 'y/\\m<C-R>"', { desc = "Force magic regex during forward search for selected text" })
+map("n", "?", "?\\m", { desc = "Force magic regex during backward search" })
+map("v", "?", 'y?\\m<C-R>"', { desc = "Force magic regex during backward search for selected text" })
+map("c", "%s/", "%s/\\m", { desc = "Force magic regex during search" })
 
 -- spelling
 -- • on/off/toggle with [os/]os/yos mappings from unimpaired.nvim plugin
 -- • ]=,[= : correct next/previous bad word
-map("n", "]=", "]sz=", { desc = "jump to next bad word [n]" })
-map("n", "[=", "[sz=", { desc = "jump to previous bad word [n]" })
+map("n", "]=", "]sz=", { desc = "Jump to next bad word" })
+map("n", "[=", "[sz=", { desc = "Jump to previous bad word" })
 
 -- avoid accidental capitalisation of :w, :q, :e
-map({ "n", "v", "o" }, ":W", ":w", { desc = "prevent accidental capitalisation of ':w' [n,v,o]" })
-map({ "n", "v", "o" }, ":Q", ":q", { desc = "prevent accidental capitalisation of ':q' [n,v,o]" })
-map({ "n", "v", "o" }, ":E", ":e", { desc = "prevent accidental capitalisation of ':e' [n,v,o]" })
+map({ "n", "v", "o" }, ":W", ":w", { desc = "Prevent accidental capitalisation of ':w'" })
+map({ "n", "v", "o" }, ":Q", ":q", { desc = "Prevent accidental capitalisation of ':q'" })
+map({ "n", "v", "o" }, ":E", ":e", { desc = "Prevent accidental capitalisation of ':e'" })
 
 -- when yank visual selection stay at end of selection
-map("v", "y", "ygv<Esc>", { desc = "stay at end of visual selection [v]" })
+map("v", "y", "ygv<Esc>", { desc = "Stay at end of visual selection" })
 
 -- cycle buffers with Tab, S-Tab
-map("n", "<Tab>", "<Cmd>bnext<CR>", { silent = true, desc = "cycle forward through tabs [n]" })
-map("n", "<S-Tab>", "<Cmd>bprevious<CR>", { silent = true, desc = "cycle backwards through tabs [n]" })
+map("n", "<Tab>", "<Cmd>bnext<CR>", { silent = true, desc = "Cycle forward through tabs" })
+map("n", "<S-Tab>", "<Cmd>bprevious<CR>", { silent = true, desc = "Cycle backwards through tabs" })
 
 -- switch between alternate buffers with <BS>
-map("n", "<BS>", ":b#<CR>", { silent = true, desc = "switch between alternate buffers [n]" })
+map("n", "<BS>", ":b#<CR>", { silent = true, desc = "Switch between alternate buffers" })
 
 -- move highlighted text vertically
-map("v", "J", ":move '>+1<CR>gv==kgvo<esc>=kgvo", { desc = "move highlighted text down" })
-map("v", "K", ":move '<-2<CR>gv==jgvo<esc>=jgvo", { desc = "move highlighted text up" })
+map("v", "J", ":move '>+1<CR>gv==kgvo<esc>=kgvo", { desc = "Move highlighted text down" })
+map("v", "K", ":move '<-2<CR>gv==jgvo<esc>=jgvo", { desc = "Move highlighted text up" })
 
 -- delete whole words backwards
-map("i", "<C-BS>", "<Esc>cvb", { desc = "delete whole words backwards [n]" })
+map("i", "<C-BS>", "<Esc>cvb", { desc = "Delete whole words backwards" })
 
 -- enable insert new line without losing indent if escape immediately after
 -- does not work if configured to delete trailing whitespace on InsertLeave
---map("n", "o", "o <BS>", { desc = "insert newline but don't lose indent" })
---map("n", "O", "O <BS>", { desc = "insert newline but don't lose indent" })
+--map("n", "o", "o <BS>", { desc = "Insert newline but don't lose indent" })
+--map("n", "O", "O <BS>", { desc = "Insert newline but don't lose indent" })
 
 -- paste over currently selected text without yanking it
-map("v", "p", '"_dP', { desc = "paste over visual selection without yanking it" })
+map("v", "p", '"_dP', { desc = "Paste over visual selection without yanking it" })
 
 -- better escape using jk in insert and terminal mode
-map("i", "jk", "<ESC>", { desc = "alternative escape in insert mode" })
-map("t", "jk", "<C-\\><C-n>", { desc = "alternative escape in terminal mode" })
+map("i", "jk", "<ESC>", { desc = "Alternative escape" })
+map("t", "jk", "<C-\\><C-n>", { desc = "alternative escape" })
 
 -- use alexghergh/nvim-tmux-navigation for nvim/tmux navigation
-vim.keymap.set({ "n", "t" }, "<C-h>", "<Cmd>NvimTmuxNavigateLeft<CR>", { silent = true })
-vim.keymap.set({ "n", "t" }, "<C-j>", "<Cmd>NvimTmuxNavigateDown<CR>", { silent = true })
-vim.keymap.set({ "n", "t" }, "<C-k>", "<Cmd>NvimTmuxNavigateUp<CR>", { silent = true })
-vim.keymap.set({ "n", "t" }, "<C-l>", "<Cmd>NvimTmuxNavigateRight<CR>", { silent = true })
-vim.keymap.set({ "n", "t" }, "<C-\\>", "<Cmd>NvimTmuxNavigateLastActive<CR>", { silent = true })
+map({ "n", "t" }, "<C-h>", "<Cmd>NvimTmuxNavigateLeft<CR>", { silent = true, desc = "Move left to next pane/split" })
+map({ "n", "t" }, "<C-j>", "<Cmd>NvimTmuxNavigateDown<CR>", { silent = true, desc = "Move down to next pane/split" })
+map({ "n", "t" }, "<C-k>", "<Cmd>NvimTmuxNavigateUp<CR>", { silent = true, desc = "Move up to next pane/split" })
+map({ "n", "t" }, "<C-l>", "<Cmd>NvimTmuxNavigateRight<CR>", { silent = true, desc = "Move right to next pane/split" })
+map(
+  { "n", "t" },
+  "<C-\\>",
+  "<Cmd>NvimTmuxNavigateLastActive<CR>",
+  { silent = true, desc = "Move to previous pane/split" }
+)

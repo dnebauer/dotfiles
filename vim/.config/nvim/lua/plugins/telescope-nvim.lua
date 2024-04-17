@@ -45,12 +45,12 @@ return {
       { "<Leader>ss", false },
       { "<Leader>sS", false },
       -- reassign "<Leader>sC" action to "<Leader>sc"
-      { "<leader>sc", "<cmd>Telescope commands<cr>", desc = "Commands" },
+      { "<leader>sc", "<cmd>Telescope Commands<cr>", desc = "Commands" },
       -- add this plugin key mapping
       {
         "<Leader>fs",
         "<Cmd>Telescope builtin<CR>",
-        desc = "Telescope builtin selectors",
+        desc = "Telescope Builtin Selectors",
       },
     },
     dependencies = {
@@ -118,7 +118,7 @@ return {
       -- undo
       {
         "debugloop/telescope-undo.nvim",
-        keys = { { "<leader>U", "<cmd>Telescope undo<cr>" } },
+        keys = { { "<leader>U", "<cmd>Telescope undo<cr>", desc = "Telescope Undo" } },
         config = function()
           require("telescope").load_extension("undo")
         end,
