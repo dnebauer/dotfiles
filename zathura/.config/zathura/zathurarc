@@ -1,0 +1,11 @@
+# on 11 May 2024 a debian upgrade of zathura advised the plain database
+# setting was deprecated and advised setting the database backend to sqlite
+#
+# after the upgrade, zathura wrote the following messages to console
+# on each startup:
+#   info: Opening plain database via sqlite backend.
+#   warning: sqlite database already exists. Set your database backend to sqlite
+#
+# these messages ceased after adding the following configuration setting
+# as per "man 4 zathurarc"
+set database sqlite
