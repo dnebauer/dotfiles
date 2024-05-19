@@ -3,6 +3,11 @@
 return {
   {
     "neovim/nvim-lspconfig",
+    init = function()
+      local keys = require("lazyvim.plugins.lsp.keymaps").get()
+      -- disable \cc keymap so dn-utils can grab it
+      keys[#keys + 1] = { "<Leader>+cc", false }
+    end,
     opts = {
       servers = {
         bashls = {}, -- bash
