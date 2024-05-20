@@ -12,7 +12,6 @@ return {
       servers = {
         bashls = {}, -- bash
         biome = {}, -- json, javascript, typescript
-        ccls = {}, -- c/c++/objective-c
         clangd = {}, -- c++, clang
         cmake = {}, -- cmake
         dockerls = {}, -- docker

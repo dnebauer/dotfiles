@@ -7,7 +7,6 @@ return {
     opts = {
       ensure_installed = {
         "bashls", -- bash
-        "ccls", -- c/c++/objective-c
         "clangd", -- c++, clang
         "cmake", -- cmake
         "dockerls", -- docker
