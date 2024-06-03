@@ -3,7 +3,7 @@
 use Moo;                 # {{{1
 use strictures 2;
 use 5.006;
-use 5.036_001;
+use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;    # }}}1
 
@@ -202,11 +202,25 @@ __END__
 
 myscript - does stuff ...
 
+=head1 VERSION
+
+This documentation is for myscript version 0.1.
+
 =head1 USAGE
 
 B<myscript param> [ B<-o> ]
 
 B<myscript -h>
+
+=head1 OPTIONS
+
+=over
+
+=item B<option>
+
+Does...
+
+=back
 
 =head1 REQUIRED ARGUMENTS
 
@@ -267,8 +281,8 @@ Really?
 
 autodie, Carp, Const::Fast, Dn::Role::HasPath, English, experimental,
 Moo, MooX::HandlesVia, MooX::Options, namespace::clean, Path::Tiny, strictures,
-Try::Tiny, Types::Common::Numeric, Types::Common::String, Types::Path::Tiny,
-Types::Standard, version.
+Syntax::Keyword::Try, Types::Common::Numeric, Types::Common::String,
+Types::Path::Tiny, Types::Standard, version.
 
 =head2 Executables
 
@@ -297,6 +311,10 @@ Configuration file
 
 =back
 
+=head2 Environment
+
+This script does not use environmental variables.
+
 =head1 INCOMPATIBILITIES
 
 There are no known incompatibilities.
@@ -317,10 +335,11 @@ ${author}
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2022 ${author}
+Copyright (c) 2024 ${author}
 
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =cut
+
 # vim:foldmethod=marker:
