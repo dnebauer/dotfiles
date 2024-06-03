@@ -234,7 +234,7 @@ Please report any bugs to the author.
 
 =head1 AUTHOR
 
-David Nebauer E<lt>davidnebauer@hotkey.net.auE<gt>
+David Nebauer E<lt>david@nebauer.orgE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
