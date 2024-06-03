@@ -3,17 +3,15 @@ package Dn::Package;
 use Moo;    # {{{1
 use strictures 2;
 use 5.006;
-use 5.036_001;
+use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
 
 use autodie qw(open close);
 use Carp    qw(confess);
 use Const::Fast;
-use Dn::Common;
-use Dn::Error;
 use Dn::InteractiveIO;
-use English qw(-no_match_vars);
+use English;
 use MooX::HandlesVia;
 use Path::Tiny;
 use Sys::Syslog qw(:DEFAULT setlogsock);
@@ -24,7 +22,6 @@ with qw(Role::Utils::Dn);
 
 const my $TRUE  => 1;
 const my $FALSE => 0;
-my $cp = Dn::Common->new();
 my $io = Dn::InteractiveIO->new;
 Sys::Syslog::openlog('ident', 'user');    # }}}1
     # ident is prepended to every message - adapt to module
@@ -155,24 +152,22 @@ __END__
 
 =head1 NAME
 
-My::Module - what I do
+Dn::Package - what I do
+
+=head1 VERSION
+
+This documentation is for Dn::Package version 0.1.
 
 =head1 SYNOPSIS
 
-    use My::Module;
+    use Dn::Package;
     ...
 
 =head1 DESCRIPTION
 
 Full description. May have subsections.
 
-=head1 ATTRIBUTES
-
-=head2 attr_1
-
-Does stuff...  Scalar string. Required.
-
-=head1 METHODS
+=head1 SUBROUTINES/METHODS
 
 =head2 method1($param)
 
@@ -206,15 +201,27 @@ Really?
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-There are no configuration files used. There are no module/role settings.
+=head2 Properties
+
+=head3 Attribute1
+
+Explain use of Attribute1.
+
+=head2 Configuration
+
+This module does not use configuration files.
+
+=head2 Environment
+
+This module does not use environmental variables.
 
 =head1 DEPENDENCIES
 
 =head2 Perl modules
 
-autodie, Carp, Const::Fast, Dn::InteractiveIO, Dn::Common, Dn::Menu, English,
-experimental, Moo, MooX::HandlesVia, namespace::clean, Path::Tiny, Sys::Syslog,
-strictures, Try::Tiny, Types::Common::Numeric, Types::Common::String,
+autodie, Carp, Const::Fast, Dn::InteractiveIO, English, Moo, MooX::HandlesVia,
+namespace::clean, Path::Tiny, Role::Utils::Dn, strictures, Sys::Syslog,
+Syntax::Keyword::Try, Types::Common::Numeric, Types::Common::String,
 Types::Path::Tiny, Types::Standard, version.
 
 =head2 INCOMPATIBILITIES
@@ -231,7 +238,7 @@ David Nebauer E<lt>davidnebauer@hotkey.net.auE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2017 ${author}
+Copyright (c) 2024 ${author}
 
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
