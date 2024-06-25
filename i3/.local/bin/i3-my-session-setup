@@ -312,7 +312,7 @@ function launchTiddlywiki() {
 	plugin_path='/usr/local/share/tiddlywiki/plugins'
 	alacritty \
 		--title launcher_tiddlywiki \
-		--option env.TIDDLYWIKI_PLUGIN_PATH=$plugin_path \
+		--option "env.TIDDLYWIKI_PLUGIN_PATH=\"$plugin_path\"" \
 		--command "$tiddlywiki" "$HOME/data/misc/auxiliary-memory" \
 		--listen port=10744 &
 	sleep $delay_post_launch
