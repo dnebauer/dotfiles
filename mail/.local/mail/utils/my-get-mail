@@ -319,7 +319,7 @@ unset mail_servers missing
 # get time since last full sync    {{{1
 [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
 [[ -d "$cache_dir" ]] ||
-	abortscript "Unable to create cache directory: $cache_dir"
+	abortScript "Unable to create cache directory: $cache_dir"
 if [ -f "$cache_fp" ]; then
 	time_of_last_full_sync="$(cat "$cache_fp")"
 else
@@ -338,7 +338,7 @@ else
 	echo "$self: quick offlineimap sync"
 	offlineimap -o -q -u quiet -l "$log_file" || synced_ok 'false'
 fi
-synced_ok || abortscript "See offlineimap log: $log_file"
+synced_ok || abortScript "See offlineimap log: $log_file"
 unset cache_fp full_sync_interval log_file time_now time_since_last_full_sync
 
 # update notmuch    {{{1
