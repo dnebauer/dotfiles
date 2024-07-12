@@ -20,7 +20,7 @@ set -o pipefail
 
 # VARIABLES    {{{1
 
-self="$(basename $0)"
+self="$(basename "$0")"
 parameters=" [-v] [-d]"
 # tools on the system path
 required_system_tools=(
@@ -93,6 +93,15 @@ abortScript() {
 #   prints: error message if tool(s) missing
 #   return: n/a, aborts scipts on failure
 checkPrereqs() {
+	# need bash version containing builtin 'mapfile'
+	if ! echo 'test' | mapfile -t 2>/dev/null; then
+		local msg
+		msg='Bash does not have the builtin feature: mapfile'
+		echo "$msg" 1>&2
+		logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
+		exit 1
+	fi
+	# check for tools
 	local missing tool
 	missing=()
 	# these tools can be found on the base system path
@@ -177,10 +186,16 @@ _USAGE
 #   return: setter=nil, getter=boolean flag value
 flag() {
 	case $# in
-	1) return ${flag_values[$1]} ;;
+	1)
+		return "${flag_values[$1]}"
+		;;
 	2)
-		[[ "$2" = 'true' ]] && flag_values[$1]=0 || true
-		[[ "$2" = 'false' ]] && flag_values[$1]=1 || true
+		if [[ "$2" = 'true' ]]; then
+			flag_values[$1]=0
+		fi
+		if [[ "$2" = 'false' ]]; then
+			flag_values[$1]=1
+		fi
 		;;
 	*)
 		echo "$self: bad param count: $#" 1>&2
@@ -211,17 +226,17 @@ joinBy() {
 #           remaining command line args (after options removed)
 processOptions() {
 	# read the command line options
-	local OPTIONS="$(
+	local OPTIONS
+	if ! OPTIONS="$(
 		getopt \
 			--options hvd \
 			--long help,verbose,debug \
 			--name "${BASH_SOURCE[0]}" \
 			-- "${@}"
-	)"
-	[[ ${?} -eq 0 ]] || {
-		echo '$self: invalid command line options' 1>&2
+	)"; then
+		# getopt displays errors
 		exit 1
-	}
+	fi
 	eval set -- "${OPTIONS}"
 	while true; do
 		case "${1}" in
@@ -244,7 +259,6 @@ processOptions() {
 		*) break ;;
 		esac
 	done
-	ARGS=("${@}") # remaining arguments
 }
 # }}}1
 
@@ -266,16 +280,16 @@ if ! mkdir "$piddir" 2>/dev/null; then
 	if [[ -f "$pidfile" ]]; then
 		# is process actually still running under this pid
 		oldpid="$(cat "$pidfile")"
-		result="$(ps -ef | grep "$oldpid" | grep "$ps_grep" || true)"
+		result="$(pgrep -af "$oldpid" | grep "$ps_grep" || true)"
 		[[ -n "$result" ]] &&
 			abortScript "$self is already running (PID=$oldpid)"
 	fi
 fi
-pid="$(ps -ef | grep "$ps_grep" | head -n1 | awk '{print $2;}')"
+pid="$(pgrep -f "$ps_grep" | head -n1)"
 [[ -d "$piddir" ]] ||
 	abortScript "Unexpected deletion of pid locking directory: $piddir"
 echo "$pid" >"$pidfile" # update pid file
-trap "[[ -f \"$pidfile\" ]] && rm -rf \"$piddir\"" EXIT
+trap '[[ -f "${pidfile:-}" ]] && rm -rf "$piddir"' EXIT
 unset oldpid pid piddir pidfile result
 
 # abort if offlineimap is already running    {{{1
@@ -287,14 +301,14 @@ timeout=1
 prompt="$self: press any key to force quick synchronisation..."
 errexit_setting="$(set -o | grep 'errexit' | awk '{print $2}')"
 set +o errexit
-read -n 1 -p "$prompt" -s -t $timeout quick_sync
+read -n 1 -p "$prompt" -s -r -t $timeout quick_sync
 [[ $? -le 128 ]] && quick_sync='yes'
 [[ "$errexit_setting" = 'on' ]] && set -o errexit
 echo ' '
 [[ -n "${quick_sync}" ]] || rm -f "$cache_fp"
 
 # flush queued mail    {{{1
-num_queue=$("$msmtpq" --q-mgmt -d | grep "num" | wc -l || true)
+num_queue=$("$msmtpq" --q-mgmt -d | grep -c "num" || true)
 if [[ $num_queue -gt 0 ]]; then
 	msg="$self: flushing $num_queue queued message"
 	[[ $num_queue -gt 1 ]] && msg+='s'
@@ -306,7 +320,7 @@ unset msg num_queue
 # check that mail servers are reachable    {{{1
 [[ -e "$offlineimaprc" ]] ||
 	abortScript "Cannot locate offlineimap config file: $offlineimaprc"
-mail_servers=($(cat "$offlineimaprc" | grep "^remotehost" | awk '{print $3}'))
+mapfile -t mail_servers < <(grep "^remotehost" <"$offlineimaprc" | awk '{print $3}')
 missing=()
 for server in "${mail_servers[@]}"; do
 	echo "$self: checking for mail server $server"
@@ -348,7 +362,7 @@ while IFS= read -r line; do
 done < <(notmuch new)
 
 # pause to review feedback    {{{1
-read -p "$self: press a key to continue... " -n 1 -t 5 -e || true
+read -p "$self: press a key to continue... " -n 1 -t 5 -e -r || true
 # }}}1
 
 # vim:foldmethod=marker:
