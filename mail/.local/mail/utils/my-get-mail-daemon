@@ -18,16 +18,15 @@ set -o pipefail
 # Turn on traces, useful while debugging but commented out by default
 # set -o xtrace
 
-
 # VARIABLES    {{{1
 
-self="$(basename $0)"
+self="$(basename "$0")"
 parameters=" [-v] [-d]"
-check_interval='10m'  # delay between checks for mail
-startup_delay='3m'    # delay while internet becomes reachable
-required_system_tools=(logger sleep)   # find on system path
+check_interval='10m'                 # delay between checks for mail
+startup_delay='3m'                   # delay while internet becomes reachable
+required_system_tools=(logger sleep) # find on system path
 my_get_mail="$HOME/.local/mail/utils/my-get-mail"
-required_local_tools=("$my_get_mail")  # find by absolute path
+required_local_tools=("$my_get_mail") # find by absolute path
 # }}}1
 
 # PROCEDURES
@@ -37,51 +36,52 @@ required_local_tools=("$my_get_mail")  # find by absolute path
 #   params: nil
 #   prints: feedback
 #   return: nil
-checkMailLoop () {
-    while true ; do
-        # do not terminate if my_get_mail script fails
-        "$my_get_mail" || true
-        sleep "$check_interval"
-    done
+checkMailLoop() {
+	while true; do
+		# do not terminate if my_get_mail script fails
+		"$my_get_mail" || true
+		sleep "$check_interval"
+	done
 }
 # checkPrereqs()    {{{1
 #   intent: check for required tools
 #   params: nil
 #   prints: error message if tool(s) missing
 #   return: n/a, aborts scipts on failure
-function checkPrereqs () {
-    local missing tool
-    missing=()
-    # these tools can be found on the system path
-    for tool in "${required_system_tools[@]}" ; do
-        command -v "$tool" &>/dev/null || missing+=("$tool")
-    done
-    # these tools are specified by absolute path
-    for tool in "${required_local_tools[@]}" ; do
-        [[ -x "$tool" ]] || missing+=("$tool")
-    done
-    if [[ ${#missing[@]} -ne 0 ]] ; then
-        local msg ; msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
-        echo "$msg" 1>&2
-        logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
-        exit 1
-    fi
+function checkPrereqs() {
+	local missing tool
+	missing=()
+	# these tools can be found on the system path
+	for tool in "${required_system_tools[@]}"; do
+		command -v "$tool" &>/dev/null || missing+=("$tool")
+	done
+	# these tools are specified by absolute path
+	for tool in "${required_local_tools[@]}"; do
+		[[ -x "$tool" ]] || missing+=("$tool")
+	done
+	if [[ ${#missing[@]} -ne 0 ]]; then
+		local msg
+		msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+		echo "$msg" 1>&2
+		logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
+		exit 1
+	fi
 }
 # delayStart()    {{{1
 #   intent: delay mail checking until internet is reachable
 #   params: nil
 #   prints: feedback
 #   return: nil
-delayStart () {
-    sleep "$startup_delay"
+delayStart() {
+	sleep "$startup_delay"
 }
 # displayUsage()    {{{1
 #   intent: display script usage information
 #   params: nil
 #   prints: nil
 #   return: nil
-displayUsage () {
-cat << _USAGE
+displayUsage() {
+	cat <<_USAGE
 ${self}: periodically check for email
 
 Runs the $my_get_mail
@@ -107,13 +107,13 @@ _USAGE
 #           $itemX - items to be joined
 #   prints: string containing joined items
 #   return: nil
-joinBy () {
-    local delim first_item
-    delim="${1:-}"
-    shift
-    first_item="${1:-}"
-    shift
-    printf %s "$first_item" "${@/#/$delim}"
+joinBy() {
+	local delim first_item
+	delim="${1:-}"
+	shift
+	first_item="${1:-}"
+	shift
+	printf %s "$first_item" "${@/#/$delim}"
 }
 # processOptions(@opts)    {{{1
 #   intent: process command line options
@@ -122,38 +122,49 @@ joinBy () {
 #   return: nil
 #   note:   after execution variable ARGS contains
 #           remaining command line args (after options removed)
-processOptions () {
-    # read the command line options
-    local OPTIONS="$(                     \
-        getopt                            \
-            --options hvd                 \
-            --long    help,verbose,debug  \
-            --name    "${BASH_SOURCE[0]}" \
-            -- "${@}"                     \
-    )"
-    [[ ${?} -eq 0 ]] || {
-        echo '$self: invalid command line options' 1>&2
-        exit 1
-    }
-    eval set -- "${OPTIONS}"
-    while true ; do
-        case "${1}" in
-        -h | --help    ) displayUsage   ; exit 0  ;;
-        -v | --verbose ) set -o verbose ; shift 1 ;;
-        -d | --debug   ) set -o xtrace  ; shift 1 ;;
-        --             ) shift ; break ;;
-        *              ) break ;;
-        esac
-    done
-    ARGS=("${@}")  # remaining arguments
+processOptions() {
+	# read the command line options
+	local OPTIONS
+	if ! OPTIONS="$(
+		getopt \
+			--options hvd \
+			--long help,verbose,debug \
+			--name "${BASH_SOURCE[0]}" \
+			-- "${@}"
+	)"; then
+		# getopt displays errors
+		exit 1
+	fi
+	eval set -- "${OPTIONS}"
+	while true; do
+		case "${1}" in
+		-h | --help)
+			displayUsage
+			exit 0
+			;;
+		-v | --verbose)
+			set -o verbose
+			shift 1
+			;;
+		-d | --debug)
+			set -o xtrace
+			shift 1
+			;;
+		--)
+			shift
+			break
+			;;
+		*) break ;;
+		esac
+	done
 }
 # }}}1
 
 # MAIN
 
 checkPrereqs
-processOptions
-delayStart     # allows time for the internet to become reachable
-checkMailLoop  # begin infinite loop of periodic checking for mail
+processOptions "$@"
+delayStart    # allows time for the internet to become reachable
+checkMailLoop # begin infinite loop of periodic checking for mail
 
 # vim:foldmethod=marker:
