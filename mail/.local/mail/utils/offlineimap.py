@@ -1,5 +1,10 @@
 # ~/.local/mail/utils/offlineimap.py
 
+# pyright: reportMissingParameterType=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnknownVariableType=false
+
 # offlineimap pythonfile
 
 """ Convert utf-7 imap directory names to utf-8
@@ -53,7 +58,6 @@ file:
   nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
 
 """
-import subprocess  # noqa, required for reading passwords
 import re
 
 
@@ -81,8 +85,8 @@ def convert_utf7_to_utf8(str_imap):
 
     """
     try:
-        str_utf7 = re.sub(r'&(\w{3}\-)', '+\\1', str_imap)
-        str_utf8 = str_utf7.encode('utf-8').decode('utf_7')
+        str_utf7 = re.sub(r"&(\w{3}\-)", "+\\1", str_imap)
+        str_utf8 = str_utf7.encode("utf-8").decode("utf_7")
         return str_utf8
     except UnicodeDecodeError:
         # error decoding because already utf-8, so return original string
