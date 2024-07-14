@@ -3,303 +3,305 @@
 use Moo;                 # {{{1
 use strictures 2;
 use 5.006;
-use 5.034_001;
+use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;    # }}}1
 
 {
 
-    package Dn::AliasesRegenerate;
+  package Dn::AliasesRegenerate;
 
-    use Moo;             # {{{1
-    use strictures 2;
-    use namespace::clean -except => [ '_options_data', '_options_config' ];
-    use autodie qw(open close);
-    use Const::Fast;
-    use Desktop::Notify;
-    use Email::Address;
-    use File::Copy;
-    use File::Temp;
-    use File::Which;
-    use English qw(-no_match_vars);
-    use Env     qw(HOME);
-    use Function::Parameters;
-    use IPC::Cmd qw(run);
-    use IPC::Run;
-    use MooX::HandlesVia;
-    use MooX::Options protect_argv => 0;
-    use Path::Tiny;
-    use Types::Standard;
+  use Moo;               # {{{1
+  use strictures 2;
+  use namespace::clean -except => [ '_options_data', '_options_config' ];
+  use autodie qw(open close);
+  use Const::Fast;
+  use Desktop::Notify;
+  use Email::Address;
+  use File::Copy;
+  use File::Temp;
+  use File::Which;
+  use English qw(-no_match_vars);
+  use Env     qw($HOME);
+  use Function::Parameters;
+  use IPC::Cmd;
+  use IPC::Run;
+  use MooX::HandlesVia;
+  use MooX::Options protect_argv => 0;
+  use Path::Tiny;
+  use Types::Standard;
 
-    const my $TRUE       => 1;
-    const my $FALSE      => 0;
-    const my $MIN_LEN    => 5;
-    const my $ICON       => '/usr/share/doc/neomutt/logo/neomutt.svg';
-    const my $DEFAULT_FP => "$HOME/.config/neomutt/aliases";            # }}}1
+  const my $TRUE       => 1;
+  const my $FALSE      => 0;
+  const my $MIN_LEN    => 5;
+  const my $ICON       => '/usr/share/doc/neomutt/logo/neomutt.svg';
+  const my $DEFAULT_FP => "$HOME/.config/neomutt/aliases";             # }}}1
 
-    # debug
-    use Data::Dumper::Simple;                                           # }}}1
+  # debug
+  use Data::Dumper::Simple;                                            # }}}1
 
-    # option
+  # option
 
-    # alias_fp (-p)    {{{1
-    option 'alias_fp' => (
-        is       => 'ro',
-        format   => 's@',
-        required => $FALSE,
-        default  => sub { [] },
-        short    => 'p',
-        doc      => "Path to aliases file (default: $DEFAULT_FP)",
-    );
+  # alias_fp (-p)    {{{1
+  option 'alias_fp' => (
+    is       => 'ro',
+    format   => 's@',
+    required => $FALSE,
+    default  => sub { [] },
+    short    => 'p',
+    doc      => "Path to aliases file (default: $DEFAULT_FP)",
+  );
 
-    method _alias_fp () {
-        my $alias_fp;
-        my @alias_fp = @{ $self->alias_fp };
-        $alias_fp = (@alias_fp) ? $alias_fp[0] : $DEFAULT_FP;
-        return $alias_fp;
-    }                     # }}}1
+  method _alias_fp () {
+    my $alias_fp;
+    my @alias_fp = @{ $self->alias_fp };
+    $alias_fp = (@alias_fp) ? $alias_fp[0] : $DEFAULT_FP;
+    return $alias_fp;
+  }    # }}}1
 
-    # attribute
+  # attribute
 
-    # _addresses, _add_addresses    {{{1
-    has '_email_address_array' => (
-        is  => 'rw',
-        isa => Types::Standard::ArrayRef [
-            Types::Standard::InstanceOf ['Email::Address'],
-        ],
-        lazy        => $TRUE,
-        default     => sub { [] },
-        handles_via => 'Array',
-        handles     => {
-            _addresses     => 'elements',
-            _add_addresses => 'push',
-        },
-        doc => 'Array of Email::Address objects',
-    );    # }}}1
+  # _addresses, _add_addresses    {{{1
+  has '_email_address_array' => (
+    is  => 'rw',
+    isa => Types::Standard::ArrayRef [
+      Types::Standard::InstanceOf ['Email::Address'],
+    ],
+    lazy        => $TRUE,
+    default     => sub { [] },
+    handles_via => 'Array',
+    handles     => {
+      _addresses     => 'elements',
+      _add_addresses => 'push',
+    },
+    doc => 'Array of Email::Address objects',
+  );    # }}}1
 
-    # methods
+  # methods
 
-    # main()    {{{1
-    #
-    # does:   main method
-    # params: nil
-    # prints: feedback
-    # return: n/a, dies on failure
-    method main () {
+  # main()    {{{1
+  #
+  # does:   main method
+  # params: nil
+  # prints: feedback
+  # return: n/a, dies on failure
+  method main () {
 
-        # check dependencies
-        $self->_check_deps;
+    # check dependencies
+    $self->_check_deps;
 
-        # get email addresses
-        $self->_get_addresses;
+    # get email addresses
+    $self->_get_addresses;
 
-        # write details to alias file
-        $self->_write_alias_file;
+    # write details to alias file
+    $self->_write_alias_file;
+
+    return;
+  }
+
+  # _abort($msg)    {{{1
+  #
+  # does:   get sender and recipient email addresses from notmuch
+  # params: nil
+  # prints: feedback
+  # return: n/a, dies on failure
+  method _abort ($msg) {    ## no critic (RequireInterpolationOfMetachars)
+
+    # display notification error
+    my $subject = 'Neomutt aliases refresh FAILED';
+    my %opts    = (summary => $subject, body => $msg, timeout => 5000);
+    ## no critic (ValuesAndExpressions::ProhibitFiletest_f)
+    if (-f "$ICON" or -l "$ICON" or -p "$ICON") {
+
+      # app_icon not supported as of Desktop::Notify v0.05
+      $opts{'app_icon'} = $ICON;
+    }
+    ## use critic
+    my $notify = Desktop::Notify->new();
+    my $note   = $notify->create(%opts);
+    $note->show;
+
+    # - do not 'close' $note now or it dies and is never displayed
+
+    # die with error
+    die "$subject: $msg\n";
+  }
+
+  # _check_deps()    {{{1
+  #
+  # does:   get sender and recipient email addresses from notmuch
+  # params: nil
+  # prints: feedback
+  # return: n/a, dies on failure
+  method _check_deps () {
+
+    # required apps    {{{2
+    my @required = qw(notmuch);
+    my @missing  = grep { not File::Which::which $_ } @required;
+    if (@missing) {
+      my $progs = join ', ', @missing;
+      $self->_abort("Needed to run: $progs");
+    }    # }}}2
+
+    return;
+  }
+
+  # _get_addresses()    {{{1
+  #
+  # does:   get sender and recipient email addresses from notmuch
+  # params: nil
+  # prints: feedback
+  # return: n/a, dies on failure
+  method _get_addresses () {
+
+    # get email address details from notmuch    {{{2
+    my ($cmd, $output, @notmuch_output);
+
+    # - get senders
+    $cmd = [
+      'notmuch',         'address',
+      '--output=sender', '--deduplicate=address',
+      q{*},
+    ];
+    $output = $self->_run_cmd($cmd)
+        or $self->_abort('Unable to retrieve senders from notmuch');
+    my @senders = split /\n/xsm, $output;
+    push @notmuch_output, @senders;
+
+    # - get recipients
+    ## no critic (ProhibitDuplicateLiteral)
+    $cmd = [
+      'notmuch',             'address',
+      '--output=recipients', '--deduplicate=address',
+      q{*},
+    ];
+    ## use critic
+    $output = $self->_run_cmd($cmd)
+        or $self->_abort('Unable to retrieve recipients from notmuch');
+    my @recipients = split /\n/xsm, $output;
+    push @notmuch_output, @recipients;
+
+    # handle case of no addresses    {{{2
+    if (not @notmuch_output) {
+      $self->_abort('No email addresses retrieved from notmuch');
     }
 
-    # _abort($msg)    {{{1
-    #
-    # does:   get sender and recipient email addresses from notmuch
-    # params: nil
-    # prints: feedback
-    # return: n/a, dies on failure
-    method _abort ($msg) {
+    # create email objects    {{{2
+    my (@emails, %addresses);
+    for my $line (@notmuch_output) {
+      my @candidates = Email::Address->parse($line);
+      for my $candidate (@candidates) {
+        my $address = $candidate->address;
 
-        # display notification error
-        my $subject = 'Neomutt aliases refresh FAILED';
-        my %opts    = ( summary => $subject, body => $msg, timeout => 5000 );
-        ## no critic (ValuesAndExpressions::ProhibitFiletest_f)
-        if ( -f "$ICON" or -l "$ICON" or -p "$ICON" ) {
-
-            # app_icon not supported as of Desktop::Notify v0.05
-            $opts{'app_icon'} = $ICON;
+        # do not duplicate previously extracted address
+        if (not exists $addresses{$address}) {
+          push @emails, $candidate;
+          $addresses{$address} = $TRUE;
         }
-        ## use critic
-        my $notify = Desktop::Notify->new();
-        my $note   = $notify->create(%opts);
-        $note->show;
-
-        # - do not 'close' $note now or it dies and is never displayed
-
-        # die with error
-        die "$subject: $msg\n";
+      }
     }
 
-    # _check_deps()    {{{1
-    #
-    # does:   get sender and recipient email addresses from notmuch
-    # params: nil
-    # prints: feedback
-    # return: n/a, dies on failure
-    method _check_deps () {
-
-        # required apps    {{{2
-        my @required = qw(notmuch);
-        my @missing  = grep { not File::Which::which $_ } @required;
-        if (@missing) {
-            my $progs = join ', ', @missing;
-            $self->_abort("Needed to run: $progs");
-        }    # }}}2
-
-        return;
+    # set alias name for each email    {{{2
+    # - use Email::Address's phrase field
+    # - use user part of user@host.com if not already defined,
+    #   or entire email address if the user part is too short
+    for my $email (@emails) {
+      if (not defined $email->phrase) {
+        my $name = $email->user;
+        if (length $name < $MIN_LEN) { $name = $email->address; }
+        $email->phrase($name);
+      }
     }
 
-    # _get_addresses()    {{{1
-    #
-    # does:   get sender and recipient email addresses from notmuch
-    # params: nil
-    # prints: feedback
-    # return: n/a, dies on failure
-    method _get_addresses () {
+    # set alias key    {{{2
+    # - (ab)use Email::Address's comment field for this
+    my %keys;
+    for my $email (@emails) {
 
-        # get email address details from notmuch    {{{2
-        my ( $cmd, $output, @notmuch_output );
+      # try phrase, user and address fields in turn to
+      # get alias key of sufficient length
+      my $key = $email->phrase;
+      if (length $key < $MIN_LEN) { $key = $email->user; }
+      if (length $key < $MIN_LEN) { $key = $email->address; }
 
-        # - get senders
-        $cmd = [
-            'notmuch',         'address',
-            '--output=sender', '--deduplicate=address',
-            q{*},
-        ];
-        $output = $self->_run_cmd($cmd)
-            or $self->_abort('Unable to retrieve senders from notmuch');
-        my @senders = split /\n/xsm, $output;
-        push @notmuch_output, @senders;
+      # tidy alias key, especially removing spaces
+      $key =~ s/\A(.*)\Z/lc($1)/gxsme;
+      $key =~ s/[\s,]/-/gxsm;
+      $key =~ s/[':!]//gxsm;
+      $key =~ s/-+/-/gxsm;
+      $key =~ s/[.]$//gxsm;
 
-        # - get recipients
-        $cmd = [
-            'notmuch',             'address',
-            '--output=recipients', '--deduplicate=address',
-            q{*},
-        ];
-        $output = $self->_run_cmd($cmd)
-            or $self->_abort('Unable to retrieve recipients from notmuch');
-        my @recipients = split /\n/xsm, $output;
-        push @notmuch_output, @recipients;
-
-        # handle case of no addresses    {{{2
-        if ( not @notmuch_output ) {
-            $self->_abort('No email addresses retrieved from notmuch');
-        }
-
-        # create email objects    {{{2
-        my ( @emails, %addresses );
-        for my $line (@notmuch_output) {
-            my @candidates = Email::Address->parse($line);
-            for my $candidate (@candidates) {
-                my $address = $candidate->address;
-
-                # do not duplicate previously extracted address
-                if ( not exists $addresses{$address} ) {
-                    push @emails, $candidate;
-                    $addresses{$address} = $TRUE;
-                }
-            }
-        }
-
-        # set alias name for each email    {{{2
-        # - use Email::Address's phrase field
-        # - use user part of user@host.com if not already defined,
-        #   or entire email address if the user part is too short
-        for my $email (@emails) {
-            if ( not defined $email->phrase ) {
-                my $name = $email->user;
-                if ( length $name < $MIN_LEN ) { $name = $email->address; }
-                $email->phrase($name);
-            }
-        }
-
-        # set alias key    {{{2
-        # - (ab)use Email::Address's comment field for this
-        my %keys;
-        for my $email (@emails) {
-
-            # try phrase, user and address fields in turn to
-            # get alias key of sufficient length
-            my $key = $email->phrase;
-            if ( length $key < $MIN_LEN ) { $key = $email->user; }
-            if ( length $key < $MIN_LEN ) { $key = $email->address; }
-
-            # tidy alias key, especially removing spaces
-            $key =~ s/\A(.*)\Z/lc($1)/gxsme;
-            $key =~ s/[\s,]/-/gxsm;
-            $key =~ s/[':!]//gxsm;
-            $key =~ s/-+/-/gxsm;
-            $key =~ s/[.]$//gxsm;
-
-            # add subnumber to ensure uniqueness if duplicates
-            if ( defined $keys{$key} ) {
-                $keys{$key}++;
-                $key .= $keys{$key};
-            }
-            else {
-                $keys{$key} = 0;
-            }
-            $email->comment($key);
-        }
-
-        # save completed email addresses    {{{2
-        $self->_add_addresses(@emails);    # }}}2
-
-        return;
+      # add subnumber to ensure uniqueness if duplicates
+      if (defined $keys{$key}) {
+        $keys{$key}++;
+        $key .= $keys{$key};
+      }
+      else {
+        $keys{$key} = 0;
+      }
+      $email->comment($key);
     }
 
-    # _run_cmd($cmd)    {{{1
-    #
-    # does:   runs shell command
-    # params: $cmd - command [string or arrayref]
-    # prints: error message if dies
-    # return: output (stdout) of command, dies on failure
-    method _run_cmd ($cmd) {
+    # save completed email addresses    {{{2
+    $self->_add_addresses(@emails);    # }}}2
 
-        # run command
-        my ( $success, $err, $full, $stdout, $stderr )
-            = IPC::Cmd::run( command => $cmd );
+    return;
+  }
 
-        # return command output if successful
-        if ($success) {
+  # _run_cmd($cmd)    {{{1
+  #
+  # does:   runs shell command
+  # params: $cmd - command [string or arrayref]
+  # prints: error message if dies
+  # return: output (stdout) of command, dies on failure
+  method _run_cmd ($cmd) {    ## no critic (RequireInterpolationOfMetachars)
 
-            # IPC::Cmd::run returns stdout as arrayref, with the underlying
-            # array consisting of the shell output chopped into individual
-            # string elements 4096 characters long (including newlines), so
-            # need to join array elements to reconstruct the command output
-            return join q{}, @{$stdout};
-        }
-        else {
-            if ($err) { warn "$err\n"; }
+    # run command
+    my ($success, $err, $full, $stdout, $stderr) =
+        IPC::Cmd::run(command => $cmd);
 
-            # return default value of false
-            return;
-        }
+    # return command output if successful
+    if ($success) {
+
+      # IPC::Cmd::run returns stdout as arrayref, with the underlying
+      # array consisting of the shell output chopped into individual
+      # string elements 4096 characters long (including newlines), so
+      # need to join array elements to reconstruct the command output
+      return join q{}, @{$stdout};
+    }
+    else {
+      if ($err) { warn "$err\n"; }
+      return $FALSE;
+    }
+  }
+
+  # _write_alias_file()    {{{1
+  #
+  # does:   write aliases to temporay file and copy it over alias file
+  # params: nil
+  # prints: feedback
+  # return: n/a, dies on failure
+  method _write_alias_file () {
+
+    # assemble output    {{{2
+    my @output;
+    for my $email ($self->_addresses) {
+      my @parts = ($email->comment, $email->name, $email->address);
+      my $line  = sprintf "alias %s %s <%s>\n", @parts;
+      push @output, $line;
     }
 
-    # _write_alias_file()    {{{1
-    #
-    # does:   write aliases to temporay file and copy it over alias file
-    # params: nil
-    # prints: feedback
-    # return: n/a, dies on failure
-    method _write_alias_file () {
+    # write temporary file    {{{2
+    my $tmp = Path::Tiny::path(File::Temp->new());
+    $tmp->spew(@output)
+        or $self->_abort('Unable to write temporary file');
 
-        # assemble output    {{{2
-        my @output;
-        for my $email ( $self->_addresses ) {
-            my @parts = ( $email->comment, $email->name, $email->address );
-            my $line = sprintf "alias %s %s <%s>\n", @parts;
-            push @output, $line;
-        }
+    # copy over alias file    {{{2
+    File::Copy::copy($tmp->canonpath, $self->_alias_fp)
+        or $self->_abort('Unable to save alias file');    # }}}2
 
-        # write temporary file    {{{2
-        my $tmp = Path::Tiny::path( File::Temp->new() );
-        $tmp->spew(@output)
-            or $self->_abort('Unable to write temporary file');
-
-        # copy over alias file    {{{2
-        File::Copy::copy( $tmp->canonpath, $self->_alias_fp )
-            or $self->_abort('Unable to save alias file');    # }}}2
-
-        return;
-    };    # }}}1
+    return;
+  }    # }}}1
 
 }
 
@@ -308,9 +310,8 @@ my $p = Dn::AliasesRegenerate->new_with_options->main;
 1;
 
 # POD    {{{1
-__END__
 
-=encoding utf8
+__END__
 
 =head1 NAME
 
@@ -321,30 +322,6 @@ neomutt_aliases-regenerate - regenerate neomutt alias file using notmuch
 B<neomutt_aliases-regenerate> [ B<-p> path ]
 
 B<neomutt_aliases-regenerate -h>
-
-=head1 REQUIRED ARGUMENTS
-
-Nil.
-
-=head1 REQUIRED OPTIONS
-
-Nil.
-
-=head1 OPTIONS
-
-=over
-
-=item B<-p>  B<--alias_fp>
-
-Filepath to neomutt alias file.
-
-String. Optional. Default: F<~/.config/neomutt/aliases>.
-
-=item B<-h>
-
-Display help and exit.
-
-=back
 
 =head1 DESCRIPTION
 
@@ -374,6 +351,32 @@ If an alias file already exists it is silently overwritten.
 If the script is unable to regenerate the alias file it writes an error message
 to the console and display it in a system notification.
 
+=head1 CONFIGURATION
+
+There are no configuration variables or files.
+
+=head1 REQUIRED ARGUMENTS
+
+Nil.
+
+=head1 OPTIONS
+
+=head2 -p | --alias_fp FILEPATH
+
+Filepath to neomutt alias file.
+
+String. Optional. Default: F<~/.config/neomutt/aliases>.
+
+=head2 -h | --help
+
+Display help and exit. Flag. Optional. Default: false.
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly the
+error code is that given by the system.
+
 =head1 DIAGNOSTICS
 
 =head2 Needed to run: ...
@@ -400,6 +403,14 @@ These errors occur when writing the alias file. The first error occurs when
 trying to write alias details to a temporary file. The second error occurs when
 trying to copy the temporary file over an existing alias file.
 
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs to the author.
+
 =head1 DEPENDENCIES
 
 =head2 Perl modules
@@ -413,34 +424,17 @@ Types::Standard, version.
 
 notmuch.
 
-=head1 CONFIGURATION
-
-There are no configuration variables or files.
-
-=head1 INCOMPATIBILITIES
-
-There are no known incompatibilities.
-
-=head1 EXIT STATUS
-
-The exit code is 0 for successful execution and 1 if the script does a
-controlled exit following an error. If the script crashes unexpectedly the
-error code is that given by the system.
-
-=head1 BUGS AND LIMITATIONS
-
-Please report any bugs to the author.
-
 =head1 AUTHOR
 
-David Nebauer (david at nebauer dot org)
+David Nebauer S<< <david@nebauer.org> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2022 David Nebauer (david at nebauer dot org)
+Copyright (c) 2024 David Nebauer S<< <david@nebauer.org> >>
 
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =cut
+
 # vim:foldmethod=marker:
