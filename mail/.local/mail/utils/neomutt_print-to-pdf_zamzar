@@ -1,5 +1,17 @@
 #! /usr/bin/env python3
 # pylint: disable=invalid-name
+# pyright: reportAny=false
+# pyright: reportArgumentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportMissingParameterType=false
+# pyright: reportMissingSuperCall=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnknownVariableType=false
+# pyright: reportMissingTypeStubs=false
+# pyright: reportPossiblyUnboundVariable=false
+# pyright: reportCallIssue=false
 
 # module docstring    {{{1
 """ script to save email as pdf
@@ -94,29 +106,33 @@ import email
 import tkinter
 import tkinter.filedialog
 
-import keyring  # type: ignore
+import keyring
 import requests.auth
-import notify2  # type: ignore
-import gi  # type: ignore
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk  # type: ignore # noqa: E402 # pylint:disable=C0413
-log.basicConfig(format='%(message)s')
+import notify2
+import gi
+
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk  # noqa: E402 # pylint:disable=C0413
+
+log.basicConfig(format="%(message)s")
 
 # constants    {{{1
 
-KEYRING = ['api-key', 'zamzar.com']  # keyring 'service' and 'username'
-SAVE_DIR = (os.path.join(os.environ['HOME'], 'Downloads')
-            if os.path.isdir(os.path.join(os.environ['HOME'], 'Downloads'))
-            else os.environ['HOME'])
-ENDPOINT_BASE = 'https://sandbox.zamzar.com/v1'
+KEYRING = ["api-key", "zamzar.com"]  # keyring 'service' and 'username'
+SAVE_DIR = (
+    os.path.join(os.environ["HOME"], "Downloads")
+    if os.path.isdir(os.path.join(os.environ["HOME"], "Downloads"))
+    else os.environ["HOME"]
+)
+ENDPOINT_BASE = "https://sandbox.zamzar.com/v1"
 TIME_LIMIT = 300  # seconds, for entire conversion
 UPDATE_INTERVAL = 5  # seconds, between job status checks
 HTTP_TIMEOUT = 5  # seconds, for each http request
 
 
-class SaveAsPdf():    # {{{1
+class SaveAsPdf:  # {{{1
     # class docstring    {{{2
-    """ save current email as pdf
+    """save current email as pdf
 
     assumes:
     * email is supplied via stdin
@@ -133,64 +149,67 @@ class SaveAsPdf():    # {{{1
     savepdf.save()
     """
 
-    def __init__(self):    # {{{2
-        """ initialise variables """
+    def __init__(self):  # {{{2
+        """initialise variables"""
         # file attributes
         self._message_id = None  # email message id
-        self._tmp_dir = None     # temporary directory
-        self._tmp_eml = None     # file path of eml file in temp dir
-        self._auth = None        # http request authorisation token
+        self._tmp_dir = None  # temporary directory
+        self._tmp_eml = None  # file path of eml file in temp dir
+        self._auth = None  # http request authorisation token
         # notifications
-        if not notify2.init('Neomutt: Save as PDF'):
-            log.error('Unable to initialise notify2 module')
+        if not notify2.init("Neomutt: Save as PDF"):
+            log.error("Unable to initialise notify2 module")
             sys.exit(1)
-        self._notification = notify2.Notification('Neomutt: Save as PDF', '_')
-        self._notification.set_timeout(5000)
+        self._notification = notify2.Notification(
+            summary="Neomutt: Save as PDF", message="_"
+        )
+        self._notification.set_timeout(timeout=5000)
         icon_size = 64  # previously Gtk.IconSize.DIALOG
         self._icon = {
-            'error': (Gtk.IconTheme()
-                      .load_icon('dialog-error', icon_size, 0)),
-            'info': (Gtk.IconTheme()
-                     .load_icon('dialog-information', icon_size, 0)),
+            "error": (Gtk.IconTheme().load_icon("dialog-error", icon_size, 0)),
+            "info": (
+                Gtk.IconTheme().load_icon("dialog-information", icon_size, 0)
+            ),  # force wrap
         }
         try:
-            self._icon['neomutt'] = (
-                Gtk.IconTheme().load_icon('neomutt', icon_size, 0))
+            self._icon["neomutt"] = Gtk.IconTheme().load_icon(
+                "neomutt", icon_size, 0
+            )  # force wrap
         except gi.repository.GLib.Error:
-            self._icon['neomutt'] = None
+            self._icon["neomutt"] = None
 
-    def _abort(self, msg):    # {{{2
-        """ display error notification and exit """
+    def _abort(self, msg):  # {{{2
+        """display error notification and exit"""
         log.error(msg)
         self._notification.set_urgency(notify2.URGENCY_CRITICAL)
-        if self._icon['neomutt']:
-            body = '<b>ERROR:</b><br>' + msg
-            self._notification.update('Save as PDF', body)
-            self._notification.set_icon_from_pixbuf(self._icon['neomutt'])
+        if self._icon["neomutt"]:
+            body = "<b>ERROR:</b><br>" + msg
+            self._notification.update("Save as PDF", body)
+            self._notification.set_icon_from_pixbuf(self._icon["neomutt"])
         else:
-            self._notification.update('Neomutt: Save as PDF', msg)
-            self._notification.set_icon_from_pixbuf(self._icon['error'])
+            self._notification.update("Neomutt: Save as PDF", msg)
+            self._notification.set_icon_from_pixbuf(self._icon["error"])
         if not self._notification.show():
-            log.error('Unable to send error notification')
+            log.error("Unable to send error notification")
             sys.exit(1)
         sys.exit(1)
 
-    def _info(self, msg):    # {{{2
-        """ display information notification """
+    def _info(self, msg):  # {{{2
+        """display information notification"""
         log.debug(msg)
         self._notification.set_timeout(notify2.EXPIRES_NEVER)
-        if self._icon['neomutt']:
-            self._notification.update('Save as PDF', msg)
-            self._notification.set_icon_from_pixbuf(self._icon['neomutt'])
+        if self._icon["neomutt"]:
+            self._notification.update("Save as PDF", msg)
+            self._notification.set_icon_from_pixbuf(self._icon["neomutt"])
         else:
-            self._notification.update('Neomutt: Save as PDF', msg)
-            self._notification.set_icon_from_pixbuf(self._icon['info'])
+            self._notification.update("Neomutt: Save as PDF", msg)
+            self._notification.set_icon_from_pixbuf(self._icon["info"])
         if not self._notification.show():
-            log.error('Unable to send information notification')
+            log.error("Unable to send information notification")
             sys.exit(1)
 
-    def _set_auth_token(self):    # {{{2
-        """ get zamzar api key from keyring """
+    def _set_auth_token(self):  # {{{2
+        """get zamzar api key from keyring"""
         try:
             api_key = keyring.get_password(*KEYRING)
         except keyring.errors.KeyringError as err:
@@ -199,10 +218,10 @@ class SaveAsPdf():    # {{{1
         if api_key is None:
             msg = "No value found for keyring service '{}' and username '{}'"
             self._abort(msg.format(*KEYRING))
-        self._auth = requests.auth.HTTPBasicAuth(api_key, '')
+        self._auth = requests.auth.HTTPBasicAuth(api_key, "")
 
-    def _copy_file(self, source, target, err):    # {{{2
-        """ copy file
+    def _copy_file(self, source, target, err):  # {{{2
+        """copy file
         * requires creation of non-zero-sized target file for success
         """
         if not os.path.isfile(source):
@@ -211,128 +230,134 @@ class SaveAsPdf():    # {{{1
         if (not os.path.isfile(target)) or (os.path.getsize(target) == 0):
             self._abort(err)
 
-    def _request_start(self):    # {{{2
-        """ start zamzar conversion job
+    def _request_start(self):  # {{{2
+        """start zamzar conversion job
         * returns: job (int)
         """
-        endpoint = ENDPOINT_BASE + '/jobs'
-        data = {'target_format': 'pdf'}
+        endpoint = ENDPOINT_BASE + "/jobs"
+        data = {"target_format": "pdf"}
         # pylint: disable=consider-using-with
-        files = {'source_file': open(self._tmp_eml, 'rb')}
+        files = {"source_file": open(self._tmp_eml, "rb")}
         # send request
         try:
-            res_obj = requests.post(endpoint, data=data, files=files,
-                                    auth=self._auth, timeout=HTTP_TIMEOUT)
+            res_obj = requests.post(
+                url=endpoint,
+                data=data,
+                files=files,
+                auth=self._auth,
+                timeout=HTTP_TIMEOUT,
+            )
         except ConnectionError as err:
-            self._abort('Connection error: ' + str(err))
+            self._abort("Connection error: " + str(err))
         except requests.HTTPError as err:
-            self._abort('HTTP error: ' + str(err))
+            self._abort("HTTP error: " + str(err))
         except requests.Timeout as err:
-            self._abort('Timeout error: ' + str(err))
+            self._abort("Timeout error: " + str(err))
         # check response
         try:
             res = res_obj.json()  # gives dict, despit method name
         except json.JSONDecodeError as err:
-            self._abort('HTTP decode failed: ' + str(err.msg))
+            self._abort("HTTP decode failed: " + str(err.msg))
         # get job id
-        if 'id' not in res:
-            self._abort('Initial server response had no job id')
-        job = res['id']
+        if "id" not in res:
+            self._abort("Initial server response had no job id")
+        job = res["id"]
         if not job:
-            self._abort('Unable to retrieve conversion job number')
+            self._abort("Unable to retrieve conversion job number")
         return job
 
-    def _delete_file(self, filepath):    # {{{2
-        """ delete file """
+    def _delete_file(self, filepath):  # {{{2
+        """delete file"""
         try:
             os.remove(filepath)
         except OSError as err:
             opts = [err.strerror, err.errno]
             self._abort("Unable to delete file: {} ({})".format(*opts))
 
-    def _request_update(self, job):    # {{{2
-        """ request status of samzar conversion job
+    def _request_update(self, job):  # {{{2
+        """request status of samzar conversion job
         * returns: target files (list of dicts)
         """
-        endpoint = ENDPOINT_BASE + '/jobs/' + str(job)
-        args = {'auth': self._auth, 'timeout': HTTP_TIMEOUT}
+        endpoint = ENDPOINT_BASE + "/jobs/" + str(job)
+        args = {"auth": self._auth, "timeout": HTTP_TIMEOUT}
         # send request
         try:
             res_obj = requests.get(endpoint, **args)
         except ConnectionError as err:
-            self._abort('Connection error: ' + str(err))
+            self._abort("Connection error: " + str(err))
         except requests.HTTPError as err:
-            self._abort('HTTP error: ' + str(err))
+            self._abort("HTTP error: " + str(err))
         except requests.Timeout as err:
-            self._abort('Timeout error: ' + str(err))
+            self._abort("Timeout error: " + str(err))
         # convert response to dict
         try:
             res = res_obj.json()  # gives dict, despit method name
         except json.JSONDecodeError as err:
-            self._abort('HTTP decode failed: ' + str(err.msg))
+            self._abort("HTTP decode failed: " + str(err.msg))
         # check status
-        if 'status' not in res:
-            self._abort('Malformed response has no status')
-        status = res['status']
-        if status != 'successful':
+        if "status" not in res:
+            self._abort("Malformed response has no status")
+        status = res["status"]
+        if status != "successful":
             return None
         # if successful check details of target files structure
-        if 'target_files' not in res:
-            self._abort('No target files in server response')
-        file_dicts = res['target_files']
+        if "target_files" not in res:
+            self._abort("No target files in server response")
+        file_dicts = res["target_files"]
         if not isinstance(file_dicts, list):
-            self._abort('Expected file list, got ' + type(file_dicts).__name__)
+            self._abort("Expected file list, got " + type(file_dicts).__name__)
         if len(file_dicts) == 0:
-            self._abort('No file details returned from server')
+            self._abort("No file details returned from server")
         for file_dict in file_dicts:
-            if 'id' not in file_dict:
-                self._abort('Malformed file dict has no id')
+            if "id" not in file_dict:
+                self._abort("Malformed file dict has no id")
         return file_dicts
 
-    def _request_download(self, job, filepath):    # {{{2
-        """ request download of converted file """
+    def _request_download(self, job, filepath):  # {{{2
+        """request download of converted file"""
         endpoint = f"{ENDPOINT_BASE}/files/{str(job)}/content"
-        args = {'stream': True, 'auth': self._auth, 'timeout': HTTP_TIMEOUT}
+        args = {"stream": True, "auth": self._auth, "timeout": HTTP_TIMEOUT}
         # create connection
         try:
             response = requests.get(endpoint, **args)
         except ConnectionError as err:
-            self._abort('Connection error: ' + str(err))
+            self._abort("Connection error: " + str(err))
         except requests.HTTPError as err:
-            self._abort('HTTP error: ' + str(err))
+            self._abort("HTTP error: " + str(err))
         except requests.Timeout as err:
-            self._abort('Timeout error: ' + str(err))
+            self._abort("Timeout error: " + str(err))
         # download file
         try:
-            with open(filepath, 'wb') as file_handle:
+            with open(filepath, "wb") as file_handle:
                 for chunk in response.iter_content(chunk_size=1024):
                     if chunk:
-                        file_handle.write(chunk)
+                        _ = file_handle.write(chunk)
                         file_handle.flush()
         except OSError as err:
             opts = [filepath, err.strerror, err.errno]
-            msg = 'Error downloading {}: {} ({})'.format(*opts)
+            msg = "Error downloading {}: {} ({})".format(*opts)
             self._abort(msg)
 
-    def _set_download_filepaths(self, file_dicts):    # {{{2
-        """ ensure download filepaths are unique and use temp dir """
+    def _set_download_filepaths(self, file_dicts):  # {{{2
+        """ensure download filepaths are unique and use temp dir"""
         files = []
         # ensure file names are unique
         for file_dict in file_dicts:
-            name, ext = os.path.splitext(file_dict['name'])
+            name, ext = os.path.splitext(file_dict["name"])
             suffix = 1
-            while file_dict['name'] in files:
-                file_dict['name'] = f"{name}_{suffix}{ext}"
+            while file_dict["name"] in files:
+                file_dict["name"] = f"{name}_{suffix}{ext}"
                 suffix += 1
-            files.append(file_dict['name'])
+            files.append(file_dict["name"])
         # prepend temp directory path
         for file_dict in file_dicts:
-            file_dict['name'] = os.path.join(self._tmp_dir, file_dict['name'])
+            file_dict["name"] = os.path.join(self._tmp_dir, file_dict["name"])
 
     @staticmethod
-    def process_args():    # {{{2
-        """ print help if requested """
-        description = textwrap.dedent('''\
+    def process_args():  # {{{2
+        """print help if requested"""
+        description = textwrap.dedent(
+            """\
         script to save email as pdf
 
         This script was designed for use with neomutt's
@@ -379,30 +404,32 @@ class SaveAsPdf():    # {{{1
 
         Common failure modes are displayed in desktop notification
         error messages.
-        ''')
-        argparse.ArgumentParser(formatter_class=argparse.
-                                RawDescriptionHelpFormatter,
-                                description=description
+        """
+        )
+        _ = argparse.ArgumentParser(
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            description=description,
         ).parse_args()
 
-    def check_requirements(self):    # {{{2
-        """ check for requirements
+    def check_requirements(self):  # {{{2
+        """check for requirements
         * internet connectivity (as per https://stackoverflow.com/a/33117579)
         """
-        host = '8.8.8.8'  # google-public-dns-a.google.com
-        port = 53         # tcp
+        host = "8.8.8.8"  # google-public-dns-a.google.com
+        port = 53  # tcp
         timeout = 3
         try:
             socket.setdefaulttimeout(timeout)
-            socket.socket(socket.AF_INET,
-                          socket.SOCK_STREAM).connect((host, port))
+            socket.socket(
+                family=socket.AF_INET, type=socket.SOCK_STREAM  # force wrap
+            ).connect(address=(host, port))
         except OSError as err:
             opts = [err.strerror, err.errno]
-            msg = 'No internet connection: {}: {}'.format(*opts)
+            msg = "No internet connection: {}: {}".format(*opts)
             self._abort(msg)
 
-    def get_file_details(self):    # {{{2
-        """ convert eml to pdf
+    def get_file_details(self):  # {{{2
+        """convert eml to pdf
         * locates filepath of email file
           - start with message id and look it up in notmuch database
         * prepares filepaths for source eml and temporary files
@@ -411,105 +438,115 @@ class SaveAsPdf():    # {{{1
         """
         # save stdin to temporary file
         if sys.stdin.isatty():
-            self._abort('No data has been piped into script')
+            self._abort("No data has been piped into script")
         self._tmp_dir = tempfile.mkdtemp()
-        base = 'email'
-        tmp_eml = os.path.join(self._tmp_dir, base + '.eml')
-        with os.fdopen(sys.stdin.fileno(), 'rb') as input_file,\
-                open(tmp_eml, 'wb') as output_file:
+        base = "email"
+        tmp_eml = os.path.join(self._tmp_dir, base + ".eml")
+        with os.fdopen(sys.stdin.fileno(), "rb") as input_file, open(
+            tmp_eml, "wb"
+        ) as output_file:
             shutil.copyfileobj(input_file, output_file)
         self._tmp_eml = tmp_eml
         # get email subject
-        subject = ''
-        with open(tmp_eml, 'rb') as eml_fh:
+        subject = ""
+        with open(tmp_eml, "rb") as eml_fh:
             message = email.message_from_binary_file(eml_fh)
-        candidate_subject = message.get('subject')
+        candidate_subject = message.get("subject")
         # change filename to subject-derived value if have subject
         if candidate_subject is not None:
             subject = candidate_subject.strip()
             subject = subject[:20]  # truncate long subject lines
             # replace non-word chars with dashes, remove duplicate dashes
-            base = re.sub(r'(-)\1+', '\\1',
-                          re.sub(r'[^A-Za-z0-9_-]', '-', subject))
+            base: str = re.sub(  # pyright: ignore[reportRedeclaration]
+                r"(-)\1+", "\\1", re.sub(r"[^A-Za-z0-9_-]", "-", subject)
+            )
             # lower case, truncate to 20 chars, remove lead/trail dashes
-            base = base.lower()[:20].strip('-')
-            self._tmp_eml = os.path.join(self._tmp_dir, base + '.eml')
+            base: str = base.lower()[:20].strip(chars="-")
+            self._tmp_eml = os.path.join(self._tmp_dir, base + ".eml")
             os.rename(tmp_eml, self._tmp_eml)
 
-    def convert(self):    # {{{2
-        """ use zamzar online conversion service """
+    def convert(self):  # {{{2
+        """use zamzar online conversion service"""
         self._set_auth_token()
         start = time.process_time()
         # start conversion
-        self._info('Uploading eml file for conversion...')
+        self._info("Uploading eml file for conversion...")
         job = self._request_start()  # returns integer job number
         self._delete_file(self._tmp_eml)  # clear out temp dir
         # check until complete
         file_dicts = []
         while True:
-            self._info('Converting eml file to pdf at zamzar.com...')
+            self._info("Converting eml file to pdf at zamzar.com...")
             ret = self._request_update(job)  # returns None or list of dicts
             if ret is not None:
                 file_dicts.extend(ret)
                 break
             if (start - time.process_time()) > TIME_LIMIT:
-                self._abort('Server conversion exceeded time limit')
+                self._abort("Server conversion exceeded time limit")
             time.sleep(UPDATE_INTERVAL)
         # download completed files
-        self._info('Downloading converted files...')
+        self._info("Downloading converted files...")
         self._set_download_filepaths(file_dicts)
         for file_dict in file_dicts:
-            self._request_download(file_dict['id'], file_dict['name'])
+            self._request_download(file_dict["id"], file_dict["name"])
 
-    def save(self):    # {{{2
-        """ copy converted pdf files to save location """
+    def save(self):  # {{{2
+        """copy converted pdf files to save location"""
         # get downloaded filepaths
-        fps_glob = os.path.join(os.path.split(self._tmp_eml)[0], '*')
+        fps_glob = os.path.join(os.path.split(self._tmp_eml)[0], "*")
         fps = glob.glob(fps_glob)
         if not fps:
-            self._abort('Oops, no files for user to save')
+            self._abort("Oops, no files for user to save")
         # shuffle pdf files to front of list
         for index, filepath in enumerate(fps):
-            if index > 0 and os.path.splitext(filepath)[1] == '.pdf':
+            if index > 0 and os.path.splitext(filepath)[1] == ".pdf":
                 fps.insert(0, fps.pop(index))
         # save files (pdfs first)
         save_dir = SAVE_DIR
         for index, filepath in enumerate(fps):
             initialfile = os.path.split(filepath)[1]
-            ftype = os.path.splitext(initialfile)[1].lstrip('.')
-            filetypes = ((ftype + ' files', '*.' + ftype), ('all files', '*'))
-            default_ext = '.' + ftype
+            ftype = os.path.splitext(initialfile)[1].lstrip(".")
+            filetypes = ((ftype + " files", "*." + ftype), ("all files", "*"))
+            default_ext = "." + ftype
             title = f"Save email file {index + 1} of {len(fps)}"
             tkinter.Tk().withdraw()
-            opts = {'initialdir': save_dir, 'initialfile': initialfile,
-                    'filetypes': filetypes, 'defaultextension': default_ext,
-                    'title': title}
+            opts = {
+                "initialdir": save_dir,
+                "initialfile": initialfile,
+                "filetypes": filetypes,
+                "defaultextension": default_ext,
+                "title": title,
+            }
             save_fp = tkinter.filedialog.asksaveasfilename(**opts)
             if save_fp:  # user entered/selected filepath
-                self._copy_file(filepath, save_fp,
-                                'Unable to save file to destination')
+                self._copy_file(
+                    source=filepath,
+                    target=save_fp,
+                    err="Unable to save file to destination",
+                )
                 opts = [os.path.split(save_fp)[1], os.path.split(save_fp)[0]]
                 self._info("Saved file '{}'\nto '{}'".format(*opts))
             else:  # user cancelled
                 self._info(f"File '{initialfile}' not saved")
             # save_dir = os.path.split(save_fp)[0]  # remember save directory
 
-    def cleanup(self):    # {{{2
-        """ take only photographs and leave only footprints """
+    def cleanup(self):  # {{{2
+        """take only photographs and leave only footprints"""
         # remove temporary directory
         if self._tmp_dir is not None and os.path.isdir(self._tmp_dir):
-            shutil.rmtree(self._tmp_dir, ignore_errors=True)    # }}}2
+            shutil.rmtree(self._tmp_dir, ignore_errors=True)  # }}}2
         # close notification
-        if self._notification is not None:
-            time.sleep(2)
-            self._notification.close()
+        time.sleep(seconds=2)
+        self._notification.close()
+
+
 # }}}1
 
 
 def main():
-    """ script execution starts here """
+    """script execution starts here"""
     savepdf = SaveAsPdf()
-    atexit.register(savepdf.cleanup)
+    _ = atexit.register(savepdf.cleanup)
     savepdf.process_args()
     savepdf.check_requirements()
     savepdf.get_file_details()
@@ -517,7 +554,7 @@ def main():
     savepdf.save()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
 # vim:fdm=marker:
