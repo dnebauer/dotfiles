@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # adapted from https://github.com/anufrievroman/Neomutt-File-Picker
 # - note the  in the sed command below is created in vim
@@ -7,12 +7,15 @@
 # - it is assumed the default editor mode/menu mapping of
 #   Ctrl-v (aka ^V) to the <quote-char> function is in place
 
-tmpfile=$HOME/.cache/neomutt/picker-cache
+tmpfile=$HOME/.cache/neomutt/picker-temp
+cachefile=$HOME/.cache/neomutt/picker-cache
 
+# shellcheck disable=SC2288 # escaping is needed
 if \[ -z "$1" \]; then
-    ranger --choosefiles $tmpfile &&
-    sed -i 's/ / /g' $tmpfile &&
-    echo "$(awk 'BEGIN {printf "%s", "push "} {printf "%s", "<attach-file>\""$0"\"<enter>"}'  $tmpfile)" > $tmpfile
-elif \[ $1 == "clean" \]; then
-    rm $tmpfile
+	ranger --choosefiles "$tmpfile" &&
+		sed -i 's/ / /g' "$tmpfile" &&
+		awk 'BEGIN {printf "%s", "push "} {printf "%s", "<attach-file>\""$0"\"<enter>"}' "$tmpfile" >"$cachefile"
+elif \[ "$1" == "clean" \]; then
+	rm "$tmpfile"
+	rm "$cachefile"
 fi
