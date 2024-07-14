@@ -1,4 +1,11 @@
 #! /usr/bin/env python3
+# pyright: reportAny=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportMissingParameterType=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnknownVariableType=false
 # pylint: disable=invalid-name
 
 # module docstring    {{{1
@@ -14,18 +21,20 @@ License: GPL-3+
 
 # import    {{{1
 
+# • xerox is installed by pipx ('pipx install xerox')
+#   - modules installed this way can't be found by the linter
 import sys
 import logging as log
 import textwrap
 import argparse
 import email
 import html2text
-import xerox  # type: ignore
+import xerox  # type: ignore[reportMissingImports]
 
 
-class ContentToClipboard():    # {{{1
+class ContentToClipboard:  # {{{1
     # class docstring    {{{2
-    """ send content to clipboard as plain text
+    """send content to clipboard as plain text
 
     assumes:
     * email is supplied via stdin
@@ -39,10 +48,11 @@ class ContentToClipboard():    # {{{1
     sendclip.send_to_clipboard()
     """
 
-    def __init__(self):    # {{{2
-        """ initialise variables """
+    # the 'reportMissingSuperCall' error displays erroneously on base classes
+    def __init__(self) -> None:  # type: ignore[reportMissingSuperCall] {{{2
+        """initialise variables"""
         # configure logging
-        log.basicConfig(format='%(message)s')
+        log.basicConfig(format="%(message)s")
 
         # email object
         self._email = None
@@ -51,45 +61,47 @@ class ContentToClipboard():    # {{{1
         self._content = None
 
     @staticmethod
-    def _abort(msg):    # {{{2
-        """ display error and exit """
+    def _abort(msg: str) -> None:  # {{{2
+        """display error and exit"""
         log.error(msg)
         sys.exit(msg)
 
     @staticmethod
-    def process_args():    # {{{2
-        """ print help if requested """
-        description = textwrap.dedent('''\
+    def process_args() -> None:  # {{{2
+        """print help if requested"""
+        description: str = textwrap.dedent(
+            text="""\
         script to send email content to clipboard as plain text
 
         This script reads an email from stdin, extracts the content
         as plaint text, and sends it to the system clipboard.
-        ''')
-        argparse.ArgumentParser(formatter_class=argparse.
-                                RawDescriptionHelpFormatter,
-                                description=description
-                                ).parse_args()
+        """
+        )
+        _ = argparse.ArgumentParser(
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            description=description,
+        ).parse_args()
 
-    def create_email_object(self):    # {{{2
-        """ create email object from stdin """
+    def create_email_object(self) -> None:  # {{{2
+        """create email object from stdin"""
         # save stdin to string
         # - ignore UnicodeDecodeErrors from sys.stdin.readlines
-        sys.stdin.reconfigure(errors='ignore')
+        sys.stdin.reconfigure(errors="ignore")
         if sys.stdin.isatty():
-            self._abort('No data has been piped into script')
-        lines = sys.stdin.readlines()
-        data = ''.join(lines)
+            self._abort(msg="No data has been piped into script")
+        lines: list[str] = sys.stdin.readlines()
+        data: str = "".join(lines)
         # create email object
         self._email = email.message_from_string(data)
 
-    def extract_content(self):    # {{{2
-        """ extract email content as plain text """
+    def extract_content(self) -> None:  # {{{2
+        """extract email content as plain text"""
         text = self._pullout(self._email)
         text = text.strip()
         self._content = text
 
-    def _pullout(self, msg):    # {{{2
-        """ pull out email content
+    def _pullout(self, msg) -> str:  # {{{2
+        """pull out email content
         * handles multipart and nested multipart messages
 
         args:
@@ -98,10 +110,11 @@ class ContentToClipboard():    # {{{1
         return:
         * all text/html content from all parts (as plaintext string)
         """
-        text = ''
+        text = ""
         # 1. handle part that is an email object
-        if isinstance(msg, (email.message.EmailMessage,
-                            email.message.Message)):
+        if isinstance(
+            msg, (email.message.EmailMessage, email.message.Message)
+        ):  # stub comment to force line wrapping
             # 1.a. handle part that is an email object with multiple parts
             if msg.is_multipart():
                 # - iterate over message parts and recurse
@@ -130,7 +143,7 @@ class ContentToClipboard():    # {{{1
                     payload = payload.decode()
                 text += html2text.html2text(payload)
             else:
-                text += 'Skipping part that is neither plaintext nor html\n'
+                text += "Skipping part that is neither plaintext nor html\n"
             return text
         # 2. handle part that is not an email object
         #    - so far can handle 'bytes' and 'None' types
@@ -139,15 +152,15 @@ class ContentToClipboard():    # {{{1
                 payload = msg.decode()
                 text += payload
             except ValueError as err:
-                errmsg = getattr(err, 'message', str(err))
-                print(f'Unable to decode bytes part: {errmsg}')
+                errmsg = getattr(err, "message", str(err))
+                print(f"Unable to decode bytes part: {errmsg}")
             return text
         if msg is None:
             return text
         raise ValueError(f"Script can't handle {str(type(msg))} part")
 
-    def send_to_clipboard(self):    # {{{2
-        """ send extracted plaintext content to clipboard
+    def send_to_clipboard(self):  # {{{2
+        """send extracted plaintext content to clipboard
         use xerox.copy():
         * homepage is https://github.com/adityarathod/xerox
         * packaged to install with pip (see https://pypi.org/project/xerox/)
@@ -164,11 +177,13 @@ class ContentToClipboard():    # {{{1
         * - could not find a workaround to prevent this
         """
         xerox.copy(self._content)
+
+
 # }}}1
 
 
 def main():
-    """ script execution starts here """
+    """script execution starts here"""
     sendclip = ContentToClipboard()
     sendclip.process_args()
     sendclip.create_email_object()
@@ -176,7 +191,7 @@ def main():
     sendclip.send_to_clipboard()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
 # vim:fdm=marker:
