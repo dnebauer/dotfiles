@@ -58,6 +58,8 @@ file:
   nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
 
 """
+# subprocess is required for reading passwords
+import subprocess  # noqa: F401 # pyright: ignore[reportUnusedImport]
 import re
 
 

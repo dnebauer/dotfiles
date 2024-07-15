@@ -67,9 +67,6 @@ import binascii
 import codecs
 import six
 
-# required for reading passwords
-import subprocess  # noqa: F401 # pyright: ignore[reportUnusedImport] # flake8: noqa
-
 
 # encoding
 
@@ -163,3 +160,8 @@ def imap4_utf_7(name):
 
 
 codecs.register(imap4_utf_7)
+
+
+# required for reading passwords
+
+import subprocess  # noqa: F401 # pyright: ignore[reportUnusedImport] # flake8: noqa
