@@ -41,14 +41,19 @@ return {
             { Util.lualine.pretty_path() },
           },
           lualine_x = {
+            { "encoding", "fileformat", "filetype" },
+            -- show normal-mode keystrokes
             {
               require("noice").api.status.command.get,
               cond = require("noice").api.status.command.has,
               color = { fg = "#ff9e64" },
             },
-            "encoding",
-            "fileformat",
-            "filetype",
+            -- show notice when macro is recording
+            {
+              require("noice").api.statusline.mode.get,
+              cond = require("noice").api.statusline.mode.has,
+              color = { fg = "#ff9e64" },
+            },
           },
           lualine_y = { { "progress", separator = " ", padding = { left = 1, right = 0 } } },
           lualine_z = { { "location", padding = { left = 0, right = 1 } } },
