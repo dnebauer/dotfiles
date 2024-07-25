@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /home/david/.venvs/neomutt/bin/python
 # pyright: reportAny=false
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportMissingParameterType=false
@@ -21,15 +21,16 @@ License: GPL-3+
 
 # import    {{{1
 
-# • xerox is installed by pipx ('pipx install xerox')
-#   - modules installed this way can't be found by the linter
 import sys
 import logging as log
 import textwrap
 import argparse
 import email
 import html2text
-import xerox  # type: ignore[reportMissingImports]
+
+# xerox module is part of a virtual environment (see shebang)
+# • although linter cannot find it, python finds it at runtime
+import xerox  # type: ignore[reportMissingImports] # noqa: E402
 
 
 class ContentToClipboard:  # {{{1
@@ -86,7 +87,7 @@ class ContentToClipboard:  # {{{1
         """create email object from stdin"""
         # save stdin to string
         # - ignore UnicodeDecodeErrors from sys.stdin.readlines
-        sys.stdin.reconfigure(errors="ignore")
+        sys.stdin.reconfigure(encoding="utf-8", errors="ignore")
         if sys.stdin.isatty():
             self._abort(msg="No data has been piped into script")
         lines: list[str] = sys.stdin.readlines()
@@ -96,7 +97,7 @@ class ContentToClipboard:  # {{{1
 
     def extract_content(self) -> None:  # {{{2
         """extract email content as plain text"""
-        text = self._pullout(self._email)
+        text = self._pullout(msg=self._email)
         text = text.strip()
         self._content = text
 
@@ -149,7 +150,14 @@ class ContentToClipboard:  # {{{1
         #    - so far can handle 'bytes' and 'None' types
         if isinstance(msg, bytes):
             try:
-                payload = msg.decode()
+                # if 'msg.decode()' then 'errors' defaults to 'strict'
+                # • script works in terminal but *not* in neomutt (no output)
+                # if 'msg.decode(errors="ignore")'
+                # • script works in terminal *and* in neomutt
+                # • but undecodable bytes are silently dropped from output
+                # experimenting with Latin-1 encodingto see if it reduces
+                # decoding errors, that is, dropped bytes
+                payload = msg.decode(encoding="latin-1", errors="ignore")
                 text += payload
             except ValueError as err:
                 errmsg = getattr(err, "message", str(err))
