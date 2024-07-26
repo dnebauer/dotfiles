@@ -207,10 +207,17 @@ if variable("exists", "global", "tex_flavor") then
   variable("set", "global", "tex_flavor", "latex")
 end
 
--- checkhealth recommends setting perl host (but it does not work!)
+-- checkhealth recommends setting perl host
 local perl = "/usr/bin/perl"
 if fn("filereadable", { perl }) then
   variable("set", "global", "perl_host_prog", perl)
+end
+
+-- checkhealth recommends setting ruby host (but it does not work!)
+local ruby = "/usr/local/bin/neovim-ruby-host" -- fails
+--local ruby = "/usr/bin/ruby" -- fails
+if fn("filereadable", { ruby }) then
+  variable("set", "global", "ruby_host_prog", ruby)
 end
 
 -- for python linting use basedpyright instead of pyright
