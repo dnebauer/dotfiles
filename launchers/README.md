@@ -2,6 +2,10 @@
 
 Launcher scripts.
 
+#### julia ####
+
+Launches a julia instance. Assumes julia was installed with snap.
+
 #### mybrain ####
 
 Launches the node.js Tiddlywiki5 server and a browser client that connects to
