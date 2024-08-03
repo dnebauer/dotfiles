@@ -26,7 +26,7 @@ config.bind(",s", "spawn --userscript qutebrowser_viewsource")
 # - save to text file: ,t
 config.bind(",t", "spawn --userscript SaveText.sh")
 # - open tab: t (the '-s' option appends a space)
-config.bind("t", "set-cmd-text -s :open -t ")
+config.bind("t", "cmd-set-text -s :open -t ")
 # - next tab: l | gt | <Ctrl-PgDown>
 config.unbind("l", mode="normal")
 config.bind("l", "tab-next")
