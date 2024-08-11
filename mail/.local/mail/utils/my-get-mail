@@ -222,8 +222,6 @@ joinBy() {
 #   params: @opts - all command line parameters
 #   prints: feedback
 #   return: nil
-#   note:   after execution variable ARGS contains
-#           remaining command line args (after options removed)
 processOptions() {
 	# read the command line options
 	local OPTIONS
@@ -266,7 +264,7 @@ processOptions() {
 
 # basic setup    {{{1
 checkPrereqs
-processOptions "${@}"                      # leaves ${ARGS[@]} holding positional arguments
+processOptions "${@}"
 echo -e "\n------------------------------" # demarcate new feedback
 echo "$self: $now"                         # timestamp
 
