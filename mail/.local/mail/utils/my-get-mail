@@ -297,15 +297,17 @@ pgrep -x offlineimap &>/dev/null &&
 	abortScript 'Offlineimap is already running'
 
 # give user chance to force quick syncronisation    {{{1
-timeout=1
-prompt="$self: press any key to force quick synchronisation..."
-errexit_setting="$(set -o | grep 'errexit' | awk '{print $2}')"
-set +o errexit
-read -n 1 -p "$prompt" -s -r -t $timeout quick_sync
-[[ $? -le 128 ]] && quick_sync='yes'
-[[ "$errexit_setting" = 'on' ]] && set -o errexit
-echo ' '
-[[ -n "${quick_sync}" ]] || rm -f "$cache_fp"
+# • default to full sync to avoid delay (requires removing cache file)
+rm -f "$cache_fp"
+##timeout=1
+##prompt="$self: press any key to force quick synchronisation..."
+##errexit_setting="$(set -o | grep 'errexit' | awk '{print $2}')"
+##set +o errexit
+##read -n 1 -p "$prompt" -s -r -t $timeout quick_sync
+##[[ $? -le 128 ]] && quick_sync='yes'
+##[[ "$errexit_setting" = 'on' ]] && set -o errexit
+##echo ' '
+##[[ -n "${quick_sync}" ]] || rm -f "$cache_fp"
 
 # flush queued mail    {{{1
 num_queue=$("$msmtpq" --q-mgmt -d | grep -c "num" || true)
