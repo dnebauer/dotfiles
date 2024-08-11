@@ -273,15 +273,17 @@ echo "$self: $now"                         # timestamp
 [[ -e "$mail_icon" ]] && use_icon 'true'
 
 # abort if script is already running    {{{1
-if ! mkdir "$piddir" 2>/dev/null; then
-	sleep 3 # give the other process time to write its pid
-	if [[ -f "$pidfile" ]]; then
-		# is process actually still running under this pid
-		oldpid="$(cat "$pidfile")"
-		result="$(pgrep -af "$oldpid" | grep "$ps_grep" || true)"
-		[[ -n "$result" ]] &&
-			abortScript "$self is already running (PID=$oldpid)"
-	fi
+# • accept risk that another script process has started
+#   but not yet written its pid file
+##if [[ -d "$piddir" ]]; then
+##	sleep 3 # give the other process time to write its pid
+##fi
+if [[ -f "$pidfile" ]]; then
+	# is process actually still running under this pid
+	oldpid="$(cat "$pidfile")"
+	result="$(pgrep -af "$oldpid" | grep "$ps_grep" || true)"
+	[[ -n "$result" ]] &&
+		abortScript "$self is already running (PID=$oldpid)"
 fi
 pid="$(pgrep -f "$ps_grep" | head -n1)"
 [[ -d "$piddir" ]] ||
