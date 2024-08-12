@@ -285,9 +285,10 @@ if [[ -f "$pidfile" ]]; then
 	[[ -n "$result" ]] &&
 		abortScript "$self is already running (PID=$oldpid)"
 fi
-pid="$(pgrep -f "$ps_grep" | head -n1)"
+mkdir -p "$piddir" &>/dev/null || true
 [[ -d "$piddir" ]] ||
 	abortScript "Unexpected deletion of pid locking directory: $piddir"
+pid="$(pgrep -f "$ps_grep" | head -n1)"
 echo "$pid" >"$pidfile" # update pid file
 trap '[[ -f "${pidfile:-}" ]] && rm -rf "$piddir"' EXIT
 unset oldpid pid piddir pidfile result
