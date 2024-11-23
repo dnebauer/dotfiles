@@ -1,0 +1,7 @@
+# reload articles on startup and periodically thereafter
+# • default 'reload-time' in minutes is 60
+auto-reload yes
+refresh-on-startup yes
+
+# use ISO date format
+datetime-format "%a %F"
