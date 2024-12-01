@@ -176,7 +176,7 @@ folder-hook -noregex "notmuch://?query=folder:$my_account/INBOX.Trash" \
 set sidebar_visible
     # show sidebar
 set sidebar_format = '%D%?F? [%F]?%* %?N?%N/?%S'
-    # format of sidebat display
+    # format of sidebar display
 set mail_check_stats
     # recalculate message statistics periodically
 set sort_browser = unsorted
