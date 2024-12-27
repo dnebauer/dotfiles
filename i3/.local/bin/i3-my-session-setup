@@ -25,11 +25,23 @@ self="$(basename "$0")"
 # at startup i3 uses path that does not contain ~/.local/bin
 # - these tools can be found on base system path
 required_system_tools=(
-	'alacritty' 'i3-msg' 'dn-neovide'
-	'bc' 'logger' 'printf' 'yad'
-	'date' 'mkfifo' 'sleep'
-	'exec' 'mktemp' 'tmux'
-	'getopt' 'neomutt' 'trap'
+	'alacritty'
+	'bc'
+	'date'
+	'dn-neovide'
+	'exec'
+	'getopt'
+	'i3-msg'
+	'logger'
+	'mkfifo'
+	'mktemp'
+	'neomutt'
+	'newsboat'
+	'printf'
+	'sleep'
+	'tmux'
+	'trap'
+	'yad'
 )
 # - these tools have to be searched for in specified locations
 #   . note especially the local qutebrowser wrapper which is
@@ -219,6 +231,34 @@ function launchNeomutt() {
 		--class 'AlacrittyNeomutt,AlacrittyNeomutt' \
 		--title AlacrittyNeomutt \
 		--command neomutt &
+	sleep $delay_post_launch
+
+	# logging
+	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+	log "  Finished ${task}"
+	local elapsed
+	elapsed="$(timer "${tmr}")"
+	log "  Elapsed time ${elapsed}"
+}
+# launchNewsboat()    {{{1
+#   intent: launch newsboat news client
+#   params: nil
+#   prints: nil
+#   return: nil
+function launchNewsboat() {
+	# logging
+	local tmr
+	tmr="$(timer)"
+	local task
+	task='launching newsboat news client'
+	log "Begin ${task}"
+	notifyMessage 'Launching newsboat news client...'
+
+	# launch newsboat
+	alacritty \
+		--class 'AlacrittyNewsboat,AlacrittyNewsboat' \
+		--title AlacrittyNewsboat \
+		--command newsboat &
 	sleep $delay_post_launch
 
 	# logging
@@ -740,6 +780,7 @@ assignWorkspaces # actually done in i3 config file (see function)
 applyLayouts
 launchNvimGui
 launchNeomutt
+launchNewsboat
 launchGoogleChrome
 launchTiddlywiki
 launchQutebrowserSessions
