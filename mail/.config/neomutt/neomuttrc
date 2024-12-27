@@ -931,6 +931,8 @@ set signature = $my_signature
     # signature file
 set nosig_dashes
     # no dashes before sig
+set sig_on_top
+    # place signature before quoted text
 set attribution="* %n <%a> [%{%Y-%m-%d %H:%M:%S %Z}]:\n"
     # string preceding message included in reply
 set mime_forward = ask-no
