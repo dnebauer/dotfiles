@@ -50,7 +50,6 @@
 # |         nm-applet | network manager                                      |
 # |          numlockx | control NumLock key                                  |
 # |           nvim-qt | gui editor                                           |
-# |             oneko | cursor locator                                       |
 # |             pactl | PulseAudio controller                                |
 # |        parcellite | clipboard manager                                    |
 # |              perl | perl 5 language interpreter                          |
@@ -157,6 +156,7 @@
 # $mod+Shift+space      floating toggle
 # $mod+Up               move focus up
 # $mod+a                focus parent
+# $mod+c                find cursor
 # $mod+d                app/command launcher
 # $mod+f                fullscreen toggle
 # $mod+g                goto mark
@@ -326,10 +326,6 @@ exec --no-startup-id dropbox start -i
 bindsym Ctrl+space exec dunstctl close
 ## close all displayed notifications
 bindsym Ctrl+Shift+space exec dunstctl close-all
-
-# oneko    {{{2
-
-exec --no-startup-id oneko -time 70000 -bg red -position -30+20
 
 # parcellite    {{{2
 #
@@ -574,6 +570,11 @@ bindsym F2 exec --no-startup-id ~/.local/bin/i3-my-help
 bindsym F3 exec --no-startup-id tellico
 # }}}2
 
+# find cursor {{{2
+
+## find cursor
+bindsym $mod+c exec --no-startup-id \
+~/.local/bin/find-cursor --outline --repeat 2 --wait 600
 
 # MOVEMENT KEYS    {{{1
 
