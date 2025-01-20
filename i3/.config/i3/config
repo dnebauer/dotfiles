@@ -37,6 +37,7 @@
 # | dn-load-clipboard | load selected items into clipboard                   |
 # |           dropbox | cloud storage                                        |
 # |               feh | image viewer                                         |
+# |    g{810,512}-led | manage keyboard led lighting on Logitech G512 Carbon |
 # |            getopt | parse script command line options                    |
 # |     google-chrome | web browser                                          |
 # |              grep | search file contents for matches                     |
@@ -568,13 +569,19 @@ bindsym F2 exec --no-startup-id ~/.local/bin/i3-my-help
 
 ## tellico collection manager
 bindsym F3 exec --no-startup-id tellico
-# }}}2
 
 # find cursor {{{2
 
 ## find cursor
 bindsym $mod+c exec --no-startup-id \
 ~/.local/bin/find-cursor --outline --repeat 2 --wait 600
+
+# cycle through led keyboard profiles
+
+## cycle led keyboard profiles
+bindsym Scroll_Lock exec --no-startup-id \
+g512-led -p /etc/g810-led/profile
+# }}}2
 
 # MOVEMENT KEYS    {{{1
 
