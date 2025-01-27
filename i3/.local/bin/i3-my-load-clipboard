@@ -96,11 +96,10 @@ is structured.
 Usage: ${self}
        ${self} -h
 
-Options: -d | --debug   = print expanded commands as
-                          they are expanded
-         -v | --verbose = print script lines as they
-                          are read
-         -h | --help    = display this help and exit
+Options: -d = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -v = print input lines as they are read
+              (equivalent to 'set -o xtrace')
 _USAGE
 }
 # processOptions([@options])    {{{1

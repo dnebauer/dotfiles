@@ -1,0 +1,13 @@
+#compdef i3-my-fullscreen-handler
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help)'{-h,--help}'[Show a help message]' \
+  - 'script_options' \
+    '(-l --no-logging)'{-l,--no-logging}'[Suppress system logging]' \
+    '(-n --no-notifications)'{-n,--no-notifications}'[Suppress popup user notifications]' \
+  && rc=0
+
+return rc

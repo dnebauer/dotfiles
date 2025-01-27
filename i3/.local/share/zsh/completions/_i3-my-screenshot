@@ -1,0 +1,20 @@
+#compdef i3-my-screenshot
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help)'{-h,--help}'[Show a help message]' \
+    '(-v --verbose)'{-v,--verbose}'[Print script lines after command expansion]' \
+    '(-u --debug)'{-u,--debug}'[Print script lines as they are read]' \
+  - 'image_destinations' \
+    '(-c --clipboard)'{-c,--clipboard}'[Send image to system clipboard]' \
+    '(-f --file)'{-f,--file}'[Save image to disk file]' \
+  - 'capture_methods' \
+    '(-d --desktop)'{-d,--desktop}'[Capture entire desktop (all screens)]' \
+    '(-r --region)'{-r,--region}'[Capture user-selected region (with mouse)]' \
+    '(-s --screen)'{-s,--screen}'[Capture a single screen (select screen from menu)]' \
+    '(-w --window)'{-w,--window}'[Capture window with focus (after 5-second delay)]' \
+  && rc=0
+
+return rc

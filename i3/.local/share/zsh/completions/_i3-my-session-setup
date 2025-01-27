@@ -1,0 +1,14 @@
+#compdef i3-my-session-setup
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help)'{-h,--help}'[Show a help message]' \
+    '(-v --verbose)'{-v,--verbose}'[Print script lines after command expansion]' \
+    '(-d --debug)'{-d,--debug}'[Print script lines as they are read]' \
+  - 'script_options' \
+    '(-n --no-log)'{-n,--no-log}'[Suppress logging to system log]' \
+  && rc=0
+
+return rc

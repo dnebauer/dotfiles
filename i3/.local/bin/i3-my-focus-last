@@ -11,7 +11,7 @@
     it only toggles between the same two windows.
 
     Credit: repo = https://github.com/altdesktop/i3ipc-python/
-            file = examples/focus-last.py
+            file = examples/focus-last
 """
 
 import os
@@ -116,7 +116,7 @@ class FocusWatcher:
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        prog="i3-my-focus-last.py",
+        prog="i3-my-focus-last",
         description="""
         Focus the last-focused window. This script should be launched from
         ~/.xsessionrc or the i3 config file without argument to start an

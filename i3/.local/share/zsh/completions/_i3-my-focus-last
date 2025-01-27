@@ -1,0 +1,12 @@
+#compdef i3-my-focus-last
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help)'{-h,--help}'[Show a help message]' \
+  - 'script_options' \
+    '(--switch)'{--switch}'[Signal daemon to trigger focus change]' \
+  && rc=0
+
+return rc

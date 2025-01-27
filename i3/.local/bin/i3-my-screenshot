@@ -49,7 +49,8 @@ save_fp="$save_path/$save_name"
 
 # PROCEDURES
 
-# Show usage   {{{1
+# displayUsage()   {{{1
+#   intent: show usage
 #   params: nil
 #   prints: nil
 #   return: nil
@@ -116,8 +117,107 @@ Options:
                (5-second delay before capture)
 _USAGE
 }
-# Process command line options    {{{1
-#   params: all command line parameters
+# abort($msg)    {{{1
+#   intent: - abort script
+#   params: $msg - message to display on exit
+#   prints: error message to console if no notify daemon
+#   return: n/a
+function abort() {
+	if command -v notify-send &>/dev/null; then
+		notify-send \
+			--urgency='critical' \
+			--expire-time=5000 \
+			--category='fatal' \
+			'Screenshot capture failed' \
+			"$1"
+	else
+		echo 'Screenshot capture failed' >/dev/stderr
+		echo "$1" >/dev/stderr
+	fi
+	exit 1
+}
+# disableScript()    {{{1
+#   intent: disable script - explain to user and exit
+#   params: nil
+#   prints: nil
+#   return: n/a
+disableScript() {
+	# in January 2024 this script began failing with the error:
+	#    Maim encountered an error:
+	#    Error: Failed to open X display: :0
+	# troubleshooting failed to determine the cause or find a workaround,
+	# although maim works fine when called directly from the command line;
+	# so it is temporarily disabled
+	summary='Screenshot Script Deactivated'
+	body=$(
+		cat <<-END
+			Script '$self'
+			is causing X to crash.
+
+			Consider running maim directly, e.g.,
+			<u>Super</u>+<u>d</u>, <u>Ctrl</u>+<u>Tab</u>, then something like:
+
+			maim --select &#x5c;
+				$HOME/Downloads/screenshot.png
+
+			(Do not use '~' shortcut for '$HOME')"
+		END
+	)
+	if command -v notify-send &>/dev/null; then
+		# frcolor = frame colour = yellow (#FFFF00)
+		# bgcolor = background colour = light yellow (#FFFFE0)
+		# fgcolor = foreground (text) colour = black (#000000)
+		notify-send \
+			--urgency=critical \
+			--expire-time=30000 \
+			--hint 'string:frcolor:#FFFF00' \
+			--hint 'string:bgcolor:#FFFFE0' \
+			--hint 'string:fgcolor:#000000' \
+			"$summary" "$body"
+	else
+		echo "$summary" 1>&2
+		echo "$body" 1>&2
+	fi
+	exit
+}
+# joinBy($delim, $item[, ...])    {{{1
+#   intent: join items
+#   params: $delim  - delimiter string to insert between items
+#           $item1+ - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy() {
+	local d=$1
+	shift
+	local f=$1
+	shift
+	printf %s "$f" "${@/#/$d}"
+}
+# moveImageFile()    {{{1
+#   intent: move/rename image file
+#   params: nil
+#   prints: nil
+#   return: nil
+moveImageFile() {
+	local new_save_fp
+	new_save_fp="$(
+		yad \
+			--file-selection \
+			--title='Save image as' \
+			--window-icon='filesaveas' \
+			--file-selection \
+			--save \
+			--filename="$save_fp" \
+			--confirm-overwrite \
+			--file-filter="*.png"
+	)"
+	if [[ -n "$new_save_fp" ]] && [[ "$new_save_fp" != "$save_fp" ]]; then
+		mv --force "$save_fp" "$new_save_fp"
+	fi
+}
+# processOptions($param1[, ...])    {{{1
+#   intent: process command line options
+#   params: $param1+ - command line parameters
 #   prints: feedback
 #   return: nil
 #   note:   after execution variable ARGS contains
@@ -184,22 +284,11 @@ processOptions() {
 		esac
 	done
 }
-# Join items    {{{1
-#   params: 1  - delimiter
-#           2+ - items to be joined
-#   prints: string containing joined items
+# screen_geometry()   {{{1
+#   intent: get screen geometry
+#   params: nil
+#   prints: screen geometry
 #   return: nil
-function joinBy() {
-	local d=$1
-	shift
-	local f=$1
-	shift
-	printf %s "$f" "${@/#/$d}"
-}
-# Get screen geometry   {{{1
-#  params: nil
-#  prints: screen geometry
-#  return: nil
 function screen_geometry() {
 	local items
 	mapfile -t items < <(
@@ -221,84 +310,12 @@ function screen_geometry() {
 	)"
 	echo "$geometry"
 }
-# Move/rename image file    {{{1
-#  params: nil
-#  prints: nil
-#  return: nil
-move_image_file() {
-	local new_save_fp
-	new_save_fp="$(
-		yad \
-			--file-selection \
-			--title='Save image as' \
-			--window-icon='filesaveas' \
-			--file-selection \
-			--save \
-			--filename="$save_fp" \
-			--confirm-overwrite \
-			--file-filter="*.png"
-	)"
-	if [[ -n "$new_save_fp" ]] && [[ "$new_save_fp" != "$save_fp" ]]; then
-		mv --force "$save_fp" "$new_save_fp"
-	fi
-}
-# Abort script    {{{1
-#  params: 1 - message
-#  prints: error message to console if no notify daemon
-#  return: n/a
-function abort() {
-	if command -v notify-send &>/dev/null; then
-		notify-send \
-			--urgency='critical' \
-			--expire-time=5000 \
-			--category='fatal' \
-			'Screenshot capture failed' \
-			"$1"
-	else
-		echo 'Screenshot capture failed' >/dev/stderr
-		echo "$1" >/dev/stderr
-	fi
-	exit 1
-}
 # }}}1
 
 # MAIN
 
-# WARNING: disabling script due to fatal X error
-
-# in January 2024 this script began failing with the error:
-#    Maim encountered an error:
-#    Error: Failed to open X display: :0
-# troubleshooting failed to determine the cause or find a workaround,
-# although maim works fine when called directly from the command line;
-# so it is temporarily disabled
-summary='Screenshot Script Deactivated'
-body="Script '$self'
-is causing X to crash.
-
-Consider running maim directly, e.g.,
-<u>Super</u>+<u>d</u>, <u>Ctrl</u>+<u>Tab</u>, then something like:
-
-maim --select &#x5c;
-  $HOME/Downloads/screenshot.png
-
-(Do not use '~' shortcut for '$HOME')"
-if command -v notify-send &>/dev/null; then
-	# frcolor = frame colour = yellow (#FFFF00)
-	# bgcolor = background colour = light yellow (#FFFFE0)
-	# fgcolor = foreground (text) colour = black (#000000)
-	notify-send \
-		--urgency=critical \
-		--expire-time=30000 \
-		--hint 'string:frcolor:#FFFF00' \
-		--hint 'string:bgcolor:#FFFFE0' \
-		--hint 'string:fgcolor:#000000' \
-		"$summary" "$body"
-else
-	echo "$summary" 1>&2
-	echo "$body" 1>&2
-fi
-exit
+# script disabled from January 2024 to January 2025 due to X error
+#disableScript
 
 # Start up tasks    {{{1
 
@@ -400,7 +417,7 @@ fi
 
 # - optionally move/rename destination
 if [[ $to_file = true ]]; then
-	move_image_file
+	moveImageFile
 fi
 
 # - restart oneko if originally running

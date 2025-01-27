@@ -146,23 +146,28 @@ Log messages are written to the system log for key startup tasks.
 .SH "OPTIONS"
 .TP
 .BR "\-n" ", " "\-\-no-log"
-Suppress logging of informational and warning messages to syslog. Optional.
+Suppress logging of informational and warning messages to syslog.
+Flag. Optional. Default: false (that is, logging is active).
 .TP
 .BR "\-v" ", " "\-\-verbose"
-Print input lines after command expansion. Equivalent to \[dq]set -o
-verbose\[dq]. Optional.
+Print input lines after command expansion. Equivalent to
+.BR "set -o verbose" "."
+Flag. Optional. Default: false
 .TP
 .BR "\-d" ", " "\-\-debug"
-Print input lines as they are read. Equivalent to \[dq]set -o xtrace\[dq].
-Optional.
+Print input lines as they are read. Equivalent to
+.BR "set -o xtrace" "."
+Flag. Optional. Default: false.
 .TP
 .BR "\-h" ", " "\-\-help"
-Print usage information and exit. Optional.
+Print usage information and exit. Flag. Optional. Default: false.
 .SH "SEE ALSO"
 .BR "i3 " "(1),"
 .BR "logger " "(1)."
 .SH "AUTHOR"
-\*[self] was written by David Nebauer (david at nebauer dot org).
+\*[self] was written by
+.URL "david at nebauer dot org" "David Nebauer" "."
 .PP
-This manual page was written by David Nebauer (david at nebauer dot org)
+This manual page was written by
+.URL "david at nebauer dot org" "David Nebauer"
 for the Debian project (but may be used by others).
