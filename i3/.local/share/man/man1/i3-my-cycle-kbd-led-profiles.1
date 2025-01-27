@@ -1,0 +1,201 @@
+.\" Hey, EMACS: -*- nroff -*-
+
+.\" Filename: i3-my-cycle-kbd-led-profiles.1
+.\" Author:   David Nebauer
+.\" History:  2025-01-27 - created
+
+.\" -----------------------------------------------------------------
+.\" NOTES
+.\" -----------------------------------------------------------------
+.ig
+
+For header (.TH), first parameter, NAME, should be all caps
+Second parameter, SECTION, should be 1-8, maybe w/ subsection
+Other parameters are allowed: see man(7), man(1)
+Please adjust the date whenever revising the manpage.
+
+Some roff macros, for reference:
+.nh        disable hyphenation
+.hy        enable hyphenation
+.ad l      left justify
+.ad b      justify to both left and right margins
+.nf        disable filling
+.fi        enable filling
+.br        insert line break
+.sp <n>    insert n+1 empty lines
+for manpage-specific macros, see groff_man(7) and man(7)
+
+Formatting [see groff_char (7) and man (7) for details]:
+\(aq  : escape sequence for (')
+\[dq] : plain double quote
+\[lq] : left/open double quote
+\[rq] : right/close double quote
+`     : left/open single quote
+'     : right/close single quote
+\(em  : escape sequence for em dash
+\(en  : escape sequence for en dash
+\.    : escape sequence for period/dot
+\(rg  : registration symbol
+\(tm  : trademark symbol
+\fX   : escape sequence that changes font, where 'X' can be 'R|I|B|BI'
+        (R = roman/normal | I = italic | B = bold | BI = bold-italic)
+\fP   : switch to previous font
+        in this case '\fR' could also have been used
+.B    : following arguments are boldened
+.I    : following arguments are italicised
+.BI   : following arguments are bold alternating with italics
+.BR   : following arguments are bold alternating with roman
+.IB   : following arguments are italics alternating with bold
+.IR   : following arguments are italics alternating with roman
+.RB   : following arguments are roman alternating with bold
+.RI   : following arguments are roman alternating with italics
+.SM   : following arguments are small (scaled 9/10 of the regular size)
+.SB   : following arguments are small bold (not small alternating with bold)
+        [note: if argument in alternating pattern contains whitespace,
+               enclose in whitespace]
+.RS x : indent following lines by x characters
+.RE   : end indent
+
+Bulleted list:
+   A bulleted list:
+   .IP \[bu] 2
+   lawyers
+   .IP \[bu]
+   guns
+   .IP \[bu]
+   money
+Numbered list:
+   A numbered list:
+   .nr step 1 1
+   .IP \n[step]. 3
+   lawyers
+   .IP \n+[step].
+   guns
+   .IP \n+[step].
+   money
+..
+
+.\" -----------------------------------------------------------------
+.\" SETUP
+.\" -----------------------------------------------------------------
+
+.\" Macro: Format URL
+.\"  usage:  .URL "http:\\www.gnu.org" "GNU Project" " of the"
+.\"  params: 1 = url
+.\"          2 = link text/name
+.\"          3 = postamble (optional)
+.\"  note:   The www.tmac macro provides a .URL macro package; this
+.\"          is a local fallback in case www.tmac is unavailable
+.\"  credit: man(7)
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+
+.\" Prefer .URL macro from www.tmac macro package if it is available
+.\"  note: In the conditional below the '\n' escape returns the value of
+.\"        a register, in this the '.g'
+.\"        The '.g' register is only found in GNU 'troff', and it is
+.\"        assumed that GNU troff will always include the www.tmac
+.\"        macro package
+.if \n[.g] .mso www.tmac
+
+.\" Macro: Ellipsis
+.\"  usage: .ellipsis
+.\"  note: only works at beginning of line
+.de ellipsis
+.cc ^
+...
+^cc
+..
+
+.\" String: Command name
+.ds self i3-my-cycle-kbd-led-profiles
+.ds cache_fp ~/.cache/g512-led/last-profile-details
+.ds default_profile profile
+.ds max_cycle_interval 60
+.ds off_profile off
+.ds profiles_dir /etc/g810-led
+
+.\" -----------------------------------------------------------------
+.\" MANPAGE CONTENT
+.\" -----------------------------------------------------------------
+
+.TH "I3-MY-CYCLE-KBD-LED-PROFILES" "1" "2025-01-27" "" "I3-MY-CYCLE-KBD-LED-PROFILES Manual"
+.SH "NAME"
+\*[self] \- cycle through g512-led/g810-led profiles
+.SH "SYNOPSIS"
+.B "\*[self] "
+.RB "[ " "\-v " "]"
+.RB "[ " "\-x " "]"
+.br
+.B "\*[self] -h"
+.SH "DESCRIPTION"
+\*[self]
+The keyboard LED management tool g512-led stores its profiles in the directory
+.IR "\*[profiles_dir]" "."
+.PP
+This script requires that at least 2 profiles are present:
+.IP \[bu] 2
+an 'off' profile named \[lq]\*[off_profile]\[rq]
+.IP \[bu]
+a default profile named \[lq]\*[default_profile]\[rq]
+.PP
+Each time this script is run it disables the current profile and activates
+another profile.
+.PP
+The actual command that is run is
+.B "g512-led -p ${profiles_dir}/NAME"
+where NAME is the name of the profile file.
+.PP
+The name of the last profile selected by this script, and the time it was
+activated, is stored in the cache file
+.IR \*[cache_fp] "."
+.PP
+If this script is run within \*[max_cycle_interval] seconds of the previous
+script execution, it simply advances to the next profile in alphanumeric
+sequence, wrapping around after the last profile name is reached.
+.PP
+If this script is run after \*[max_cycle_interval] seconds of the previous
+script execution, it toggles between the \(aqoff\(aq and default profiles.
+That is, if the previous script execution selected a profile other than the
+\(aqoff\(aq profile, the current execution activates the \(aqoff\(aq profile;
+and if the previous script execution selected the \(aqoff\(aq profile, the
+current execution activates the default profile.
+.PP
+Fatal errors result in an abort message being written to the console and
+displayed in a system notification.
+.PP
+If a new profile is successfully activated a message is written to the console
+and displayed in a system notification.
+.SH "OPTIONS"
+.TP
+.B "\-v  \-\-verbose"
+Print input lines as they are read (equivalent to
+.BR "set -o verbose" ")."
+Flag. Optional. Default: false.
+.TP
+.B "\-d  \-\-debug"
+Print input lines after command expansion (equivalent to
+.BR "set -o xtrace" ")."
+Flag. Optional. Default: false.
+.TP
+.B "\-h  \-\-help"
+Print help text and exit. Flag. Optional. Default: false.
+.SH "FILES"
+.I \*[profiles_dir]
+.IP
+Directory containing profile files.
+.PP
+.I \*[cache_fp]
+.IP
+Cache file holding details of most recent profile selection by \*[self].
+.SH "SEE ALSO"
+.BR "g512-led " "(1)."
+.SH "AUTHOR"
+\*[self] was written by
+.URL "https://github.com/MatMoul" "MatMoul" "."
+.PP
+This manual page was written by
+.URL "david at nebauer dot org" "David Nebauer"
+for the Debian project (but may be used by others).
+

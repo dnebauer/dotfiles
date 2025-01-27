@@ -580,7 +580,7 @@ bindsym $mod+c exec --no-startup-id \
 
 ## cycle led keyboard profiles
 bindsym Scroll_Lock exec --no-startup-id \
-g512-led -p /etc/g810-led/profile
+~/.local/bin/i3-my-cycle-kbd-led-profiles
 # }}}2
 
 # MOVEMENT KEYS    {{{1

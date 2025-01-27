@@ -1,0 +1,533 @@
+#!/usr/bin/env bash
+
+# File: my-cycle-kbd-led-profiles
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: cycle through keoyboard LED profiles
+# Created: 2025-01-27
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+parameters="[-d] [-v]"
+# tools on the system path
+required_system_tools=(
+	cat
+	dir
+	g512-led
+	getopt
+	grep
+	logger
+	notify-send
+	sed
+)
+# local tools specified by absolute path
+required_local_tools=()
+max_cycle_interval=60 # maximum interval for cycling (60 seconds)
+mail_icon='/usr/share/icons/hicolor/scalable/apps/ibus-keyboard.svg'
+cache_dir="$HOME/.cache/g512-led"
+cache_fp="$cache_dir/last-profile-details"
+cached_time=0
+cached_profile=''
+profiles_dir='/etc/g810-led' # no traling slash
+default_profile='profile'
+off_profile='off'
+now=$(date +%s)
+
+# flags
+# - all default to false
+
+declare -A flag_values=(
+	[use_icon]=1
+	[have_display]=1
+	[have_cached_profile]=1
+	[have_cached_time]=1
+	[outside_max_cycle_interval]=1
+)
+use_icon() {
+	flag 'use_icon' "$@"
+	return $?
+}
+have_display() {
+	flag 'have_display' "$@"
+	return $?
+}
+have_cached_profile() {
+	flag 'have_cached_profile' "$@"
+	return $?
+}
+have_cached_time() {
+	flag 'have_cached_time' "$@"
+	return $?
+}
+outside_max_cycle_interval() {
+	flag 'outside_max_cycle_interval' "$@"
+	return $?
+}
+# }}}1
+
+# PROCEDURES
+
+# abortScript($msg)    {{{1
+#   abort script with notification error message
+#   params: $msg - abort message
+#   prints: nil
+#   return: nil
+abortScript() {
+	local body subject
+	subject='Cycling of keyboard LED profile FAILED'
+	body="${1:-}"
+	if have_display; then
+		if use_icon; then
+			notify-send --icon="$mail_icon" \
+				"$subject" \
+				"$body"
+		else
+			notify-send "$subject" \
+				"$body"
+		fi
+	fi
+	echo "$self: cycling of keyboard led profile failed: $body"
+	exit 1
+}
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+checkPrereqs() {
+	# check for tools
+	local missing tool
+	missing=()
+	# these tools can be found on the base system path
+	for tool in "${required_system_tools[@]}"; do
+		command -v "$tool" &>/dev/null || missing+=("$tool")
+	done
+	# these tools are specified by absolute path
+	for tool in "${required_local_tools[@]}"; do
+		[[ -x "$tool" ]] || missing+=("$tool")
+	done
+	if [[ ${#missing[@]} -ne 0 ]]; then
+		local msg
+		msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+		echo "$msg" 1>&2
+		log "$msg" 'user.err'
+		exit 1
+	fi
+	unset missing tools required_tools
+	# need bash version containing builtin 'mapfile'
+	if ! echo 'test' | mapfile -t 2>/dev/null; then
+		local msg
+		msg='Bash does not have the builtin feature: mapfile'
+		echo "$msg" 1>&2
+		log "${msg}" "user.err"
+		exit 1
+	fi
+}
+# displayUsage()    {{{1
+#   intent: display script usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage() {
+	cat <<_USAGE
+${self}: cycle through g512-led/g810-led profiles
+
+The keyboard LED management tool g512-led stores its
+profiles in the directory:
+
+  ${profiles_dir}
+
+This script requires that at least 2 profiles are present:
+* an 'off' profile, named '${off_profile}'
+* a default profile, named '${default_profile}'.
+
+Each time this script is run it disables the current profile
+and activates another profile.
+
+The actual command that is run is:
+
+  g512-led -p ${profiles_dir}/NAME
+
+where NAME is the name of the profile file.
+
+The name of the last profile selected by this script, and
+the time it was activated, is stored in a cache file:
+
+  $cache_fp
+
+If this script is run within $max_cycle_interval seconds of the previous
+script execution, it simply advances to the next profile in
+alphanumeric sequence, wrapping around after the last
+profile name is reached.
+
+If this script is run after $max_cycle_interval seconds of the previous
+script execution, it toggles between the 'off' and default
+profiles. That is, if the previous script execution selected
+a profile other than the 'off' profile, the current execution
+activates the 'off' profile; and if the previous script
+execution selected the 'off' profile, the current execution
+activates the default profile.
+
+Fatal errors result in an abort message being written to the
+console and displayed in a system notification.
+
+If a new profile is successfully activated a message is
+written to the console and displayed in a system
+notification.
+
+USAGE: ${self} ${parameters}
+       ${self} -h
+
+Options: -v = print input lines after command expansion
+              (equivalent to 'set -o verbose')
+         -d = print input lines as they are read
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# elementInArray($element, @array)    {{{1
+# Determine whether string present in array
+#   params: $element - target string to search for [required]
+#           @array   - array elements to search [required]
+#   prints: nil
+#   return: boolean (0=present|1=not present)
+#   usage:  if elementInArray "${element}" "${array[@]}" ; then ...
+elementInArray() {
+	[[ ${#} -gt 0 ]] || return 1 # sanity check
+	local element="${1}"
+	shift
+	while [[ "${#}" -gt 0 ]]; do # loop through array elements
+		[[ "${1}" == "${element}" ]] && return 0
+		shift
+	done
+	return 1
+}
+# flag($name, [$value])    {{{1
+#   intent: flag getter/setter
+#   params: $name  - flag name, also key in 'flag_values' associative array
+#           $value - new flag value, boolean {'true','false'} [optional]
+#   prints: nil
+#   return: setter=nil, getter=boolean flag value
+flag() {
+	case $# in
+	1)
+		return "${flag_values[$1]}"
+		;;
+	2)
+		if [[ "$2" = 'true' ]]; then
+			flag_values[$1]=0
+		fi
+		if [[ "$2" = 'false' ]]; then
+			flag_values[$1]=1
+		fi
+		;;
+	*)
+		echo "$self: bad param count: $#" 1>&2
+		exit 2
+		;;
+	esac
+}
+# joinBy($delim, $item1[, $item2[, ...]])    {{{1
+#   intent: join items with given delimiter
+#   params: $delim - delimiter
+#           $itemX - items to be joined
+#   prints: string containing joined items
+#   return: nil
+joinBy() {
+	local delim first_item
+	delim="${1:-}"
+	shift
+	first_item="${1:-}"
+	shift
+	printf %s "$first_item" "${@/#/$delim}"
+}
+# log($prefix, $message, [$priority])    {{{1
+#   intent: write message to system log (prefix='CYCLE_KBD_LED')
+#   params: 1 - message [required]
+#           2 - priority [optional, default='info']
+#               can be emerg|alert|crit|err|warning|notice|info|debug
+#   prints: nil
+#   return: exit status of log command
+log() {
+	# process parameters
+	local prefix='CYCLE_KBD_LED'
+	local message
+	message="${1}"
+	local priority
+	priority="${2}"
+	[[ -z "${priority}" ]] && priority="info"
+	# log message
+	local exe="/usr/bin/logger"
+	${exe} --priority "${priority}" --tag "${prefix}" "${message}"
+}
+# notifyUser($msg)    {{{1
+#   abort script with notification error message
+#   params: $msg - abort message
+#   prints: nil
+#   return: nil
+notifyUser() {
+	local body subject
+	subject='Keyboard LED profile changed'
+	body="${1:-}"
+	if have_display; then
+		if use_icon; then
+			notify-send --icon="$mail_icon" \
+				"$subject" \
+				"$body"
+		else
+			notify-send "$subject" \
+				"$body"
+		fi
+	fi
+	echo "$self: keyboard LED profile changed: $body"
+}
+# processCacheFile()    {{{1
+#   intent: process configuration files
+#   params: nil
+#   prints: nil
+#   return: nil
+#   notes:  set variables [  ]
+processCacheFile() {
+	# set variables
+	if [ -r "${cache_fp}" ]; then
+		while read -r name val; do
+			# skip comment lines
+			name="${name#"${name%%[![:space:]]*}"}" # remove leading spaces
+			[[ "${name:0:1}" == '#' ]] && continue
+			[[ -n "${val}" ]] || continue # need a value
+			# remove enclosing quotes if present
+			val="$(stripEnclosingQuotes "${val}")"
+			# load vars depending on name
+			case ${name} in
+			'profile') cached_profile="${val}" ;;
+			'time') cached_time="${val}" ;;
+			esac
+		done <"${cache_fp}"
+	fi
+}
+# processOptions(@opts)    {{{1
+#   intent: process command line options
+#   params: @opts - all command line parameters
+#   prints: feedback
+#   return: nil
+processOptions() {
+	# read the command line options
+	local OPTIONS
+	if ! OPTIONS="$(
+		getopt \
+			--options hvd \
+			--long help,verbose,debug \
+			--name "${BASH_SOURCE[0]}" \
+			-- "${@}"
+	)"; then
+		# getopt displays errors
+		exit 1
+	fi
+	eval set -- "${OPTIONS}"
+	while true; do
+		case "${1}" in
+		-h | --help)
+			displayUsage
+			exit 0
+			;;
+		-v | --verbose)
+			set -o verbose
+			shift 1
+			;;
+		-d | --debug)
+			set -o xtrace
+			shift 1
+			;;
+		--)
+			shift
+			break
+			;;
+		*) break ;;
+		esac
+	done
+}
+# stripEnclosingQuotes($text)    {{{1
+#   intent: strip quotes from front and end of string
+#   params: $text - strinjg to analyse
+#   prints: string with enclosing quotes removed
+#   return: nil
+#     note: not designed to remove concentric quotes, but will remove from <"'text'">
+#     note: assumes closing quote type (single or double) matches opening quote type -- does not check
+#     note: if opening and closing quotes are not of the same type the outcome is unpredictable
+#     note: uses 'eval' to simplify bash intermediary quoting
+#     note: 'eval' can be confused by multiple quoting
+#     note: does not use 'eval' if using it causes 'echo' to error
+stripEnclosingQuotes() {
+	# set variable
+	local string="${1}"
+	eval echo "${string}" &>/dev/null # multiple quotes can confuse eval
+	local use_eval=${?}
+	# strip quotes
+	if [ "$(echo "${string}" | grep -c -- '^"')" -eq 1 ]; then
+		# do not use eval if use causes error
+		if [ ${use_eval} -eq 0 ]; then
+			string="$(
+				eval echo "${string}" |
+					sed -e 's/^"//' |
+					sed -e 's/"$//'
+			)"
+		else
+			string="$(
+				echo "${string}" |
+					sed -e 's/^"//' |
+					sed -e 's/"$//'
+			)"
+		fi
+	elif [ "$(echo "${string}" | grep -c -- "^'")" -eq 1 ]; then
+		if [ ${use_eval} -eq 0 ]; then
+			string="$(
+				eval echo "${string}" |
+					sed -e "s/^'//" |
+					sed -e "s/'$//"
+			)"
+		else
+			string="$(
+				echo "${string}" |
+					sed -e "s/^'//" |
+					sed -e "s/'$//"
+			)"
+		fi
+	fi
+	echo "${string}"
+}
+# stripLeadingSpaces($text)    {{{1
+#   intent: strip spaces from front and end of string
+#   params: $text - string to analyse
+#   prints: string with leading spaces removed
+#   return: nil
+stripLeadingSpaces() {
+	text="${1}"
+	echo "${text#"${text%%[![:space:]]*}"}"
+}
+# }}}1
+
+# MAIN
+
+# set system flags    {{{1
+[[ "x$DISPLAY" != "x" ]] && have_display 'true'
+[[ -e "$mail_icon" ]] && use_icon 'true'
+
+# basic setup    {{{1
+checkPrereqs
+processOptions "${@}"
+
+# get available profiles    {{{1
+available_profiles=()
+for file in $(dir -1 "${profiles_dir}" 2>/dev/null); do
+	available_profiles+=("$file")
+done
+profiles_count=${#available_profiles[@]}
+((profiles_count > 0)) || abortScript "No profiles found"
+
+# set default profile {{{1
+if ! elementInArray "${default_profile}" "${available_profiles[@]}"; then
+	default_profile=''
+	for profile in "${available_profiles[@]}"; do
+		if [[ "${profile}" != "${off_profile}" ]]; then
+			default_profile="${profile}"
+			break
+		fi
+	done
+fi
+[[ -n "${default_profile}" ]] ||
+	abortScript "Cannot set default profile"
+
+# check for 'off' profile
+elementInArray "${off_profile}" "${available_profiles[@]}" ||
+	abortScript "Cannot find off profile '${off_profile}'"
+
+# load cached time and profile name if available    {{{1
+processCacheFile
+if [[ -n "${cached_profile}" ]]; then
+	# cached profile could have been deleted since it was selected
+	elementInArray "${cached_profile}" "${available_profiles[@]}" &&
+		have_cached_profile 'true'
+fi
+((cached_time > 0)) && have_cached_time 'true'
+if have_cached_time; then
+	cycle_interval=$((now - cached_time))
+	((cycle_interval > max_cycle_interval)) && outside_max_cycle_interval 'true'
+fi
+
+# select profile to activate    {{{1
+new_profile=''
+if have_cached_profile; then
+	if have_cached_time; then
+		if outside_max_cycle_interval; then
+			# toggle default and 'off' profiles
+			if [[ "${cached_profile}" == "${off_profile}" ]]; then
+				new_profile="${default_profile}"
+			else
+				new_profile="${off_profile}"
+			fi
+		else # inside max cycle interval
+			# select next profile in cycle
+			profile_index=-1
+			len=${#available_profiles[@]}
+			last_index=$((len - 1))
+			for ((i = 0; i < len; i++)); do
+				if [[ "${cached_profile}" == "${available_profiles[i]}" ]]; then
+					if ((i == last_index)); then
+						profile_index=0
+					else
+						profile_index=$((i + 1))
+					fi
+					new_profile="${available_profiles[${profile_index}]}"
+					break
+				fi
+			done
+			((profile_index == -1)) && abortScript "Unable to find profile in cycle"
+		fi
+	else # have no cached time
+		abortScript "Bad cache file has profile but no time"
+	fi
+else # have no cached profile
+	if have_cached_time; then
+		abortScript "Bad cache file has time but no profile"
+	else # have no cached time
+		# presumed first use, so just select default profile
+		new_profile="${default_profile}"
+	fi
+fi
+[[ -n "${new_profile}" ]] || abortScript "Unable to select new profile"
+
+# activate new profile
+if g512-led -p "/etc/g810-led/${new_profile}"; then
+	# provide user feedback
+	msg='Now running'
+	[[ "${new_profile}" == "${default_profile}" ]] && msg+=" default"
+	msg+=" profile: '${new_profile}'"
+	notifyUser "${msg}"
+	# update cache file
+	if ! [[ -d "${cache_dir}" ]]; then
+		mkdir -p "${cache_dir}"
+		if ! [[ -d "${cache_dir}" ]]; then
+			abortScript "Unable to create cache directory '$cache_dir}'"
+		fi
+	fi
+	echo "profile ${new_profile}" >"${cache_fp}"
+	echo "time    ${now}" >>"${cache_fp}"
+else
+	msg='g512-led exited with error status when trying to activate profile'
+	msg+=" '${new_profile}'"
+	abortScript "${msg}"
+fi
+
+# vim:foldmethod=marker:
