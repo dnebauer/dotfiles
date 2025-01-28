@@ -13,7 +13,7 @@ use namespace::clean;    # }}}1
 
   use Moo;               # {{{1
   use strictures 2;
-  use namespace::clean -except => [ '_options_data', '_options_config' ];
+  use namespace::clean -except => [qw(_options_data _options_config)];
   use autodie qw(open close);
   use Carp    qw(croak);
   use Const::Fast;
@@ -21,7 +21,11 @@ use namespace::clean;    # }}}1
   use Getopt::Long::Descriptive;
   use List::SomeUtils;
   use MooX::HandlesVia;
-  use MooX::Options protect_argv => 0;
+  use MooX::Options (
+    authors      => 'David Nebauer <david at nebauer dot org>',
+    description  => '',
+    protect_argv => 0,
+  );
   use Path::Tiny;
   use Sys::Syslog qw(:DEFAULT setlogsock);
   use Syntax::Keyword::Try;
