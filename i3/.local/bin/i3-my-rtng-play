@@ -1,37 +1,76 @@
 #!/usr/bin/perl
 
-## no critic (ProhibitDuplicateLiteral)
-
+use Moo;                 # {{{1
 use strictures 2;
 use 5.006;
-use 5.022_001;
-use version; our $VERSION = qv('0.1');
-use namespace::clean;
-use IPC::Cmd;
-use Net::DBus;
+use 5.038_001;
+use version; our $VERSION = qv('0.2');
+use namespace::clean;    # }}}1
 
-# check for required tools
-IPC::Cmd::can_run('pactl') or die "Cannot run without 'pactl'\n";
+{
 
-# adjust volume
-sub run_cmd {
-  my $cmd    = shift;
-  my @output = IPC::Cmd::run(command => $cmd);
-  return;
+  package Dn::Internal;
+
+  use Moo;               # {{{1
+  use strictures 2;
+  use namespace::clean -except => [qw(_options_data _options_config)];
+  use Const::Fast;
+  use IPC::Cmd;
+  use Net::DBus;
+  use MooX::Options (
+    authors     => 'David Nebauer <david at nebauer dot org>',
+    description => 'Uses the Radiotray-NG DBus interface to play the last'
+        . ' station if none is currently playing, or pause the current'
+        . " station if one is currently playing.\n\n"
+        . 'Sets the volume to 25% using C<pactl>.',
+    protect_argv => 0,
+  );
+
+  const my $DEFAULT_SINK => '@DEFAULT_SINK@';    ## no critic(RequireInterpolationOfMetachars)
+  const my $PACTL        => 'pactl';             # }}}1
+
+  # methods
+
+  # main()    {{{1
+  #
+  # does:   main method
+  # params: nil
+  # prints: feedback
+  # return: n/a, dies on failure
+  sub main ($self) {
+
+    # check for required tools
+    IPC::Cmd::can_run($PACTL) or die "Cannot run without '$PACTL'\n";
+
+    my $vol     = '20%';
+    my @unmute  = ($PACTL, 'set-sink-mute',   $DEFAULT_SINK, 'false');
+    my @set_vol = ($PACTL, 'set-sink-volume', $DEFAULT_SINK, $vol);
+    run_cmd([@unmute]);
+    run_cmd([@set_vol]);
+
+    # play/pause using radiotry-ng dbus interface
+    my $bus     = Net::DBus->session;
+    my $service = $bus->get_service('com.github.radiotray_ng');
+    my $rtng    = $service->get_object('/com/github/radiotray_ng');
+    $rtng->play;
+
+    return;
+  }
+
+  # run_cmd($cmd)    {{{1
+  # does:   adjust volume
+  # params: $cmd - command to run [arrayref, required]
+  # prints: nil
+  # return: nil
+  sub run_cmd {
+    my $cmd    = shift;
+    my @output = IPC::Cmd::run(command => $cmd);
+    return;
+  }    # }}}1
+
 }
-my $vol = '20%';
-## no critic (RequireInterpolationOfMetachars)
-my @unmute  = ('pactl', 'set-sink-mute',   '@DEFAULT_SINK@', 'false');
-my @set_vol = ('pactl', 'set-sink-volume', '@DEFAULT_SINK@', $vol);
-## use critic
-run_cmd([@unmute]);
-run_cmd([@set_vol]);
 
-# play/pause using radiotry-ng dbus interface
-my $bus     = Net::DBus->session;
-my $service = $bus->get_service('com.github.radiotray_ng');
-my $rtng    = $service->get_object('/com/github/radiotray_ng');
-$rtng->play;
+my $p = Dn::Internal->new_with_options->main;
 
 1;
 
@@ -48,18 +87,6 @@ i3-my-rtng-play - play or pause a Radiotray-NG station
 
 B<i3-my-rtng-play>
 
-=head1 REQUIRED ARGUMENTS
-
-Nil.
-
-=head1 REQUIRED OPTIONS
-
-Nil.
-
-=head1 OPTIONS
-
-Nil.
-
 =head1 DESCRIPTION
 
 Uses the Radiotray-NG DBus interface to play the last station if none is
@@ -67,9 +94,43 @@ currently playing, or pause the current station if one is currently playing.
 
 Sets the volume to 25% using C<pactl>.
 
+=head1 CONFIGURATION
+
+There are no configuration options for this script.
+
+=head1 REQUIRED ARGUMENTS
+
+Nil.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-h>
+
+Display help and exit.
+
+=back
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly
+the error code is that given by the system.
+
 =head1 DIAGNOSTICS
 
-No failure modes are currently documented.
+=head2 Cannot run without 'pactl'
+
+This utility is required to adjust sound volume.
+
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs to the author.
 
 =head1 DEPENDENCIES
 
@@ -77,34 +138,17 @@ No failure modes are currently documented.
 
 namespace::clean, IPC::Cmd, Net::DBus, strictures, version.
 
-=head1 CONFIGURATION
-
-There are no configuration options for this script.
-
-=head1 INCOMPATIBILITIES
-
-There are no known incompatibilities.
-
-=head1 EXIT STATUS
-
-The exit code is 0 for successful execution and 1 if the script does a
-controlled exit following an error. If the script crashes unexpectedly the
-error code is that given by the system.
-
-=head1 BUGS AND LIMITATIONS
-
-Please report any bugs to the author.
-
 =head1 AUTHOR
 
 David Nebauer (david at nebauer dot org)
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2022 David Nebauer (david at nebauer dot org)
+Copyright (c) 2024 David Nebauer E<lt>david at nebauer dot orgE<gt>.
 
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =cut
+
 # vim:foldmethod=marker:
