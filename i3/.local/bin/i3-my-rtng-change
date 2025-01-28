@@ -47,7 +47,7 @@ use namespace::clean;    # }}}1
 
   use Moo;             # {{{1
   use strictures 2;
-  use namespace::clean -except => [ '_options_data', '_options_config' ];
+  use namespace::clean -except => [qw( _options_data _options_config)];
   use Carp;
   use Const::Fast;
   use English qw(-no_match_vars);
@@ -55,7 +55,14 @@ use namespace::clean;    # }}}1
   use IPC::Run;
   use JSON::MaybeXS;
   use MooX::HandlesVia;
-  use MooX::Options protect_argv => 0;
+  use MooX::Options (
+    authors     => 'David Nebauer <david at nebauer dot org>',
+    description => 'The user selects a bookmarked radio station defined in'
+        . ' Radiotray-NG and plays it. If Radiotray-NG is currently playing a'
+        . ' radio station it will stop it and start the selected radio'
+        . ' station.',
+    protect_argv => 0,
+  );
   use Net::DBus;
   use Types::Standard;
 
@@ -107,7 +114,7 @@ use namespace::clean;    # }}}1
   # params: nil
   # prints: feedback
   # return: n/a, dies on failure
-  sub main ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub main ($self) {
 
     # check for necessary tools
     $self->_check_tools;
@@ -133,7 +140,7 @@ use namespace::clean;    # }}}1
   # params: nil
   # prints: error message if tools missing
   # return: n/a, dies on failure
-  sub _check_tools ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub _check_tools ($self) {
 
     # tools: pactl, yad
     my @tools = qw(pactl yad);
@@ -150,8 +157,7 @@ use namespace::clean;    # }}}1
   # params: nil
   # prints: error message if fails
   # return: n/a, dies on failure
-  sub _extract_station_data ($self)
-  {    ## no critic (RequireInterpolationOfMetachars)
+  sub _extract_station_data ($self) {
 
     # get radiotray-ng bookmarks via dbus interface
     my $bus     = Net::DBus->session;
@@ -211,7 +217,7 @@ use namespace::clean;    # }}}1
   # params: nil
   # prints: error message if fails
   # return: n/a, dies on failure
-  sub _play_station ($self) {   ## no critic (RequireInterpolationOfMetachars)
+  sub _play_station ($self) {
 
     # accept on faith that station and group selected
     my $group   = $self->_group;
@@ -234,7 +240,7 @@ use namespace::clean;    # }}}1
   # params: 1 - command [string or arrayref]
   # prints: error message if dies
   # return: output (stdout) of command, dies on failure
-  sub _run_cmd ($self, $cmd) {  ## no critic (RequireInterpolationOfMetachars)
+  sub _run_cmd ($self, $cmd) {
 
     # run command
     my ($success, $err, $full, $stdout, $stderr) =
@@ -262,8 +268,7 @@ use namespace::clean;    # }}}1
   #         2 - menu items [arrayref]
   # prints: nil
   # return: selected item, false value if none selected
-  sub _select ($self, $prompt, $items)
-  {    ## no critic (RequireInterpolationOfMetachars)
+  sub _select ($self, $prompt, $items) {
 
     my $title = 'Radiotray NG';
     const my $HEIGHT => 500;
@@ -300,7 +305,7 @@ use namespace::clean;    # }}}1
   # params: nil
   # prints: error message if fails
   # return: n/a, dies on failure
-  sub _select_station ($self) { ## no critic (RequireInterpolationOfMetachars)
+  sub _select_station ($self) {
 
     # first select station group
     # - from previous checks know there is at least one group
@@ -332,7 +337,7 @@ use namespace::clean;    # }}}1
   # params: nil
   # prints: error message if fails
   # return: n/a, dies on failure
-  sub _set_volume ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub _set_volume ($self) {
     my $vol = '25%';
 
     # prevent PerlCritic thinking @DEFAULT_SINK@ is a list
