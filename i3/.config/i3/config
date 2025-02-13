@@ -576,7 +576,7 @@ bindsym F3 exec --no-startup-id tellico
 bindsym $mod+c exec --no-startup-id \
 ~/.local/bin/find-cursor --outline --repeat 2 --wait 600
 
-# cycle through led keyboard profiles
+# cycle through led keyboard profiles {{{2
 
 ## cycle led keyboard profiles
 bindsym Scroll_Lock exec --no-startup-id \
