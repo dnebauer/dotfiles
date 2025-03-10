@@ -241,7 +241,7 @@ set $Transparent #00000000
 
 ####font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 ####font pango:DejaVu Sans Mono 10
-font pango:DejaVu Sans Mono, Terminus Bold Semi-Condensed 11
+font pango:DejaVu Sans Mono 11, Terminus Bold 11
 ####font pango:Terminus 11px
 
 
@@ -730,6 +730,8 @@ for_window [class="Gxmessage" instance="gxmessage"] floating enable
 for_window [class="mpv" instance="gl"] floating enable
 for_window [class="okular" instance="okular"] floating enable
 for_window [class="smplayer" instance="smplayer"] floating enable
+for_window [title="Showtime" class="python3" instance="python3"] floating enable
+for_window [class="steam" instance="steamwebhelper"] floating enable
 for_window [class="Xmessage" instance="xmessage"] floating enable
 for_window [class="Yad" instance="yad"] floating enable
 for_window [class="zenity" instance="zenity"] floating enable, resize set 1000 600
