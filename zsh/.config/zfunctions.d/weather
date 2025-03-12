@@ -11,8 +11,11 @@ fi
 city="${1}"
 
 # get url fragment for the desired city
+# • to find fragment for new city go to https://www.bbc.com/weather,
+#   search for desired city and display its weather, then harvest
+#   the fragment from the end of the page's url
 case "${city}" in
-  brisbane)  url_fragment=2073124;;
+  brisbane)  url_fragment=2174003;;
   darwin)    url_fragment=2073124;;
   melbourne) url_fragment=2158177;;
   sydney)    url_fragment=2147714;;
