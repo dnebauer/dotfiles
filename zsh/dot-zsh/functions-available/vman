@@ -1,2 +1,0 @@
-vim -c "SuperMan $*"
-[[ "$?" == '0' ]] || echo "No manual entry for $*"
