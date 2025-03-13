@@ -1,4 +1,4 @@
-#!/home/david/.venvs/neomutt/bin/python
+#!/home/david/.venvs/neomutt/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
