@@ -53,6 +53,6 @@ eval "$(fasd --init auto)"
 
 # default completion for commands without defined completion
 compdef _gnu_generic \
-    convert display dpkg find gunzip iconv  \
-    lintian man     mc   pass perl   python \
-    rsync   sup-add sudo tar  vcsh
+    cd     convert display dpkg find gunzip \
+    iconv  lintian man     mc   pass perl \
+    python rsync   sup-add sudo tar  vcsh
