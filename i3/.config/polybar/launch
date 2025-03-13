@@ -1,11 +1,10 @@
 #!/bin/bash
 ###!/usr/bin/env bash
 
-# File: launch.sh
+# File: launch
 # Author: David Nebauer (david at nebauer dot org)
 # Purpose: launch polybar on each monitor
 # Created: 2022-05-20
-
 
 # ERROR HANDLING
 
@@ -20,19 +19,17 @@ set -o pipefail
 # Turn on traces, useful while debugging but commented out by default
 # set -o xtrace
 
-
 # VARIABLES
 
 self="$(basename "$0")"
 required_tools=(
-    getopt
-    xdo
-    xdotool
+	getopt
+	xdo
+	xdotool
 )
 primary=''
 others=()
 dummy_wids=()
-
 
 # PROCEDURES
 
@@ -40,15 +37,15 @@ dummy_wids=()
 #   params: nil
 #   prints: nil
 #   return: nil
-displayUsage () {
-cat << _USAGE
-${dn_self}: launch polybar
+displayUsage() {
+	cat <<_USAGE
+${self}: launch polybar
 
 Kills any existing instances of polybar and launches a fresh
 instance.
 
 Usage: $self [-v] [-d]
-       ${dn_self} -h
+       ${self} -h
 
 Options: -v = print input lines after command expansion
               (equivalent to 'set -o verbose')
@@ -62,118 +59,132 @@ _USAGE
 #   return: nil
 #   note:   after execution variable ARGS contains
 #           remaining command line args (after options removed)
-processOptions () {
-    # read the command line options
-    local OPTIONS="$(                     \
-        getopt                            \
-            --options hvd                 \
-            --long    help,verbose,debug  \
-            --name    "${BASH_SOURCE[0]}" \
-            -- "${@}"                     \
-    )"
-    [[ ${?} -eq 0 ]] || {
-        echo 'Invalid command line options' 1>&2
-        exit 1
-    }
-    eval set -- "${OPTIONS}"
-    while true ; do
-        case "${1}" in
-        -h | --help    ) displayUsage   ; exit 0  ;;
-        -v | --verbose ) set -o verbose ; shift 1 ;;
-        -d | --debug   ) set -o xtrace  ; shift 1 ;;
-        --             ) shift ; break ;;
-        *              ) break ;;
-        esac
-    done
-    ARGS="${@}"  # remaining arguments
+processOptions() {
+	# read the command line options
+	local OPTIONS
+	if ! OPTIONS="$(
+		getopt \
+			--options hvd \
+			--long help,verbose,debug \
+			--name "${BASH_SOURCE[0]}" \
+			-- "${@}"
+	)"; then
+		# getopt displays errors
+		exit 1
+	fi
+	eval set -- "${OPTIONS}"
+	while true; do
+		case "${1}" in
+		-h | --help)
+			displayUsage
+			exit 0
+			;;
+		-v | --verbose)
+			set -o verbose
+			shift 1
+			;;
+		-d | --debug)
+			set -o xtrace
+			shift 1
+			;;
+		--)
+			shift
+			break
+			;;
+		*) break ;;
+		esac
+	done
 }
 # Join items
 #   params: 1  - delimiter
 #           2+ - items to be joined
 #   prints: string containing joined items
 #   return: nil
-function joinBy () {
-    local d=$1
-    shift
-    local f=$1
-    shift
-    printf %s "$f" "${@/#/$d}"
+function joinBy() {
+	local d=$1
+	shift
+	local f=$1
+	shift
+	printf %s "$f" "${@/#/$d}"
 }
 # Get monitor names as per xrandr
 #   params: nil
 #   prints: nil
 #   return: nil
-function setMonitorNames () {
-    primary=$(xrandr --query |\
-        grep ' connected'    |\
-        grep 'primary'       |\
-        cut -d' ' -f1\
-    )
-    others=$(xrandr --query  |\
-        grep ' connected'    |\
-        grep -v 'primary'    |\
-        cut -d' ' -f1\
-    )
+function setMonitorNames() {
+	primary="$(
+		xrandr --query |
+			grep ' connected' |
+			grep 'primary' |
+			cut -d' ' -f1
+	)"
+	mapfile -t others < <(
+		xrandr --query |
+			grep ' connected' |
+			grep -v 'primary' |
+			cut -d' ' -f1
+	)
 }
 # Launch bar on each monitor
 #   params: 1 - bar
 #   prints: nil
 #   return: nil
-function launchBars () {
+function launchBars() {
 
-    local bar="${1}"
+	local bar="${1}"
 
-    # launch on primary monitor
-    MONITOR=$primary polybar --reload "$bar" &
-    sleep 1
+	# launch on primary monitor
+	MONITOR=$primary polybar --reload "$bar" &
+	sleep 1
 
-    # launch on all other monitors
-    for monitor in $others ; do
-        MONITOR=$monitor polybar --reload "$bar" &
-    done
-    sleep 1
+	# launch on all other monitors
+	for monitor in "${others[@]}"; do
+		MONITOR=$monitor polybar --reload "$bar" &
+	done
+	sleep 1
 }
 # Launch dummy bar on each monitor
 #   params: nil
 #   prints: nil
 #   return: nil
-function launchDummyBars () {
-    launchBars 'dummy'
+function launchDummyBars() {
+	launchBars 'dummy'
 }
 # Get window ids (wids) of dummy bars
 #   params: nil
 #   prints: nil
 #   return: nil
-function getDummyWids () {
-    dummy_wids=($(xdotool search --all --class 'Polybar'))
+function getDummyWids() {
+	mapfile -t dummy_wids < <(
+		xdotool search --all --class 'Polybar'
+	)
 }
 # Launch main bar on each monitor
 #   params: nil
 #   prints: nil
 #   return: nil
-function launchMainBars () {
-    launchBars 'main'
+function launchMainBars() {
+	launchBars 'main'
 }
 # Lower dummy bars below main bars
 #   params: nil
 #   prints: nil
 #   return: nil
-function lowerDummyBars () {
-    for wid in "${dummy_wids[@]}" ; do
-        xdo lower $wid
-    done
+function lowerDummyBars() {
+	for wid in "${dummy_wids[@]}"; do
+		xdo lower "$wid"
+	done
 }
-
 
 # MAIN
 
 # Check for required tools
 missing=()
-for tool in "${required_tools[@]}" ; do
-    command -v "${tool}" &>/dev/null || missing+=("${tool}")
+for tool in "${required_tools[@]}"; do
+	command -v "${tool}" &>/dev/null || missing+=("${tool}")
 done
-[[ ${#missing[@]} -eq 0 ]] \
-    || dnFailScript "Can't run without: $(joinBy ', ' "${missing[@]}")"
+[[ ${#missing[@]} -eq 0 ]] ||
+	dnFailScript "Can't run without: $(joinBy ', ' "${missing[@]}")"
 unset missing tools required_tools
 
 # Process command line options
@@ -196,13 +207,13 @@ while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
 #   main bar with "xdo" (as discussed in polybar chat at
 #   https://gitter.im/polybar/polybar?at=5e78cdf74fa834644901efba)
 if type "xrandr"; then
-    setMonitorNames
-    launchDummyBars
-    getDummyWids
-    launchMainBars
-    lowerDummyBars
+	setMonitorNames
+	launchDummyBars
+	getDummyWids
+	launchMainBars
+	lowerDummyBars
 else
-    polybar --reload main &
+	polybar --reload main &
 fi
 
 # vim:foldmethod=marker:
