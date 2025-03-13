@@ -1,4 +1,23 @@
 #! /home/david/.venvs/neomutt/bin/python
+
+# * the unusual shebang is because the 'xerox' and
+#   'html2text' modules are installed in a virtual
+#   environment (~/.venvs/neomutt)
+# * if the script is run using the python excecutable
+#   from that virtual environment it automatically
+#   finds those modules
+# * the modules are installed in the virtual
+#   environment in a subdirectory specific to the
+#   version of python in use at the time the module
+#   was installed
+# * when the system python is upgraded to a new
+#   version, e.g., python3 3.12→3.13, this script
+#   will be unable to locate the modules, and will
+#   fail with a ModulNotFound error for 'html2text'
+# * the solution is to delete and re-create the
+#   virtual environment and reinstall into it the
+#   'xerox' and 'html2text' modules.
+
 # pyright: reportAny=false
 # pyright: reportAttributeAccessIssue=false
 # pyright: reportMissingParameterType=false
