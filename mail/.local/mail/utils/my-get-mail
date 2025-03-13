@@ -281,14 +281,22 @@ echo "$self: $now"                         # timestamp
 if [[ -f "$pidfile" ]]; then
 	# is process actually still running under this pid
 	oldpid="$(cat "$pidfile")"
-	result="$(pgrep -af "$oldpid" | grep "$ps_grep" || true)"
-	[[ -n "$result" ]] &&
-		abortScript "$self is already running (PID=$oldpid)"
+	# pid file can be empty
+	if [[ -n "${oldpid}" ]]; then
+		result="$(pgrep -af "$oldpid" | grep -v 'grep' | grep "$ps_grep" || true)"
+		[[ -n "$result" ]] &&
+			abortScript "$self is already running (PID=$oldpid)"
+	fi
 fi
 mkdir -p "$piddir" &>/dev/null || true
 [[ -d "$piddir" ]] ||
 	abortScript "Unexpected deletion of pid locking directory: $piddir"
-pid="$(pgrep -f "$ps_grep" | head -n1)"
+#pid="$(pgrep -f "$ps_grep" | head -n1)"
+# in February 2025 'pgrep -f' began exiting with error status if no matches,
+# which caused script failure with 'pipefail' set
+pgrep_output="$(pgrep -f 'bash /home/david/.local/mail/utils/my-get-mail-daemon')" || true
+pid=''
+[[ -n "${pgrep_output}" ]] && pid="$(head -n1 <<<"${pgrep_output}")"
 echo "$pid" >"$pidfile" # update pid file
 trap '[[ -f "${pidfile:-}" ]] && rm -rf "$piddir"' EXIT
 unset oldpid pid piddir pidfile result
