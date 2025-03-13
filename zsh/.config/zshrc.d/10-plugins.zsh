@@ -1,7 +1,6 @@
 # Plugins    {{{1
 # • for oh-my-zsh
 plugins=(
-  autojump
   bgnotify
   chucknorris
   colored-man-pages
