@@ -318,7 +318,7 @@ function launchQutebrowserSessions() {
 		local task
 		task="launching qutebrowser session '$session'"
 		log "Begin ${task}"
-		notifyMessage "Launnching qutebrowser session '$session'..."
+		notifyMessage "Launching qutebrowser session '$session'..."
 
 		# launch qutebrowser instance
 		$qutebrowser \
