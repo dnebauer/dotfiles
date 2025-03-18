@@ -54,55 +54,86 @@
 .rr rF
 .\" ========================================================================
 .\"
-.IX Title "I3-MY-RTNG-STATUS 1"
-.TH I3-MY-RTNG-STATUS 1 2025-03-18 "perl v5.40.1" "User Contributed Perl Documentation"
+.IX Title "Select 3"
+.TH Select 3 2025-03-18 "perl v5.40.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH NAME
-i3\-my\-rtng\-status \- display current status of Radiotray\ NG
-.SH USAGE
-.IX Header "USAGE"
-\&\fBi3\-my\-rtng\-status\fR
+App::Dn::RTNG::Select \- user selects a value from a menu
+.SH VERSION
+.IX Header "VERSION"
+This documentation is for \f(CW\*(C`App::Dn::RTNG::Select\*(C'\fR version 0.1.
+.SH SYNOPSIS
+.IX Header "SYNOPSIS"
+.Vb 6
+\&    use App::Dn::RTNG::Select;
+\&    my $selection = App::Dn::RTNG::Select\->new(
+\&      items  => $items,
+\&      prompt => $prompt,
+\&      title  => $title,
+\&    )\->run;
+.Ve
 .SH DESCRIPTION
 .IX Header "DESCRIPTION"
-Obtains details of Radiotray\ NG's current state using its DBus interface and
-displays key details in a system notification.
-.SH CONFIGURATION
-.IX Header "CONFIGURATION"
-There are no configuration options for this script.
-.SH "REQUIRED ARGUMENTS"
-.IX Header "REQUIRED ARGUMENTS"
+The user selects a value from a menu.
+The menu displays instructions for its use.
+Iterative search is available.
+.PP
+The class part of the X11 WM_CLASS property for the menu is set to
+"Perl/Tk widget".
+.SH "CONFIGURATION AND ENVIRONMENT"
+.IX Header "CONFIGURATION AND ENVIRONMENT"
+.SS Properties
+.IX Subsection "Properties"
+\fIitems\fR
+.IX Subsection "items"
+.PP
+Menu items. Arrayref of scalar strings. Required, non-empty.
+.PP
+\fIprompt\fR
+.IX Subsection "prompt"
+.PP
+Menu prompt. Scalar string. Required. Non-empty.
+.PP
+\fItitle\fR
+.IX Subsection "title"
+.PP
+Menu title. Scalar string. Required, non-empty.
+.SS Attributes
+.IX Subsection "Attributes"
+None.
+.SS "Configuration files"
+.IX Subsection "Configuration files"
+None used.
+.SS "Environment variables"
+.IX Subsection "Environment variables"
+None used.
+.SH SUBROUTINES/METHODS
+.IX Header "SUBROUTINES/METHODS"
+.SS \fBrun()\fP
+.IX Subsection "run()"
+This is the only public method.
+The user selects a menu item as described in DESCRIPTION.
+.PP
+\fIParameters\fR
+.IX Subsection "Parameters"
+.PP
 Nil.
-.SH OPTIONS
-.IX Header "OPTIONS"
-.IP "\fB\-h\fR  \fB\-\-help\fR" 4
-.IX Item "-h --help"
-Show a help message.
-.IP \fB\-\-usage\fR 4
-.IX Item "--usage"
-Show a short help message.
-.IP \fB\-\-man\fR 4
-.IX Item "--man"
-Show the manual.
-.SH "EXIT STATUS"
-.IX Header "EXIT STATUS"
-The exit code is 0 for successful execution and 1 if the script does a
-controlled exit following an error. If the script crashes unexpectedly the
-error code is that given by the system.
+.PP
+\fIPrints\fR
+.IX Subsection "Prints"
+.PP
+Error messages.
+.PP
+\fIReturns\fR
+.IX Subsection "Returns"
+.PP
+Scalar string (selected item) or FALSE (no item selected).
 .SH DIAGNOSTICS
 .IX Header "DIAGNOSTICS"
-.SS org.freedesktop.DBus.Error.ServiceUnknown
-.IX Subsection "org.freedesktop.DBus.Error.ServiceUnknown"
-The full error is:
-.PP
-.Vb 2
-\&    org.freedesktop.DBus.Error.ServiceUnknown:
-\&    The name com.github.radiotray_ng was not provided by any .service files
-.Ve
-.PP
-The commonest cause of this error is that Radiotray\ NG is not running.
+No failure modes are documented.
 .SH INCOMPATIBILITIES
 .IX Header "INCOMPATIBILITIES"
 There are no known incompatibilities.
@@ -113,13 +144,14 @@ Please report any bugs to the author.
 .IX Header "DEPENDENCIES"
 .SS "Perl modules"
 .IX Subsection "Perl modules"
-App::Dn::RTNG::Status, File::FindLib, namespace::clean, strictures, version.
+charnames, Const::Fast, English, Feature::Compat::Try, Moo, MooX::HandlesVia,
+namespace::clean, strictures, Tk, Types::Standard, version.
 .SH AUTHOR
 .IX Header "AUTHOR"
-David Nebauer (david at nebauer dot org)
+David Nebauer <mailto:david@nebauer.org>
 .SH "LICENSE AND COPYRIGHT"
 .IX Header "LICENSE AND COPYRIGHT"
-Copyright (c) 2024 David Nebauer (david at nebauer dot org)
+Copyright (c) 2025 David Nebauer <mailto:david@nebauer.org>
 .PP
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

@@ -54,55 +54,53 @@
 .rr rF
 .\" ========================================================================
 .\"
-.IX Title "I3-MY-RTNG-STATUS 1"
-.TH I3-MY-RTNG-STATUS 1 2025-03-18 "perl v5.40.1" "User Contributed Perl Documentation"
+.IX Title "Station 3"
+.TH Station 3 2025-03-18 "perl v5.40.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH NAME
-i3\-my\-rtng\-status \- display current status of Radiotray\ NG
-.SH USAGE
-.IX Header "USAGE"
-\&\fBi3\-my\-rtng\-status\fR
+App::Dn::RTNG::Station \- utility module modelling a station
+.SH VERSION
+.IX Header "VERSION"
+This documentation is for \f(CW\*(C`App::Dn::RTNG::Station\*(C'\fR version 0.1.
+.SH SYNOPSIS
+.IX Header "SYNOPSIS"
+.Vb 1
+\&    use App::Dn::RTNG::Station;
+.Ve
 .SH DESCRIPTION
 .IX Header "DESCRIPTION"
-Obtains details of Radiotray\ NG's current state using its DBus interface and
-displays key details in a system notification.
-.SH CONFIGURATION
-.IX Header "CONFIGURATION"
-There are no configuration options for this script.
-.SH "REQUIRED ARGUMENTS"
-.IX Header "REQUIRED ARGUMENTS"
-Nil.
-.SH OPTIONS
-.IX Header "OPTIONS"
-.IP "\fB\-h\fR  \fB\-\-help\fR" 4
-.IX Item "-h --help"
-Show a help message.
-.IP \fB\-\-usage\fR 4
-.IX Item "--usage"
-Show a short help message.
-.IP \fB\-\-man\fR 4
-.IX Item "--man"
-Show the manual.
-.SH "EXIT STATUS"
-.IX Header "EXIT STATUS"
-The exit code is 0 for successful execution and 1 if the script does a
-controlled exit following an error. If the script crashes unexpectedly the
-error code is that given by the system.
+Store details of a radio station defined in Radiotray\ NG.
+.SH "CONFIGURATION AND ENVIRONMENT"
+.IX Header "CONFIGURATION AND ENVIRONMENT"
+.SS Properties
+.IX Subsection "Properties"
+None.
+.SS Attributes
+.IX Subsection "Attributes"
+.ie n .IP $name 4
+.el .IP \f(CW$name\fR 4
+.IX Item "$name"
+Station name as extracted from Radiotray\ NG bookmark data. String. Required.
+.ie n .IP $url 4
+.el .IP \f(CW$url\fR 4
+.IX Item "$url"
+Station url as extracted from Radiotray\ NG bookmark data. URI object.
+Required.
+.SS "Configuration files"
+.IX Subsection "Configuration files"
+None used.
+.SS "Environment variables"
+.IX Subsection "Environment variables"
+None used.
+.SH SUBROUTINES/METHODS
+.IX Header "SUBROUTINES/METHODS"
+None.
 .SH DIAGNOSTICS
 .IX Header "DIAGNOSTICS"
-.SS org.freedesktop.DBus.Error.ServiceUnknown
-.IX Subsection "org.freedesktop.DBus.Error.ServiceUnknown"
-The full error is:
-.PP
-.Vb 2
-\&    org.freedesktop.DBus.Error.ServiceUnknown:
-\&    The name com.github.radiotray_ng was not provided by any .service files
-.Ve
-.PP
-The commonest cause of this error is that Radiotray\ NG is not running.
+No failure modes are documented.
 .SH INCOMPATIBILITIES
 .IX Header "INCOMPATIBILITIES"
 There are no known incompatibilities.
@@ -113,13 +111,14 @@ Please report any bugs to the author.
 .IX Header "DEPENDENCIES"
 .SS "Perl modules"
 .IX Subsection "Perl modules"
-App::Dn::RTNG::Status, File::FindLib, namespace::clean, strictures, version.
+namespace::clean, Moo, MooX::HandlesVia, strictures, Types::Standard, URI,
+version.
 .SH AUTHOR
 .IX Header "AUTHOR"
-David Nebauer (david at nebauer dot org)
+David Nebauer <mailto:david@nebauer.org>
 .SH "LICENSE AND COPYRIGHT"
 .IX Header "LICENSE AND COPYRIGHT"
-Copyright (c) 2024 David Nebauer (david at nebauer dot org)
+Copyright (c) 2025 David Nebauer <mailto:david@nebauer.org>
 .PP
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

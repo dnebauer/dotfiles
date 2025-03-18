@@ -54,43 +54,47 @@
 .rr rF
 .\" ========================================================================
 .\"
-.IX Title "I3-MY-RTNG-STATUS 1"
-.TH I3-MY-RTNG-STATUS 1 2025-03-18 "perl v5.40.1" "User Contributed Perl Documentation"
+.IX Title "Stop 3"
+.TH Stop 3 2025-03-18 "perl v5.40.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH NAME
-i3\-my\-rtng\-status \- display current status of Radiotray\ NG
-.SH USAGE
-.IX Header "USAGE"
-\&\fBi3\-my\-rtng\-status\fR
+App::Dn::RTNG::Stop \- stop any currently playing Radiotray\ NG station
+.SH VERSION
+.IX Header "VERSION"
+This documentation is for \f(CW\*(C`App::Dn::RTNG::Stop\*(C'\fR version 0.1.
+.SH SYNOPSIS
+.IX Header "SYNOPSIS"
+.Vb 1
+\&    use App::Dn::RTNG::Stop;
+\&
+\&    App::Dn::RTNG::Stop\->new_with_options\->run;
+.Ve
 .SH DESCRIPTION
 .IX Header "DESCRIPTION"
-Obtains details of Radiotray\ NG's current state using its DBus interface and
-displays key details in a system notification.
-.SH CONFIGURATION
-.IX Header "CONFIGURATION"
-There are no configuration options for this script.
-.SH "REQUIRED ARGUMENTS"
-.IX Header "REQUIRED ARGUMENTS"
-Nil.
-.SH OPTIONS
-.IX Header "OPTIONS"
-.IP "\fB\-h\fR  \fB\-\-help\fR" 4
-.IX Item "-h --help"
-Show a help message.
-.IP \fB\-\-usage\fR 4
-.IX Item "--usage"
-Show a short help message.
-.IP \fB\-\-man\fR 4
-.IX Item "--man"
-Show the manual.
-.SH "EXIT STATUS"
-.IX Header "EXIT STATUS"
-The exit code is 0 for successful execution and 1 if the script does a
-controlled exit following an error. If the script crashes unexpectedly the
-error code is that given by the system.
+Uses the Radiotray\ NG DBus interface to stop any currently playing station.
+.SH "CONFIGURATION AND ENVIRONMENT"
+.IX Header "CONFIGURATION AND ENVIRONMENT"
+.SS Properties
+.IX Subsection "Properties"
+None.
+.SS Attributes
+.IX Subsection "Attributes"
+None.
+.SS "Configuration files"
+.IX Subsection "Configuration files"
+None used.
+.SS "Environment variables"
+.IX Subsection "Environment variables"
+None used.
+.SH SUBROUTINES/METHODS
+.IX Header "SUBROUTINES/METHODS"
+.SS \fBrun()\fP
+.IX Subsection "run()"
+The only public method. It uses the Radiotray\ NG DBus interface to stop any
+currently playing station.
 .SH DIAGNOSTICS
 .IX Header "DIAGNOSTICS"
 .SS org.freedesktop.DBus.Error.ServiceUnknown
@@ -113,13 +117,14 @@ Please report any bugs to the author.
 .IX Header "DEPENDENCIES"
 .SS "Perl modules"
 .IX Subsection "Perl modules"
-App::Dn::RTNG::Status, File::FindLib, namespace::clean, strictures, version.
+App::Dn::RTNG::Library, namespace::clean, Moo, MooX::Options, strictures,
+Types::Standard, version.
 .SH AUTHOR
 .IX Header "AUTHOR"
-David Nebauer (david at nebauer dot org)
+David Nebauer <mailto:david@nebauer.org>
 .SH "LICENSE AND COPYRIGHT"
 .IX Header "LICENSE AND COPYRIGHT"
-Copyright (c) 2024 David Nebauer (david at nebauer dot org)
+Copyright (c) 2025 David Nebauer <mailto:david@nebauer.org>
 .PP
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

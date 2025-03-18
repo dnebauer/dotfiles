@@ -1,0 +1,12 @@
+#compdef i3-my-rtng-stop
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help)'{-h,--help}'[Show a help message]' \
+    '--usage[Show a short help message]' \
+    '--man[Show the manual]' \
+  && rc=0
+
+return rc

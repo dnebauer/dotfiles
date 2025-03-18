@@ -1,87 +1,26 @@
 #!/usr/bin/perl
 
-use Moo;                 # {{{1
 use strictures 2;
 use 5.006;
 use 5.038_001;
-use version; our $VERSION = qv('0.2');
-use namespace::clean;    # }}}1
+use version; our $VERSION = qv('0.1');
+use namespace::clean;
+use File::FindLib 'share/perl5';
+use App::Dn::RTNG::Play;
 
-{
-
-  package Dn::Internal;
-
-  use Moo;               # {{{1
-  use strictures 2;
-  use namespace::clean -except => [qw(_options_data _options_config)];
-  use Const::Fast;
-  use IPC::Cmd;
-  use Net::DBus;
-  use MooX::Options (
-    authors     => 'David Nebauer <david at nebauer dot org>',
-    description => 'Uses the Radiotray-NG DBus interface to play the last'
-        . ' station if none is currently playing, or pause the current'
-        . " station if one is currently playing.\n\n"
-        . 'Sets the volume to 25% using C<pactl>.',
-    protect_argv => 0,
-  );
-
-  const my $DEFAULT_SINK => '@DEFAULT_SINK@';    ## no critic(RequireInterpolationOfMetachars)
-  const my $PACTL        => 'pactl';             # }}}1
-
-  # methods
-
-  # main()    {{{1
-  #
-  # does:   main method
-  # params: nil
-  # prints: feedback
-  # return: n/a, dies on failure
-  sub main ($self) {
-
-    # check for required tools
-    IPC::Cmd::can_run($PACTL) or die "Cannot run without '$PACTL'\n";
-
-    my $vol     = '20%';
-    my @unmute  = ($PACTL, 'set-sink-mute',   $DEFAULT_SINK, 'false');
-    my @set_vol = ($PACTL, 'set-sink-volume', $DEFAULT_SINK, $vol);
-    run_cmd([@unmute]);
-    run_cmd([@set_vol]);
-
-    # play/pause using radiotry-ng dbus interface
-    my $bus     = Net::DBus->session;
-    my $service = $bus->get_service('com.github.radiotray_ng');
-    my $rtng    = $service->get_object('/com/github/radiotray_ng');
-    $rtng->play;
-
-    return;
-  }
-
-  # run_cmd($cmd)    {{{1
-  # does:   adjust volume
-  # params: $cmd - command to run [arrayref, required]
-  # prints: nil
-  # return: nil
-  sub run_cmd {
-    my $cmd    = shift;
-    my @output = IPC::Cmd::run(command => $cmd);
-    return;
-  }    # }}}1
-
-}
-
-my $p = Dn::Internal->new_with_options->main;
+App::Dn::RTNG::Play->new_with_options->run;
 
 1;
 
 # POD    {{{1
+
 __END__
 
 =encoding utf8
 
 =head1 NAME
 
-i3-my-rtng-play - play or pause a Radiotray-NG station
+i3-my-rtng-play - play or pause a Radiotray NG station
 
 =head1 USAGE
 
@@ -89,14 +28,33 @@ B<i3-my-rtng-play>
 
 =head1 DESCRIPTION
 
-Uses the Radiotray-NG DBus interface to play the last station if none is
+Uses the S<Radiotray NG> DBus interface to play the last station if none is
 currently playing, or pause the current station if one is currently playing.
 
-Sets the volume to 25% using C<pactl>.
+Attempts to set the volume to the configured default value for the station.
+See L<App::Dn::RTNG::Play> for further details.
 
 =head1 CONFIGURATION
 
-There are no configuration options for this script.
+Uses a configuration file with the file name stem 'rtng-play-change' placed in
+one of the usual configuration file locations.
+(See L<File::ConfigDir> and L<Config::Any> for further details.)
+
+Any of the file formats supported by L<Config::Any> can be used.
+Configuration support is limited to default volume set on a per station basis.
+There must be a section called 'volume' within which are key:value pairs where
+keys are station names and values are corresponding volumes.
+The volume values can be any format supported by C<pactl>.
+
+Here is an example configuration file located in
+S<< F<$HOME/.config/rtng-play-change.json> >>:
+
+    {
+      "volume": {
+        "ABC Country": "40%",
+        "Country 108": "25%"
+      }
+    }
 
 =head1 REQUIRED ARGUMENTS
 
@@ -106,9 +64,17 @@ Nil.
 
 =over
 
-=item B<-h>
+=item B<-h>  B<--help>
 
-Display help and exit.
+Show a help message.
+
+=item B<--usage>
+
+Show a short help message.
+
+=item B<--man>
+
+Show the manual.
 
 =back
 
@@ -120,9 +86,14 @@ the error code is that given by the system.
 
 =head1 DIAGNOSTICS
 
-=head2 Cannot run without 'pactl'
+=head2 org.freedesktop.DBus.Error.ServiceUnknown
 
-This utility is required to adjust sound volume.
+The full error is:
+
+    org.freedesktop.DBus.Error.ServiceUnknown:
+    The name com.github.radiotray_ng was not provided by any .service files
+
+The commonest cause of this error is that Radiotray NG is not running.
 
 =head1 INCOMPATIBILITIES
 
@@ -136,15 +107,15 @@ Please report any bugs to the author.
 
 =head2 Perl modules
 
-namespace::clean, IPC::Cmd, Net::DBus, strictures, version.
+App::Dn::RTNG::Play, File::FindLib, namespace::clean, strictures, version.
 
 =head1 AUTHOR
 
-David Nebauer (david at nebauer dot org)
+L<David Nebauer|mailto:david@nebauer.org>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2024 David Nebauer E<lt>david at nebauer dot orgE<gt>.
+Copyright (c) 2022 L<David Nebauer|mailto:david@nebauer.org>
 
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

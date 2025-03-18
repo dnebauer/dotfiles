@@ -1,98 +1,61 @@
 #!/usr/bin/perl
 
-## no critic (ProhibitDuplicateLiteral)
-
 use strictures 2;
 use 5.006;
-use 5.022_001;
+use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
-use JSON::MaybeXS;
-use Net::DBus;
+use File::FindLib 'share/perl5';
+use App::Dn::RTNG::Status;
 
-# obtain radiotry-ng status using dbus interface and display with dunst
-
-# obtain status information
-my $bus     = Net::DBus->session;
-my $service = $bus->get_service('com.github.radiotray_ng');
-my $rtng    = $service->get_object('/com/github/radiotray_ng');
-my $output  = $rtng->get_player_state;
-
-# decode JSON-like output to a list
-my $data_arrayref = JSON::MaybeXS::decode_json $output;
-my %data          = %{$data_arrayref};
-if (not %data) { die "No status data extracted\n"; }
-
-# construct status message
-my $msg;
-if ($data{'state'} eq 'playing') {
-  $msg = sprintf "Streaming: %s\nPlaying: %s (%s)", $data{'station'},
-      $data{'title'}, $data{'artist'};
-}
-elsif ($data{'state'} eq 'stopped') {
-  $msg = sprintf "Currently stopped\nLast station: %s", $data{'station'};
-}
-else {
-  die "Unknown player state: $data{'state'}\n";
-}
-
-# display message in dunst
-my @cmd = ('dunstify', 'Radiotray NG', $msg);
-system @cmd;
+App::Dn::RTNG::Status->new_with_options->run;
 
 1;
 
 # POD    {{{1
+
 __END__
 
 =encoding utf8
 
 =head1 NAME
 
-i3-my-rtng-status - display current status of Radiotray-NG
+i3-my-rtng-status - display current status of S<Radiotray NG>
 
 =head1 USAGE
 
 B<i3-my-rtng-status>
 
-=head1 REQUIRED ARGUMENTS
-
-Nil.
-
-=head1 REQUIRED OPTIONS
-
-Nil.
-
-=head1 OPTIONS
-
-Nil.
-
 =head1 DESCRIPTION
 
-Obtains details of Radiotray-NG's current state using its DBus interface and
-displays key details using dunstify.
-
-=head1 DIAGNOSTICS
-
-No failure modes are currently documented.
-
-=head1 DEPENDENCIES
-
-=head2 Perl modules
-
-namespace::clean, JSON::MaybeXS, Net::DBus, strictures, version.
-
-=head2 Executables
-
-dunstify.
+Obtains details of S<Radiotray NG's> current state using its DBus interface and
+displays key details in a system notification.
 
 =head1 CONFIGURATION
 
 There are no configuration options for this script.
 
-=head1 INCOMPATIBILITIES
+=head1 REQUIRED ARGUMENTS
 
-There are no known incompatibilities.
+Nil.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-h>  B<--help>
+
+Show a help message.
+
+=item B<--usage>
+
+Show a short help message.
+
+=item B<--man>
+
+Show the manual.
+
+=back
 
 =head1 EXIT STATUS
 
@@ -100,9 +63,30 @@ The exit code is 0 for successful execution and 1 if the script does a
 controlled exit following an error. If the script crashes unexpectedly the
 error code is that given by the system.
 
+=head1 DIAGNOSTICS
+
+=head2 org.freedesktop.DBus.Error.ServiceUnknown
+
+The full error is:
+
+    org.freedesktop.DBus.Error.ServiceUnknown:
+    The name com.github.radiotray_ng was not provided by any .service files
+
+The commonest cause of this error is that S<Radiotray NG> is not running.
+
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
 =head1 BUGS AND LIMITATIONS
 
 Please report any bugs to the author.
+
+=head1 DEPENDENCIES
+
+=head2 Perl modules
+
+App::Dn::RTNG::Status, File::FindLib, namespace::clean, strictures, version.
 
 =head1 AUTHOR
 
@@ -116,4 +100,5 @@ This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =cut
+
 # vim:foldmethod=marker:
