@@ -1,7 +1,7 @@
 # Load autoconfig.yml
 config.load_autoconfig()
 
-# Bindings
+# BINDINGS
 
 # - only unbind when necessary, i.e., doing so causes no error
 
@@ -133,3 +133,9 @@ BIND_COMMAND = " ;; ".join(
 )
 config.bind("<ctrl-5>", BIND_COMMAND, mode="insert")
 del CHANGE_EDITOR_COMMAND, OPEN_EDITOR, RESET_EDITOR_COMMAND, BIND_COMMAND
+
+# SETTINGS
+
+# change this sandbox setting to try and prevent renderer crashes
+# - as per qutebrowser/qutebrowser github repo issue #7353
+config.set('qt.chromium.sandboxing', 'disable-seccomp-bpf')
