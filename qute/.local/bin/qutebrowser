@@ -51,50 +51,50 @@ session=default
 basedir_specified=false
 opts_read=0
 while [ $opts_read -lt $# ]; do
-    opt=$1 && shift
-    case "$opt" in
-        (--basedir) basedir_specified=true ;;
-        (-r|--restore) test $# -gt 0 && session=$1 && shift && continue ;;
-        (-[!-]*r) test $# -gt 0 && session=$1 && shift && opt=${opt%r} ;;
-        (-R) continue ;; # TODO
-    esac
-    set -- "$@" "$opt"
-    opts_read=$((opts_read + 1))
+	opt=$1 && shift
+	case "$opt" in
+	--basedir) basedir_specified=true ;;
+	-r | --restore) test $# -gt 0 && session=$1 && shift && continue ;;
+	-[!-]*r) test $# -gt 0 && session=$1 && shift && opt=${opt%r} ;;
+	-R) continue ;; # TODO
+	esac
+	set -- "$@" "$opt"
+	opts_read=$((opts_read + 1))
 done
 
 # Set up session base directory, unless --basedir has been specified by the
 # user:
 if ! $basedir_specified; then
-    basedir=$XDG_RUNTIME_DIR/qutebrowser/$session
-    session_file=$basedir/data/sessions/$session.yml
-    if test -f "$session_file" ; then
-        set -- --basedir "$basedir" "$@" '--restore' "$session"
-    else
-        set -- --basedir "$basedir" "$@"
-    fi
-    mkdir -p \
-        "$basedir" \
-        "$XDG_CONFIG_HOME/qutebrowser" \
-        "$XDG_CACHE_HOME/qutebrowser/$session" \
-        "$XDG_STATE_HOME/qutebrowser/$session" \
-        "$basedir/runtime"
-    ln -fsT "$XDG_CONFIG_HOME/qutebrowser" "$basedir/config"
-    ln -fsT "$XDG_CACHE_HOME/qutebrowser/$session" "$basedir/cache"
-    ln -fsT "$XDG_STATE_HOME/qutebrowser/$session" "$basedir/data"
-    if [ -d "$XDG_DATA_HOME/qutebrowser/userscripts" ]; then
-        ln -fsT "$XDG_DATA_HOME/qutebrowser/userscripts" \
-                "$basedir/data/userscripts"
-    fi
+	basedir=$XDG_RUNTIME_DIR/qutebrowser/$session
+	session_file=$basedir/data/sessions/$session.yml
+	if test -f "$session_file"; then
+		set -- --basedir "$basedir" "$@" '--restore' "$session"
+	else
+		set -- --basedir "$basedir" "$@"
+	fi
+	mkdir -p \
+		"$basedir" \
+		"$XDG_CONFIG_HOME/qutebrowser" \
+		"$XDG_CACHE_HOME/qutebrowser/$session" \
+		"$XDG_STATE_HOME/qutebrowser/$session" \
+		"$basedir/runtime"
+	ln -fsT "$XDG_CONFIG_HOME/qutebrowser" "$basedir/config"
+	ln -fsT "$XDG_CACHE_HOME/qutebrowser/$session" "$basedir/cache"
+	ln -fsT "$XDG_STATE_HOME/qutebrowser/$session" "$basedir/data"
+	if [ -d "$XDG_DATA_HOME/qutebrowser/userscripts" ]; then
+		ln -fsT "$XDG_DATA_HOME/qutebrowser/userscripts" \
+			"$basedir/data/userscripts"
+	fi
 fi
 
 # Search "real" qutebrowser executable (just another `qutebrowser` in PATH):
 spath=$(readlink -f "$0")
 IFS=:
 for p in $PATH; do
-    epath=$p/qutebrowser
-    if [ -x "$epath" ] && [ "$(readlink -f "$epath")" != "$spath" ]; then
-        exec "$epath" "$@"
-    fi
+	epath=$p/qutebrowser
+	if [ -x "$epath" ] && [ "$(readlink -f "$epath")" != "$spath" ]; then
+		exec "$epath" "$@"
+	fi
 done
 
 # ¯\_(ツ)_/¯
