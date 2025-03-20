@@ -45,7 +45,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: @msgs - error messages [array]
   # prints: error messages
   # return: nil, exits scripts
-  sub abort ($self, @msgs) {    ## no critic (RequireInterpolationOfMetachars)
+  sub abort ($self, @msgs) {
 
     # print error screen header
     $self->clear_screen;
@@ -71,7 +71,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: $text - string to format
   # prints: nil
   # return: scalar string
-  sub bold ($self, $text) {    ## no critic (RequireInterpolationOfMetachars)
+  sub bold ($self, $text) {
     return Term::ANSIColor::colored([$ARG_BOLD], "$text");
   }
 
@@ -81,8 +81,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: $text - string to format
   # prints: nil
   # return: scalar string
-  sub boldred ($self, $text)
-  {   ## no critic (RequireInterpolationOfMetachars, ProhibitDuplicateLiteral)
+  sub boldred ($self, $text) {
     return Term::ANSIColor::colored([ $ARG_BOLD, 'red' ], "$text");
   }
 
@@ -94,7 +93,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # return: n/a, dies on failure
   # source: method taken from perlfaq
   #         (https://perldoc.perl.org/perlfaq8#How-do-I-clear-the-screen?)
-  sub clear_screen ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub clear_screen ($self) {
 
     # get clear control string for current terminal
     my $terminal     = Term::Cap->Tgetent({ OSPEED => 9600 });
@@ -112,7 +111,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: nil
   # prints: nil, except error messages
   # return: string (char)
-  sub get_char ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub get_char ($self) {
 
     # get single character of input
     # - source: https://stackoverflow.com/a/2685736
@@ -129,8 +128,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: $text - string to format
   # prints: nil
   # return: scalar string
-  sub yellow ($self, $text)
-  {   ## no critic (RequireInterpolationOfMetachars, ProhibitDuplicateLiteral)
+  sub yellow ($self, $text) {
     return Term::ANSIColor::colored(['yellow'], "$text");
   }    # }}}2
 
@@ -141,16 +139,16 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
 # - encapsulate menu item functionality
 {
 
-  package Dn::Clipboard::Menu::Item;   ## no critic (ProhibitMultiplePackages)
+  package Dn::Clipboard::Menu::Item;    ## no critic (ProhibitMultiplePackages)
 
-  use Moo;                             # {{{2
+  use Moo;                              # {{{2
   use strictures 2;
   use namespace::clean;
   use Const::Fast;
   use English qw(-no_match_vars);
   use Types::Standard;
 
-  const my $TRUE => 1;                 # }}}2
+  const my $TRUE => 1;                  # }}}2
 
   # attributes
 
@@ -248,7 +246,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # return: array
   #         0 = action = {item,escape}
   #         1 = value  = item string or null
-  sub choose ($self, $name) {   ## no critic (RequireInterpolationOfMetachars)
+  sub choose ($self, $name) {
 
     # create hotkey hash
     my $hotkey_index_ref = $self->_hotkey_index;
@@ -291,8 +289,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: $key - hotkey character to check for [char]
   # prints: feedback
   # return: boolean
-  sub has_hotkey ($self, $key)
-  {    ## no critic (RequireInterpolationOfMetachars)
+  sub has_hotkey ($self, $key) {
 
     # check param
     my $ref = ref $key;
@@ -320,8 +317,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: $name - menu name
   # prints: nil, except error messages
   # return: n/a, dies on failure
-  sub _display_menu ($self, $name)
-  {   ## no critic (RequireInterpolationOfMetachars, ProhibitDuplicateLiteral)
+  sub _display_menu ($self, $name) {
 
     my $line;
     my $token = $self->yellow('-->');
@@ -375,7 +371,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # return: hashref
   #         key   = hotkey
   #         value = arrayref (0=action {submenu,item}, 1=value)
-  sub _hotkey_index ($self) {   ## no critic (RequireInterpolationOfMetachars)
+  sub _hotkey_index ($self) {
 
     my %index;
     my @items = $self->items;
@@ -395,7 +391,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: nil
   # prints: nil, except error messages
   # return: string (hotkey)
-  sub _user_select ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub _user_select ($self) {
 
     # get single character of input
     ## - source: https://stackoverflow.com/a/2685736
@@ -468,13 +464,13 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
     doc      => 'File to hold clipboard value (assumed to be empty)',
   );
 
-  sub _temp_file ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub _temp_file ($self) {
     my @temp_files = @{ $self->temp_file };
     if (not @temp_files)        { croak "No temporary filepath provided\n"; }
     if (scalar @temp_files > 1) { warn "Ignoring extra arguments\n"; }
     my $file_obj = Path::Tiny::path($temp_files[0]);
     return $file_obj;
-  }                           # }}}1
+  }    # }}}1
 
   # attributes
 
@@ -503,7 +499,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: nil
   # prints: feedback
   # return: n/a, dies on failure
-  sub main ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub main ($self) {
 
     # load menus
     $self->_load_menus;
@@ -533,7 +529,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   # params: nil
   # prints: nil
   # return: n/a, dies on failure
-  sub _load_menus ($self) {    ## no critic (RequireInterpolationOfMetachars)
+  sub _load_menus ($self) {
 
     # get menu data
     my $conf_fh       = Path::Tiny::path($CONF);
@@ -579,8 +575,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   #         $data  - menu data [arrayref]
   # prints: nil
   # return: n/a, dies on failure
-  sub _process_config_data ($self, $menus, $name, $data)
-  {   ## no critic (RequireInterpolationOfMetachars, ProhibitExcessComplexity)
+  sub _process_config_data ($self, $menus, $name, $data) {    ## no critic (RequireInterpolationOfMetachars, ProhibitExcessComplexity)
 
     # check params
     my $ref;
@@ -745,8 +740,7 @@ const my $VAL_SUBMENU             => 'submenu';                      # }}}1
   #         0 = action = {item,escape}
   #         1 = value  = item string or null
   # notes:  function may recurse if user selects a submenu
-  sub _select_from_menu ($self, $name)
-  {   ## no critic (RequireInterpolationOfMetachars, ProhibitDuplicateLiteral)
+  sub _select_from_menu ($self, $name) {
 
     # select from menu
     my $menu      = $self->_get_menu($name);
