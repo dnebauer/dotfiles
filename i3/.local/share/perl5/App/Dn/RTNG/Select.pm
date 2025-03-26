@@ -109,6 +109,7 @@ sub run ($self) {
     -scrollbars => 'osoe',      # os=south/below, oe=east/right
     -selectmode => 'single',    # select single item
     -font       => $font,
+    -height     => 0,           # fit all menu items
     -width      => 0,           # fit longest item
   )->pack(-side => 'left');
   $lb->insert($VAL_END, @items);    # load menu items
