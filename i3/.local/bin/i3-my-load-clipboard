@@ -1,189 +1,294 @@
-#!/usr/bin/env bash
+#!/usr/bin/perl
 
-# File: i3-my-load-clipboard
-# Author: David Nebauer (david at nebauer dot org)
-# Purpose: copy user-selected value to the system clipboard
-# Created: 2022-12-11
+use strictures 2;
+use 5.006;
+use 5.038_001;
+use version; our $VERSION = qv('0.1');
+use namespace::clean;
+use File::FindLib 'share/perl5';
+use App::Dn::Clipboard::Load;
 
-# ERROR HANDLING    {{{1
+App::Dn::Clipboard::Load->new_with_options->run;
 
-# Exit on error. Append "|| true" if you expect an error.
-set -o errexit
-# Exit on error inside any functions or subshells.
-set -o errtrace
-# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
-set -o nounset
-# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
-set -o pipefail
-# Turn on traces, useful while debugging but commented out by default
-# set -o xtrace
+1;
 
-# VARIABLES    {{{1
+# POD    {{{1
 
-self="$(basename "$0")"
-# required tools findable on system path
-required_system_tools=(
-	alacritty
-	cat
-	getopt
-	mktemp
-)
-required_local_tools=(
-	"$HOME/.local/libexec/i3-my-load-clipboard-engine"
-)
-engine="$HOME/.local/libexec/i3-my-load-clipboard-engine"
-temp_file="$(mktemp)"
-trap '[[ -f "$temp_file" ]] && rm -f "$temp_file"' EXIT
-# }}}1
+__END__
 
-# PROCEDURES
+=encoding utf8
 
-# checkPrereqs()    {{{1
-#   intent: check for required tools
-#   params: nil
-#   prints: error message if tool(s) missing
-#   return: n/a, aborts scipts on failure
-function checkPrereqs() {
-	local missing tool
-	missing=()
-	# these tools can be found on the base system path
-	for tool in "${required_system_tools[@]}"; do
-		command -v "$tool" &>/dev/null || missing+=("$tool")
-	done
-	# these tools are specified by absolute path
-	for tool in "${required_local_tools[@]}"; do
-		[[ -x "$tool" ]] || missing+=("$tool")
-	done
-	local num_missing=${#missing[@]}
-	if [[ $num_missing -ne 0 ]]; then
-		local msg
-		if [[ $num_missing -eq 1 ]]; then
-			msg="$self: fatal error: cannot find tool: ${missing[0]}"
-		else
-			msg="$self: fatal error: cannot find tools:"
-			for tool in "${missing[@]}"; do
-				msg="$msg\n- $tool"
-			done
-		fi
-		echo -e "$msg" >/dev/stderr
-		exit 1
-	fi
-	unset required_system_tools
-}
-# displayUsage()    {{{1
-#   intent: display usage information
-#   params: nil
-#   prints: nil
-#   return: nil
-displayUsage() {
-	cat <<_USAGE
-${self}: load user-selected value into the system clipboard
+=head1 NAME
 
-The user selects from menus of pre-defined options. The
-selected option is loaded into the system clipboard.
+i3-my-load-clipboard - load user-selected value into the system clipboard
 
-A submenu is indicated by an option with an appended '-->'.
-Selecting such an option opens a submenu.
+=head1 USAGE
 
-Menu options have a one character prefix (a hotkey) to
-enable quick option selection.
+B<i3-my-load-clipboard>
 
-The menu options are defined in configuration file:
-'~/.config/i3/i3-my-load-clipboard-data.json'.
-See the man page for details of how the configuration file
-is structured.
+B<i3-my-load-clipboard -h>
 
-Usage: ${self}
-       ${self} -h
+=head1 DESCRIPTION
 
-Options: -d = print input lines after command expansion
-              (equivalent to 'set -o verbose')
-         -v = print input lines as they are read
-              (equivalent to 'set -o xtrace')
-_USAGE
-}
-# processOptions([@options])    {{{1
-#   intent: process all command line options
-#   params: @options - all command line parameters
-#   prints: feedback
-#   return: nil
-#   note:   after execution variable @ARGS contains
-#           remaining command line args (after options removed)
-processOptions() {
-	# read the command line options
-	local OPTIONS
-	if ! OPTIONS="$(
-		getopt \
-			--options hvds \
-			--long help,verbose,debug \
-			--name "${BASH_SOURCE[0]}" \
-			-- "${@}"
-	)"; then
-		# getopt displays errors
-		exit 1
-	fi
-	eval set -- "${OPTIONS}"
-	while true; do
-		case "${1}" in
-		-h | --help)
-			displayUsage
-			exit 0
-			;;
-		-v | --verbose)
-			set -o verbose
-			shift 1
-			;;
-		-d | --debug)
-			set -o xtrace
-			shift 1
-			;;
-		--)
-			shift
-			break
-			;;
-		*) break ;;
-		esac
-	done
-	#ARGS=("${@}") # remaining arguments are not used
-}
-# joinBy($delim, @items)    {{{1
-#   intent: join all items using delimiter
-#   params: delim - delimiter
-#           items - items to be joined
-#   prints: string containing joined items
-#   return: nil
-function joinBy() {
-	local delimiter first_item
-	delimiter="${1:-}"
-	shift
-	first_item="${1:-}"
-	shift
-	printf %b%s "$first_item" "${@/#/$delimiter}"
-}
-# }}}1
+The user selects from menus of pre-defined options. The selected option is
+loaded into the system clipboard.
 
-# MAIN
+A submenu is indicated by an option with an appended "-->". Selecting
+such an option opens a submenu.
 
-# check for required tools    {{{1
-checkPrereqs
+Menu options have a one character hotkey to enable quick option selection.
 
-# process command line options    {{{1
-processOptions "${@}" # leaves ${ARGS[@]} holding positional arguments
+=head1 CONFIGURATION
 
-# launch engine script in alacritty    {{{1
-cmd=(
-	"$engine"
-	--temp_file
-	"$temp_file"
-)
-alacritty \
-	--title 'Clipboard Loader' \
-	--class 'Clipboard_Loader,Clipboard_Loader' \
-	--command "${cmd[@]}"
+=head2 Menu contents
 
-# retrieve and copy selected value    {{{1
-value="$(cat "$temp_file")"
-echo -n "$value" | xclip -sel clip
-# }}}1
+The menu content is defined in configuration file
+S<< F<~/.config/load-clipboard-data.json> >>.
+
+The general structure of the menu is:
+
+    [
+      {
+        "menu": "Main",
+        "hotkey": "i",
+        "type": "option",
+        "value": "david@nebauer.id.au",
+        "default": 1
+      },
+      ...
+      {},
+      {},
+      {},
+      ...
+      {
+        "menu": "Email",
+        "hotkey": "i",
+        "type": "option",
+        "value": "david@nebauer.id.au",
+        "default": 0
+      },
+      ...
+    ]
+
+While the structure is largely self-explanatory, its major features are:
+
+=over
+
+=item *
+
+The data is valid JSON.
+
+=item *
+
+The outer data structure is an array.
+
+=item *
+
+Each menu item is a single hashref. (In perl a JSON object is known
+as a hash. In other languages it is an associative array.)
+
+=item *
+
+Each menu item hashref must have the following keys:
+
+=over
+
+=item menu
+
+Can be anything, but is traditionally a single word with initial
+capitalisation. All items with the same menu name belong to that menu -
+this is how menus are defined.
+
+The base menu, that is, the first menu to display when this module is run,
+is called "Main". This menu must be defined in the configuration file.
+It is defined by having at least one menu item with a C<menu> value of "Main".
+
+All menus except the "Main" menu must be called by at least one menu item
+(see the C<submenu> menu item key).
+
+Scalar string. Required.
+
+=item hotkey
+
+This single character must be unique within a menu. Char. Required.
+
+=item type
+
+Indicate whether the menu item represents a value for loading into the
+clipboard or represents a submenu.
+String. Required. Valid values: 'option', 'submenu'.
+
+=item value
+
+This is either the text string to be loaded into the clipboard
+(for C<type> = "option") or the name of a submenu to be invoked
+(C<type> = "submenu").
+All called submenu names must correspond to defined menus
+(see the C<menu> menu item key).
+An "option" value is displayed in the menu item without alteration.
+A "submenu" value is displayed in the menu item with a trailing " -->".
+
+=item default
+
+Whether the menu item is the default selection for the menu.
+At least one menu item per menu can have a true value.
+No more than one menu item per menu can have a true value.
+Required. Boolean. By convention 1 is true while 0 is false.
+
+=back
+
+=item *
+
+There are special tokens which signify the current date in a particular format.
+
+=item *
+
+The menu item value must contain only the token string with no additional
+characters. See below for available date tokens.
+
+=back
+
+The available date tokens are:
+
+=over
+
+=item I<%current_date_full%>
+
+Example: 1 December 2022
+
+=item I<%current_date_full_nbsp%>
+
+As for "%current_date_full%" except that spaces are replaced with
+non-breaking spaces
+
+=item I<%current_date_iso%>
+
+Example: 2022-12-01
+
+=item I<%current_date_rfc%>
+
+Example: Thu,  1 Dec 2022 18:51:37 +0930
+
+The system time zone is used and day numbers less than 10 have a leading space.
+
+=back
+
+Menu item hashrefs from different lists can be interspersed with each other,
+but the order of menu items in each menu reflects the order of the
+underlying hashrefs in the configuration file.
+
+Empty hashrefs are ignored. If all item hashrefs are grouped according to menu,
+the grouped items from each menu can be separated by multiple empty hashrefs
+as shown in the example above.
+
+=head2 i3 window manager
+
+In the i3 window manager the wrapper script can be invoked from a binding that
+can be set in the F<config> file. For example, to launch it with the F2 key use
+the following configuration command:
+
+    set $loader_launcher ~/.local/bin/i3-my-load-clipboard
+    bindsym F2 exec --no-startup-id $loader_launcher
+
+The wrapper script launches this script in an alacritty instance. To ensure the
+terminal window is free-floating add a line like this to the i3wm F<config>
+file:
+
+    for_window [class="Clipboard_Loader" instance="Clipboard_Loader"] \\
+               floating enable, resize set 1000 600
+
+Adjust the C<class> and C<instance> values as appropriate.
+
+If the picom compositor is being used add a line like the following to its
+S<< F<picom.conf> >> file to ensure the alacritty terminal is opaque:
+
+    opacity-rule = [ "100:class_g *?= 'Clipboard_Loader'" ];
+
+Adjust the C<class> value as appropriate.
+
+=head1 REQUIRED ARGUMENTS
+
+Nil.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-h>  B<--help>
+
+Show a help message.
+
+=item B<--usage>
+
+Show a short help message.
+
+=item B<--man>
+
+Show the manual.
+
+=back
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly the
+error code is that given by the system.
+
+=head1 DIAGNOSTICS
+
+=head2 Multiple configuration files located based on stem 'STEM'
+
+=head2 Using: FILEPATH
+
+=head2 Ignoring: FILEPATH(S)
+
+These non-fatal error warning messages are shown when multiple configuration
+files are found with the provided name stem.
+
+See C<Config::Any> for more details on what file names are searched for.
+
+=head2 No configuration directories located
+
+This is a non-fatal warning that occurs when no configuration directories are
+located. This should never happen on a sane *nix system.
+
+See C<File::ConfigDir> for more details about the target directories.
+
+=head2 No configuration files located
+
+This is a non-fatal warning that occurs when no configuration files having the
+name stem "rtng-play-change" are found in common configuration directories.
+
+See L<Config::Any> for more details about the search used.
+
+I<Additional warning and error messages may be generated by subsidiary
+modules.>
+
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs to the author.
+
+=head1 DEPENDENCIES
+
+=head2 Perl modules
+
+App::Dn::Clipboard::Load, File::FindLib, namespace::clean, strictures, version.
+
+=head1 AUTHOR
+
+L<David Nebauer|mailto:david@nebauer.org>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (c) 2022 L<David Nebauer|mailto:david@nebauer.org>
+
+This script is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut
 
 # vim:foldmethod=marker:
