@@ -7,7 +7,6 @@ use 5.006;
 use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
-use charnames qw(:full);
 use Const::Fast;
 use English;
 use MooX::HandlesVia;
@@ -17,21 +16,13 @@ use Types::Standard;
 
 const my $TRUE       => 1;
 const my $FALSE      => 0;
-const my $DEFAULT_BG => 'light gray';
-const my $DEFAULT_FG => 'black';
 const my $FONT_NAME  => 'Bitstream Vera Sans Mono';
 const my $FONT_SIZE  => 12;
 const my $RANGE_NINE => 9;
-const my $SEARCH_BG  => $DEFAULT_FG;                  # black
-const my $SEARCH_FG  => 'white';
-const my $VAL_BOTTOM => 'bottom';
-const my $VAL_END    => 'end';
 const my $VAL_TOP    => 'top';
 const my $VAL_W      => 'w';
 
 const my $AVAILABLE_HOTKEYS_COUNT => 62;    # a-z + A-Z + 0-9    }}}1
-
-use Data::Dumper::Simple;
 
 # attributes
 
@@ -70,7 +61,7 @@ has 'title' => (
 has '_hotkeys_arrayref' => (
   is  => 'rw',
   isa => Types::Standard::ArrayRef [
-    Types::Standard::StrMatch [qr{\A[[:lower:][:upper:]\d]\z}xsm]
+    Types::Standard::StrMatch [qr{\A[[:alnum:]]\z}xsm]
   ],
   lazy        => $TRUE,
   default     => sub { [] },
@@ -84,7 +75,7 @@ has '_hotkeys_arrayref' => (
 
 # method
 
-# run()
+# run()    {{{1
 #
 # does:   select item from menu
 # params: nil
@@ -92,31 +83,29 @@ has '_hotkeys_arrayref' => (
 # return: scalar string (selected item) or FALSE (no item selected)
 sub run ($self) {
 
-  # variables    {{{1
-  my @items          = $self->_items;
-  my $made_selection = $FALSE;
-  my $font           = [ $FONT_NAME, $FONT_SIZE ];
-  my $title          = $self->title;
-  my $prompt         = $self->prompt;
-  my $search         = q{};
+  # variables    {{{2
+  my @items  = $self->_items;
+  my $font   = [ $FONT_NAME, $FONT_SIZE ];
+  my $title  = $self->title;
+  my $prompt = $self->prompt;
   my $selection;
 
-  # generate hotkeys and menu labels
+  # • generate hotkeys and menu labels
   $self->_assign_hotkeys;
   my @hotkeys     = $self->_hotkeys;
   my @item_labels = $self->_item_labels;
 
-  # interface widgets    {{{1
+  # interface widgets    {{{2
 
-  # • main window    {{{2
+  # • main window    {{{3
   my $mw = MainWindow->new(-class => 'Perl/Tk widget');
   $mw->title($title);
 
-  # • prompt label    {{{2
+  # • prompt label    {{{3
   $mw->Label(-text => $prompt)
       ->pack(-side => $VAL_TOP, -expand => $TRUE, -anchor => $VAL_W);
 
-  # • instruction labels    {{{2
+  # • instruction labels    {{{3
   my @instructions = (
     '[Hotkey]: select corresponding option',
     'Enter: accept default option',
@@ -127,11 +116,7 @@ sub run ($self) {
         ->pack(-side => $VAL_TOP, -expand => $TRUE, -anchor => $VAL_W);
   }
 
-  # • search label    {{{2
-  my $sl = $mw->Label(-textvariable => \$search)
-      ->pack(-side => $VAL_TOP, -expand => $TRUE, -anchor => $VAL_W);
-
-  # • listbox    {{{2
+  # • listbox    {{{3
   my $lb = $mw->Scrolled(
     'Listbox',
     -scrollbars => 'osoe',      # os=south/below, oe=east/right
@@ -140,11 +125,11 @@ sub run ($self) {
     -height     => 0,           # fit all menu items
     -width      => 0,           # fit longest item
   )->pack(-side => 'left');
-  $lb->insert($VAL_END, @item_labels);    # load menu items
+  $lb->insert('end', @item_labels);    # load menu items
 
-  # actions    {{{1
+  # actions    {{{2
 
-  # • [Escape]    {{{2
+  # • [Escape]    {{{3
   # •• mimic action of Cancel button, i.e., abort
 
   my sub _cancel () {
@@ -153,11 +138,10 @@ sub run ($self) {
   }
   $mw->bind('<KeyRelease-Escape>' => sub { _cancel() });
 
-  # • [Return]    {{{2
+  # • [Return]    {{{3
   # •• mimic action of Ok button, i.e., accept selection
 
   my sub _ok () {
-    $made_selection = $TRUE;
     try { $selection = $lb->get($lb->curselection); }
     catch ($e) { };
     if (Tk::Exists($mw)) { $mw->destroy; }
@@ -165,7 +149,7 @@ sub run ($self) {
   }
   $mw->bind('<KeyRelease-Return>' => sub { _ok() });
 
-  # • hotkeys    {{{2
+  # • hotkeys    {{{3
   # •• tk passes Listbox object as first parameter to anonymous sub in binding
   # •• tk passes $index as second parameter to anonymous sub in binding
   # •• skip activating/setting hotkey selection because window is destroyed
@@ -185,12 +169,12 @@ sub run ($self) {
     );
   }
 
-  # display menu    {{{1
+  # display menu    {{{2
   $lb->focus;
   MainLoop;
 
-  # report result    {{{1
-  return $selection;    # }}}1
+  # report result    {{{2
+  return $selection;    # }}}2
 
 }
 
@@ -289,7 +273,7 @@ sub _item_labels ($self) {
     push @menu_items, "[$hotkey] $item";
   }
   return @menu_items;
-}
+}    # }}}1
 
 1;
 
@@ -385,7 +369,7 @@ Please report any bugs to the author.
 
 =head2 Perl modules
 
-charnames, Const::Fast, English, Feature::Compat::Try, Moo, MooX::HandlesVia,
+Const::Fast, English, Feature::Compat::Try, Moo, MooX::HandlesVia,
 namespace::clean, strictures, Tk, Types::Standard, version.
 
 =head1 AUTHOR
