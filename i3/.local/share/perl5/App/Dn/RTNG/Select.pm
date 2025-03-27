@@ -19,15 +19,19 @@ const my $TRUE       => 1;
 const my $FALSE      => 0;
 const my $DEFAULT_BG => 'light gray';
 const my $DEFAULT_FG => 'black';
-const my $FONT_NAME  => 'LucidaSans';
+const my $FONT_NAME  => 'Bitstream Vera Sans Mono';
 const my $FONT_SIZE  => 12;
-const my $SEARCH_BG  => $DEFAULT_FG;    # black
+const my $RANGE_NINE => 9;
+const my $SEARCH_BG  => $DEFAULT_FG;                  # black
 const my $SEARCH_FG  => 'white';
 const my $VAL_BOTTOM => 'bottom';
 const my $VAL_END    => 'end';
-const my $VAL_NINE   => 9;
 const my $VAL_TOP    => 'top';
-const my $VAL_W      => 'w';            # }}}1
+const my $VAL_W      => 'w';
+
+const my $AVAILABLE_HOTKEYS_COUNT => 62;    # a-z + A-Z + 0-9    }}}1
+
+use Data::Dumper::Simple;
 
 # attributes
 
@@ -37,9 +41,14 @@ has 'items' => (
   isa           => Types::Standard::ArrayRef [Types::Standard::Str],
   required      => $TRUE,
   handles_via   => 'Array',
-  handles       => { _items => 'elements' },
+  handles       => { _items_unsorted => 'elements' },
   documentation => 'Menu items',
 );
+
+sub _items ($self) {
+  my @items_sorted = sort $self->_items_unsorted;
+  return @items_sorted;
+}
 
 # prompt    {{{1
 has 'prompt' => (
@@ -55,6 +64,22 @@ has 'title' => (
   isa           => Types::Standard::Str,
   required      => $TRUE,
   documentation => 'Menu title',
+);
+
+# _add_hotkeys(), _hotkeys()    {{{1
+has '_hotkeys_arrayref' => (
+  is  => 'rw',
+  isa => Types::Standard::ArrayRef [
+    Types::Standard::StrMatch [qr{\A[[:lower:][:upper:]\d]\z}xsm]
+  ],
+  lazy        => $TRUE,
+  default     => sub { [] },
+  handles_via => 'Array',
+  handles     => {
+    _add_hotkeys => 'push',
+    _hotkeys     => 'elements',
+  },
+  documentation => 'Menu item hotkeys',
 );    # }}}1
 
 # method
@@ -68,13 +93,18 @@ has 'title' => (
 sub run ($self) {
 
   # variables    {{{1
-  my @items          = sort $self->_items;
+  my @items          = $self->_items;
   my $made_selection = $FALSE;
   my $font           = [ $FONT_NAME, $FONT_SIZE ];
   my $title          = $self->title;
   my $prompt         = $self->prompt;
   my $search         = q{};
   my $selection;
+
+  # generate hotkeys and menu labels
+  $self->_assign_hotkeys;
+  my @hotkeys     = $self->_hotkeys;
+  my @item_labels = $self->_item_labels;
 
   # interface widgets    {{{1
 
@@ -88,11 +118,9 @@ sub run ($self) {
 
   # • instruction labels    {{{2
   my @instructions = (
-    "\N{UPWARDS ARROW}\N{DOWNWARDS ARROW}: move up|down options",
-    'Space: select option',
-    'Enter: accept selection',
-    'Escape: abort',
-    '[A-Za-z0-9.-]: iterative search',
+    '[Hotkey]: select corresponding option',
+    'Enter: accept default option',
+    'Escape: abort selection',
   );
   for my $instruction (@instructions) {
     $mw->Label(-text => "\N{BULLET} $instruction")
@@ -112,7 +140,7 @@ sub run ($self) {
     -height     => 0,           # fit all menu items
     -width      => 0,           # fit longest item
   )->pack(-side => 'left');
-  $lb->insert($VAL_END, @items);    # load menu items
+  $lb->insert($VAL_END, @item_labels);    # load menu items
 
   # actions    {{{1
 
@@ -137,53 +165,24 @@ sub run ($self) {
   }
   $mw->bind('<KeyRelease-Return>' => sub { _ok() });
 
-  # • alphanum    {{{2
-  # •• iterative search for matching menu item
-
-  my sub _search_items ($term) {
-    my $found_match = $FALSE;
-    for my $index (0 .. $#items) {
-      if ($items[$index] =~ /\A$search/xsmi) {
-        $found_match = $TRUE;
-        $lb->see($index);
-        $lb->selectionClear(0, $VAL_END);
-        $lb->selectionSet($index);
-        $sl->configure(-fg => $SEARCH_FG, -bg => $SEARCH_BG);
-        last;
-      }
-    }
-    return $found_match;
-  }
-
-  my sub _search ($key) {
-
-    # add key to previous search term and search
-    # • search term is displayed in search label ('$sl')
-    $search .= $key;
-    my $match_found = _search_items($search);
-    if ($match_found) { return; }
-
-    # try the key alone
-    $search      = $key;
-    $match_found = _search_items($search);
-    if ($match_found) { return; }
-
-    # if no match on key alone, discard it
-    $search = q{};
-    $sl->configure(-fg => $DEFAULT_FG, -bg => $DEFAULT_BG);
-
-    return;
-  }
-
-  # •• unable to bind Space as its built-in action (to activate
-  #    current menu item) overrides any binding
-  my @keys;
-  push @keys, ('A' .. 'Z'), ('a' .. 'z'), (0 .. $VAL_NINE), q{-};
-  my %bind_keys = map { $ARG => $ARG } @keys;
-  $bind_keys{'period'} = q{.};
-  for my $bind_key (keys %bind_keys) {
-    my $search_key = $bind_keys{$bind_key};
-    $mw->bind("<KeyRelease-$bind_key>" => sub { _search($search_key) });
+  # • hotkeys    {{{2
+  # •• tk passes Listbox object as first parameter to anonymous sub in binding
+  # •• tk passes $index as second parameter to anonymous sub in binding
+  # •• skip activating/setting hotkey selection because window is destroyed
+  #    too quickly to see it
+  for my $index (0 .. $#hotkeys) {
+    my $hotkey = $hotkeys[$index];
+    $mw->bind(
+      "<KeyRelease-$hotkey>" => [
+        sub {
+          my (undef, $hotkey_index) = (shift, shift);
+          $selection = $items[$hotkey_index];
+          if (Tk::Exists($mw)) { $mw->destroy; }
+          return;
+        },
+        $index,
+      ],
+    );
   }
 
   # display menu    {{{1
@@ -195,6 +194,103 @@ sub run ($self) {
 
 }
 
+# _assign_hotkeys()    {{{1
+#
+# does:   assign a unique hotkey for each menu item
+# params: nil
+# prints: error messages
+# return: n/a, loads attribute '_hotkeys_arrayref'
+sub _assign_hotkeys ($self) {
+
+  # variables
+  my @items = $self->_items;
+  my (@items_alphanum, @items_chars, @hotkeys, @hotkey_candidates);
+  for (0 .. $#items) { push @hotkeys, q{}; }
+  push @hotkey_candidates, ('a' .. 'z'), (0 .. $RANGE_NINE), ('A' .. 'Z');
+  my %available_candidates = map { $ARG => $TRUE } @hotkey_candidates;
+
+  # check that menu size does not exceed number of available hotkeys
+  my $menu_size = @items;
+  if ($#items > $AVAILABLE_HOTKEYS_COUNT) {
+    my $msg = "More menu items ($menu_size) than"
+        . " available hotkeys ($AVAILABLE_HOTKEYS_COUNT)";
+    die "$msg\n";
+  }
+
+  # get sequences of menu characters
+  @items_alphanum = map { lc $ARG } map {s/[^[:alnum:]]//grxsm} @items;
+  for my $item (@items_alphanum) {
+    my @item_chars = split //xsm, $item;
+    push @items_chars, [@item_chars];
+  }
+
+  # try assigning option characters as hotkeys
+  my $loop              = 0;
+  my $assigning_hotkeys = $TRUE;
+
+  while ($assigning_hotkeys) {
+    $assigning_hotkeys = $FALSE;
+
+    # loop through options testing option char at $loop
+    for my $option_index (0 .. $#items) {
+
+      # only operate on options without a hotkey assigned
+      if ($hotkeys[$option_index]) { next; }
+
+      # try char at loop position
+      my @item_chars       = @{ $items_chars[$option_index] };
+      my $hotkey_candidate = $item_chars[$loop];
+      if (exists $available_candidates{$hotkey_candidate}) {
+        $hotkeys[$option_index] = $hotkey_candidate;
+        delete $available_candidates{$hotkey_candidate};
+        $assigning_hotkeys = $TRUE;
+      }
+    }
+    ++$loop;
+  }
+
+  # for remaining options without hotkeys, pick next available in alnum order
+  for my $option_index (0 .. $#items) {
+
+    # only operate on options without a hotkey assigned
+    if ($hotkeys[$option_index]) { next; }
+
+    # get next available hotkey candidate
+    my $hotkey;
+    for my $hotkey_candidate (@hotkey_candidates) {
+      if ($available_candidates{$hotkey_candidate}) {
+        $hotkey = $hotkey_candidate;
+        last;
+      }
+    }
+    $hotkeys[$option_index] = $hotkey;
+    delete $available_candidates{$hotkey};
+  }
+
+  # save hotkeys
+  $self->_add_hotkeys(@hotkeys);
+
+  return;
+}
+
+# _item_labels()    {{{1
+#
+# does:   create menu items using hotkeys
+# params: nil
+# prints: error messages
+# return: list of strings
+sub _item_labels ($self) {
+  my @hotkeys = $self->_hotkeys;
+  my @items   = $self->_items;
+  my @menu_items;
+  for my $index (0 .. $#items) {
+    my $hotkey = $hotkeys[$index];
+    my $item   = $items[$index];
+    push @menu_items, "[$hotkey] $item";
+  }
+  return @menu_items;
+}
+
 1;
 
 # POD    {{{1
@@ -203,7 +299,7 @@ __END__
 
 =head1 NAME
 
-App::Dn::RTNG::Select - user selects a value from a menu
+App::Dn::RTNG::Select - user selects a value from a hotkey menu
 
 =head1 VERSION
 
@@ -220,9 +316,8 @@ This documentation is for C<App::Dn::RTNG::Select> version 0.1.
 
 =head1 DESCRIPTION
 
-The user selects a value from a menu.
+The user selects a value from a hotkey menu.
 The menu displays instructions for its use.
-Iterative search is available.
 
 The class part of the X11 WM_CLASS property for the menu is set to
 "Perl/Tk widget".
