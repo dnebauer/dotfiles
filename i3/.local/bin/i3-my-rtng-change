@@ -41,7 +41,6 @@ one of the usual configuration file locations.
 (See L<File::ConfigDir> and L<Config::Any> for further details.)
 
 Any of the file formats supported by L<Config::Any> can be used.
-Configuration support is limited to default volume set on a per station basis.
 There must be a section called 'volume' within which are key:value pairs where
 keys are station names and values are corresponding volumes.
 The volume values can be any format supported by C<pactl>.
