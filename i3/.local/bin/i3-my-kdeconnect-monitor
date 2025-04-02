@@ -1,0 +1,121 @@
+#!/usr/bin/perl
+
+use strictures 2;
+use 5.006;
+use 5.038_001;
+use version; our $VERSION = qv('0.1');
+use namespace::clean;
+use File::FindLib 'share/perl5';
+use App::Dn::KDEConnect::Monitor;
+
+App::Dn::KDEConnect::Monitor->new_with_options->run;
+
+1;
+
+# POD    {{{1
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+i3-my-kdeconnect-monitor - monitor connected devices using kdeconnect
+
+=head1 USAGE
+
+B<i3-my-kdeconnect-monitor>
+
+B<i3-my-kdeconnect-monitor -h>
+
+=head1 DESCRIPTION
+
+Periodically uses C<kdeconnect-cli> to try and connect unconnected devices.
+The user is notified if S<3 consecutive> attempts to connect a device fail,
+following which the check interval lengthens with each failed connection
+attempt until the interval is at least S<30 minutes.>
+
+Devices are specified in a configuration file.
+
+=head1 CONFIGURATION
+
+=head2 Configuration file
+
+Uses a configuration file with the file name stem 'kdeconnect-monitor-data'
+placed in one of the usual configuration file locations.
+(See L<File::ConfigDir> and L<Config::Any> for further details.)
+
+Any of the file formats supported by L<Config::Any> can be used.
+There must be a section called 'devices' within which are key:value pairs where
+keys are device names and values are corresponding ids.
+
+Here is an example configuration file located in
+S<< F<$HOME/.config/kdeconnect-monitor-data.json> >>:
+
+    {
+      "devices": {
+        "Galaxy S10e": "61ed761205f01d63"
+      }
+    }
+
+=head1 REQUIRED ARGUMENTS
+
+Nil.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-h>  B<--help>
+
+Show a help message.
+
+=item B<--usage>
+
+Show a short help message.
+
+=item B<--man>
+
+Show the manual.
+
+=back
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly the
+error code is that given by the system.
+
+=head1 DIAGNOSTICS
+
+See L<App::Dn::KDEConnect::Monitor>.
+
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs to the author.
+
+=head1 DEPENDENCIES
+
+=head2 Perl modules
+
+App::Dn::KDEConnect::Monitor, File::FindLib, namespace::clean, strictures,
+version.
+
+=head1 AUTHOR
+
+L<David Nebauer|mailto:david@nebauer.org>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (c) 2025 L<David Nebauer|mailto:david@nebauer.org>
+
+This script is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut
+
+# vim:foldmethod=marker:

@@ -408,6 +408,10 @@ exec --no-startup-id systemctl --user start i3-my-fullscreen-handler.service
 
 exec --no-startup-id systemctl --user start my-get-mail.service
 
+# monitor connected devices using kdeconnect    {{{2
+
+exec --no-startup-id systemctl --user start i3-my-kdeconnect-monitor.service
+
 # fading effects    {{{2
 #
 # - use a compositor

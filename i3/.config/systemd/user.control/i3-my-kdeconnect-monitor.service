@@ -1,0 +1,10 @@
+[Unit]
+Description=i3-my-kdeconnect-monitor daemon
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/i3-my-kdeconnect-monitor
+Restart=always
+
+[Install]
+WantedBy=default.target
