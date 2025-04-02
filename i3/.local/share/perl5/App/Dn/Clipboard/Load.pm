@@ -88,6 +88,9 @@ sub _check_config_data ($self, $data) {    ## no critic (Subroutines::ProhibitEx
   # test: must be arrayref
   my $ref = ref $data;
   if (not $ref) { die "Expected arrayref config data, got a non-ref\n"; }
+  if ($ref ne 'ARRAY') {
+    die "Expected arrayref config data, got a $ref ref\n";
+  }
 
   # cycle through menu items
   # - ignore empty items used as spacers in config file
