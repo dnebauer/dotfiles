@@ -1,1 +1,1 @@
-/usr/share/vim/addons/syntax/msmtp.vim
+../../../../../../../../../usr/share/vim/addons/syntax/msmtp.vim
