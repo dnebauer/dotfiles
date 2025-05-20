@@ -60,12 +60,12 @@ file:
 """
 # subprocess is required for reading passwords
 import subprocess  # noqa: F401 # pyright: ignore[reportUnusedImport]
-from imap_tools.imap_utf7 import encode, decode
+from imap_tools.imap_utf7 import utf7_encode
 
 # import re
 
 
-def convert_utf7_to_utf8(foldername):
+def convert_utf7_to_utf8(foldername) -> str:
     """
     This function converts an IMAP_UTF-7 string object to UTF-8.
     It first replaces the ampersand (&) character with plus character (+)
@@ -78,10 +78,10 @@ def convert_utf7_to_utf8(foldername):
 
     Example code:
     my_string = "abc&AK4-D"
-    print(kix_utf7_to_utf8(my_string))
+    print(convert_utf7_to_utf8(my_string))
 
     Args:
-        bytes_imap: IMAP UTF7 string
+        foldername: IMAP UTF7 string
 
     Returns: UTF-8 string
 
@@ -90,12 +90,12 @@ def convert_utf7_to_utf8(foldername):
     """
     # try:
     #    str_utf7 = re.sub(r"&(\w{3}\-)", "+\\1", foldername)
-    #    str_utf8 = str_utf7.encode("utf-8").decode("utf_7")
+    #    str_utf8 = str_utf7.utf7_encode("utf-8").utf7_decode("utf_7")
     #    return str_utf8
     # except UnicodeDecodeError:
     #    # error decoding because already utf-8, so return original string
     #    return foldername
     assert isinstance(foldername, str), foldername
-    foldername = encode(foldername)
-    foldername = foldername.decode("utf-8")
-    return foldername
+    bytes_foldername: bytes = utf7_encode(value=foldername)
+    str_foldername: str = bytes_foldername.decode(encoding="utf-8")
+    return str_foldername
