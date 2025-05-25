@@ -101,9 +101,9 @@ unset -v client_cmd_template server_cmd_template \
 	url_template
 # tools whose absence will cause a fatal error
 required_tools=(
-	$terminal
-	$browser
-	$server_exe
+	"$terminal"
+	"$browser"
+	"$server_exe"
 	getopt
 	grep
 	dn-tk-info
@@ -146,21 +146,19 @@ _USAGE
 #   params: all command line parameters
 #   prints: feedback
 #   return: nil
-#   note:   after execution variable ARGS contains
-#           remaining command line args (after options removed)
 process_options() {
 	# read the command line options
-	local OPTIONS="$(
+	local OPTIONS
+	if ! OPTIONS="$(
 		getopt \
 			--options hvds \
 			--long showcmd,help,verbose,debug \
 			--name "${BASH_SOURCE[0]}" \
 			-- "${@}"
-	)"
-	[[ ${?} -eq 0 ]] || {
-		echo 'Invalid command line options' 1>&2
+	)"; then
+		# getopt displays errors
 		exit 1
-	}
+	fi
 	eval set -- "${OPTIONS}"
 	while true; do
 		case "${1}" in
@@ -187,7 +185,6 @@ process_options() {
 		*) break ;;
 		esac
 	done
-	ARGS="${@}" # remaining arguments
 }
 
 # join_by() -> void    {{{1
@@ -254,7 +251,7 @@ function feedback {
 		local output
 		for msg in "${msgs[@]}"; do
 			output="$self:"
-			[[ "x$msg_type" == 'xfatal' ]] && output+=' fatal:'
+			[[ "$msg_type" == 'fatal' ]] && output+=' fatal:'
 			output+=" $msg"
 			case $msg_type in
 			fatal) echo "$output" >/dev/stderr ;;
@@ -271,7 +268,7 @@ function feedback {
 	caption="${msgs[0]}"
 	msgs=("${msgs[@]:1}")
 	detail="$(join_by '\n' "${msgs[@]}")"
-	if [[ "x$msg_type" == 'xfatal' ]]; then
+	if [[ "$msg_type" == 'fatal' ]]; then
 		dn-tk-error --title "$self" --caption "$caption" --detail "$detail"
 	else
 		dn-tk-info --title "$self" --caption "$caption" --detail "$detail"
@@ -342,7 +339,6 @@ done
 unset missing tools required_tools
 
 # process command line options    {{{1
-# - results in $ARGS holding remaining non-option command line arguments
 process_options "${@}"
 unset port server_exe site_name terminal
 
@@ -366,7 +362,7 @@ unset -v grep_matcher
 
 # start server in terminal    {{{1
 $show_cmd && echo "$terminal_cmd $server_cmd &"
-$terminal_cmd $server_cmd &
+$terminal_cmd "$server_cmd" &
 fb_wait_for_server_start
 unset -v browser connected_to_terminal server server_cmd terminal_cmd
 
