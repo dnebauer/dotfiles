@@ -31,10 +31,10 @@ parameters='[-v] [-d] [-s]'
 # 2. A terminal is launched and from within that terminal
 #    the html server is launched
 # 3. The command used to launch the terminal and html server is:
-#        ${terminal_cmd} "${server_cmd}" &
-#    where ${terminal_cmd} launches the terminal, and ${server_cmd}
+#        ${terminal_cmd[@]} ${server_cmd[@]} &
+#    where ${terminal_cmd[@]} launches the terminal, and ${server_cmd[@]}
 #    launches the html server, and it will be apparent that
-#    ${terminal_cmd} must end in such a way that the next string
+#    ${terminal_cmd[@]} must end in such a way that the next string
 #    expected is the command to execute within the terminal
 # 3. The command used to launch the client is:
 #        ${client_cmd} > /dev/null 2>&1 &
@@ -55,8 +55,9 @@ terminal_opts_template="${terminal_opts_template_array[*]}"
 # - command to invoke terminal
 terminal_cmd_template="$terminal $terminal_opts_template"
 # - perform variable substitutions
-terminal_cmd="$terminal_cmd_template"
-terminal_cmd="${terminal_cmd//%SITE_DIR%/$site_dir}"
+terminal_str="$terminal_cmd_template"
+terminal_str="${terminal_str//%SITE_DIR%/$site_dir}"
+mapfile -t terminal_cmd <<<"$terminal_str"
 # - html server executable name
 server='Nanoc'
 server_exe='nanoc'
@@ -65,16 +66,17 @@ port='3000'
 # - server command option used if adsf-live gem package is installed
 live=''
 if command -v gem &>/dev/null; then
-	installed="$(sudo gem list --local --installed --exact --quiet adsf-live)"
+	installed="$(sudo gem list --local --installed --exact --quiet adsf)"
 	# note space in $live to separate options on command line
 	[[ "$installed" = 'true' ]] && live=' --live-reload'
 fi
 server_cmd_template='%SERVER_EXE% view --port=%PORT%%LIVE%'
 # - perform variable substitutions
-server_cmd="${server_cmd_template}"
-server_cmd="${server_cmd//%SERVER_EXE%/$server_exe}"
-server_cmd="${server_cmd//%PORT%/$port}"
-server_cmd="${server_cmd//%LIVE%/$live}"
+server_str="${server_cmd_template}"
+server_str="${server_str//%SERVER_EXE%/$server_exe}"
+server_str="${server_str//%PORT%/$port}"
+server_str="${server_str//%LIVE%/$live}"
+mapfile -t server_cmd <<<"$server_str"
 # - browser to run nanoc client
 browser='qutebrowser'
 # - url to open nanoc client in browser
@@ -90,14 +92,14 @@ client_cmd="${client_cmd//%BROWSER%/$browser}"
 client_cmd="${client_cmd//%URL%/$url}"
 # note: the grep matcher matches the *entire* process command
 # - matching string for finding the server command in ps output
-grep_matcher="$terminal_cmd $server_cmd"
+grep_matcher="$terminal_str $server_str"
 # - whether to echo shell cmds to stdout
 show_cmd=false
 # - whether connected to a terminal
 connected_to_terminal=false
-unset -v client_cmd_template server_cmd_template \
+unset -v client_cmd_template server_cmd_template server_str \
 	terminal_cmd_template terminal_opts_template_array \
-	terminal_opts_template url \
+	terminal_str terminal_opts_template url \
 	url_template
 # tools whose absence will cause a fatal error
 required_tools=(
@@ -361,8 +363,10 @@ fi
 unset -v grep_matcher
 
 # start server in terminal    {{{1
-$show_cmd && echo "$terminal_cmd $server_cmd &"
-$terminal_cmd "$server_cmd" &
+$show_cmd && echo "${terminal_cmd[*]} ${server_cmd[*]} &"
+# have to leave unquoted or shell parses as single value
+# shellcheck disable=SC2068
+${terminal_cmd[@]} ${server_cmd[@]} &
 fb_wait_for_server_start
 unset -v browser connected_to_terminal server server_cmd terminal_cmd
 
