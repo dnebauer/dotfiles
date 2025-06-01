@@ -806,6 +806,8 @@ set mbox = +INBOX.Archive
     # folder into which read mail is appended
 set attach_save_dir = $my_download_dir
     # default 'download' directory
+set attach_save_without_prompting
+    # save attachments without prompting user
 set print_command = $my_print_pdf
     # conversion to pdf
 set noprint_decode
@@ -886,6 +888,8 @@ macro index,pager C "\
 <pipe-message> $my_send_clipboard<enter>\
 <enter-command>echo 'Copied content to system clipboard'<enter>\
 "    'copy content to clipboard as plaintext'
+# [a] s : save message/attachment (default binding)
+bind attach s save-entry
 # }}}1
 
 
