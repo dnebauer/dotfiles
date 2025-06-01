@@ -38,4 +38,4 @@
 [core]
 	editor = /usr/bin/editor
 [oh-my-zsh]
-	git-commit-alias = 881c8b78d3e3ade9bccfddb3e616842807d07a59
+	git-commit-alias = 6ef47526f852114209e36af87938075b4caa28e1
