@@ -427,8 +427,8 @@ bind pager yy modify-labels
 # [ip] yd : add [development] label
 # - no default [ip] y bindings
 macro index yd "\
-<enter-command>echo \
-'Adding [development] label...'<enter>\
+<enter-command>\
+echo 'Adding [development] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+development<enter>\
@@ -438,7 +438,8 @@ macro index yd "\
 <check-stats>\
 "    'add label: development'
 macro pager yd "\
-<enter-command>echo 'Adding [development] label...'<enter>\
+<enter-command>\
+echo 'Adding [development] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <modify-labels>+development<enter>\
@@ -450,7 +451,8 @@ macro pager yd "\
 # [ip] yf : add [financial] label
 # - no default [ip] y bindings
 macro index yf "\
-<enter-command>echo 'Adding [financial] label...'<enter>\
+<enter-command>\
+echo 'Adding [financial] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+financial<enter>\
@@ -460,7 +462,8 @@ macro index yf "\
 <check-stats>\
 "    'add label: financial'
 macro pager yf "\
-<enter-command>echo 'Adding [financial] label...'<enter>\
+<enter-command>\
+echo 'Adding [financial] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <modify-labels>+financial<enter>\
@@ -472,7 +475,8 @@ macro pager yf "\
 # [ip] yl : add [later] label
 # - no default [ip] y bindings
 macro index yl "\
-<enter-command>echo 'Adding [later] label...'<enter>\
+<enter-command>\
+echo 'Adding [later] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+later<enter>\
@@ -482,7 +486,8 @@ macro index yl "\
 <check-stats>\
 "    'add label: later'
 macro pager yl "\
-<enter-command>echo 'Adding [later] label...'<enter>\
+<enter-command>\
+echo 'Adding [later] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <modify-labels>+later<enter>\
@@ -494,7 +499,8 @@ macro pager yl "\
 # [ip] yo : add [order] label
 # - no default [ip] y bindings
 macro index yo "\
-<enter-command>echo 'Adding [order] label...'<enter>\
+<enter-command>\
+echo 'Adding [order] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+order<enter>\
@@ -504,7 +510,8 @@ macro index yo "\
 <check-stats>\
 "    'add label: order'
 macro pager yo "\
-<enter-command>echo 'Adding [order] label...'<enter>\
+<enter-command>\
+echo 'Adding [order] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <modify-labels>+order<enter>\
@@ -516,7 +523,8 @@ macro pager yo "\
 # [ip] yp : add [personal] label
 # - no default [ip] y bindings
 macro index yp "\
-<enter-command>echo 'Adding [personal] label...'<enter>\
+<enter-command>\
+echo 'Adding [personal] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+personal<enter>\
@@ -526,7 +534,8 @@ macro index yp "\
 <check-stats>\
 "    'add label: personal'
 macro pager yp "\
-<enter-command>echo 'Adding [personal] label...'<enter>\
+<enter-command>\
+echo 'Adding [personal] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <modify-labels>+personal<enter>\
@@ -538,7 +547,8 @@ macro pager yp "\
 # [ip] yu : add [union] label
 # - no default [ip] y bindings
 macro index yu "\
-<enter-command>echo 'Adding [union] label...'<enter>\
+<enter-command>\
+echo 'Adding [union] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+union<enter>\
@@ -548,7 +558,8 @@ macro index yu "\
 <check-stats>\
 "    'add label: union'
 macro pager yu "\
-<enter-command>echo 'Adding [union] label...'<enter>\
+<enter-command>\
+echo 'Adding [union] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <modify-labels>+union<enter>\
@@ -560,7 +571,8 @@ macro pager yu "\
 # [ip] yv : add [vault] label
 # - no default [ip] y bindings
 macro index yv "\
-<enter-command>echo 'Adding [vault] label...'<enter>\
+<enter-command>\
+echo 'Adding [vault] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+vault<enter>\
@@ -570,7 +582,8 @@ macro index yv "\
 <check-stats>\
 "    'add label: vault'
 macro pager yv "\
-<enter-command>echo 'Adding [vault] label...'<enter>\
+<enter-command>\
+echo 'Adding [vault] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <modify-labels>+vault<enter>\
@@ -582,7 +595,8 @@ macro pager yv "\
 # [ip] yw : add [work] label
 # - no default [ip] y bindings
 macro index yw "\
-<enter-command>echo 'Adding [work] label...'<enter>\
+<enter-command>\
+echo 'Adding [work] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <tag-prefix><modify-labels>+work<enter>\
@@ -592,7 +606,8 @@ macro index yw "\
 <check-stats>\
 "    'add label: work'
 macro pager yw "\
-<enter-command>echo 'Adding [work] label...'<enter>\
+<enter-command>\
+echo 'Adding [work] label...'<enter>\
 <enter-command>set my_resolve=\$resolve<enter>\
 <enter-command>unset resolve<enter>\
 <modify-labels>+work<enter>\
@@ -855,10 +870,12 @@ macro index,pager V "\
 # [ipac] <Ctrl>+b : view/copy urls
 # no default [ipac] ^B bindings
 macro index,pager \cb "\
-<pipe-message>urlscan<enter>\
+<pipe-message>\
+urlscan<enter>\
 "    'call urlscan to extract URLs out of a message'
 macro attach,compose \cb "\
-<pipe-entry> urlscan<enter>\
+<pipe-entry>\
+urlscan<enter>\
 "    'call urlscan to extract URLs out of a message'
 # [ip] v : show MIME attachments (default bindings)
 bind index,pager v view-attachments
@@ -877,7 +894,8 @@ bind attach T view-text
 macro index,pager S "\
 <pipe-message>\
 ripmime -i - -d $my_download_dir && rm $my_download_dir/textfile*<enter>\
-<enter-command>echo 'Attachments saved to $my_download_dir'<enter>\
+<enter-command>\
+echo 'Attachments saved to $my_download_dir'<enter>\
 "    'save all non-text attachments using ripmime'
 # [ipa] p : print message (default binding)
 bind index,pager p print-message
@@ -885,8 +903,10 @@ bind attach p print-entry
 # [ip] C : copy content to clipboard
 # no default [ip] C binding
 macro index,pager C "\
-<pipe-message> $my_send_clipboard<enter>\
-<enter-command>echo 'Copied content to system clipboard'<enter>\
+<pipe-message>\
+$my_send_clipboard<enter>\
+<enter-command>\
+echo 'Copied content to system clipboard'<enter>\
 "    'copy content to clipboard as plaintext'
 # [a] s : save message/attachment (default binding)
 bind attach s save-entry
@@ -1045,8 +1065,10 @@ macro compose Y "\
 <first-entry>\
 <enter-command>set my_wait_key=\$wait_key<enter>\
 <enter-command>unset wait_key<enter>\
-<pipe-entry>pandoc -o $my_cache/text-alternative.html<enter>\
-<attach-file>$my_cache/text-alternative.html<enter>\
+<pipe-entry>\
+pandoc -o $my_cache/text-alternative.html<enter>\
+<attach-file>\
+$my_cache/text-alternative.html<enter>\
 <toggle-unlink><toggle-disposition>\
 <tag-entry><first-entry><tag-entry><group-alternatives>\
 <enter-command>set wait_key=\$my_wait_key<enter>\
