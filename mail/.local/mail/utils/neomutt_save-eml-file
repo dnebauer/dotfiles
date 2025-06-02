@@ -114,7 +114,7 @@ formatted_date="$(date --date="$mail_date" --iso-8601='date')"
 #   iconv = convert from utf-8 to ascii encoding
 #   tr = convert uppercase to lowercase
 #   tr = convert non-alphanum chars to spaces
-#   sed = remove single and double quotation marks
+#   tr = remove single ('\'') and double (\") quotation marks
 #   tr = convert spaces to dashes
 #   tr = remove dash sequences
 #   head = truncate at X chars (actually, bytes)
@@ -125,7 +125,7 @@ subject="$(
 		iconv --from-code=UTF-8 --to-code=ASCII//TRANSLIT |
 		tr '[:upper:]' '[:lower:]' |
 		tr '/()[]{}<>+=_;:,.!?~`@#$%^*' '                          ' |
-		sed --expression='s/"//g' | sed --expression="s/'//g" |
+		tr --delete "'\''\"" |
 		tr ' ' '-' |
 		tr --squeeze-repeats '-' |
 		head --bytes=40 |
