@@ -78,6 +78,7 @@ set my_utils = $HOME/.local/mail/utils
 set my_fetch_script = $my_utils/my-get-mail
 set my_nvim_args = $my_utils/neomutt_nvim-args.vim
 set my_print_pdf = $my_utils/neomutt_print-to-pdf
+set my_save_eml = $my_utils/neomutt_save-eml-file
 set my_send_clipboard = $my_utils/neomutt_eml-content-to-clipboard
 set my_trim_quotes = $my_utils/neomutt_trim-quotes
 set my_signature = $my_cfgdir_d/signature
@@ -910,6 +911,16 @@ echo 'Copied content to system clipboard'<enter>\
 "    'copy content to clipboard as plaintext'
 # [a] s : save message/attachment (default binding)
 bind attach s save-entry
+# [ip] E : save message to eml file
+# no default [ip] E binding
+macro index,pager E "\
+<enter-command>set my_wait_key=\$wait_key<enter>\
+<enter-command>set wait_key<enter>\
+<pipe-message>\
+$my_save_eml $my_download_dir<enter>\
+<enter-command>set wait_key=\$my_wait_key<enter>\
+<enter-command>unset my_wait_key<enter>\
+"    'save message to eml file in download dir'
 # }}}1
 
 
