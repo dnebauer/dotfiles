@@ -121,7 +121,7 @@ formatted_date="$(date --date="$mail_date" --iso-8601='date')"
 #   sed = remove leading/trailing dashes
 subject="$(
 	formail -c -z -x 'Subject' <<<"$message" |
-		php -r 'echo iconv_mime_decode(stream_get_contents(STDIN),1,"utf-8");' |
+		php --run 'echo iconv_mime_decode(stream_get_contents(STDIN),1,"utf-8");' |
 		iconv --from-code=UTF-8 --to-code=ASCII//TRANSLIT |
 		tr '[:upper:]' '[:lower:]' |
 		tr '/()[]{}<>+=_;:,.!?~`@#$%^*' '                          ' |
