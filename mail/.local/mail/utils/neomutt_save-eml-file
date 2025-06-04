@@ -109,12 +109,12 @@ formatted_date="$(date --date="$mail_date" --iso-8601='date')"
 # extract subject part of file name    {{{1
 # • transformations:
 #   php = fix MIME encoded-word syntax
-#         (see https://en.wikipedia.org/wiki/MIME#Encoded-Word and
-#          https://unix.stackexchange.com/a/564513)
+#         (see https://en.wikipedia.org/wiki/MIME#Encoded-Word
+#          and https://unix.stackexchange.com/a/564513)
 #   iconv = convert from utf-8 to ascii encoding
 #   tr = convert uppercase to lowercase
 #   tr = convert non-alphanum chars to spaces
-#   tr = remove single ('\'') and double (\") quotation marks
+#   tr = remove single and double quotation marks
 #   tr = convert spaces to dashes
 #   tr = remove dash sequences
 #   head = truncate at X chars (actually, bytes)
