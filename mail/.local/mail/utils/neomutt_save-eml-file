@@ -125,7 +125,7 @@ subject="$(
 		iconv --from-code=UTF-8 --to-code=ASCII//TRANSLIT |
 		tr '[:upper:]' '[:lower:]' |
 		tr '/()[]{}<>+=_;:,.!?~`@#$%^*' '                          ' |
-		tr --delete "'\''\"" |
+		tr --delete "'\"" |
 		tr ' ' '-' |
 		tr --squeeze-repeats '-' |
 		head --bytes=40 |
