@@ -254,8 +254,8 @@ Fatal error.
 =head2 Perl modules
 
 Carp, charnames, Const::Fast, Date::Parse, Email::MIME, English,
-IO::Interactive, Path::Tiny, strictures, Text::Unidecode, Time::Piece, utf8,
-version.
+IO::Interactive, List::SomeUtils, Path::Tiny, strictures, Text::Unidecode,
+Time::Piece, utf8, version.
 
 =head1 CONFIGURATION
 
