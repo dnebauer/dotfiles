@@ -22,19 +22,19 @@ use utf8;    ## no critic (ProhibitUnnecessaryUTF8Pragma)
 binmode STDIN, ':encoding(UTF-8)';
 
 # constants    {{{1
-const my $TRUE               => 1;
-const my $DATE               => 'Date';
-const my $NO_DATE            => 'Unable to extract header date field';
-const my $NO_SUBJECT         => 'Unable to extract header subject field';
-const my $NO_STDIN           => 'No standard input received';
-const my $SUBJECT            => 'Subject';
+const my $TRUE       => 1;
+const my $DATE       => 'Date';
+const my $NO_DATE    => 'Error: Unable to extract header date field';
+const my $NO_SUBJECT => 'Error: Unable to extract header subject field';
+const my $NO_STDIN   => 'Error: No standard input received';
+const my $SUBJECT    => 'Subject';
 const my $SUBJECT_MAX_LENGTH => 40;
 
 # get directory path from command line    {{{1
 my $arg_count = @ARGV;
-if ($arg_count != 1) { die "Expected 1 argument, got $arg_count\n"; }
+if ($arg_count != 1) { die "Error: Expected 1 argument, got $arg_count\n"; }
 my $dirpath = Path::Tiny::path(shift @ARGV);
-if (not $dirpath->is_dir) { die "Invalid directory: '$dirpath'\n"; }
+if (not $dirpath->is_dir) { die "Error: Invalid directory: '$dirpath'\n"; }
 
 # test for stdin    {{{1
 # • not sure why this logic works, but it does
@@ -64,7 +64,7 @@ if (not $field_date) { warn "$NO_SUBJECT\n"; }
 # convert date to iso format for use in output file name    {{{1
 my $epoch = Date::Parse::str2time($field_date);
 my $date  = Time::Piece->strptime($epoch, '%s')->ymd;
-if (not $date) { die "Unable to convert date value\n"; }
+if (not $date) { die "Error: Unable to convert date value\n"; }
 
 # convert subject for use in output file name    {{{1
 # • unidecode() should make s/[^[:ascii:]]/\N{SPACE}/xsmgr unnecessary,
@@ -89,7 +89,7 @@ my $basename = ($subject) ? "${date}_${subject}" : $date;
 my $filepath = Path::Tiny::path("$dirpath/$basename.eml");
 
 # write to output file    {{{1
-if ($filepath->exists) { die "Output file '$filepath' already exists\n"; }
+if ($filepath->exists) { die "Error: File '$filepath' already exists\n"; }
 $filepath->spew_utf8($message);
 say "Saved to $filepath" or croak;    # }}}1
 
