@@ -13,6 +13,7 @@ use Date::Parse;
 use Email::MIME;
 use English;
 use IO::Interactive;
+use List::SomeUtils;
 use Path::Tiny;
 use Text::Unidecode;
 use Time::Piece;
@@ -45,12 +46,19 @@ if (not $message) { die "$NO_STDIN\n"; }
 
 # extract email date and subject field contents    {{{1
 # • header_str_pairs decodes field contents, including MIME encoded word syntax
-my %headers = Email::MIME->new($message)->header_str_pairs;
-if (not defined $headers{$DATE})    { die "$NO_DATE\n"; }
-if (not defined $headers{$SUBJECT}) { die "$NO_SUBJECT\n"; }
-my $field_date = $headers{$DATE};
+# • do case-insensitive header name search - can be 'date' or 'Date', etc.
+my %headers      = Email::MIME->new($message)->header_str_pairs;
+my @header_names = keys %headers;
+my $date_header  = List::SomeUtils::first_value {/date/xsmi} @header_names;
+if (not $date_header)                   { die "$NO_DATE\n"; }
+if (not defined $headers{$date_header}) { die "$NO_DATE\n"; }
+my $field_date = $headers{$date_header};
 if (not $field_date) { die "$NO_DATE\n"; }
-my $field_subject = $headers{$SUBJECT};
+my $subject_header =
+    List::SomeUtils::first_value {/subject/xsmi} @header_names;
+if (not $subject_header)                   { die "$NO_SUBJECT\n"; }
+if (not defined $headers{$subject_header}) { die "$NO_SUBJECT\n"; }
+my $field_subject = $headers{$subject_header};
 if (not $field_date) { warn "$NO_SUBJECT\n"; }
 
 # convert date to iso format for use in output file name    {{{1
