@@ -67,9 +67,8 @@ my $date  = Time::Piece->strptime($epoch, '%s')->ymd;
 if (not $date) { die "Error: Unable to convert date value\n"; }
 
 # convert subject for use in output file name    {{{1
-# • unidecode() should make s/[^[:ascii:]]/\N{SPACE}/xsmgr unnecessary,
-#   but it is retained just in case unidecode() fails to remove all unicode
-# • ignore perlcritic wanting '[:lower:]' instead of 'a-z'
+# • unidecode() converts to ascii; s/[^[:ascii:]]/ strips remaining non-ascii
+# • ignore perlcritic preference for utf8-ish '[:lower:]' over ascii-ish 'a-z'
 my $subject;
 if ($field_subject) {
   $subject = lc $field_subject;
