@@ -1,0 +1,1 @@
+../../.config/nvim/template/template.tcl
