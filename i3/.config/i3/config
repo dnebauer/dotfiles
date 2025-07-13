@@ -738,6 +738,7 @@ for_window [class="Perl/Tk widget"] floating enable
 for_window [class="smplayer" instance="smplayer"] floating enable
 for_window [title="Showtime" class="python3" instance="python3"] floating enable
 for_window [class="steam" instance="steamwebhelper"] floating enable
+for_window [class="Tk" instance="tk"] floating enable
 for_window [class="Xmessage" instance="xmessage"] floating enable
 for_window [class="Yad" instance="yad"] floating enable
 for_window [class="zenity" instance="zenity"] floating enable, resize set 1000 600
