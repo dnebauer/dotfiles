@@ -28,6 +28,7 @@ return {
         "python",
         "query",
         "regex",
+        "ruby",
         "tcl",
         "toml",
         "tsx",

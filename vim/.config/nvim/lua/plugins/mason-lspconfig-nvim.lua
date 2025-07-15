@@ -24,6 +24,7 @@ return {
         "perlnavigator", -- perl
         "pylsp", -- python
         "raku_navigator", -- raku
+        "rubocop", -- ruby
         "taplo", -- toml
         "vimls", -- vimscript
         "yamlls", -- yaml
