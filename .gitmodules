@@ -1,0 +1,3 @@
+[submodule "pandoc/.local/share/pandoc/templates"]
+	path = pandoc/.local/share/pandoc/templates
+	url = https://github.com/dnebauer/pandoc-templates.git
