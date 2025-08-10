@@ -38,14 +38,14 @@
 # When using konsole as a terminal in which to launch a
 # console utility, note the following:
 # --background-mode
-#   * option is supposed to start konsole in background mode
-#   * F12 toggles between background and foreground modes
-#   * works when executing the konsole command manually
-#   * does not work when executing via xbindkeys
+#   • option is supposed to start konsole in background mode
+#   • F12 toggles between background and foreground modes
+#   • works when executing the konsole command manually
+#   • does not work when executing via xbindkeys
 # --background <color>
-#   * unable to get this to work manually at all
+#   • unable to get this to work manually at all
 # --geometry
-#   * this option has been broken for years 
+#   • this option has been broken for years
 
 # To re-read configuration file, send a HUP signal to xbindkeys:
 #    killall -HUP xbindkeys
@@ -56,7 +56,7 @@
 
 # Show all commands
 # [Ctrl-Alt-s]
-"xbindkeys_show" 
+"xbindkeys_show"
   control+alt + s
 
 # Open terminal
@@ -197,7 +197,7 @@
 
 ## gPodder
 ## [Ctrl-Alt-p]
-#"gpodder" 
+#"gpodder"
 #  control+alt + p
 
 ## Open superuser terminal
