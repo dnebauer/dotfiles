@@ -371,6 +371,12 @@ mode "$mode_radiotray" {
     bindsym $mod+r   mode "default"
 }
 
+## radioplay play/pause
+bindsym XF86AudioPlay exec --no-startup-id $rtng_play
+
+## radioplay stop
+bindsym XF86AudioStop exec --no-startup-id $rtng_stop
+
 # syncthingtray    {{{2
 #
 # - runs as daemon in system tray
