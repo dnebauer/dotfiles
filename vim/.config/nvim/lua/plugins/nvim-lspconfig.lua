@@ -10,6 +10,7 @@ return {
     end,
     opts = {
       servers = {
+        autotools_ls = {}, -- autoconf, automake, make
         bashls = {}, -- bash
         biome = {}, -- json, javascript, typescript
         clangd = {}, -- c++, clang

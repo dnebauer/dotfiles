@@ -6,6 +6,7 @@ return {
     dependencies = { "williamboman/mason.nvim" },
     opts = {
       ensure_installed = {
+        "autotools_ls", -- autoconf, automake, make
         "bashls", -- bash
         "clangd", -- c++, clang
         "cmake", -- cmake
