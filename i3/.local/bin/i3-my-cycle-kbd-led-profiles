@@ -509,7 +509,7 @@ fi
 [[ -n "${new_profile}" ]] || abortScript "Unable to select new profile"
 
 # activate new profile
-if g512-led -p "/etc/g810-led/${new_profile}"; then
+if sudo g512-led -p "/etc/g810-led/${new_profile}"; then
 	# provide user feedback
 	msg='Now running'
 	[[ "${new_profile}" == "${default_profile}" ]] && msg+=" default"
