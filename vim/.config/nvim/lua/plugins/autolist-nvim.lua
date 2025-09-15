@@ -25,7 +25,7 @@ return {
       -- run autolist-new-bullet after the <cr> of nvim-autopairs-cr
       -- timeout of 0ms delays enough for my computer but u might need to adjust
       local timeoutms = 0
-      vim.loop.new_timer():start(
+      vim.uv.new_timer():start(
         timeoutms,
         0,
         vim.schedule_wrap(function()
