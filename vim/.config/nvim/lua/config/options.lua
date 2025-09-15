@@ -20,7 +20,7 @@ fn = function(name, args)
   assert(name:len() > 0, "Got a zero-length string for function name")
   args = args or {}
   assert(type(args) == "table", "Expected table, got " .. type(args))
-  assert(vim.tbl_islist(args), "Expected list table, got a map table")
+  assert(vim.islist(args), "Expected list table, got a map table")
   -- call function
   return vim.fn[name](unpack(args))
 end

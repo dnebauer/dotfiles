@@ -48,7 +48,7 @@ fn = function(name, args)
   assert(name:len() > 0, "Got a zero-length string for function name")
   args = args or {}
   assert(type(args) == "table", "Expected table, got " .. type(args))
-  assert(vim.tbl_islist(args), "Expected list table, got a map table")
+  assert(vim.islist(args), "Expected list table, got a map table")
   -- call function
   return vim.fn[name](unpack(args))
 end
@@ -311,9 +311,9 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
     --     this expands to the full true filepath (with symlinks resolved)
     local full_fp = vim.api.nvim_buf_get_name(0)
     -- real_fp is the full true filepath of init_fp, with symlinks resolved
-    local real_fp = vim.loop.fs_realpath(full_fp)
+    local real_fp = vim.uv.fs_realpath(full_fp)
     -- check whether file is a symlink
-    local is_symlink = vim.loop.fs_readlink(full_fp)
+    local is_symlink = vim.uv.fs_readlink(full_fp)
     if is_symlink then
       local file_name = fn("fnamemodify", { real_fp, ":t" })
       vim.api.nvim_echo({
@@ -332,7 +332,7 @@ autocmd_create("LspAttach", {
   group = augroup_create("my_delete_k_mapping", { clear = true }),
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client.server_capabilities.hoverProvider then
+    if client and client.server_capabilities.hoverProvider then
       vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = args.buf })
     end
   end,
