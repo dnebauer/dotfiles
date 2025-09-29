@@ -1,9 +1,9 @@
---[[ williamboman/mason-lspconfig.nvim : bridge between mason.nvim and lspconfig plugins ]]
+--[[ mason-org/mason-lspconfig.nvim : bridge between mason.nvim and lspconfig plugins ]]
 
 return {
   {
-    "williamboman/mason-lspconfig.nvim",
-    dependencies = { "williamboman/mason.nvim" },
+    "mason-org/mason-lspconfig.nvim",
+    dependencies = { "mason-org/mason.nvim" },
     opts = {
       ensure_installed = {
         "autotools_ls", -- autoconf, automake, make

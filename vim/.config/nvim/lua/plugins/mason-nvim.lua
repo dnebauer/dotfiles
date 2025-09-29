@@ -1,8 +1,8 @@
---[[ williamboman/mason.nvim : portable package manager for neovim ]]
+--[[ mason-org/mason.nvim : portable package manager for neovim ]]
 
 return {
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     -- disable plugin key mappings
     keys = function()
       return {}

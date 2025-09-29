@@ -1,8 +1,8 @@
--- [[ echasnovski/mini.surround : delete/change/add surrounding parens, etc. ]]
+-- [[ nvim-mini/mini.surround : delete/change/add surrounding parens, etc. ]]
 
 return {
   {
-    "echasnovski/mini.surround",
+    "nvim-mini/mini.surround",
     -- force load because the 'z' and 'yzz' mappings do not trigger lazy load
     lazy = false,
     -- configure to match my customised version of the standard tpope/vim-surround mappings
