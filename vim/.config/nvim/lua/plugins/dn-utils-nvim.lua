@@ -1,5 +1,8 @@
 --[[ dnebauer/dn-utils.nvim : general utilities ]]
 
+-- lua plugin
+-- not part of default LazyVim
+
 -- required by: dnebauer/dn-md-utils.nvim
 
 return {

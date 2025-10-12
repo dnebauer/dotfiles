@@ -1,5 +1,8 @@
 --[[ hotoo/template.vim : file templates ]]
 
+-- vim plugin
+-- not part of default LazyVim
+
 return {
   {
     "hotoo/template.vim",

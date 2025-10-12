@@ -1,9 +1,13 @@
 --[[ nvim-lualine/lualine.nvim : nvim statusline ]]
 
+-- lua plugin
+-- part of default LazyVim
+
 return {
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     init = function()
       vim.g.lualine_laststatus = vim.o.laststatus
       if vim.fn.argc(-1) > 0 then
@@ -15,30 +19,28 @@ return {
       end
     end,
     opts = function()
-      local icons = require("lazyvim.config").icons
-      local Util = require("lazyvim.util")
-      return {
+      local opts = {
         options = {
+          icons_enabled = true,
           theme = "auto",
-          globalstatus = true,
-          disabled_filetypes = { statusline = { "dashboard", "alpha", "starter" } },
+          globalstatus = vim.o.laststatus == 3,
+          disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter" } },
         },
         sections = {
           lualine_a = { "mode" },
           lualine_b = { "branch", "diff", "diagnostics" },
           lualine_c = {
-            Util.lualine.root_dir(),
             {
               "diagnostics",
               symbols = {
-                error = icons.diagnostics.Error,
-                warn = icons.diagnostics.Warn,
-                info = icons.diagnostics.Info,
-                hint = icons.diagnostics.Hint,
+                error = " ",
+                hint = " ",
+                info = " ",
+                warn = " ",
               },
             },
             { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
-            { Util.lualine.pretty_path() },
+            { "filename", color = { fg = "#ffffff" } },
           },
           lualine_x = {
             { "encoding", "fileformat", "filetype" },
@@ -58,8 +60,10 @@ return {
           lualine_y = { { "progress", separator = " ", padding = { left = 1, right = 0 } } },
           lualine_z = { { "location", padding = { left = 0, right = 1 } } },
         },
-        extensions = { "neo-tree", "lazy" },
+        extensions = { "neo-tree", "lazy", "fzf" },
       }
+
+      return opts
     end,
   },
 }

@@ -1,5 +1,8 @@
 --[[ nvim-tree/nvim-web-devicons : provide filetype glyphs ]]
 
+-- lua plugin
+-- not part of default LazyVim
+
 return {
   {
     "nvim-tree/nvim-web-devicons",

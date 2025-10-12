@@ -1,5 +1,8 @@
 --[[ vim-pandoc/vim-pandoc : pandoc integration ]]
 
+-- vim plugin
+-- not part of default LazyVim
+
 return {
   {
     "vim-pandoc/vim-pandoc",
@@ -8,7 +11,7 @@ return {
       -- utility functions
       local error_msg = function(...)
         for _, msg in ipairs({ ... }) do
-          vim.api.nvim_err_writeln(msg)
+          vim.api.nvim_echo({ { msg } }, false, {})
         end
       end
       local check_executables = function(executables, msg)
@@ -24,15 +27,16 @@ return {
         end
       end
       -- require pandoc and pander for output generation
-      check_executables({ "pandoc", "pander" }, "Cannot find all the executables needed to generate output")
-      -- require pandoc-xnos filter suite for output generation
-      check_executables(
-        { "pandoc-eqnos", "pandoc-fignos", "pandoc-secnos", "pandoc-tablenos", "pandoc-xnos" },
-        "Cannot find the entire pandoc-xnos filter suite used for cross-referencing"
-      )
+      check_executables({ "pandoc", "pander" }, "Cannot find the executables needed to generate output")
+      -- require pandoc-crossref filter for cross-referencing
+      check_executables({ "pandoc-crossref" }, "Cannot find the pandoc-crossref filter")
       -- enable pandoc functionality for markdown files
       -- while using the markdown filetype and syntax
-      vim.g["pandoc#filetypes#handled"] = { "pandoc", "markdown" }
+      vim.g["pandoc#filetypes#handled"] = {
+        "pandoc",
+        "markdown",
+        "markdown.pandoc",
+      }
       vim.g["pandoc#filetypes#pandoc_markdown"] = 0
       -- formatting
       vim.g["pandoc#modules#enabled"] = {
@@ -59,6 +63,10 @@ return {
       vim.g["pandoc#compiler#command"] = "pander"
       -- hashes at end as well as start of headings
       vim.g["pandoc#keyboard#sections#header_style"] = "a"
+      -- do not set shortcuts for opening hypertext links
+      -- • allow other plugins to manage this
+      -- • e.g., do not override shortcuts set by 'gx.nvim' plugin
+      vim.g["pandoc#hypertext#use_default_mappings"] = 0
     end,
   },
 }

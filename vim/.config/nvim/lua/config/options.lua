@@ -1,326 +1,274 @@
--- Options are automatically loaded before lazy.nvim startup
--- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
--- Add any additional options here
-
---[[ functions ]]
-
--- predeclare functions {{{1
-local fn
-local option
-local variable
-
--- fn(name, args) {{{1
----Call a function and return result.
----@param name string Function name
----@param args table|nil Function arguments
----@return any|nil Return value from function
-fn = function(name, args)
-  -- check args
-  assert(type(name) == "string", "Expected string, got " .. type(name))
-  assert(name:len() > 0, "Got a zero-length string for function name")
-  args = args or {}
-  assert(type(args) == "table", "Expected table, got " .. type(args))
-  assert(vim.islist(args), "Expected list table, got a map table")
-  -- call function
-  return vim.fn[name](unpack(args))
-end
-
--- option("get", name, opts)
--- option("set|append|prepend|remove", name, value, opts) {{{1
----Universal function for option manipulation. There are 2 function
----signatures: one for a get operation, and another for set, append, prepend,
----and remove operations.
----
----The "get" operation returns a table for list- and map-style options, as
----per |vim.opt|. The remaining operations accept table values as per
----|vim.opt|.
----@param operation string Operation to perform (get|set|append|prepend|remove)
----@param name string Name of option to operate upon
----@param arg3 table|string|number|boolean|nil Depends on operation:
----• "get": Optional configuration dict
----• other: Value to set, append, prepend, or remove
----@param arg4 table|string|number|boolean|nil Depends on operation:
----• "get": Not used
----• other: Optional configuration dict
----
----The optional configuration dict has only 1 valid key:
----• {scope} (string): Can be "local" (behaves as `:setlocal`),
----  "global" (behaves as `:setglobal`), or
----  nil (behaves as ":set", see |set-args|)
----@return any|nil _ Depends on operation:
----• "get": Value of option
----• other: nil
-option = function(operation, name, arg3, arg4)
-  -- functions
-  -- • check param is a non-empty string
-  local _check_string_param = function(_name)
-    assert(
-      type(_name) == "string" and string.len(_name) > 0,
-      "Expected non-empty string, got " .. type(_name) .. ": " .. tostring(_name)
-    )
-  end
-  -- • check option name
-  local _check_option_name = function(_name)
-    local ok = pcall(function()
-      local _ = vim.opt[_name]
-    end)
-    assert(ok, "Invalid option name: " .. name)
-  end
-  -- check params
-  -- • operation
-  assert(type(operation) == "string", "Expected string, got " .. type(string))
-  local valid_operations = { "get", "set", "append", "prepend", "remove" }
-  assert(vim.tbl_contains(valid_operations, operation), "Invalid operation: " .. operation)
-  -- • name
-  _check_string_param(name)
-  _check_option_name(name)
-  -- • arg3 ('value' or 'opts')
-  local opts, value = {}, nil
-  local value_types = { "table", "number", "integer", "string", "boolean", "nil" }
-  if operation == "get" then
-    -- arg3 is 'opts'
-    opts = opts or {}
-    local valid_arg3_types = { "table", "nil" }
-    assert(vim.tbl_contains(valid_arg3_types, type(arg3)), "Expected table, got " .. type(arg3))
-    if type(arg3) == "table" then
-      for key, val in ipairs(arg3) do
-        opts[key] = val
-      end
-    end
-  else
-    -- arg3 is 'value'
-    assert(vim.tbl_contains(value_types, type(arg3)), "Invalid option value type: " .. type(arg3))
-    value = arg3
-  end
-  -- • arg4 ('opts' or nil)
-  if vim.tbl_contains({ "set", "append", "prepend", "remove" }, operation) then
-    -- arg4 is 'opts'
-    opts = opts or {}
-    local valid_arg4_types = { "table", "nil" }
-    assert(vim.tbl_contains(valid_arg4_types, type(arg4)), "Expected table, got " .. type(arg4))
-    if type(arg4) == "table" then
-      for key, val in ipairs(arg4) do
-        opts[key] = val
-      end
-    end
-  end
-  -- • opts
-  for key, val in pairs(opts) do
-    if key == "scope" then
-      local valid_scopes = { "local", "global" }
-      assert(type(val) == "string", "Expected string scope, got " .. type(val))
-      assert(vim.tbl_contains(valid_scopes, val), "Invalid scope: " .. val)
-    else
-      error("Invalid configuration option: " .. key)
-    end
-  end
-  -- get option verb
-  local opt_verb = "opt"
-  if opts.scope then
-    opt_verb = opts.scope
-  end
-  -- perform operations
-  if operation == "get" then
-    return vim[opt_verb][name]:get()
-  elseif operation == "set" then
-    vim[opt_verb][name] = value
-  elseif operation == "append" then
-    vim[opt_verb][name]:append(value)
-  elseif operation == "prepend" then
-    vim[opt_verb][name]:prepend(value)
-  elseif operation == "remove" then
-    vim[opt_verb][name]:remove(value)
-  end
-end
-
--- variable(operation, scope, name, [value]) {{{1
----Universal function for vaariable manipulation.
----@param operation string Operation to perform on variable (get, set, exists, remove)
----@param scope string Variable scope (only 'buffer' and 'global' supported)
----@param name string Variable name
----@param value any|nil Variable value (set only)
----@return any|nil _ Return value depends on operation:
----• 'get': any
----• other: nil
-variable = function(operation, scope, name, value)
-  -- functions
-  -- • check param is a non-empty string
-  local _check_string_param = function(_name)
-    assert(
-      type(_name) == "string" and string.len(_name) > 0,
-      "Expected non-empty string, got " .. type(_name) .. ": " .. tostring(_name)
-    )
-  end
-  -- check params
-  -- • operation
-  _check_string_param(operation)
-  local valid_operations = { "get", "set", "exists", "remove" }
-  assert(vim.tbl_contains(valid_operations, operation), "Invalid operation: " .. operation)
-  -- • scope
-  _check_string_param(scope)
-  local valid_scopes = { "buffer", "global" }
-  assert(vim.tbl_contains(valid_scopes, scope), "Invalid operation: " .. scope)
-  -- • name
-  _check_string_param(name)
-  -- • value
-  if operation ~= "set" and value ~= nil then
-    error("Non-nil value provided for variable" .. operation .. " operation")
-  end
-  -- perform operation
-  local scope_char = { buffer = "b", global = "g" }
-  if operation == "get" then
-    return vim[scope_char[scope]][name]
-  elseif operation == "set" then
-    vim[scope_char[scope]][name] = value
-  elseif operation == "exists" then
-    if scope == "buffer" then
-      local ok, _ = pcall(vim.api.nvim_buf_get_var, 0, name)
-      return ok
-    elseif scope == "global" then
-      local ok, _ = pcall(vim.api.nvim_get_var, name)
-      return ok
-    end
-  elseif operation == "remove" then
-    vim[scope_char[scope]][name] = nil
-  end
-end
--- }}}1
+-- options
 
 --[[ mapleader ]]
 
-variable("set", "global", "mapleader", "\\")
+vim.g.mapleader = "\\"
+vim.g.maplocalleader = "\\"
 
 --[[ variables ]]
 
 -- checkhealth command recommends using g:python[3]_host_prog
 local python2 = "/usr/bin/python2"
-if fn("filereadable", { python2 }) then
-  variable("set", "global", "python_host_prog", python2)
+if vim.fn.filereadable(python2) then
+  vim.g.python_host_prog = python2
 end
 local python3 = "/usr/bin/python3"
-if fn("filereadable", { python3 }) then
-  variable("set", "global", "python3_host_prog", python3)
+if vim.fn.filereadable(python3) then
+  vim.g.python3_host_prog = python3
 end
 
 -- vimtex issues warning if tex_flavor not set
-if variable("exists", "global", "tex_flavor") then
-  variable("set", "global", "tex_flavor", "latex")
+if vim.fn.exists("g:tex_flavor") == 0 then
+  vim.g.tex_flavor = "latex"
 end
 
 -- checkhealth recommends setting perl host
 local perl = "/usr/bin/perl"
-if fn("filereadable", { perl }) then
-  variable("set", "global", "perl_host_prog", perl)
+if vim.fn.filereadable(perl) then
+  vim.g.perl_host_prog = perl
 end
 
 -- checkhealth recommends setting ruby host (but it does not work!)
 local ruby = "/usr/local/bin/neovim-ruby-host" -- fails
 --local ruby = "/usr/bin/ruby" -- fails
-if fn("filereadable", { ruby }) then
-  variable("set", "global", "ruby_host_prog", ruby)
+if vim.fn.filereadable(ruby) then
+  vim.g.ruby_host_prog = ruby
 end
 
--- for python linting use basedpyright instead of pyright
--- • as per release notes for lzyvim 10.x
-variable("set", "global", "lazyvim_python_lsp", "basedpyright")
+-- snacks animations (folke/snacks.nvim)
+-- set to `false` to globally disable all snacks animations
+vim.g.snacks_animate = true
+
+-- show the current document symbols location from Trouble in lualine
+-- disable per buffer by setting `vim.b.trouble_lualine = false`
+vim.g.trouble_lualine = true
+
+-- fix markdown indentation settings
+vim.g.markdown_recommended_style = 0
 
 --[[ options ]]
 
--- colour column: managed by "ecthelionvi/NeoColumn.nvim" plugin
+-- colour
+vim.o.termguicolors = true -- true color support (but nvim tries to use true color if present by default!)
+-- • colour column: managed by "ecthelionvi/NeoColumn.nvim" plugin
 
 -- language: trust nvim language selection
 
 -- tabs, indenting
 local tab_size = 2
-option("set", "tabstop", tab_size) -- number of spaces inserted by tab
-option("set", "softtabstop", 0) -- do NOT insert mix of {tabs,spaces} when tab while editing
-option("set", "shiftwidth", tab_size) -- number of spaces for autoindent
-option("set", "expandtab", true) -- expand tabs to this many spaces
-option("set", "autoindent", true) -- copy indent from current line to new
-option("set", "smartindent", true) -- attempt intelligent indenting
+vim.o.tabstop = tab_size -- number of spaces inserted by tab
+vim.o.softtabstop = 0 -- do NOT insert mix of {tabs,spaces} when tab while editing
+vim.o.shiftwidth = tab_size -- number of spaces for autoindent
+vim.o.expandtab = true -- expand tabs to this many spaces
+vim.o.autoindent = true -- copy indent from current line to new
+vim.o.smartindent = true -- attempt intelligent indenting
+vim.o.shiftround = true -- when changing indent with > and <, round off indent to a multiple of 'shiftwidth'
+
+-- folding
+vim.o.foldlevel = 99 -- open all folds by default (0 = close all folds)
+vim.o.foldmethod = "indent" -- can also be marker/expr/manual/syntax/diff
+
+-- line numbering
+vim.o.number = true -- line number in front of (current) line
+vim.o.relativenumber = true -- relative line numbers
+vim.o.signcolumn = "yes" -- always show the signcolumn, otherwise it would shift the text each time
+
+-- splits
+vim.o.splitbelow = true -- put new windows below current when |:split|
+vim.o.splitkeep = "screen" -- anchor current line within screen when horizontal split opens/closes/resizes
+vim.o.splitright = true -- put new windows right of current when |:vsplit|
+vim.o.winminwidth = 5 -- windows can't be squashed any smaller than this (default = 1)
+
+-- mapping completion time
+-- • lower than default (1000) to quickly trigger which-key
+-- • unless using VSCode Neovim <http://github.com/vscode-neovim/vscode-neovim>
+vim.o.timeoutlen = vim.g.vscode and 1000 or 300
+
+-- file message behaviour
+--[[
+default flags:
+• l = use "999L, 888B" instead of 999 lines, 888 bytes""
+• t = if file message too long for line, truncate at start
+• T = if non-file message too long for line, truncate in middle
+• o = if file read message follows file write message, it overwrites
+• O = file read message overwrites any previous message
+• C = suppress messages while scanning for |ins-completion| items
+• F = suppress file info when editing file
+added flags:
+• W = suppress "written" or "[w]" messages on file write
+• I = suppress intro message at vim startup
+• c = suppress |ins-completion-menu| messages
+• C = suppress messages while scanning for |ins-completion| items
+]]
+vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
+
+-- status line
+vim.o.statuscolumn = "" -- appears to have no effect on left side of screen
+vim.o.laststatus = 3 -- global statusline
+vim.o.ruler = false -- disable the default ruler (because statusline plugin)
+vim.o.showmode = false -- dont show mode since we have a statusline
+
+-- cursor and current line
+vim.o.cursorline = true -- enable highlighting of the current line
+vim.o.scrolloff = 4 -- lines of context kept above/below cursor
+vim.o.sidescrolloff = 8 -- columns of context kept to left/right of cursor
+vim.opt.virtualedit = { "block" } -- allow cursor to move where there is no text in visual block mode
+
+-- popups
+vim.opt.completeopt = { "menu", "menuone" } -- popup with default selection
+--[[ when doing completion in command-line (with Tab or Ctrl-d):
+• longest:full = complete to longest common string, and start 'wildmenu'
+• full = complete the next full match, and start 'wildmenu'
+]]
+vim.opt.wildmode = { "longest:full", "full" }
+vim.o.pumblend = 10 -- make popups pseudo-transparent
+vim.o.pumheight = 0 -- popups use available screen space
+
+-- save behaviour
+vim.o.autowrite = true -- write file automatically on buffer switch
+vim.o.confirm = true -- confirm to save changes before exiting modified buffer
+vim.o.updatetime = 200 -- save swap file and trigger CursorHold quickly (default = 4000)
+
+-- mouse
+vim.o.mouse = "a" -- enable mouse mode
 
 -- encoding for new files
-option("set", "fileencoding", "utf-8", { scope = "global" })
+vim.go.fileencoding = "utf-8"
+
+-- |:mksession| command
+vim.opt.sessionoptions = {
+  "buffers",
+  "curdir",
+  "tabpages",
+  "winsize",
+  "help",
+  "globals",
+  "skiprtp",
+  "folds",
+}
+
+-- fill characters
+vim.opt.fillchars = {
+  foldopen = "",
+  foldclose = "",
+  fold = " ",
+  foldsep = " ",
+  diff = "╱",
+  eob = " ",
+}
 
 -- files to ignore when file matching
-option("set", "suffixes", ".bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc")
+vim.opt.suffixes = {
+  ".bak",
+  "~",
+  ".swp",
+  ".o",
+  ".info",
+  ".aux",
+  ".log",
+  ".dvi",
+  ".bbl",
+  ".blg",
+  ".brf",
+  ".cb",
+  ".ind",
+  ".idx",
+  ".ilg",
+  ".inx",
+  ".out",
+  ".toc",
+}
 
--- clipboard
 --[[
-Option 'unnamedplus' uses the clipboard register "+" instead of register "*"
-for all yank, delete, change and put operations which would normally go to
-the unnamed register. When 'unnamed' is also included in the option, yank
-and delete operations (but not put) will additionally copy the text into
-register '*'.
-
-The PRIMARY X11 selection is used by middle mouse button.
-The CLIPBOARD X11 selection is used by X11 cut, copy, paste operations,
-e.g., (Ctrl-c, Ctrl-v).
+clipboard:
+• option 'unnamedplus' uses the clipboard register "+" instead of register "*"
+  for all yank, delete, change and put operations which would normally go to
+  the unnamed register
+• when 'unnamed' is also included in the option, yank and delete operations
+  (but not put) will additionally copy the text into register '*'
+• PRIMARY X11 selection is used by middle mouse button
+• CLIPBOARD X11 selection is used by X11 cut, copy, paste operations,
+  e.g., (Ctrl-c, Ctrl-v) or (Ctrl-Shift-c, Ctrl-Shift-v)
 ]]
-option("set", "clipboard", "unnamed,unnamedplus")
+vim.opt.clipboard = { "unnamed", "unnamedplus" }
 
 -- treat all numerals as decimal
-option("set", "nrformats", "")
+vim.o.nrformats = ""
 
--- save undo history in a file
-option("set", "undofile", true)
+-- undo
+vim.o.undofile = true -- save undo history in a file
+vim.o.undolevels = 2000 -- default setting = 1000, LazyVim setting = 10000
 
 -- change to file directory
-option("set", "autochdir", true)
+vim.o.autochdir = true
+
+-- search/replace (also see 'case sensitivity' below)
+vim.o.gdefault = true -- 'g' flag considered on (using 'g' now toggles option off)
+vim.o.incsearch = true -- progressive match with incremental search
+vim.o.grepformat = "%f:%l:%c:%m" -- default for ripgrep
+vim.o.inccommand = "nosplit" -- preview incremental substitute
 
 -- case sensitivity
-option("set", "ignorecase", true) -- case insensitive matching if all lowercase
-option("set", "smartcase", true) -- case sensitive matching if any capital letters
-option("set", "infercase", true) -- intelligent case selection in autocompletion
-
--- 'g' flag now considered on by search/replace
--- using 'g' now toggles option off
-option("set", "gdefault", true)
-
--- progressive match with incremental search
-option("set", "incsearch", true)
+vim.o.ignorecase = true -- case insensitive matching if all lowercase
+vim.o.smartcase = true -- case sensitive matching if any capital letters
+vim.o.infercase = true -- intelligent case selection in autocompletion
 
 -- spelling
-option("set", "spell", false) -- initially spelling is off
-option("set", "spelllang", "en_au")
+vim.o.spell = false -- initially spelling is off
+vim.opt.spelllang = { "en_au" }
 local dictionaries = { "/usr/share/dict/words" }
 for _, dict in ipairs(dictionaries) do
-  if fn("filereadable", { dict }) then
-    option("remove", "dictionary", dict)
-    option("append", "dictionary", dict)
+  if vim.fn.filereadable(dict) then
+    vim.opt.dictionary:append(dict)
   end
 end
-local thesauruses = { fn("stdpath", { "config" }) .. "/thes/mthesaur.txt" }
+local thesauruses = { vim.fn.stdpath("config") .. "/thes/mthesaur.txt" }
 for _, thes in ipairs(thesauruses) do
-  if fn("filereadable", { thes }) then
-    option("remove", "thesaurus", thes)
-    option("append", "thesaurus", thes)
+  if vim.fn.filereadable(thes) then
+    vim.opt.thesaurus:append(thes)
   end
 end
 
--- autoinsert comment headers
-option("append", "formatoptions", "ro")
+-- wrapping
+vim.o.wrap = false -- disable line wrap
+vim.o.linebreak = true -- wrap virtually at a break character (newline NOT inserted)
+vim.o.textwidth = 0 -- do not break line on text insertion to enforce width maximum
+vim.o.smoothscroll = true -- signal if part of first line is beyond top of screen (due to wrapping)
+--[[ formatoptions:
+• j = remove comment leader when joining lines
+• c = auto-wrap comments
+• r = auto-insert comment-leader on pressing Enter
+• o = auto-insert comment-leader on pressing 'o' or 'O'
+• q = allow formatting of comments with 'gq'
+• l = do not break long lines in insert mode
+• n = recognise numbered list when formatting text
+• t = auto-wrap text
+]]
+vim.opt.formatoptions = "jcroqlnt"
 
--- enable word wrap
-option("set", "linebreak", true)
-
--- don't wrap words by default
-option("set", "textwidth", 0)
-
--- don't jump to start of line after move commands
-option("set", "startofline", false)
+-- jumps
+vim.o.jumpoptions = "view" -- restore view at mark
+vim.o.startofline = false -- don't jump to start of line after move commands
 
 -- show matching brackets
-option("set", "showmatch", true)
+vim.o.showmatch = true
 
--- non-visible characters
---[[ ‹-› = U+2039-U+203a, single [left|right]-pointing angle quotation mark
-      ★  = U+2605, black star
-      »  = U+00bb, right-pointing double angle quotation mark
-      «  = U+00ab, left-pointing double angle quotation mark
-      •  = U+2022, bullet
---]]
-option("set", "list", true)
-option("set", "listchars", { tab = "‹-›", trail = "★", extends = "»", precedes = "«", nbsp = "•" })
+-- handle non-visible characters
+--[[
+‹-› = U+2039-U+203a, single [left|right]-pointing angle quotation mark
+ ★  = U+2605, black star
+ »  = U+00bb, right-pointing double angle quotation mark
+ «  = U+00ab, left-pointing double angle quotation mark
+ •  = U+2022, bullet
+]]
+vim.o.list = true -- use symbols to show different kinds of spaces (modified by 'listchars')
+vim.opt.listchars = {
+  tab = "‹-›",
+  trail = "★",
+  extends = "»",
+  precedes = "«",
+  nbsp = "•",
+}
+vim.o.conceallevel = 2 -- hide * markup for bold and italic, but not markers with substitutions
 
 -- vim:foldmethod=marker:

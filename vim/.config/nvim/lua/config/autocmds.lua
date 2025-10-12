@@ -1,280 +1,130 @@
--- Autocmds are automatically loaded on the VeryLazy event
+-- autocmds
+
 -- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
--- Add any additional autocmds here
+
+-- plugins used:
+-- • preservim/vim-textobj-sentence
+-- • gaoDean/autolist.nvim
+-- • LazyVim/LazyVim
+-- • echasnovski/mini.surround
 
 --[[ functions ]]
 
--- predeclare function names {{{1
-local augroup_create
-local autocmd_create
-local fn
-local map
-local option
-local text_editing_settings
-local variable
-
--- augroup_create(name, {opts}) {{{1
----Create an autocommand group.
----This is a thin wrapper around |nvim_create_augroup()|.
----@param name string Name of the group
----@param opts table|nil Optional configuration parameters:
----• {clear} (boolean): Clear existing commands
----  if the group exists (optional, default=true)
----@return number _ Integer id of the created group
-augroup_create = function(name, opts)
-  opts = opts or {}
-  return vim.api.nvim_create_augroup(name, opts)
-end
-
--- autocmd_create(event, {opts}) {{{1
----Create an autocommand event handler.
----This is a thin wrapper around |nvim_create_autocmd()|.
----@param event string|table Event(s) that will trugger the handler
----@param opts table|nil Optional configuration dictionary
----@return number _ Autocommand id
-autocmd_create = function(event, opts)
-  opts = opts or {}
-  return vim.api.nvim_create_autocmd(event, opts)
-end
-
--- fn(name, {args})
----Call a function and return result.
----@param name string Function name
----@param args table|any Function arguments
----@return any|nil Return value from function
-fn = function(name, args)
-  -- check args
-  assert(type(name) == "string", "Expected string, got " .. type(name))
-  assert(name:len() > 0, "Got a zero-length string for function name")
-  args = args or {}
-  assert(type(args) == "table", "Expected table, got " .. type(args))
-  assert(vim.islist(args), "Expected list table, got a map table")
-  -- call function
-  return vim.fn[name](unpack(args))
-end
-
--- map(mode, lhs, rhs, opts) {{{1
----Thin wrapper for |vim.keymap.set()|.
----@param mode table|string Mode short name (see |nvim_set_keymap()|), can
----also be list of modes
----@param lhs string Left-hand side |{lhs}| of the mapping
----@param rhs string|function Right-hand side |{rhs}| of the mapping, can be
----a Lua function
----@param opts table|nil Table of |:map-arguments| as per |vim.keymap.set()|
-map = function(mode, lhs, rhs, opts)
-  vim.keymap.set(mode, lhs, rhs, opts)
-end
-
--- option("get", name, {opts})
--- option(operation, name, value|opts, [opts]) {{{1
----Universal function for option manipulation. There are 2 function
----signatures: one for a get operation, and another for set, append, prepend,
----and remove operations.
----
----The "get" operation returns a table for list- and map-style options, as
----per |vim.opt|. The remaining operations accept table values as per
----|vim.opt|.
----@param operation string Operation to perform (get|set|append|prepend|remove)
----@param name string Name of option to operate upon
----@param arg3 table|string|number|boolean|nil Depends on operation:
----• "get": Optional configuration dict
----• other: Value to set, append, prepend, or remove
----@param arg4 table|string|number|boolean|nil Depends on operation:
----• "get": Not used
----• other: Optional configuration dict
----
----The optional configuration dict has only 1 valid key:
----• {scope} (string): Can be "local" (behaves as `:setlocal`),
----  "global" (behaves as `:setglobal`), or
----  nil (behaves as ":set", see |set-args|)
----@return any|nil _ Depends on operation:
----• "get": Value of option
----• other: nil
-option = function(operation, name, arg3, arg4)
-  -- functions
-  -- • check param is a non-empty string
-  local _check_string_param = function(_name)
-    assert(
-      type(_name) == "string" and string.len(_name) > 0,
-      "Expected non-empty string, got " .. type(_name) .. ": " .. tostring(_name)
-    )
-  end
-  -- • check option name
-  local _check_option_name = function(_name)
-    local ok = pcall(function()
-      local _ = vim.opt[_name]
-    end)
-    assert(ok, "Invalid option name: " .. name)
-  end
-  -- check params
-  -- • operation
-  assert(type(operation) == "string", "Expected string, got " .. type(string))
-  local valid_operations = { "get", "set", "append", "prepend", "remove" }
-  assert(vim.tbl_contains(valid_operations, operation), "Invalid operation: " .. operation)
-  -- • name
-  _check_string_param(name)
-  _check_option_name(name)
-  -- • arg3 ('value' or 'opts')
-  local opts, value = {}, nil
-  local value_types = { "table", "number", "integer", "string", "boolean", "nil" }
-  if operation == "get" then
-    -- arg3 is 'opts'
-    opts = opts or {}
-    local valid_arg3_types = { "table", "nil" }
-    assert(vim.tbl_contains(valid_arg3_types, type(arg3)), "Expected table, got " .. type(arg3))
-    if type(arg3) == "table" then
-      for key, val in ipairs(arg3) do
-        opts[key] = val
-      end
-    end
-  else
-    -- arg3 is 'value'
-    assert(vim.tbl_contains(value_types, type(arg3)), "Invalid option value type: " .. type(arg3))
-    value = arg3
-  end
-  -- • arg4 ('opts' or nil)
-  if vim.tbl_contains({ "set", "append", "prepend", "remove" }, operation) then
-    -- arg4 is 'opts'
-    opts = opts or {}
-    local valid_arg4_types = { "table", "nil" }
-    assert(vim.tbl_contains(valid_arg4_types, type(arg4)), "Expected table, got " .. type(arg4))
-    if type(arg4) == "table" then
-      for key, val in ipairs(arg4) do
-        opts[key] = val
-      end
-    end
-  end
-  -- • opts
-  for key, val in pairs(opts) do
-    if key == "scope" then
-      local valid_scopes = { "local", "global" }
-      assert(type(val) == "string", "Expected string scope, got " .. type(val))
-      assert(vim.tbl_contains(valid_scopes, val), "Invalid scope: " .. val)
-    else
-      error("Invalid configuration option: " .. key)
-    end
-  end
-  -- get option verb
-  local opt_verb = "opt"
-  if opts.scope then
-    opt_verb = opts.scope
-  end
-  -- perform operations
-  if operation == "get" then
-    return vim[opt_verb][name]:get()
-  elseif operation == "set" then
-    vim[opt_verb][name] = value
-  elseif operation == "append" then
-    vim[opt_verb][name]:append(value)
-  elseif operation == "prepend" then
-    vim[opt_verb][name]:prepend(value)
-  elseif operation == "remove" then
-    vim[opt_verb][name]:remove(value)
-  end
-end
-
--- text_editing_settings() {{{1
----Common settings to apply to text file types.
----@return nil _ No return value
-text_editing_settings = function()
-  -- sentence-based text objects are more sensible
-  -- plugin: preservim/vim-textobj-sentence
-  fn("textobj#sentence#init")
-  -- rewrap paragraph using <M-q>, i.e., <Alt-q, {})
-  map(
-    "n",
-    "<M-q>",
-    '{gq}<Bar>:echo "Rewrapped paragraph"<CR>',
-    { remap = false, silent = true, desc = "Rewrap paragraph" }
-  )
-  map("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true, desc = "Rewrap paragraph" })
-  -- sensible formatting
-  option("set", "formatexpr", "tqna1", { scope = "local" })
-  -- autolist
-  map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>", { desc = "New bullet on current line" })
-end
-
--- variable(operation, scope, name, [value]) {{{1
----Universal function for vaariable manipulation.
----@param operation string Operation to perform on variable (get, set, exists, remove)
----@param scope string Variable scope (only 'buffer' and 'global' supported)
----@param name string Variable name
----@param value any|nil Variable value (set only)
----@return any|nil _ Return value depends on operation:
----• 'get': any
----• other: nil
-variable = function(operation, scope, name, value)
-  -- functions
-  -- • check param is a non-empty string
-  local _check_string_param = function(_name)
-    assert(
-      type(_name) == "string" and string.len(_name) > 0,
-      "Expected non-empty string, got " .. type(_name) .. ": " .. tostring(_name)
-    )
-  end
-  -- check params
-  -- • operation
-  _check_string_param(operation)
-  local valid_operations = { "get", "set", "exists", "remove" }
-  assert(vim.tbl_contains(valid_operations, operation), "Invalid operation: " .. operation)
-  -- • scope
-  _check_string_param(scope)
-  local valid_scopes = { "buffer", "global" }
-  assert(vim.tbl_contains(valid_scopes, scope), "Invalid operation: " .. scope)
-  -- • name
-  _check_string_param(name)
-  -- • value
-  if operation ~= "set" and value ~= nil then
-    error("Non-nil value provided for variable" .. operation .. " operation")
-  end
-  -- perform operation
-  local scope_char = { buffer = "b", global = "g" }
-  if operation == "get" then
-    return vim[scope_char[scope]][name]
-  elseif operation == "set" then
-    vim[scope_char[scope]][name] = value
-  elseif operation == "exists" then
-    if scope == "buffer" then
-      local ok, _ = pcall(vim.api.nvim_buf_get_var, 0, name)
-      return ok
-    elseif scope == "global" then
-      local ok, _ = pcall(vim.api.nvim_get_var, name)
-      return ok
-    end
-  elseif operation == "remove" then
-    vim[scope_char[scope]][name] = nil
-  end
-end
--- }}}1
+local augroup_create = vim.api.nvim_create_augroup
+local autocmd_create = vim.api.nvim_create_autocmd
+local map = vim.keymap.set
 
 --[[ global ]]
 
--- highlight on yank {{{1
--- • increase timeout from default 150 to 500 (ms)
--- • overwrite lazvim augroup from
---   ~/.local/share/nvim/lazy/LazyVim/lua/lazyvim/config/autocmds.lua
-autocmd_create("TextYankPost", {
-  group = augroup_create("lazyvim_highlight_yank", { clear = true }),
+-- check if we need to reload the file when it has changed {{{1
+vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+  group = augroup_create("my_checktime", { clear = true }),
   callback = function()
-    vim.highlight.on_yank({ timeout = 500 })
+    if vim.o.buftype ~= "nofile" then
+      vim.cmd("checktime")
+    end
   end,
-  desc = "Overwrite lazyvim autocmd|augroup to increase timeout from default 150 to 500 ms",
+})
+pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_checktime")
+
+-- resize splits if window got resized {{{1
+vim.api.nvim_create_autocmd({ "VimResized" }, {
+  group = augroup_create("my_resize_splits", { clear = true }),
+  callback = function()
+    local current_tab = vim.fn.tabpagenr()
+    vim.cmd("tabdo wincmd =")
+    vim.cmd("tabnext " .. current_tab)
+  end,
+})
+pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_resize_splits")
+
+-- go to last loc when opening a buffer {{{1
+vim.api.nvim_create_autocmd("BufReadPost", {
+  group = augroup_create("my_last_loc", { clear = true }),
+  callback = function(event)
+    local exclude = { "gitcommit" }
+    local buf = event.buf
+    if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].my_last_loc then
+      return
+    end
+    vim.b[buf].my_last_loc = true
+    local mark = vim.api.nvim_buf_get_mark(buf, '"')
+    local lcount = vim.api.nvim_buf_line_count(buf)
+    if mark[1] > 0 and mark[1] <= lcount then
+      pcall(vim.api.nvim_win_set_cursor, 0, mark)
+    end
+  end,
 })
 
--- centre current line vertically after cursor moves [disabled] {{{1
---[[
-autocmd_create({ "CursorMoved", "CursorMovedI" }, {
-  group = augroup_create("my_vert_centre", { clear = true }),
-  callback = function()
-    -- use brute force to ensure cursor column does not change
-    local pos = fn("getpos", { "." }) -- (buf, line, col, offset)
-    local cursor_args = { pos[2], pos[3] }
-    vim.api.nvim_exec2("normal! zz", {})
-    fn("cursor", { cursor_args }) -- (line, column)
+-- close some filetypes with <q> {{{1
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup_create("my_close_with_q", { clear = true }),
+  pattern = {
+    "PlenaryTestPopup",
+    "checkhealth",
+    "dbout",
+    "gitsigns-blame",
+    "grug-far",
+    "help",
+    "lspinfo",
+    "neotest-output",
+    "neotest-output-panel",
+    "neotest-summary",
+    "notify",
+    "qf",
+    "spectre_panel",
+    "startuptime",
+    "tsplayground",
+  },
+  callback = function(event)
+    vim.bo[event.buf].buflisted = false
+    vim.schedule(function()
+      vim.keymap.set("n", "q", function()
+        vim.cmd("close")
+        pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+      end, {
+        buffer = event.buf,
+        silent = true,
+        desc = "Quit buffer",
+      })
+    end)
   end,
-  desc = "Centre current line vertically after cursor moves",
 })
---]]
+pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_close_with_q")
+
+-- fix conceallevel for json files {{{1
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  group = augroup_create("my_json_conceal", { clear = true }),
+  pattern = { "json", "jsonc", "json5" },
+  callback = function()
+    vim.opt_local.conceallevel = 0
+  end,
+})
+pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_json_conceal")
+
+-- auto create dir when saving a file {{{1
+-- • in case some intermediate directory does not exist
+vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+  group = augroup_create("my_auto_create_dir", { clear = true }),
+  callback = function(event)
+    if event.match:match("^%w%w+:[\\/][\\/]") then
+      return
+    end
+    local file = vim.uv.fs_realpath(event.match) or event.match
+    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+  end,
+})
+pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_auto_create_dir")
+
+-- prolong highlight of yanked text {{{1
+autocmd_create("TextYankPost", {
+  group = augroup_create("my_prolong_yank_highlight", { clear = true }),
+  callback = function()
+    (vim.hl or vim.highlight).on_yank({ timeout = 500 })
+  end,
+  desc = "Prolong yanked text highlight time to 500 ms",
+})
+pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_highlight_yank")
 
 -- remove end-of-line whitespace on save {{{1
 autocmd_create("BufWritePre", {
@@ -291,31 +141,32 @@ autocmd_create({ "BufNewFile", "BufReadPost" }, {
   pattern = "*",
   callback = function()
     -- only do this once
-    if variable("exists", "buffer", "my_checked_symlink") then
+    if vim.fn.exists("b:my_checked_symlink") ~= 0 then
       return
     end
-    variable("set", "buffer", "my_checked_symlink", 1)
+    vim.b.my_checked_symlink = 1
     -- only buffers associated with a file name (bufname ~= "")
     if vim.api.nvim_buf_get_name(0):len() == 0 then
       return
     end
     -- only check normal buffer (buftype == ""),
-    local opt_buftype = option("get", "buftype")
+    local opt_buftype = vim.bo.buftype
     if opt_buftype:len() ~= 0 then
       return
     end
     -- full_fp makes use of semi-broken nature of nvim_buf_get_name():
     -- • if the file is a symlink this expands to the full symlink path
-    --     (with no symlinks resolved)
+    --   (with no symlinks resolved)
     -- • if the file is real but the dirpath includes a symlink,
-    --     this expands to the full true filepath (with symlinks resolved)
+    --   this expands to the full true filepath (with symlinks resolved)
     local full_fp = vim.api.nvim_buf_get_name(0)
     -- real_fp is the full true filepath of init_fp, with symlinks resolved
     local real_fp = vim.uv.fs_realpath(full_fp)
     -- check whether file is a symlink
     local is_symlink = vim.uv.fs_readlink(full_fp)
     if is_symlink then
-      local file_name = fn("fnamemodify", { real_fp, ":t" })
+      assert(type(real_fp) == "string", "Expected string, got " .. type(real_fp))
+      local file_name = vim.fn.fnamemodify(real_fp, ":t")
       vim.api.nvim_echo({
         { file_name .. " is a symlink:\n", "WarningMsg" },
         { "- file path = " .. full_fp .. "\n", "WarningMsg" },
@@ -347,7 +198,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   group = augroup_create("my_conf_support", { clear = true }),
   pattern = "*.conf",
   callback = function()
-    option("set", "filetype", "dosini", { scope = "local" })
+    vim.bo.filetype = "dosini"
   end,
   desc = "Force filetype for *.conf to 'dosini' for syntax support",
 })
@@ -357,7 +208,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   group = augroup_create("my_gnuplot_support", { clear = true }),
   pattern = "*.plt",
   callback = function()
-    option("set", "filetype", "gnuplot", { scope = "local" })
+    vim.bo.filetype = "gnuplot"
   end,
   desc = "Force filetype for *.plt to 'gnuplot' for syntax support",
 })
@@ -367,7 +218,7 @@ autocmd_create("FileType", {
   group = augroup_create("my_json_support", { clear = true }),
   pattern = { "json", "jsonl", "jsonp" },
   callback = function()
-    option("set", "foldmethod", "syntax", { scope = "local" })
+    vim.wo.foldmethod = "syntax"
   end,
   desc = "Fold json files on {} and [] blocks",
 })
@@ -377,7 +228,7 @@ autocmd_create("FileType", {
   group = augroup_create("my_markdown_support", { clear = true }),
   pattern = { "markdown", "markdown.pandoc", "pandoc" },
   callback = function()
-    -- customise plugin 'echasnovski/mini.surround'
+    -- plugin: echasnovski/mini.surround
     local opts = {
       custom_surroundings = {
         b = { output = { left = "__", right = "__" } }, -- bold (strong emphasis)
@@ -385,9 +236,7 @@ autocmd_create("FileType", {
         ["`"] = { output = { left = "`", right = "`" } }, -- inline code
       },
     }
-    variable("set", "buffer", "minisurround_config", opts)
-    -- text edit settings
-    text_editing_settings()
+    vim.b.minisurround_config = opts
   end,
   desc = "Support for markdown files",
 })
@@ -412,7 +261,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   group = augroup_create("my_nsis_support", { clear = true }),
   pattern = "*.nsh",
   callback = function()
-    option("set", "filetype", "nsis", { scope = "local" })
+    vim.bo.filetype = "nsis"
   end,
   desc = "Force filetype for nsis header files",
 })
@@ -420,8 +269,24 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
 -- text {{{1
 autocmd_create("FileType", {
   group = augroup_create("my_text_support", { clear = true }),
-  pattern = "text",
-  callback = text_editing_settings,
+  pattern = { "text", "plaintex", "typst", "gitcommit", "markdown", "pandoc", "markdown.pandoc" },
+  callback = function()
+    -- rewrap paragraph using <M-q>, i.e., <Alt-q>
+    map(
+      "n",
+      "<M-q>",
+      '{gq}<Bar>:echo "Rewrapped paragraph"<CR>',
+      { remap = false, silent = true, desc = "Rewrap paragraph" }
+    )
+    map("i", "<M-q>", "<Esc>{gq}<CR>a", { remap = false, silent = true, desc = "Rewrap paragraph" })
+    -- turn on spelling
+    vim.wo.spell = true
+    -- sensible formatting
+    vim.bo.formatexpr = "tqna1"
+    -- autolist
+    -- • plugin: gaoDean/autolist.nvim
+    map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>", { desc = "New bullet on current line" })
+  end,
   desc = "Support for text files",
 })
 
@@ -435,11 +300,11 @@ autocmd_create("FileType", {
     -- • enclose tag names containing spaces in doubled square brackets
     -- • added to tiddler when converting from 'tid' to 'tiddler' style files
     -- • using TWTidToTiddler command from tiddlywiki ftplugin
-    variable("set", "global", "default_tiddler_tags", "[[Computing]] [[Software]]")
+    vim.g.default_tiddler_tags = "[[Computing]] [[Software]]"
     -- default tiddler creator
     -- • added to tiddler when converting from 'tid' to 'tiddler' style files
     -- • using TWTidToTiddler command from tiddlywiki ftplugin
-    variable("set", "global", "default_tiddler_creator", "David Nebauer")
+    vim.g.default_tiddler_creator = "David Nebauer"
   end,
   desc = "Support for tiddlywiki filetype",
 })
@@ -449,7 +314,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
   group = augroup_create("my_txt2tags_support", { clear = true }),
   pattern = "*.t2t",
   callback = function()
-    option("set", "filetype", "txt2tags", { scope = "local" })
+    vim.bo.filetype = "txt2tags"
   end,
   desc = "Force filetype for txt2tags syntax support",
 })
@@ -459,7 +324,7 @@ autocmd_create("FileType", {
   group = augroup_create("my_xml_support", { clear = true }),
   pattern = "xml",
   callback = function()
-    option("set", "foldmethod", "syntax", { scope = "local" })
+    vim.bo.foldmethod = "syntax"
   end,
   desc = "Support for xml files",
 })

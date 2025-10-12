@@ -1,5 +1,8 @@
 --[[ mason-org/mason.nvim : portable package manager for neovim ]]
 
+-- lua plugin
+-- part of default LazyVim
+
 return {
   {
     "mason-org/mason.nvim",

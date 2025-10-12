@@ -1,8 +1,13 @@
 --[[ flash.nvim : enhanced code navigation ]]
 
--- disabled
+-- lua plugin
+-- part of default LazyVim
+
+-- disable plugin
 
 return {
-  "folke/flash.nvim",
-  enabled = false,
+  {
+    "folke/flash.nvim",
+    enabled = false,
+  },
 }

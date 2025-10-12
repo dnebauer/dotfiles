@@ -1,5 +1,8 @@
 --[[ szw/vim-dict : dictionary lookup ]]
 
+-- vim plugin
+-- not part of default LazyVim
+
 return {
   {
     "szw/vim-dict",

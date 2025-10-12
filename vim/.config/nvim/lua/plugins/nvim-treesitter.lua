@@ -1,13 +1,17 @@
 --[[ nvim-treesitter/nvim-treesitter : interface to parsing tool treesitter ]]
 
+-- lua plugin
+-- part of default LazyVim
+
 return {
   {
     "nvim-treesitter/nvim-treesitter",
     keys = function()
       return {}
     end,
+    branch = "main",
+    cmd = { "TSUpdate", "TSInstall", "TSLog", "TSUninstall" },
     opts = {
-      matchup = { enable = true },
       ensure_installed = {
         "bash",
         "c",
@@ -39,6 +43,9 @@ return {
         "xml",
         "yaml",
       },
+      auto_install = true,
+      folds = { enable = true },
+      highlight = { enable = true },
       incremental_selection = {
         enable = true,
         keymaps = {
@@ -50,6 +57,9 @@ return {
           node_decremental = "V",
         },
       },
+      indent = { enable = true },
+      matchup = { enable = true },
+      sync_install = false,
     },
   },
 }

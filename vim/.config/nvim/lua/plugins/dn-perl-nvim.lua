@@ -1,5 +1,8 @@
 --[[ dnebauer/dn-perl.nvim : perl utilities ]]
 
+-- lua plugin
+-- not part of default LazyVim
+
 return {
   {
     "dnebauer/dn-perl.nvim",

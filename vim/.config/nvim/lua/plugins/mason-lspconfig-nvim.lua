@@ -1,9 +1,12 @@
 --[[ mason-org/mason-lspconfig.nvim : bridge between mason.nvim and lspconfig plugins ]]
 
+-- lua plugin
+-- part of default LazyVim
+
 return {
   {
     "mason-org/mason-lspconfig.nvim",
-    dependencies = { "mason-org/mason.nvim" },
+    dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     opts = {
       ensure_installed = {
         "autotools_ls", -- autoconf, automake, make

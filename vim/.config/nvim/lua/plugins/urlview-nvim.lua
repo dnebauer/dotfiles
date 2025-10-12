@@ -1,5 +1,8 @@
 --[[ axieax/urlview.nvim : finds and display urls ]]
 
+-- lua plugin
+-- not part of default LazyVim
+
 return {
   {
     "axieax/urlview.nvim",

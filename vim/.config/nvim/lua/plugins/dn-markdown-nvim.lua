@@ -1,5 +1,8 @@
 --[[ dnebauer/dn-markdown.nvim : markdown utilities ]]
 
+-- lua plugin
+-- not part of default LazyVim
+
 return {
   {
     "dnebauer/dn-markdown.nvim",

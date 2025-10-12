@@ -1,5 +1,8 @@
 --[[ sjl/gundo.vim : undo tree ]]
 
+-- vim plugin
+-- not part of default LazyVim
+
 return {
   {
     "sjl/gundo.vim",

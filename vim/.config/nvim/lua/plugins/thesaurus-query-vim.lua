@@ -1,5 +1,8 @@
 --[[ Ron89/thesaurus_query.vim : local and online thesaurus ]]
 
+-- vim plugin
+-- not part of default LazyVim
+
 return {
   {
     "Ron89/thesaurus_query.vim",

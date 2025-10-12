@@ -1,7 +1,7 @@
 --[[ tpope/vim-repeat : plugin helper for repeating commands ]]
 
--- required by: tpope/unimpaired
---              tpope/vim-surround
+-- vim plugin
+-- part of default LazyVim
 
 return {
   { "tpope/vim-repeat" },

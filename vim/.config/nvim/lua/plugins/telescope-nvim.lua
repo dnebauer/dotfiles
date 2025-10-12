@@ -1,5 +1,8 @@
 --[[ nvim-telescope/telescope.nvim : highly extendable fuzzy finder over lists ]]
 
+-- lua plugin
+-- part of LazyVim extras
+
 return {
   {
     "nvim-telescope/telescope.nvim",
