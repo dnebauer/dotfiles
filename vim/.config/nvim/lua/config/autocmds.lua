@@ -328,7 +328,6 @@ autocmd_create("FileType", {
   end,
   desc = "Support for xml files",
 })
-
 -- }}}1
 
 -- vim:foldmethod=marker:

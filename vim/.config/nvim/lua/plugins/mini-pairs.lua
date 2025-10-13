@@ -1,11 +1,11 @@
 --[[ nvim-mini/mini.pairs : minimal and fast autopairs ]]
 
 -- lua plugin
+-- do not make lazy: making lazy means it never loads
 
 return {
   {
     "nvim-mini/mini.pairs",
-    lazy = true,
     opts = {
       modes = {
         insert = true,

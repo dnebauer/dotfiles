@@ -46,6 +46,31 @@ vim.g.trouble_lualine = true
 -- fix markdown indentation settings
 vim.g.markdown_recommended_style = 0
 
+-- [[ set via functions ]]
+
+-- diagnostic icons in |sign-column|
+local signs = {
+  Error = " ",
+  Hint = " ",
+  Info = " ",
+  Warn = " ",
+}
+for type, icon in pairs(signs) do
+  local hl = "DiagnosticSign" .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+end
+
+-- diagnostic display options
+vim.diagnostic.config({
+  signs = true,
+  update_in_insert = false,
+  underline = true,
+  severity_sort = true,
+  virtual_text = {
+    source = true,
+  },
+})
+
 --[[ options ]]
 
 -- colour

@@ -4,7 +4,7 @@
 
 return {
   "saghen/blink.cmp",
-  --build = "nix run .#build-plugin",
+  version = "1.*",
   build = "cargo build --release",
   opts_extend = {
     "sources.completion.enabled_providers",
@@ -32,7 +32,15 @@ return {
       -- adjusts spacing to ensure icons are aligned
       nerd_font_variant = "mono",
     },
-
+    -- fuzzy taken from https://cmp.saghen.dev/recipes#always-prioritize-exact-matches
+    fuzzy = {
+      sorts = {
+        'exact',
+        -- defaults
+        'score',
+        'sort_text',
+      },
+    },
     completion = {
       accept = {
         -- experimental auto-brackets support
@@ -42,6 +50,27 @@ return {
       },
       menu = {
         draw = {
+          -- completion taken from https://cmp.saghen.dev/recipes#mini-icons
+          components = {
+            kind_icon = {
+              text = function(ctx)
+                local kind_icon, _, _ = require('mini.icons').get('lsp', ctx.kind)
+                return kind_icon
+              end,
+              -- (optional) use highlights from mini.icons
+              highlight = function(ctx)
+                local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                return hl
+              end,
+            },
+            kind = {
+              -- (optional) use highlights from mini.icons
+              highlight = function(ctx)
+                local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                return hl
+              end,
+            },
+          },
           treesitter = { "lsp" },
         },
       },

@@ -5,7 +5,7 @@ return {
     "mfussenegger/nvim-lint",
     lazy = true,
     opts = {
-      events = { "BufWritePost", "BufReadPost", "InsertLeave" },
+      events = { "BufReadPre", "BufNewFile", "BufWritePost", "BufReadPost", "InsertLeave" },
       linters_by_ft = {
         tcl = { "nagelfar" },
         -- use the "*" filetype to run linters on all filetypes
@@ -50,10 +50,10 @@ return {
         -- • this differs from conform.nvim which only uses the first filetype that has a formatter
         local names = lint._resolve_linter_by_ft(vim.bo.filetype)
 
-        -- create a copy of the names table to avoid modifying the original.
+        -- create a copy of the names table to avoid modifying the original
         names = vim.list_extend({}, names)
 
-        -- add fallback linters.
+        -- add fallback linters
         if #names == 0 then
           vim.list_extend(names, lint.linters_by_ft["_"] or {})
         end
@@ -61,7 +61,7 @@ return {
         -- add global linters.
         vim.list_extend(names, lint.linters_by_ft["*"] or {})
 
-        -- filter out linters that don't exist or don't match the condition.
+        -- filter out linters that don't exist or don't match the condition
         local ctx = { filename = vim.api.nvim_buf_get_name(0) }
         ctx.dirname = vim.fn.fnamemodify(ctx.filename, ":h")
         names = vim.tbl_filter(function(name)

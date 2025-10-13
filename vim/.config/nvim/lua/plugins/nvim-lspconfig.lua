@@ -7,24 +7,24 @@ return {
   {
     "neovim/nvim-lspconfig",
     config = function()
-      vim.lsp.autotools_ls = {} -- autoconf, automake, make
-      vim.lsp.bashls = {} -- bash
-      vim.lsp.biome = {} -- json javascript typescript
-      vim.lsp.clangd = {} -- c++ clang
-      vim.lsp.cmake = {} -- cmake
-      vim.lsp.dockerls = {} -- docker
-      vim.lsp.eslint = {} -- javascript typescript
-      vim.lsp.gopls = {} -- golang
-      vim.lsp.grammarly = {} -- markdown
-      vim.lsp.html = {} -- html
-      vim.lsp.jdtls = {} -- java
-      vim.lsp.jedi_language_server = {} -- python
-      vim.lsp.jqls = {} -- jq
-      vim.lsp.lemminx = {} -- xml
-      vim.lsp.ltex = {} -- latex
-      vim.lsp.lua_ls = {} -- lua
-      vim.lsp.marksman = {} -- markdown
-      vim.lsp.perlnavigator = { -- perl
+      vim.lsp.config.autotools_ls = {} -- autoconf, automake, make
+      vim.lsp.config.bashls = {} -- bash
+      vim.lsp.config.biome = {} -- json javascript typescript
+      vim.lsp.config.clangd = {} -- c++ clang
+      vim.lsp.config.cmake = {} -- cmake
+      vim.lsp.config.dockerls = {} -- docker
+      vim.lsp.config.eslint = {} -- javascript typescript
+      vim.lsp.config.gopls = {} -- golang
+      vim.lsp.config.grammarly = {} -- markdown
+      vim.lsp.config.html = {} -- html
+      vim.lsp.config.jdtls = {} -- java
+      vim.lsp.config.jedi_language_server = {} -- python
+      vim.lsp.config.jqls = {} -- jq
+      vim.lsp.config.lemminx = {} -- xml
+      vim.lsp.config.ltex = {} -- latex
+      vim.lsp.config.lua_ls = {} -- lua
+      vim.lsp.config.marksman = {} -- markdown
+      vim.lsp.config.perlnavigator = { -- perl
         cmd = {
           "/usr/bin/node",
           "/home/david/.local/share/perlnavigator/PerlNavigator/server/out/server.js",
@@ -41,61 +41,47 @@ return {
           },
         },
       }
-      vim.lsp.pylsp = {} -- python
-      vim.lsp.raku_navigator = {} -- raku
-      vim.lsp.rubocop = {} -- ruby
-      vim.lsp.taplo = {} -- toml
-      vim.lsp.vimls = {} -- vimscript
-      vim.lsp.yamlls = {} -- yaml
-    end,
-    --[[opts = {
-      servers = {
-        autotools_ls = {}, -- autoconf, automake, make
-        bashls = {}, -- bash
-        biome = {}, -- json, javascript, typescript
-        clangd = {}, -- c++, clang
-        cmake = {}, -- cmake
-        dockerls = {}, -- docker
-        eslint = {}, -- javascript, typescript
-        gopls = {}, -- golang
-        grammarly = {}, -- markdown
-        html = {}, -- html
-        jdtls = {}, -- java
-        jedi_language_server = {}, -- python
-        jqls = {}, -- jq
-        lemminx = {}, -- xml
-        ltex = {}, -- latex
-        lua_ls = {}, -- lua
-        marksman = {}, -- markdown
-        perlnavigator = { -- perl
-          cmd = {
-            "/usr/bin/node",
-            "/home/david/.local/share/perlnavigator/PerlNavigator/server/out/server.js",
-            "--stdio",
+      vim.lsp.config.pylsp = {} -- python
+      vim.lsp.config.raku_navigator = {} -- raku
+      vim.lsp.config.rubocop = {} -- ruby
+      vim.lsp.config.taplo = {} -- toml
+      vim.lsp.config.vimls = {} -- vimscript
+      vim.lsp.config.yamlls = {} -- yaml
+      vim.lsp.config("*", {
+        diagnostics = {
+          underline = true,
+          update_in_insert = false,
+          virtual_text = {
+            spacing = 4,
+            source = "if_many",
+            prefix = "●",
+            -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
+            -- prefix = "icons",
           },
-          settings = {
-            perlnavigator = {
-              perlPath = "/usr/bin/perl",
-              enableWarnings = true,
-              perltidyEnabled = true,
-              perltidyProfile = "/home/david/.perltidyrc",
-              perlcriticEnabled = true,
-              perlcriticProfile = "/home/david/.perlcriticrc",
+          severity_sort = true,
+          signs = {
+            text = {
+              [vim.diagnostic.severity.ERROR] = " ",
+              [vim.diagnostic.severity.WARN] = " ",
+              [vim.diagnostic.severity.HINT] = " ",
+              [vim.diagnostic.severity.INFO] = " ",
             },
           },
         },
-        pylsp = {}, -- python
-        raku_navigator = {}, -- raku
-        rubocop = {}, -- ruby
-        taplo = {}, -- toml
-        vimls = {}, -- vimscript
-        yamlls = {}, -- yaml
-      },
-      --setup = {
-      --  jdtls = function()
-      --    return true -- avoid duplicate servers
-      --  end,
-      --},
-    },]]
+        capabilities = {
+          workspace = {
+            fileOperations = {
+              didRename = true,
+              willRename = true,
+            },
+          },
+        },
+        setup = {
+          jdtls = function()
+            return true -- avoid duplicate servers
+          end,
+        },
+      })
+    end,
   },
 }

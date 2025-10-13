@@ -161,7 +161,8 @@ map("n", "yzz", "yz_", { remap = true, desc = "Add Surrounding for Line" })
 
 -- trying to define within plugin file causes error:
 --   "attempt to call method 'find' (a nil value)"
-map({ "n", "v" }, "<leader>sr", function()
+--map({ "n", "v" }, "<leader>sr", function()
+vim.keymap.set({ "n", "v" }, "<leader>sr", function()
   local grug = require("grug-far")
   local ext = vim.bo.buftype == "" and vim.fn.expand("%:e")
   grug.open({
@@ -169,3 +170,5 @@ map({ "n", "v" }, "<leader>sr", function()
     prefills = { filesFilter = ext and ext ~= "" and "*." .. ext or nil },
   })
 end, { desc = "Search and Replace" })
+
+-- vim:foldmethod=marker:

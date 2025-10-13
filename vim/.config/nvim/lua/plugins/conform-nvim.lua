@@ -7,7 +7,7 @@ return {
   {
     "stevearc/conform.nvim",
     dependencies = { "mason.nvim" },
-    event = { "BufWritePre" },
+    event = { "BufReadPre", "BufNewFile" },
     cmd = { "ConformInfo" },
     lazy = true,
     keys = {},
@@ -15,15 +15,15 @@ return {
       formatters_by_ft = {
         c = { "clang-format" },
         cpp = { "clang-format" },
-        cmake = { "cmake_format" },
+        cmake = { "cmake_format" }, -- unavailable: cmake_format
         css = { "prettierd", "prettier", stop_after_first = true },
-        go = { "gofmt", "goimports", "gofumpt", stop_after_first = true },
+        go = { "gofmt", "goimports", "gofumpt", stop_after_first = true }, -- unavailable: gofmt
         html = { "prettierd", "prettier", stop_after_first = true },
         javascript = { "prettierd", "prettier", stop_after_first = true },
         javascriptreact = { "prettierd" },
         json = { "prettierd", "prettier", stop_after_first = true },
         less = { "prettierd", "prettier", stop_after_first = true },
-        lua = { "stylua", "prettierd", stop_after_first = true },
+        lua = { "luaformatter", "stylua", "prettierd", stop_after_first = true },
         markdown = { "mdformat", "markdownlint", "markdownlint-cli2", "prettierd", "prettier", stop_after_first = true },
         ["markdown.pandoc"] = {
           "mdformat",
@@ -34,7 +34,7 @@ return {
           stop_after_first = true,
         },
         pandoc = { "mdformat", "markdownlint", "markdownlint-cli2", "prettierd", "prettier", stop_after_first = true },
-        perl = { "perlimports", "perltidy" },
+        perl = { "perlimports", "perltidy" }, -- unavailable: perlimports, perltidy
         --[[
         python = { "isort", "black" },
         python = function(bufnr)
@@ -94,6 +94,11 @@ return {
         async = false, -- not recommended to change
         quiet = false, -- not recommended to change
         lsp_format = "fallback", -- not recommended to change
+      },
+      format_on_save = {
+        lsp_fallback = true,
+        async = false,
+        timeout_ms = 500,
       },
     },
   },

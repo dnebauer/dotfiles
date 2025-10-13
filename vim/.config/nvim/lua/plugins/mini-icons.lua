@@ -5,7 +5,6 @@
 return {
   {
     "nvim-mini/mini.icons",
-    lazy = true,
     opts = {
       file = {
         [".chezmoiignore"] = { glyph = "", hl = "MiniIconsGrey" },
