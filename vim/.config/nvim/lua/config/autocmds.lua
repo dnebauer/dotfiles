@@ -1,11 +1,7 @@
 -- autocmds
 
--- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
-
 -- plugins used:
--- • preservim/vim-textobj-sentence
 -- • gaoDean/autolist.nvim
--- • LazyVim/LazyVim
 -- • echasnovski/mini.surround
 
 --[[ functions ]]
@@ -17,7 +13,7 @@ local map = vim.keymap.set
 --[[ global ]]
 
 -- check if we need to reload the file when it has changed {{{1
-vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+autocmd_create({ "FocusGained", "TermClose", "TermLeave" }, {
   group = augroup_create("my_checktime", { clear = true }),
   callback = function()
     if vim.o.buftype ~= "nofile" then
@@ -25,10 +21,9 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
     end
   end,
 })
-pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_checktime")
 
 -- resize splits if window got resized {{{1
-vim.api.nvim_create_autocmd({ "VimResized" }, {
+autocmd_create({ "VimResized" }, {
   group = augroup_create("my_resize_splits", { clear = true }),
   callback = function()
     local current_tab = vim.fn.tabpagenr()
@@ -36,10 +31,9 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
     vim.cmd("tabnext " .. current_tab)
   end,
 })
-pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_resize_splits")
 
 -- go to last loc when opening a buffer {{{1
-vim.api.nvim_create_autocmd("BufReadPost", {
+autocmd_create("BufReadPost", {
   group = augroup_create("my_last_loc", { clear = true }),
   callback = function(event)
     local exclude = { "gitcommit" }
@@ -57,7 +51,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 })
 
 -- close some filetypes with <q> {{{1
-vim.api.nvim_create_autocmd("FileType", {
+autocmd_create("FileType", {
   group = augroup_create("my_close_with_q", { clear = true }),
   pattern = {
     "PlenaryTestPopup",
@@ -90,21 +84,19 @@ vim.api.nvim_create_autocmd("FileType", {
     end)
   end,
 })
-pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_close_with_q")
 
 -- fix conceallevel for json files {{{1
-vim.api.nvim_create_autocmd({ "FileType" }, {
+autocmd_create({ "FileType" }, {
   group = augroup_create("my_json_conceal", { clear = true }),
   pattern = { "json", "jsonc", "json5" },
   callback = function()
     vim.opt_local.conceallevel = 0
   end,
 })
-pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_json_conceal")
 
 -- auto create dir when saving a file {{{1
 -- • in case some intermediate directory does not exist
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+autocmd_create({ "BufWritePre" }, {
   group = augroup_create("my_auto_create_dir", { clear = true }),
   callback = function(event)
     if event.match:match("^%w%w+:[\\/][\\/]") then
@@ -114,7 +106,6 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
 })
-pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_auto_create_dir")
 
 -- prolong highlight of yanked text {{{1
 autocmd_create("TextYankPost", {
@@ -124,7 +115,6 @@ autocmd_create("TextYankPost", {
   end,
   desc = "Prolong yanked text highlight time to 500 ms",
 })
-pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_highlight_yank")
 
 -- remove end-of-line whitespace on save {{{1
 autocmd_create("BufWritePre", {
@@ -283,9 +273,6 @@ autocmd_create("FileType", {
     vim.wo.spell = true
     -- sensible formatting
     vim.bo.formatexpr = "tqna1"
-    -- autolist
-    -- • plugin: gaoDean/autolist.nvim
-    map("i", "<CR>", "<CR><Cmd>AutolistNewBullet<CR>", { desc = "New bullet on current line" })
   end,
   desc = "Support for text files",
 })

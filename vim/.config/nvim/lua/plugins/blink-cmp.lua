@@ -4,7 +4,7 @@
 
 return {
   "saghen/blink.cmp",
-  version = "1.*",
+  version = "*",
   build = "cargo build --release",
   opts_extend = {
     "sources.completion.enabled_providers",
@@ -35,10 +35,10 @@ return {
     -- fuzzy taken from https://cmp.saghen.dev/recipes#always-prioritize-exact-matches
     fuzzy = {
       sorts = {
-        'exact',
+        "exact",
         -- defaults
-        'score',
-        'sort_text',
+        "score",
+        "sort_text",
       },
     },
     completion = {
@@ -54,19 +54,19 @@ return {
           components = {
             kind_icon = {
               text = function(ctx)
-                local kind_icon, _, _ = require('mini.icons').get('lsp', ctx.kind)
+                local kind_icon, _, _ = require("mini.icons").get("lsp", ctx.kind)
                 return kind_icon
               end,
               -- (optional) use highlights from mini.icons
               highlight = function(ctx)
-                local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                local _, hl, _ = require("mini.icons").get("lsp", ctx.kind)
                 return hl
               end,
             },
             kind = {
               -- (optional) use highlights from mini.icons
               highlight = function(ctx)
-                local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                local _, hl, _ = require("mini.icons").get("lsp", ctx.kind)
                 return hl
               end,
             },

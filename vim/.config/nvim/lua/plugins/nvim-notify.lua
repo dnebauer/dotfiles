@@ -1,12 +1,12 @@
 --[[ rcarriga/nvim-notify : fancy, configurable, notification manager ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {
     "rcarriga/nvim-notify",
-    -- change plugin mapping from "Dismiss All" to "Telescope notify"
+    -- change plugin mapping from "Dismiss All" to "Telescope notify",
+    -- i.e., display all notifications in a searchable list
     keys = {
       {
         "<Leader>un",

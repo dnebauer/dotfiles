@@ -1,8 +1,9 @@
 --[[ tpope/vim-speeddating : use C-{x,a} on dates ]]
 
--- vim plugin
--- not part of default LazyVim
+-- vimscript plugin
 
 return {
-  { "tpope/vim-speeddating" },
+  {
+    "tpope/vim-speeddating",
+  },
 }

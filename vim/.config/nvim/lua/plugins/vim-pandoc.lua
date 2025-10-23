@@ -8,6 +8,14 @@ return {
     "vim-pandoc/vim-pandoc",
     ft = { "markdown", "markdown.pandoc", "pandoc" },
     config = function()
+      -- WARNING: unable to move variables to an "init" field/function because
+      -- if g:pandoc#filetypes#handled is in "init" it somehow causes an
+      -- [[E716: Key not present in Dictionary: "markdown.pandoc"]] error when
+      -- executing line 97 of
+      -- ~/.local/share/nvim/lazy/vim-pandoc/plugin/pandoc.vim because
+      -- g:pandoc_extensions_table does not have a matching key for
+      -- "markdown.pandoc"
+      --
       -- utility functions
       local error_msg = function(...)
         for _, msg in ipairs({ ... }) do

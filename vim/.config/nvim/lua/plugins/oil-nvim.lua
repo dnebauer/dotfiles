@@ -1,7 +1,6 @@
 -- stevearc/oil.nvim : edit the filesystem like a normal buffer
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {
@@ -13,8 +12,12 @@ return {
     },
     opts = {
       keymaps = {
-        -- create a new mapping, gs, to search and replace in the current directory
-        -- taken from the grug-far readme
+        -- create new mapping: gs
+        -- • available while in "oil" file explorer
+        -- • search and replace in the current directory
+        -- • taken from the grug-far readme at
+        --   https://github.com/MagicDuck/grug-far.nvim?tab=readme-ov-file#\
+        --   add-oilnvim-integration-to-open-search-limited-to-focused-directory
         gs = {
           callback = function()
             -- get the current directory

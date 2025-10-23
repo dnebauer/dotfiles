@@ -1,7 +1,6 @@
 --[[ nvim-telescope/telescope.nvim : highly extendable fuzzy finder over lists ]]
 
 -- lua plugin
--- part of LazyVim extras
 
 return {
   {
@@ -31,29 +30,12 @@ return {
       require("telescope").load_extension("noice")
     end,
     keys = {
-      -- disable these plugin key mappings
-      { "<Leader>,", false },
-      { "<Leader><Space>", false },
-      { "<Leader>fc", false },
-      { "<Leader>fF", false },
-      { "<Leader>fR", false },
-      { "<Leader>sa", false },
-      { "<Leader>sb", false },
-      { "<Leader>sC", false },
-      { "<Leader>sd", false },
-      { "<Leader>sD", false },
-      { "<Leader>sg", false },
-      { "<Leader>sG", false },
-      { "<Leader>sH", false },
-      { "<Leader>ss", false },
-      { "<Leader>sS", false },
-      -- reassign "<Leader>sC" action to "<Leader>sc"
-      { "<leader>sc", "<cmd>Telescope Commands<cr>", desc = "Commands" },
-      -- add this plugin key mapping
+      -- find buffer
       {
-        "<Leader>fs",
-        "<Cmd>Telescope builtin<CR>",
-        desc = "Telescope Builtin Selectors",
+        "<leader>fb",
+        "<cmd>lua require('telescope.builtin').buffers()<cr>",
+        { "n" },
+        desc = "Telescope Buffers",
       },
     },
     dependencies = {
@@ -121,7 +103,14 @@ return {
       -- undo
       {
         "debugloop/telescope-undo.nvim",
-        keys = { { "<leader>U", "<cmd>Telescope undo<cr>", desc = "Telescope Undo" } },
+        keys = {
+          {
+            "<leader>U",
+            "<cmd>lua require('telescope').extensions.undo.undo()<cr>",
+            { "n" },
+            desc = "Telescope Undo",
+          },
+        },
         config = function()
           require("telescope").load_extension("undo")
         end,

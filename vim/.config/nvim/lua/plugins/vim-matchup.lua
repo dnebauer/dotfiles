@@ -1,8 +1,10 @@
 --[[ andymass/vim-matchup : highlight, navigate, and operate on sets of matching text ]]
 
--- lua/vim plugin
--- not part of default LazyVim
+-- lua/vimscript plugin
 
 return {
-  { "andymass/vim-matchup" },
+  {
+    "andymass/vim-matchup",
+    opts = {},
+  },
 }

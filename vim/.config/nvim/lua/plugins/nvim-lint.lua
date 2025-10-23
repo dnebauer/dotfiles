@@ -1,5 +1,7 @@
 --[[ mfussenegger/nvim-lint : async linter complementing LSPs ]]
 
+-- lua plugin
+
 return {
   {
     "mfussenegger/nvim-lint",
@@ -34,6 +36,9 @@ return {
 
       function M.debounce(ms, fn)
         local timer = vim.uv.new_timer()
+        if not timer then
+          return
+        end
         return function(...)
           local argv = { ... }
           timer:start(ms, 0, function()

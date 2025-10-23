@@ -1,8 +1,9 @@
 --[[ tpope/vim-repeat : plugin helper for repeating commands ]]
 
--- vim plugin
--- part of default LazyVim
+-- vimscript plugin
 
 return {
-  { "tpope/vim-repeat" },
+  {
+    "tpope/vim-repeat",
+  },
 }

@@ -1,7 +1,6 @@
 --[[ akinsho/toggleterm.nvim : persist and toggle multiple terminals ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {

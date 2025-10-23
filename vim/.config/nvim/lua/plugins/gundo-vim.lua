@@ -1,14 +1,17 @@
 --[[ sjl/gundo.vim : undo tree ]]
 
--- vim plugin
--- not part of default LazyVim
+-- vimscript plugin
 
 return {
   {
     "sjl/gundo.vim",
+    opts = {},
+    init = function()
+      vim.g.gundo_close_on_revert = true
+      vim.g.gundo_prefer_python3 = true
+    end,
     config = function()
-      vim.g.gundo_close_on_revert = 1
-      vim.g.gundo_prefer_python3 = 1
+      vim.keymap.set("n", "<leader>u", "<cmd>GundoToggle<cr>", { desc = "Toggle undo map" })
     end,
   },
 }

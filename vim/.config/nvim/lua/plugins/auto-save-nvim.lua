@@ -1,7 +1,6 @@
 --[[ okuuva/auto-save.nvim : event-based autosaving ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {

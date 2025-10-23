@@ -1,7 +1,6 @@
 -- chrishrb/gx.nvim : open links without netrw
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {
@@ -9,7 +8,7 @@ return {
     keys = { { "gx", "<cmd>Browse<cr>", mode = { "n", "x" } } },
     cmd = { "Browse" },
     init = function()
-      vim.g.netrw_nogx = 1 -- disable netrw gx
+      vim.g.netrw_nogx = true -- disable netrw gx
     end,
     dependencies = { "nvim-lua/plenary.nvim" },
     config = true, -- default settings

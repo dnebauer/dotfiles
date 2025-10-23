@@ -1,12 +1,11 @@
 --[[ szw/vim-dict : dictionary lookup ]]
 
--- vim plugin
--- not part of default LazyVim
+-- vimscript plugin
 
 return {
   {
     "szw/vim-dict",
-    config = function()
+    init = function()
       vim.g.dict_hosts = { { "dict.org", { "gcide", "wn", "jargon", "foldoc" } } }
     end,
   },

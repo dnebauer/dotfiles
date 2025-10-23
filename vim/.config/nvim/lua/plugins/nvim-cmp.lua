@@ -1,8 +1,6 @@
 --[[ hrsh7th/nvim-cmp : completion engine written in Lua ]]
 
 -- lua plugin
--- part of LazyVim extras
--- WARN: not enabled in LazyVim extras (plugins: coding.nvim-cmp)
 
 return {
   {

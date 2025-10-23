@@ -1,7 +1,6 @@
 --[[ kr40/nvim-macros : macro management ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {

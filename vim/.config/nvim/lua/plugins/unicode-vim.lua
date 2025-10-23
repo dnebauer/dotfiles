@@ -1,8 +1,9 @@
 --[[ chrisbra/unicode.vim : unicode/digraph handling ]]
 
--- vim plugin
--- not part of default LazyVim
+-- vimscript plugin
 
 return {
-  { "chrisbra/unicode.vim" },
+  {
+    "chrisbra/unicode.vim",
+  },
 }

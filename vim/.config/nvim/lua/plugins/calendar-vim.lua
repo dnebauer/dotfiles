@@ -1,8 +1,9 @@
 --[[ mattn/calendar : display calendar ]]
 
--- vim plugin
--- not part of default LazyVim
+-- vimscript plugin
 
 return {
-  { "mattn/calendar-vim" },
+  {
+    "mattn/calendar-vim",
+  },
 }

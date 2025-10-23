@@ -1,12 +1,12 @@
 --[[ dhruvasagar/vim-table-mode : automatic table creator and formatter ]]
 
--- vim plugin
--- not part of default LazyVim
+-- vimscript plugin
 
 return {
   {
     "dhruvasagar/vim-table-mode",
-    config = function()
+    ft = { "markdown", "markdown.pandoc", "pandoc" },
+    init = function()
       -- pandoc grid tables
       -- • if set 'g:table_mode_corner' or 'b:table_mode_corner' here it will
       --   be ignored because the plugin file "tablemode_markdown.vim" sets

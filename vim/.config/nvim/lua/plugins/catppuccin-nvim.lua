@@ -5,9 +5,14 @@
 return {
   {
     "catppuccin/nvim",
-    lazy = true,
     name = "catppuccin",
+    priority = 1000,
     opts = {
+      flavour = "auto", -- auto, latte, frappe, macchiato, mocha
+      background = { -- :h background
+        light = "latte", -- latte
+        dark = "mocha", -- frappe, macchiato, mocha
+      },
       lsp_styles = {
         underlines = {
           errors = { "undercurl" },
@@ -54,5 +59,10 @@ return {
         end,
       },
     },
+    config = function()
+      -- enable the following command to make this the default colorscheme
+      -- • can use: 'catppuccin' or 'catppuccin-{latte,frappe,macchiato,mocha}'
+      --vim.cmd.colorscheme("catppuccin-mocha")
+    end,
   },
 }

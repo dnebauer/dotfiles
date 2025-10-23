@@ -1,7 +1,6 @@
 --[[ ecthelionvi/NeoColumn.nvim : display colorcolumn ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {

@@ -1,12 +1,11 @@
 --[[ folke/lazydev.nvim : configure LuaLS for editing nvim config ]]
 
 -- lua plugin
--- part of default LazyVim
 
 return {
   {
     "folke/lazydev.nvim",
-    ft = "lua", -- only load on lua files
+    ft = { "lua" }, -- only load on lua files
     cmd = "LazyDev",
     opts = {
       library = {

@@ -1,12 +1,14 @@
 --[[ kevinhwang91/nvim-ufo : modern high performance folds ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {
     "kevinhwang91/nvim-ufo",
-    dependencies = { "kevinhwang91/promise-async", "neovim/nvim-lspconfig" },
+    dependencies = {
+      "kevinhwang91/promise-async",
+      "neovim/nvim-lspconfig",
+    },
     keys = {
       {
         "zR",

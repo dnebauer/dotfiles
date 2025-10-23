@@ -1,7 +1,6 @@
 --[[ mason-org/mason-lspconfig.nvim : bridge between mason.nvim and lspconfig plugins ]]
 
 -- lua plugin
--- part of default LazyVim
 
 return {
   {
@@ -33,11 +32,9 @@ return {
         "vimls", -- vimscript
         "yamlls", -- yaml
       },
-      --[[
-      automatic_installation = {
-        exclude = { "solargraph" },
-      },
-      --]]
+      --automatic_installation = {
+      --  exclude = { "solargraph" },
+      --},
     },
   },
 }

@@ -1,7 +1,6 @@
 --[[ tris203/hawtkeys.nvim : find/suggest keys for nvim shortcuts ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {

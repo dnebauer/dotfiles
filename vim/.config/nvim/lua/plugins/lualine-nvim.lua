@@ -1,12 +1,10 @@
 --[[ nvim-lualine/lualine.nvim : nvim statusline ]]
 
 -- lua plugin
--- part of default LazyVim
 
 return {
   {
     "nvim-lualine/lualine.nvim",
-    event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     init = function()
       vim.g.lualine_laststatus = vim.o.laststatus
@@ -46,15 +44,19 @@ return {
             { "encoding", "fileformat", "filetype" },
             -- show normal-mode keystrokes
             {
+              ---@diagnostic disable:undefined-field
               require("noice").api.status.command.get,
               cond = require("noice").api.status.command.has,
               color = { fg = "#ff9e64" },
+              ---@diagnostic enable:undefined-field
             },
             -- show notice when macro is recording
             {
+              ---@diagnostic disable:undefined-field,deprecated
               require("noice").api.statusline.mode.get,
               cond = require("noice").api.statusline.mode.has,
               color = { fg = "#ff9e64" },
+              ---@diagnostic enable:undefined-field,deprecated
             },
           },
           lualine_y = { { "progress", separator = " ", padding = { left = 1, right = 0 } } },

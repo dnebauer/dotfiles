@@ -22,13 +22,9 @@ require("lazy").setup({
     -- ensure installed parsers are always updated to match nvim-treesitter
     { "nvim-treesitter/nvim-treesitter", branch = "master", lazy = false, build = ":TSUpdate" },
   },
-  install = {
-    colorscheme = {
-      "tokyonight",
-      --"habamax",
-    },
+  checker = { -- no automatic checking for plugin updates
+    enabled = false,
   },
-  checker = { enabled = false }, -- automatical checking for plugin updates
   ui = {
     custom_keys = {
       ["<localleader>l"] = false,
@@ -52,8 +48,3 @@ require("lazy").setup({
     },
   },
 })
-
--- have to force colorscheme because these do not work:
--- • install/colorscheme setting above
--- • adding it to the config() function of the colorscheme plugin file
-vim.cmd.colorscheme("tokyonight")

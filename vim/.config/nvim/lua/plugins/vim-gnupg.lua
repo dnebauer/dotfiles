@@ -1,8 +1,9 @@
 --[[ jamessan/vim-gnupg : transparently edit gpg-encrypted files ]]
 
--- vim plugin
--- not part of default LazyVim
+-- vimscript plugin
 
 return {
-  { "jamessan/vim-gnupg" },
+  {
+    "jamessan/vim-gnupg",
+  },
 }

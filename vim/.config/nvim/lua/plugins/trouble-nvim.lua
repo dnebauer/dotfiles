@@ -1,7 +1,6 @@
 --[[ folke/trouble.nvim : better diagnostics list ]]
 
 -- lua plugin
--- part of default LazyVim
 
 return {
   {

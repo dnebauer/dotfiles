@@ -2,10 +2,14 @@
 
 -- lua plugin
 
+-- WARNING: this plugin appears to load but has no functionality;
+--          tried numerous configurations from the repo's issues but none
+--          restored the misssing functionality
+
 return {
   {
     "windwp/nvim-ts-autotag",
-    lazy = true,
+    dependencies = "nvim-treesitter/nvim-treesitter",
     opts = {},
   },
 }

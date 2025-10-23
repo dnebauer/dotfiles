@@ -1,8 +1,10 @@
 --[[ AndrewRadev/bufferize.vim : run commands and show result in temporary buffers ]]
 
--- vim plugin
--- not part of default LazyVim
+-- vimscript plugin
 
 return {
-  { "AndrewRadev/bufferize.vim" },
+  {
+    "AndrewRadev/bufferize.vim",
+    cmd = { "Bufferize", "BufferizeTimer" },
+  },
 }

@@ -1,14 +1,11 @@
 --[[ nvim-treesitter/nvim-treesitter : interface to parsing tool treesitter ]]
 
 -- lua plugin
--- part of default LazyVim
 
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    keys = function()
-      return {}
-    end,
+    keys = {},
     branch = "main",
     cmd = { "TSUpdate", "TSInstall", "TSLog", "TSUninstall" },
     opts = {

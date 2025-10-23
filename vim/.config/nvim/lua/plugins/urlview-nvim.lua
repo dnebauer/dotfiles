@@ -1,13 +1,13 @@
 --[[ axieax/urlview.nvim : finds and display urls ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {
     "axieax/urlview.nvim",
     config = function()
-      -- define 'spectate' action
+      -- use qutebrowser to open urls
+      -- • define 'spectate' action
       local actions = require("urlview.actions")
       actions["spectate"] = function(raw_url)
         local utils = require("urlview.utils")

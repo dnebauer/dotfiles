@@ -1,7 +1,6 @@
 --[[ neovim/nvim-lspconfig : configuration for the nvim LSP client ]]
 
 -- lua plugin
--- part of default LazyVim
 
 return {
   {
@@ -21,9 +20,18 @@ return {
       vim.lsp.config.jedi_language_server = {} -- python
       vim.lsp.config.jqls = {} -- jq
       vim.lsp.config.lemminx = {} -- xml
-      vim.lsp.config.ltex = {} -- latex
+      vim.lsp.config.ltex = { -- latex
+        filetypes = { "bib", "plaintex", "rst", "rnoweb", "tex", "quarto", "rmd", "context" },
+        settings = {
+          ltex = {
+            enabled = { "bibtex", "tex", "restructuredtext", "rsweave", "latex", "quarto", "rmd", "context" },
+          },
+        },
+      }
       vim.lsp.config.lua_ls = {} -- lua
-      vim.lsp.config.marksman = {} -- markdown
+      vim.lsp.config.marksman = { -- markdown
+        filetypes = { "markdown", "markdown.mdx", "markdown.pandoc", "pandoc" },
+      }
       vim.lsp.config.perlnavigator = { -- perl
         cmd = {
           "/usr/bin/node",
@@ -56,7 +64,7 @@ return {
             source = "if_many",
             prefix = "●",
             -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
-            -- prefix = "icons",
+            -- prefix = "icons"
           },
           severity_sort = true,
           signs = {

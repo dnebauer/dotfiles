@@ -1,7 +1,6 @@
 --[[ swaits/thethethe.nvim : autocorrect common misspellings and typos ]]
 
 -- lua plugin
--- not part of default LazyVim
 
 return {
   {
