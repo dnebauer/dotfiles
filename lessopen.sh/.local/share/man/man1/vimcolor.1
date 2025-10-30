@@ -1,0 +1,272 @@
+.\" Hey, EMACS: -*- nroff -*-
+
+.\" Filename: vimcolor.1
+.\" Author:   David Nebauer
+.\" History:  2025-10-29 - created
+
+.\" -----------------------------------------------------------------
+.\" NOTES
+.\" -----------------------------------------------------------------
+.ig
+
+For header (.TH), first parameter, NAME, should be all caps
+Second parameter, SECTION, should be 1-8, maybe w/ subsection
+Other parameters are allowed: see man(7), man(1)
+Please adjust the date whenever revising the manpage.
+
+Some roff macros, for reference:
+.nh        disable hyphenation
+.hy        enable hyphenation
+.ad l      left justify
+.ad b      justify to both left and right margins
+.nf        disable filling
+.fi        enable filling
+.br        insert line break
+.sp <n>    insert n+1 empty lines
+for manpage-specific macros, see groff_man(7) and man(7)
+
+Formatting [see groff_char (7) and man (7) for details]:
+\(aq  : escape sequence for (')
+\[dq] : plain double quote
+\[lq] : left/open double quote
+\[rq] : right/close double quote
+`     : left/open single quote
+'     : right/close single quote
+\(em  : escape sequence for em dash
+\(en  : escape sequence for en dash
+\.    : escape sequence for period/dot
+\(rg  : registration symbol
+\(tm  : trademark symbol
+\fX   : escape sequence that changes font, where 'X' can be 'R|I|B|BI'
+        (R = roman/normal | I = italic | B = bold | BI = bold-italic)
+\fP   : switch to previous font
+        in this case '\fR' could also have been used
+.B    : following arguments are boldened
+.I    : following arguments are italicised
+.BI   : following arguments are bold alternating with italics
+.BR   : following arguments are bold alternating with roman
+.IB   : following arguments are italics alternating with bold
+.IR   : following arguments are italics alternating with roman
+.RB   : following arguments are roman alternating with bold
+.RI   : following arguments are roman alternating with italics
+.SM   : following arguments are small (scaled 9/10 of the regular size)
+.SB   : following arguments are small bold (not small alternating with bold)
+        [note: if argument in alternating pattern contains whitespace,
+               enclose in whitespace]
+.RS x : indent following lines by x characters
+.RE   : end indent
+
+Bulleted list:
+   A bulleted list:
+   .IP \[bu] 2
+   lawyers
+   .IP \[bu]
+   guns
+   .IP \[bu]
+   money
+Numbered list:
+   A numbered list:
+   .nr step 1 1
+   .IP \n[step]. 3
+   lawyers
+   .IP \n+[step].
+   guns
+   .IP \n+[step].
+   money
+..
+
+.\" -----------------------------------------------------------------
+.\" SETUP
+.\" -----------------------------------------------------------------
+
+.\" Macro: Format URL
+.\"  usage:  .URL "http:\\www.gnu.org" "GNU Project" " of the"
+.\"  params: 1 = url
+.\"          2 = link text/name
+.\"          3 = postamble (optional)
+.\"  note:   The www.tmac macro provides a .URL macro package; this
+.\"          is a local fallback in case www.tmac is unavailable
+.\"  credit: man(7)
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+
+.\" Prefer .URL macro from www.tmac macro package if it is available
+.\"  note: In the conditional below the '\n' escape returns the value of
+.\"        a register, in this the '.g'
+.\"        The '.g' register is only found in GNU 'troff', and it is
+.\"        assumed that GNU troff will always include the www.tmac
+.\"        macro package
+.if \n[.g] .mso www.tmac
+
+.\" Macro: Ellipsis
+.\"  usage: .ellipsis
+.\"  note: only works at beginning of line
+.de ellipsis
+.cc ^
+...
+^cc
+..
+
+.\" String: Command name
+.ds self vimcolor
+
+.\" -----------------------------------------------------------------
+.\" MANPAGE CONTENT
+.\" -----------------------------------------------------------------
+
+.TH "VIMCOLOR" "1" "2025-10-29" "" "VIMCOLOR Manual"
+.SH "NAME"
+\*[self] \- use vim to highlight an input file
+.SH "SYNOPSIS"
+.SY "\*[self]"
+[
+.B "-c"
+]
+[
+.BI "-l " "language"
+]
+[
+.I "filename"
+]
+.YS
+.SY "\*[self]"
+.B "-L"
+[
+.I "pattern"
+]
+.YS
+.SY "\*[self]"
+.B "-h"
+.YS
+.SH "DESCRIPTION"
+\*[self] works by running the Vim text editor and getting it to apply its
+excellent syntax highlighting (aka \(aqfont-locking\(aq) to an input file, and mark
+pieces of text according to whether it thinks they are comments, keywords,
+strings, etc. The Perl code then reads back this markup and converts it
+to text marked with ANSI escape sequences (using Term::ANSIColor)
+based on the Vim syntax coloring of the input file.
+.PP
+Input can be:
+.IP \[bu] 2
+a file, in which case the file name is provided as a final argument to the invocation
+.IP \[bu]
+STDIN, in which case the file name is not given or is set to \(aq-\(aq.
+.PP
+A color scheme set in vim is respected. You can alter the color scheme using
+the TEXT_VIMCOLOR_ANSI environment variable in the format of "SynGroup=color;".
+For example:
+.PP
+.RS 4
+.EX
+TEXT_VIMCOLOR_ANSI='Comment=green;Statement = magenta; '
+.EE
+.RE
+.PP
+By default only the following SynGroup syntax groups are used:
+.PP
+.IP \[bu] 2
+Comment
+.IP \[bu]
+Constant
+.IP \[bu]
+Identifier
+.IP \[bu]
+Statement
+.IP \[bu]
+PreProc
+.IP \[bu]
+Type
+.IP \[bu]
+Special
+.IP \[bu]
+Underlined
+.IP \[bu]
+Ignore
+.IP \[bu]
+Error
+.IP \[bu]
+Todo
+.PP
+If you want to benefit from finer-grained syntax highlighting you can
+request in TEXT_VIMCOLOR_ANSI additional syntax groups from the list:
+.PP
+.IP \[bu] 2
+Character
+.IP \[bu]
+Number
+.IP \[bu]
+Boolean
+.IP \[bu]
+Float
+.IP \[bu]
+Function
+.IP \[bu]
+Conditional
+.IP \[bu]
+Repeat
+.IP \[bu]
+Label
+.IP \[bu]
+Operator
+.IP \[bu]
+Keyword
+.IP \[bu]
+Exception
+.IP \[bu]
+Include
+.IP \[bu]
+Define
+.IP \[bu]
+Macro
+.IP \[bu]
+PreCondit
+.IP \[bu]
+StorageClass
+.IP \[bu]
+Structure
+.IP \[bu]
+Typedef
+.IP \[bu]
+Tag
+.IP \[bu]
+SpecialChar
+.IP \[bu]
+Delimiter
+.IP \[bu]
+SpecialComment
+.IP \[bu]
+Debug
+.PP
+and chose appropriate colors.
+.SH "OPTIONS"
+.TP
+.B "\-c"
+Report color settings at the end of the program. Optional.
+.TP
+.B "\-l"
+Specify the type of file Vim should expect, if not recognized correctly.
+Optional.
+.TP
+.B "\-L"
+List supported languages (file types) [that match pattern] and exit. Optional.
+.TP
+.B "\-h"
+Print help text and exit. Optional.
+.SH "SEE ALSO"
+.BR "lesspipe.sh " "(1)."
+.SH "LICENSE"
+Copyright (c) 2002-2006 by Geoff Richards.
+.br
+Copyright (c) 2011 by Randy Stauner.
+.br
+Copyright (c) 2021-2024 by Wolfgang Friebel.
+.PP
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+.SH "AUTHOR"
+\*[self] was written by Geoff Richards, Randy Stauner, and Wolfgang Friebel.
+.PP
+This manual page was written by
+.URL "mailto:david at nebauer dot org" "David Nebauer"
+for personal use.
