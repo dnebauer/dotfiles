@@ -1,99 +1,108 @@
 # mailcap for use with neomutt
 #
 
+# INFO: for 'lesspipe.sh' commands to work cannot enclose %s in quotes
+#          so I did the same for all other commands
+# INFO: executables in ~/.local/bin must be specified by full path
 
 # audio
 
-audio/*;  /usr/bin/smplayer -close-at-end "%s" >/dev/null 2>&1 &; \
-          test=test -n "$DISPLAY"
-audio/*;  /usr/bin/mplayer "%s" >/dev/null 2>&1 &
+###audio/*;  /usr/bin/smplayer -close-at-end "%s" >/dev/null 2>&1 &; \
+###          test=test -n "$DISPLAY"
+###audio/*;  /usr/bin/mplayer "%s" >/dev/null 2>&1 &
+audio/*;  LESSQUIET=1 $HOME/.local/bin/lesspipe.sh %s; copiousoutput
 
 # video
 
-video/*;  /usr/bin/smplayer -close-at-end "%s";  test=test -n "$DISPLAY"
+###video/*;  /usr/bin/smplayer -close-at-end "%s";  test=test -n "$DISPLAY"
+video/*;  LESSQUIET=1 $HOME/.local/bin/lesspipe.sh %s; copiousoutput
 
 # images
 
-image/*;  imv-x11 -d -s shrink "%s" >/dev/null 2>&1;  test=test -n "$DISPLAY"
+###image/*;  imv-x11 -d -s shrink "%s" >/dev/null 2>&1;  test=test -n "$DISPLAY"
+image/*;  LESSQUIET=1 $HOME/.local/bin/lesspipe.sh %s; copiousoutput
+
 
 # text
 
-text/html;  $HOME/.local/bin/qutebrowser --restore tmp "%s" >/dev/null 2>&1; \
+text/html;  $HOME/.local/bin/qutebrowser --restore tmp %s >/dev/null 2>&1; \
             test=test -n "$DISPLAY"
 text/html;  w3m -I %{charset} -T text/html >/dev/null 2>&1;  copiousoutput
-text/html;  lynx -dump "%s" >/dev/null 2>&1               ;  copiousoutput
+text/html;  lynx -dump %s >/dev/null 2>&1               ;  copiousoutput
 
-text/*;     more "%s"; print=enscript -2Gr "%s"
+###text/*;     more "%s"; print=enscript -2Gr "%s"
+text/*;  LESSQUIET=1 $HOME/.local/bin/lesspipe.sh %s; copiousoutput
 
-# archives
-
-application/x-tar-gz;  gunzip -c %s | tar -tf - ;  copiousoutput
-application/x-gunzip;  gzcat;                      copiousoutput
-
-# rich text
-
-application/pdf;         /usr/bin/okular "%s" >/dev/null 2>&1 &; \
-                         test=test -n "$DISPLAY"
-application/x-pdf;       /usr/bin/okular "%s" >/dev/null 2>&1 &; \
-                         test=test -n "$DISPLAY"
-application/pdf;         /usr/bin/okular "%s" >/dev/null 2>&1 &; \
-                         test=test -n "$DISPLAY"
-application/x-pdf;       /usr/bin/okular "%s" >/dev/null 2>&1 &; \
-                         test=test -n "$DISPLAY"
-application/postscript;  ps2ascii "%s" >/dev/null 2>&1;  copiousoutput
-
-# microsoft office
-
-application/excel; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/msexcel; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/msword; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-excel; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-excel.addin.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-excel.sheet.binary.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-excel.sheet.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-excel.template.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-powerpoint; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-powerpoint.addin.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-powerpoint.presentation.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-powerpoint.slideshow.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-powerpoint.template.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.ms-word.document.macroEnabled.12; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.openxmlformats-officedocument.presentationml.presentation; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.openxmlformats-officedocument.presentationml.slideshow; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.openxmlformats-officedocument.presentationml.template; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.openxmlformats-officedocument.spreadsheetml.template; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.openxmlformats-officedocument.wordprocessingml.document; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/vnd.openxmlformats-officedocument.wordprocessingml.template; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-application/x-msexcel; \
-    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
-
-# octet stream
-
-##application/octet-stream;  neomutt_my-octet-filter "%s" >dev/null 2>&1; \
-##                           copiousoutput
-
-# remaining applications
-
-application/*;  neomutt_my-background-xdg-open "%s"
+#### archives
+###
+###application/x-tar-gz;  gunzip -c %s | tar -tf - ;  copiousoutput
+###application/x-gunzip;  gzcat;                      copiousoutput
+###
+#### rich text
+###
+###application/pdf;         /usr/bin/okular "%s" >/dev/null 2>&1 &; \
+###                         test=test -n "$DISPLAY"
+###application/x-pdf;       /usr/bin/okular "%s" >/dev/null 2>&1 &; \
+###                         test=test -n "$DISPLAY"
+###application/pdf;         /usr/bin/okular "%s" >/dev/null 2>&1 &; \
+###                         test=test -n "$DISPLAY"
+###application/x-pdf;       /usr/bin/okular "%s" >/dev/null 2>&1 &; \
+###                         test=test -n "$DISPLAY"
+###application/postscript;  ps2ascii "%s" >/dev/null 2>&1;  copiousoutput
+###
+#### microsoft office
+###
+###application/excel; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/msexcel; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/msword; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-excel; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-excel.addin.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-excel.sheet.binary.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-excel.sheet.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-excel.template.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-powerpoint; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-powerpoint.addin.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-powerpoint.presentation.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-powerpoint.slideshow.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-powerpoint.template.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.ms-word.document.macroEnabled.12; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.openxmlformats-officedocument.presentationml.presentation; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.openxmlformats-officedocument.presentationml.slideshow; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.openxmlformats-officedocument.presentationml.template; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.openxmlformats-officedocument.spreadsheetml.template; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.openxmlformats-officedocument.wordprocessingml.document; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/vnd.openxmlformats-officedocument.wordprocessingml.template; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###application/x-msexcel; \
+###    libreoffice "%s" >/dev/null 2>&1 &; test=test -n "$DISPLAY"
+###
+#### octet stream
+###
+#####application/octet-stream;  neomutt_my-octet-filter "%s" >dev/null 2>&1; \
+#####                           copiousoutput
+###
+#### remaining applications
+###
+###application/*;  neomutt_my-background-xdg-open "%s"
+application/*;  LESSQUIET=1 $HOME/.local/bin/lesspipe.sh %s; copiousoutput

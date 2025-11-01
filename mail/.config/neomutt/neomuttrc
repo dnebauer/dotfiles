@@ -843,14 +843,21 @@ set pager_stop
     # do not automatically PgDown
 set noprompt_after
     # no prompt when external pager exits
+set mailcap_path = "$my_mailcap:$mailcap_path"
+    # prepend custom mailcap file to mailcap path
 
 # prefer html
 unauto_view *
-auto_view text/html \
-          application/postscript \
-          application/x-gunzip \
-          application/x-tar-gz \
-          application/octet-stream
+###auto_view text/html \
+###          application/postscript \
+###          application/x-gunzip \
+###          application/x-tar-gz \
+###          application/octet-stream
+auto_view text/* \
+          application/* \
+          image/* \
+          audio/* \
+          video/*
 unalternative_order *
 alternative_order text/html \
                   text/plain \
