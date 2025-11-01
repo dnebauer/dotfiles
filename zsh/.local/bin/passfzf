@@ -147,9 +147,14 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
       *)
         if [[ -n "$selection" ]]; then
           tmp=${selection::-4} && tmp=${tmp#"$store"}
-          "$PASS" "${arg}" "${tmp}"
+          # executing command directly results in something like:
+          #   pass 'show --clip' github-token_git-cmd-line
+          # which results in the fatal error:
+          #   Error: show --clip is not in the password store.
+          # so need to eval first
+          eval "$PASS" "${arg}" "${tmp}"
         else
-          "$PASS" "${arg}"
+          eval "$PASS" "${arg}"
         fi
         printf "\nPress any key to continue. "
         read -rsn1
