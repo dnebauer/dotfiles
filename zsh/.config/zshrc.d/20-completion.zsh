@@ -31,8 +31,8 @@ unset bash_comp_d
 # * the following /usr/share/bash-completion/completions/ files break bash
 #   completion in zsh:
 breakers=(
-    /usr/share/bash-completion/completions/compgen  \
-    /usr/share/bash-completion/completions/complete \
+    /usr/share/bash-completion/completions/compgen
+    /usr/share/bash-completion/completions/complete
 )
 bash_comp='/usr/share/bash-completion/completions'
 if [ -d "$bash_comp" ] ; then
