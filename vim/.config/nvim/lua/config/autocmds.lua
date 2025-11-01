@@ -57,6 +57,7 @@ autocmd_create("FileType", {
     "PlenaryTestPopup",
     "checkhealth",
     "dbout",
+    "fugitive",
     "gitsigns-blame",
     "grug-far",
     "help",
