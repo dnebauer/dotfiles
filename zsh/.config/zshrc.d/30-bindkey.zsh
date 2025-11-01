@@ -2,7 +2,7 @@
 fzf_binary='fzf'
 fzf_bindings='/usr/share/doc/fzf/examples/key-bindings.zsh'
 if command -v "$fzf_binary" >/dev/null && [ -f "$fzf_bindings" ] ; then
-    source "$fzf_bindings"
+    #source "$fzf_bindings"
 fi
 unset fzf_binary fzf_bindings
 

@@ -11,6 +11,8 @@ plugins=(
   dircycle
   extract
   fasd
+  fzf-tab
+  fzf-zsh-plugin
   git
   git-commit
   github
@@ -28,4 +30,3 @@ plugins=(
   zsh-autosuggestions
   zsh-syntax-highlighting
 )
-
