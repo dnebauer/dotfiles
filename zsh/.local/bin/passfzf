@@ -27,26 +27,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# debian provides `fdfind` rather than `fd`
-FD='fdfind'
-FZF='fzf'
-PASS='pass'
-
+fd='fdfind' # debian provides `fdfind` rather than `fd`
+fzf='fzf'
+pass='pass'
 store="$HOME/.password-store/"
-swapfile="/swap/swapfile" # Set path to any swapfile not listed in /etc/fstab
+swapfile="/swap/swapfile" # set path to any swapfile not listed in /etc/fstab
 
 # Open pass tomb, if any
 if [[ -e "$HOME/.password.tomb" ]]; then
   sudo swapoff -a && sudo swapoff "${swapfile}" 2>/dev/null
-  "$PASS" open 2>/dev/null
+  "$pass" open 2>/dev/null
 fi
 
 # Select pass entry
 main() {
   while :; do
     clear
-    selection=$($FD .gpg ~/.password-store/ -d 8 |
-      $FZF --query "${tmp}" \
+    selection=$("$fd" .gpg ~/.password-store/ -d 8 |
+      "$fzf" --query "${tmp}" \
         --prompt="# " \
         --ansi \
         --extended \
@@ -95,7 +93,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         fi
         read -r
         tmp="${REPLY:=$selection}"
-        "$PASS" "${arg}" "${tmp}"
+        "$pass" "${arg}" "${tmp}"
         tmp="${selection:=$tmp}"
         continue
         ;;
@@ -104,7 +102,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         printf "\033[0;32m\nNew Directory/Name to %s '%s' to:\033[0m " "${arg}" "${tmp}"
         read -r
         if [[ -n "$REPLY" ]]; then
-          "$PASS" "${arg}" "${tmp}" "${REPLY}"
+          "$pass" "${arg}" "${tmp}" "${REPLY}"
         fi
         tmp="${REPLY:=$tmp}"
         continue
@@ -118,22 +116,22 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         tmp="${REPLY:=$selection}"
         printf "\033[0;32mNumber of characters:\033[0m "
         read -r
-        "$PASS" "${arg}" --in-place "${tmp}" "${REPLY}" \
-          2>/dev/null || "$PASS" "${arg}" "${tmp}" "${REPLY}"
+        "$pass" "${arg}" --in-place "${tmp}" "${REPLY}" \
+          2>/dev/null || "$pass" "${arg}" "${tmp}" "${REPLY}"
         tmp="${selection:=$tmp}"
         printf "\nPress any key to continue. "
         read -rsn1
         continue
         ;;
       "otp --clip")
-        if ! "$PASS" otp 2>&1 | grep -q "Usage: $PASS otp"; then
+        if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
           echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed."
         else
           if [[ -n "$selection" ]]; then
             tmp=${selection::-4} && tmp=${tmp#"$store"}
-            "$PASS" otp --clip "${tmp}"
+            "$pass" otp --clip "${tmp}"
           else
-            "$PASS" otp --clip
+            "$pass" otp --clip
           fi
         fi
         printf "\nPress any key to continue. "
@@ -152,9 +150,9 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
           # which results in the fatal error:
           #   Error: show --clip is not in the password store.
           # so need to eval first
-          eval "$PASS" "${arg}" "${tmp}"
+          eval "$pass" "${arg}" "${tmp}"
         else
-          eval "$PASS" "${arg}"
+          eval "$pass" "${arg}"
         fi
         printf "\nPress any key to continue. "
         read -rsn1
@@ -170,7 +168,7 @@ main
 # Close pass tomb, if any
 if [[ -e "$HOME/.password.tomb" ]]; then
   printf "\n"
-  "$PASS" close
+  "$pass" close
   sudo swapon -a && sudo swapon "${swapfile}" 2>/dev/null
 fi
 
