@@ -80,8 +80,6 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
     if [[ -f "/tmp/passfzfarg" ]]; then
       arg=$(cat /tmp/passfzfarg)
       rm /tmp/passfzfarg
-    else
-      arg="show --clip"
     fi
 
     if ! [[ -v "$selection" ]]; then
@@ -99,7 +97,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         continue
         ;;
       cp | mv)
-        tmp=${selection::-4} && tmp=${tmp#"$store"}
+        tmp=${selection%.gpg} && tmp=${tmp#"$store"}
         printf "\033[0;32m\nNew Directory/Name to %s '%s' to:\033[0m " "${arg}" "${tmp}"
         read -r
         if [[ -n "$REPLY" ]]; then
@@ -129,7 +127,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
           echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed."
         else
           if [[ -n "$selection" ]]; then
-            tmp=${selection::-4} && tmp=${tmp#"$store"}
+            tmp=${selection%.gpg} && tmp=${tmp#"$store"}
             "$pass" otp --clip "${tmp}"
           else
             "$pass" otp --clip
@@ -145,7 +143,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         ;;
       "show --clip")
         if [[ -n "$selection" ]]; then
-          tmp=${selection::-4} && tmp=${tmp#"$store"}
+          tmp=${selection%.gpg} && tmp=${tmp#"$store"}
         fi
         "$pass" show --clip "${tmp}"
         printf "\nPress any key to continue. "
@@ -155,7 +153,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
       *)
         # edit|show|rm
         if [[ -n "$selection" ]]; then
-          tmp=${selection::-4} && tmp=${tmp#"$store"}
+          tmp=${selection%.gpg} && tmp=${tmp#"$store"}
           "$pass" "${arg}" "${tmp}"
         else
           "$pass" "${arg}"
