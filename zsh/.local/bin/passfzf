@@ -5,6 +5,9 @@
 # Dependencies: fd, fzf, pass
 # Optional dependencies: git, pass-tomb
 #
+# Based on Mathieu Laparie's passfzf available from
+# https://git.sr.ht/~mlaparie/passfzf
+#
 # MIT License
 #
 # Copyright © [2022] Mathieu Laparie <mlaparie [at] disr [dot] it>
@@ -26,6 +29,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+# configuration
 set -xv
 fd='fdfind' # debian provides `fdfind` rather than `fd`
 fzf='fzf'
@@ -33,13 +38,13 @@ pass='pass'
 store="$HOME/.password-store/"
 swapfile="/swap/swapfile" # set path to any swapfile not listed in /etc/fstab
 
-# Open pass tomb, if any
+# open pass tomb, if any
 if [[ -e "$HOME/.password.tomb" ]]; then
   sudo swapoff -a && sudo swapoff "${swapfile}" 2>/dev/null
   "$pass" open 2>/dev/null
 fi
 
-# Select pass entry
+# select pass entry
 main() {
   #while :; do
   #  clear
@@ -77,11 +82,13 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         --bind="ctrl-c,ctrl-q,esc:execute(echo 'quit' > /tmp/passfzfarg)+cancel"
   )
 
+  # get user selection
   if [[ -f "/tmp/passfzfarg" ]]; then
     arg=$(cat /tmp/passfzfarg)
     rm /tmp/passfzfarg
   fi
 
+  # process selection
   if ! [[ -v "$selection" ]]; then
     #clear
     case "$arg" in
@@ -178,7 +185,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
 
 main
 
-# Close pass tomb, if any
+# close pass tomb, if any
 if [[ -e "$HOME/.password.tomb" ]]; then
   printf "\n"
   "$pass" close
