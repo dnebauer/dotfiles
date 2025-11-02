@@ -92,7 +92,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
       fi
       read -r
       tmp="${REPLY:=$selection}"
-      "$pass" "${arg}" "${tmp}"
+      "$pass" add "${tmp}"
       return
       ;;
     cp | mv)
@@ -113,8 +113,8 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
       tmp="${REPLY:=$selection}"
       printf "\033[0;32mNumber of characters:\033[0m "
       read -r
-      "$pass" "${arg}" --in-place "${tmp}" "${REPLY}" \
-        2>/dev/null || "$pass" "${arg}" "${tmp}" "${REPLY}"
+      "$pass" generate --clip --in-place "${tmp}" "${REPLY}" 2>/dev/null ||
+        "$pass" generate --clip "${tmp}" "${REPLY}"
       #printf "\nPress any key to continue. "
       #read -rsn1
       return
