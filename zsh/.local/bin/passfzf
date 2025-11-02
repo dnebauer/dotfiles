@@ -49,127 +49,114 @@ tmpfile="$(mktemp)"
 trap '[[ -f "${tmpfile:-}" ]] && rm -rf "$tmpfile"' EXIT
 
 # select pass entry and user action
-main() {
-  selection=$(
-    "$fd" .gpg ~/.password-store/ -d 8 |
-      "$fzf" --query "${tmp}" \
-        --prompt="# " \
-        --ansi \
-        --extended \
-        --no-border \
-        --with-nth 5.. \
-        --delimiter "/" \
-        --layout=reverse-list \
-        --no-multi \
-        --cycle \
-        --header='
+selection=$(
+  "$fd" .gpg ~/.password-store/ -d 8 |
+    "$fzf" --query "${tmp}" \
+      --prompt="# " \
+      --ansi \
+      --extended \
+      --no-border \
+      --with-nth 5.. \
+      --delimiter "/" \
+      --layout=reverse-list \
+      --no-multi \
+      --cycle \
+      --header='
 | Ret: copy | C-t: trash    | M-<: git pull  | C-a: add/insert   |
 | C-s: show | C-r: rename   | M->: git push  | C-c/C-q/Esc: exit |
 | C-e: edit | C-o: copy OTP | C-d: duplicate |
 | C-g: generate and copy new password        |' \
-        --margin='1,2,1,2' \
-        --color='16,gutter:-1' \
-        --bind="tab:down" \
-        --bind="btab:up" \
-        --bind="ctrl-a:execute(echo 'add' > $tmpfile)+print-query" \
-        --bind="ctrl-d:execute(echo 'cp' > $tmpfile)+accept" \
-        --bind="ctrl-e:execute(echo 'edit' > $tmpfile)+accept" \
-        --bind="ctrl-g:execute(echo 'generate --clip' > $tmpfile)+print-query" \
-        --bind="ctrl-o:execute(echo 'otp --clip' > $tmpfile)+accept" \
-        --bind="ctrl-r:execute(echo 'mv' > $tmpfile)+accept" \
-        --bind="ctrl-s:execute(echo 'show' > $tmpfile)+accept" \
-        --bind="ctrl-t:execute(echo 'rm' > $tmpfile)+accept" \
-        --bind="alt-<:execute(echo 'git pull' > $tmpfile)+abort" \
-        --bind="alt->:execute(echo 'git push -u --all' > $tmpfile)+abort" \
-        --bind="enter,alt-enter:execute(echo 'show --clip' > $tmpfile)+accept" \
-        --bind="ctrl-c,ctrl-q,esc:execute(echo 'quit' > $tmpfile)+cancel"
-  )
+      --margin='1,2,1,2' \
+      --color='16,gutter:-1' \
+      --bind="tab:down" \
+      --bind="btab:up" \
+      --bind="ctrl-a:execute(echo 'add' > $tmpfile)+print-query" \
+      --bind="ctrl-d:execute(echo 'cp' > $tmpfile)+accept" \
+      --bind="ctrl-e:execute(echo 'edit' > $tmpfile)+accept" \
+      --bind="ctrl-g:execute(echo 'generate --clip' > $tmpfile)+print-query" \
+      --bind="ctrl-o:execute(echo 'otp --clip' > $tmpfile)+accept" \
+      --bind="ctrl-r:execute(echo 'mv' > $tmpfile)+accept" \
+      --bind="ctrl-s:execute(echo 'show' > $tmpfile)+accept" \
+      --bind="ctrl-t:execute(echo 'rm' > $tmpfile)+accept" \
+      --bind="alt-<:execute(echo 'git pull' > $tmpfile)+abort" \
+      --bind="alt->:execute(echo 'git push -u --all' > $tmpfile)+abort" \
+      --bind="enter,alt-enter:execute(echo 'show --clip' > $tmpfile)+accept" \
+      --bind="ctrl-c,ctrl-q,esc:execute(echo 'quit' > $tmpfile)+cancel"
+)
 
-  # get user action
-  arg=$(cat "$tmpfile")
-  rm "$tmpfile"
-  trap - EXIT
+# get user action
+arg=$(cat "$tmpfile")
+rm "$tmpfile"
+trap - EXIT
 
-  # process action
-  case "$arg" in
-  add)
-    printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
+# process action
+case "$arg" in
+add)
+  printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
+  if [[ -n "$selection" ]]; then
+    printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
+  fi
+  read -r
+  tmp="${REPLY:=$selection}"
+  "$pass" add "${tmp}"
+  ;;
+cp | mv)
+  tmp=${selection%.gpg} && tmp=${tmp#"$store"}
+  printf "\033[0;32m\nNew Directory/Name to %s '%s' to:\033[0m " "${arg}" "${tmp}"
+  read -r
+  if [[ -n "$REPLY" ]]; then
+    "$pass" "${arg}" "${tmp}" "${REPLY}"
+  fi
+  ;;
+"generate --clip")
+  printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
+  if [[ -n "$selection" ]]; then
+    printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
+  fi
+  read -r
+  tmp="${REPLY:=$selection}"
+  printf "\033[0;32mNumber of characters:\033[0m "
+  read -r
+  "$pass" generate --clip --in-place "${tmp}" "${REPLY}" 2>/dev/null ||
+    "$pass" generate --clip "${tmp}" "${REPLY}"
+  ;;
+"git pull")
+  "$pass" git pull "${tmp}"
+  ;;
+"git push -u --all")
+  "$pass" git push --set-upstream --all "${tmp}"
+  ;;
+"otp --clip")
+  if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
+    echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed."
+  else
     if [[ -n "$selection" ]]; then
-      printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
+      tmp=${selection%.gpg} && tmp=${tmp#"$store"}
+      "$pass" otp --clip "${tmp}"
+    else
+      "$pass" otp --clip
     fi
-    read -r
-    tmp="${REPLY:=$selection}"
-    "$pass" add "${tmp}"
-    return
-    ;;
-  cp | mv)
+  fi
+  ;;
+quit)
+  pkill -P $$
+  ;;
+"show --clip")
+  if [[ -n "$selection" ]]; then
     tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-    printf "\033[0;32m\nNew Directory/Name to %s '%s' to:\033[0m " "${arg}" "${tmp}"
-    read -r
-    if [[ -n "$REPLY" ]]; then
-      "$pass" "${arg}" "${tmp}" "${REPLY}"
-    fi
-    return
-    ;;
-  "generate --clip")
-    printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
-    if [[ -n "$selection" ]]; then
-      printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
-    fi
-    read -r
-    tmp="${REPLY:=$selection}"
-    printf "\033[0;32mNumber of characters:\033[0m "
-    read -r
-    "$pass" generate --clip --in-place "${tmp}" "${REPLY}" 2>/dev/null ||
-      "$pass" generate --clip "${tmp}" "${REPLY}"
-    return
-    ;;
-  "git pull")
-    "$pass" git pull "${tmp}"
-    return
-    ;;
-  "git push -u --all")
-    "$pass" git push --set-upstream --all "${tmp}"
-    return
-    ;;
-  "otp --clip")
-    if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
-      echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed."
-    else
-      if [[ -n "$selection" ]]; then
-        tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-        "$pass" otp --clip "${tmp}"
-      else
-        "$pass" otp --clip
-      fi
-    fi
-    return
-    ;;
-  quit)
-    pkill -P $$
-    return
-    ;;
-  "show --clip")
-    if [[ -n "$selection" ]]; then
-      tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-    fi
-    "$pass" show --clip "${tmp}"
-    return
-    ;;
-  *)
-    # edit|show|rm
-    if [[ -n "$selection" ]]; then
-      tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-      "$pass" "${arg}" "${tmp}"
-    else
-      "$pass" "${arg}"
-    fi
-    return
-    ;;
-  esac
-}
-
-main
+  fi
+  "$pass" show --clip "${tmp}"
+  ;;
+*)
+  # edit|show|rm
+  if [[ -n "$selection" ]]; then
+    tmp=${selection%.gpg} && tmp=${tmp#"$store"}
+    "$pass" "${arg}" "${tmp}"
+  else
+    "$pass" "${arg}"
+  fi
+  ;;
+esac
 
 # close pass tomb, if any
 if [[ -e "$HOME/.password.tomb" ]]; then
