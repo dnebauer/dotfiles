@@ -92,97 +92,95 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
   trap - EXIT
 
   # process selection
-  if ! [[ -v "$selection" ]]; then
-    #clear
-    case "$arg" in
-    add)
-      printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
+  #clear
+  case "$arg" in
+  add)
+    printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
+    if [[ -n "$selection" ]]; then
+      printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
+    fi
+    read -r
+    tmp="${REPLY:=$selection}"
+    "$pass" add "${tmp}"
+    return
+    ;;
+  cp | mv)
+    tmp=${selection%.gpg} && tmp=${tmp#"$store"}
+    printf "\033[0;32m\nNew Directory/Name to %s '%s' to:\033[0m " "${arg}" "${tmp}"
+    read -r
+    if [[ -n "$REPLY" ]]; then
+      "$pass" "${arg}" "${tmp}" "${REPLY}"
+    fi
+    return
+    ;;
+  "generate --clip")
+    printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
+    if [[ -n "$selection" ]]; then
+      printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
+    fi
+    read -r
+    tmp="${REPLY:=$selection}"
+    printf "\033[0;32mNumber of characters:\033[0m "
+    read -r
+    "$pass" generate --clip --in-place "${tmp}" "${REPLY}" 2>/dev/null ||
+      "$pass" generate --clip "${tmp}" "${REPLY}"
+    #printf "\nPress any key to continue. "
+    #read -rsn1
+    return
+    ;;
+  "git pull")
+    "$pass" git pull "${tmp}"
+    #printf "\nPress any key to continue. "
+    #read -rsn1
+    return
+    ;;
+  "git push -u --all")
+    "$pass" git push --set-upstream --all "${tmp}"
+    #printf "\nPress any key to continue. "
+    #read -rsn1
+    return
+    ;;
+  "otp --clip")
+    if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
+      echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed."
+    else
       if [[ -n "$selection" ]]; then
-        printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
+        tmp=${selection%.gpg} && tmp=${tmp#"$store"}
+        "$pass" otp --clip "${tmp}"
+      else
+        "$pass" otp --clip
       fi
-      read -r
-      tmp="${REPLY:=$selection}"
-      "$pass" add "${tmp}"
-      return
-      ;;
-    cp | mv)
+    fi
+    #printf "\nPress any key to continue. "
+    #read -rsn1
+    return
+    ;;
+  quit)
+    pkill -P $$
+    return
+    ;;
+  "show --clip")
+    if [[ -n "$selection" ]]; then
       tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-      printf "\033[0;32m\nNew Directory/Name to %s '%s' to:\033[0m " "${arg}" "${tmp}"
-      read -r
-      if [[ -n "$REPLY" ]]; then
-        "$pass" "${arg}" "${tmp}" "${REPLY}"
-      fi
-      return
-      ;;
-    "generate --clip")
-      printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
-      if [[ -n "$selection" ]]; then
-        printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
-      fi
-      read -r
-      tmp="${REPLY:=$selection}"
-      printf "\033[0;32mNumber of characters:\033[0m "
-      read -r
-      "$pass" generate --clip --in-place "${tmp}" "${REPLY}" 2>/dev/null ||
-        "$pass" generate --clip "${tmp}" "${REPLY}"
-      #printf "\nPress any key to continue. "
-      #read -rsn1
-      return
-      ;;
-    "git pull")
-      "$pass" git pull "${tmp}"
-      #printf "\nPress any key to continue. "
-      #read -rsn1
-      return
-      ;;
-    "git push -u --all")
-      "$pass" git push --set-upstream --all "${tmp}"
-      #printf "\nPress any key to continue. "
-      #read -rsn1
-      return
-      ;;
-    "otp --clip")
-      if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
-        echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed."
-      else
-        if [[ -n "$selection" ]]; then
-          tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-          "$pass" otp --clip "${tmp}"
-        else
-          "$pass" otp --clip
-        fi
-      fi
-      #printf "\nPress any key to continue. "
-      #read -rsn1
-      return
-      ;;
-    quit)
-      pkill -P $$
-      return
-      ;;
-    "show --clip")
-      if [[ -n "$selection" ]]; then
-        tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-      fi
-      "$pass" show --clip "${tmp}"
-      #printf "\nPress any key to continue. "
-      #read -rsn1
-      return
-      ;;
-    *)
-      # edit|show|rm
-      if [[ -n "$selection" ]]; then
-        tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-        "$pass" "${arg}" "${tmp}"
-      else
-        "$pass" "${arg}"
-      fi
-      #printf "\nPress any key to continue. "
-      #read -rsn1
-      return
-      ;;
-    esac
-  fi
+    fi
+    "$pass" show --clip "${tmp}"
+    #printf "\nPress any key to continue. "
+    #read -rsn1
+    return
+    ;;
+  *)
+    # edit|show|rm
+    if [[ -n "$selection" ]]; then
+      tmp=${selection%.gpg} && tmp=${tmp#"$store"}
+      "$pass" "${arg}" "${tmp}"
+    else
+      "$pass" "${arg}"
+    fi
+    #printf "\nPress any key to continue. "
+    #read -rsn1
+    return
+    ;;
+  esac
   #done
 }
 
