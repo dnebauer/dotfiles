@@ -31,7 +31,6 @@
 # SOFTWARE.
 
 # configuration
-###set -xv
 fd='fdfind' # debian provides `fdfind` rather than `fd`
 fzf='fzf'
 pass='pass'
