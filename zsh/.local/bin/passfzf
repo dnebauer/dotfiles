@@ -48,7 +48,7 @@ fi
 tmpfile="$(mktemp)"
 trap '[[ -f "${tmpfile:-}" ]] && rm -rf "$tmpfile"' EXIT
 
-# select pass entry
+# select pass entry and user action
 main() {
   #while :; do
   #  clear
@@ -87,12 +87,12 @@ main() {
         --bind="ctrl-c,ctrl-q,esc:execute(echo 'quit' > $tmpfile)+cancel"
   )
 
-  # get user selection
+  # get user action
   arg=$(cat "$tmpfile")
   rm "$tmpfile"
   trap - EXIT
 
-  # process selection
+  # process action
   #clear
   case "$arg" in
   add)
