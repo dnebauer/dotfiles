@@ -118,11 +118,11 @@ if [[ $action_taken = false ]]; then
     "add")
       "$pass" insert "${selection}" # 'add' is a synonym for 'insert'
       ;;
-    "cp" | "mv")
-      printf "\033[0;32m\nNew name to %s '%s' to:\033[0m\n" "${arg}" "${selection}"
+    "cp")
+      printf "\033[0;32m\nNew name to copy '%s' to:\033[0m\n" "${selection}"
       read -r -e
       if [[ -n "$REPLY" ]]; then
-        "$pass" "${arg}" "${selection}" "${REPLY}"
+        "$pass" cp "${selection}" "${REPLY}"
       fi
       ;;
     "edit")
@@ -150,6 +150,13 @@ if [[ $action_taken = false ]]; then
       fi
       "$pass" "${gen_args[@]}" --in-place "${selection}" "${num_chars}" 2>/dev/null ||
         "$pass" "${gen_args[@]}" "${selection}" "${num_chars}"
+      ;;
+    "mv")
+      printf "\033[0;32m\nNew name to rename '%s' to:\033[0m\n" "${selection}"
+      read -r -e
+      if [[ -n "$REPLY" ]]; then
+        "$pass" mv "${selection}" "${REPLY}"
+      fi
       ;;
     "otp --clip")
       if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
