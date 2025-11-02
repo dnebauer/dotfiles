@@ -26,7 +26,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
+set -xv
 fd='fdfind' # debian provides `fdfind` rather than `fd`
 fzf='fzf'
 pass='pass'
@@ -43,39 +43,39 @@ fi
 main() {
   #while :; do
   #  clear
-  selection=$("$fd" .gpg ~/.password-store/ -d 8 |
-    "$fzf" --query "${tmp}" \
-      --prompt="# " \
-      --ansi \
-      --extended \
-      --no-border \
-      --with-nth 5.. \
-      --delimiter "/" \
-      --layout=reverse-list \
-      --no-multi \
-      --cycle \
-      --header='
+  selection=$(
+    "$fd" .gpg ~/.password-store/ -d 8 |
+      "$fzf" --query "${tmp}" \
+        --prompt="# " \
+        --ansi \
+        --extended \
+        --no-border \
+        --with-nth 5.. \
+        --delimiter "/" \
+        --layout=reverse-list \
+        --no-multi \
+        --cycle \
+        --header='
 Ret: copy, C-s: show, C-e: edit, C-r: rename, C-d: duplicate, C-a: add,
 C-g: generate and copy new password, C-t: trash, C-o: copy OTP
 M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
-      --margin='1,2,1,2' \
-      --color='16,gutter:-1' \
-      --bind="tab:down" \
-      --bind="btab:up" \
-      --bind="ctrl-s:execute(echo 'show' > /tmp/passfzfarg)+accept" \
-      --bind="ctrl-e:execute(echo 'edit' > /tmp/passfzfarg)+accept" \
-      --bind="ctrl-r:execute(echo 'mv' > /tmp/passfzfarg)+accept" \
-      --bind="ctrl-d:execute(echo 'cp' > /tmp/passfzfarg)+accept" \
-      --bind="ctrl-a:execute(echo 'add' > /tmp/passfzfarg)+print-query" \
-      --bind="ctrl-g:execute(echo 'generate --clip' > /tmp/passfzfarg)+print-query" \
-      --bind="ctrl-o:execute(echo 'otp --clip' > /tmp/passfzfarg)+accept" \
-      --bind="ctrl-t:execute(echo 'rm' > /tmp/passfzfarg)+accept" \
-      --bind="alt-<:abort+execute(echo 'git pull' > /tmp/passfzfarg)" \
-      --bind="alt->:abort+execute(echo 'git push -u --all' > /tmp/passfzfarg)" \
-      --bind="ctrl-c:execute(echo 'quit' > /tmp/passfzfarg)+cancel" \
-      --bind="ctrl-q:execute(echo 'quit' > /tmp/passfzfarg)+cancel" \
-      --bind="enter:execute(echo 'show --clip' > /tmp/passfzfarg)+accept" \
-      --bind="esc:execute(echo 'quit' > /tmp/passfzfarg)+cancel")
+        --margin='1,2,1,2' \
+        --color='16,gutter:-1' \
+        --bind="tab:down" \
+        --bind="btab:up" \
+        --bind="ctrl-s:execute(echo 'show' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-e:execute(echo 'edit' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-r:execute(echo 'mv' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-d:execute(echo 'cp' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-a:execute(echo 'add' > /tmp/passfzfarg)+print-query" \
+        --bind="ctrl-g:execute(echo 'generate --clip' > /tmp/passfzfarg)+print-query" \
+        --bind="ctrl-o:execute(echo 'otp --clip' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-t:execute(echo 'rm' > /tmp/passfzfarg)+accept" \
+        --bind="alt-<:execute(echo 'git pull' > /tmp/passfzfarg)+abort" \
+        --bind="alt->:execute(echo 'git push -u --all' > /tmp/passfzfarg)+abort" \
+        --bind="ctrl-c,ctrl-q,esc:execute(echo 'quit' > /tmp/passfzfarg)+cancel" \
+        --bind="enter,alt-enter:execute(echo 'show --clip' > /tmp/passfzfarg)+accept"
+  )
 
   if [[ -f "/tmp/passfzfarg" ]]; then
     arg=$(cat /tmp/passfzfarg)
@@ -115,6 +115,18 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
       read -r
       "$pass" generate --clip --in-place "${tmp}" "${REPLY}" 2>/dev/null ||
         "$pass" generate --clip "${tmp}" "${REPLY}"
+      #printf "\nPress any key to continue. "
+      #read -rsn1
+      return
+      ;;
+    "git pull")
+      "$pass" git pull "${tmp}"
+      #printf "\nPress any key to continue. "
+      #read -rsn1
+      return
+      ;;
+    "git push -u --all")
+      "$pass" git push --set-upstream --all "${tmp}"
       #printf "\nPress any key to continue. "
       #read -rsn1
       return
