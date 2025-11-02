@@ -74,6 +74,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         --bind="alt->:abort+execute(echo 'git push -u --all' > /tmp/passfzfarg)" \
         --bind="ctrl-c:execute(echo 'quit' > /tmp/passfzfarg)+cancel" \
         --bind="ctrl-q:execute(echo 'quit' > /tmp/passfzfarg)+cancel" \
+        --bind="enter:execute(echo 'show --clip' > /tmp/passfzfarg)+accept" \
         --bind="esc:execute(echo 'quit' > /tmp/passfzfarg)+cancel")
 
     if [[ -f "/tmp/passfzfarg" ]]; then
@@ -97,7 +98,7 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         tmp="${selection:=$tmp}"
         continue
         ;;
-      mv | cp)
+      cp | mv)
         tmp=${selection::-4} && tmp=${tmp#"$store"}
         printf "\033[0;32m\nNew Directory/Name to %s '%s' to:\033[0m " "${arg}" "${tmp}"
         read -r
@@ -142,17 +143,22 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         pkill -P $$
         return
         ;;
-      *)
+      "show --clip")
         if [[ -n "$selection" ]]; then
           tmp=${selection::-4} && tmp=${tmp#"$store"}
-          # executing command directly results in something like:
-          #   pass 'show --clip' github-token_git-cmd-line
-          # which results in the fatal error:
-          #   Error: show --clip is not in the password store.
-          # so need to eval first
-          eval "$pass" "${arg}" "${tmp}"
+        fi
+        "$pass" show --clip "${tmp}"
+        printf "\nPress any key to continue. "
+        read -rsn1
+        continue
+        ;;
+      *)
+        # edit|show|rm
+        if [[ -n "$selection" ]]; then
+          tmp=${selection::-4} && tmp=${tmp#"$store"}
+          "$pass" "${arg}" "${tmp}"
         else
-          eval "$pass" "${arg}"
+          "$pass" "${arg}"
         fi
         printf "\nPress any key to continue. "
         read -rsn1
