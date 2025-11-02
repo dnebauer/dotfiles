@@ -31,7 +31,7 @@
 # SOFTWARE.
 
 # configuration
-set -xv
+###set -xv
 fd='fdfind' # debian provides `fdfind` rather than `fd`
 fzf='fzf'
 pass='pass'
@@ -51,7 +51,7 @@ trap '[[ -f "${tmpfile:-}" ]] && rm -rf "$tmpfile"' EXIT
 # select pass entry and user action
 selection=$(
   "$fd" .gpg ~/.password-store/ -d 8 |
-    "$fzf" --query "${tmp}" \
+    "$fzf" \
       --prompt="# " \
       --ansi \
       --extended \
@@ -62,18 +62,18 @@ selection=$(
       --no-multi \
       --cycle \
       --header='
-| Ret: copy | C-t: trash    | M-<: git pull  | C-a: add/insert   |
-| C-s: show | C-r: rename   | M->: git push  | C-c/C-q/Esc: exit |
-| C-e: edit | C-o: copy OTP | C-d: duplicate |
-| C-g: generate and copy new password        |' \
+| Ret: clip | C-t: trash    | M-<: git pull | C-a: add/insert   |
+| C-s: show | C-r: rename   | M->: git push | C-c/C-q/Esc: exit |
+| C-e: edit | C-o: copy OTP | C-d: copy     |
+| C-g: generate and copy new password       |' \
       --margin='1,2,1,2' \
       --color='16,gutter:-1' \
       --bind="tab:down" \
       --bind="btab:up" \
-      --bind="ctrl-a:execute(echo 'add' > $tmpfile)+print-query" \
+      --bind="ctrl-a:execute(echo 'add' > $tmpfile)+accept-or-print-query" \
       --bind="ctrl-d:execute(echo 'cp' > $tmpfile)+accept" \
       --bind="ctrl-e:execute(echo 'edit' > $tmpfile)+accept" \
-      --bind="ctrl-g:execute(echo 'generate --clip' > $tmpfile)+print-query" \
+      --bind="ctrl-g:execute(echo 'generate --clip' > $tmpfile)+accept-or-print-query" \
       --bind="ctrl-o:execute(echo 'otp --clip' > $tmpfile)+accept" \
       --bind="ctrl-r:execute(echo 'mv' > $tmpfile)+accept" \
       --bind="ctrl-s:execute(echo 'show' > $tmpfile)+accept" \
@@ -85,78 +85,101 @@ selection=$(
 )
 
 # get user action
-arg=$(cat "$tmpfile")
+arg="$(cat "$tmpfile")"
 rm "$tmpfile"
 trap - EXIT
 
-# process action
+# process actions that do not use selected pass entry
+action_taken=false
 case "$arg" in
-add)
-  printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
-  if [[ -n "$selection" ]]; then
-    printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
-  fi
-  read -r
-  tmp="${REPLY:=$selection}"
-  "$pass" add "${tmp}"
-  ;;
-cp | mv)
-  tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-  printf "\033[0;32m\nNew Directory/Name to %s '%s' to:\033[0m " "${arg}" "${tmp}"
-  read -r
-  if [[ -n "$REPLY" ]]; then
-    "$pass" "${arg}" "${tmp}" "${REPLY}"
-  fi
-  ;;
-"generate --clip")
-  printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
-  if [[ -n "$selection" ]]; then
-    printf "\033[0;32m\nPress Return to confirm or type new Directory/Name:\033[0m "
-  fi
-  read -r
-  tmp="${REPLY:=$selection}"
-  printf "\033[0;32mNumber of characters:\033[0m "
-  read -r
-  "$pass" generate --clip --in-place "${tmp}" "${REPLY}" 2>/dev/null ||
-    "$pass" generate --clip "${tmp}" "${REPLY}"
-  ;;
 "git pull")
-  "$pass" git pull "${tmp}"
+  echo -e "\033[0;32m\nPerforming git pull...\033[0m"
+  "$pass" git pull
+  action_taken=true
   ;;
 "git push -u --all")
-  "$pass" git push --set-upstream --all "${tmp}"
-  ;;
-"otp --clip")
-  if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
-    echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed."
-  else
-    if [[ -n "$selection" ]]; then
-      tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-      "$pass" otp --clip "${tmp}"
-    else
-      "$pass" otp --clip
-    fi
-  fi
+  echo -e "\033[0;32m\nPerforming git push...\033[0m"
+  "$pass" git push --set-upstream --all
+  action_taken=true
   ;;
 quit)
   pkill -P $$
-  ;;
-"show --clip")
-  if [[ -n "$selection" ]]; then
-    tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-  fi
-  "$pass" show --clip "${tmp}"
-  ;;
-*)
-  # edit|show|rm
-  if [[ -n "$selection" ]]; then
-    tmp=${selection%.gpg} && tmp=${tmp#"$store"}
-    "$pass" "${arg}" "${tmp}"
-  else
-    "$pass" "${arg}"
-  fi
+  action_taken=true
   ;;
 esac
+
+# process actions that use selected pass entry
+if [[ $action_taken = false ]]; then
+  if { ! [[ -v "selection" ]]; } || [[ -z "$selection" ]]; then
+    echo -e "\033[0;31mError:\033[0m no name selected" 1>&2
+  else
+    # trim '.gpg' extension and path to store directory
+    selection=${selection%.gpg} && selection=${selection#"$store"}
+    case "$arg" in
+    "add")
+      "$pass" insert "${selection}" # 'add' is a synonym for 'insert'
+      ;;
+    "cp" | "mv")
+      printf "\033[0;32m\nNew name to %s '%s' to:\033[0m\n" "${arg}" "${selection}"
+      read -r -e
+      if [[ -n "$REPLY" ]]; then
+        "$pass" "${arg}" "${selection}" "${REPLY}"
+      fi
+      ;;
+    "edit")
+      "$pass" edit "${selection}"
+      ;;
+    "generate --clip")
+      printf "\033[0;32mSelected name:\033[0m %s" "${selection}"
+      printf "\033[0;32m\nName to generate password for (default=selection):\033[0m\n"
+      read -r -e
+      if [[ -n "$REPLY" ]]; then
+        selection="$REPLY"
+      fi
+      printf "\033[0;32mNumber of characters (default=16):\033[0m "
+      read -r
+      num_chars=16
+      if [[ -n "$REPLY" ]]; then
+        num_chars="$REPLY"
+      fi
+      gen_args=('generate' '--clip')
+      printf "\033[0;32mExclude symbols [y/n] (default=n):\033[0m "
+      read -r -s -n 1
+      echo "$REPLY"
+      if [[ "${REPLY,,}" == 'y' ]]; then # ${var,,} converts to lowercase
+        gen_args+=('--no-symbols')
+      fi
+      "$pass" "${gen_args[@]}" --in-place "${selection}" "${num_chars}" 2>/dev/null ||
+        "$pass" "${gen_args[@]}" "${selection}" "${num_chars}"
+      ;;
+    "otp --clip")
+      if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
+        echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed" 1>&2
+      else
+        "$pass" otp --clip "${selection}"
+      fi
+      ;;
+    "rm")
+      "$pass" rm "${selection}"
+      ;;
+    "show")
+      "$pass" show "${selection}"
+      ;;
+    "show --clip")
+      "$pass" show --clip "${selection}"
+      ;;
+    *)
+      printf "\033[0;32mSelected name:\033[0m %s" "${selection}"
+      echo -e "\033[0;31mError:\033[0m unknown action: '$arg'" 1>&2
+      if [[ -n "$selection" ]]; then
+        "$pass" "${arg}" "${selection}"
+      else
+        "$pass" "${arg}"
+      fi
+      ;;
+    esac
+  fi
+fi
 
 # close pass tomb, if any
 if [[ -e "$HOME/.password.tomb" ]]; then
