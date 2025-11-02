@@ -63,18 +63,18 @@ M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
         --color='16,gutter:-1' \
         --bind="tab:down" \
         --bind="btab:up" \
-        --bind="ctrl-s:execute(echo 'show' > /tmp/passfzfarg)+accept" \
-        --bind="ctrl-e:execute(echo 'edit' > /tmp/passfzfarg)+accept" \
-        --bind="ctrl-r:execute(echo 'mv' > /tmp/passfzfarg)+accept" \
-        --bind="ctrl-d:execute(echo 'cp' > /tmp/passfzfarg)+accept" \
         --bind="ctrl-a:execute(echo 'add' > /tmp/passfzfarg)+print-query" \
+        --bind="ctrl-d:execute(echo 'cp' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-e:execute(echo 'edit' > /tmp/passfzfarg)+accept" \
         --bind="ctrl-g:execute(echo 'generate --clip' > /tmp/passfzfarg)+print-query" \
         --bind="ctrl-o:execute(echo 'otp --clip' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-r:execute(echo 'mv' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-s:execute(echo 'show' > /tmp/passfzfarg)+accept" \
         --bind="ctrl-t:execute(echo 'rm' > /tmp/passfzfarg)+accept" \
         --bind="alt-<:execute(echo 'git pull' > /tmp/passfzfarg)+abort" \
         --bind="alt->:execute(echo 'git push -u --all' > /tmp/passfzfarg)+abort" \
-        --bind="ctrl-c,ctrl-q,esc:execute(echo 'quit' > /tmp/passfzfarg)+cancel" \
-        --bind="enter,alt-enter:execute(echo 'show --clip' > /tmp/passfzfarg)+accept"
+        --bind="enter,alt-enter:execute(echo 'show --clip' > /tmp/passfzfarg)+accept" \
+        --bind="ctrl-c,ctrl-q,esc:execute(echo 'quit' > /tmp/passfzfarg)+cancel"
   )
 
   if [[ -f "/tmp/passfzfarg" ]]; then
