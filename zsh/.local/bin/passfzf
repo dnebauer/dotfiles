@@ -50,8 +50,6 @@ trap '[[ -f "${tmpfile:-}" ]] && rm -rf "$tmpfile"' EXIT
 
 # select pass entry and user action
 main() {
-  #while :; do
-  #  clear
   selection=$(
     "$fd" .gpg ~/.password-store/ -d 8 |
       "$fzf" --query "${tmp}" \
@@ -93,7 +91,6 @@ main() {
   trap - EXIT
 
   # process action
-  #clear
   case "$arg" in
   add)
     printf "\033[0;32mNew password Directory/Name:\033[0m %s" "${selection}"
@@ -125,20 +122,14 @@ main() {
     read -r
     "$pass" generate --clip --in-place "${tmp}" "${REPLY}" 2>/dev/null ||
       "$pass" generate --clip "${tmp}" "${REPLY}"
-    #printf "\nPress any key to continue. "
-    #read -rsn1
     return
     ;;
   "git pull")
     "$pass" git pull "${tmp}"
-    #printf "\nPress any key to continue. "
-    #read -rsn1
     return
     ;;
   "git push -u --all")
     "$pass" git push --set-upstream --all "${tmp}"
-    #printf "\nPress any key to continue. "
-    #read -rsn1
     return
     ;;
   "otp --clip")
@@ -152,8 +143,6 @@ main() {
         "$pass" otp --clip
       fi
     fi
-    #printf "\nPress any key to continue. "
-    #read -rsn1
     return
     ;;
   quit)
@@ -165,8 +154,6 @@ main() {
       tmp=${selection%.gpg} && tmp=${tmp#"$store"}
     fi
     "$pass" show --clip "${tmp}"
-    #printf "\nPress any key to continue. "
-    #read -rsn1
     return
     ;;
   *)
@@ -177,12 +164,9 @@ main() {
     else
       "$pass" "${arg}"
     fi
-    #printf "\nPress any key to continue. "
-    #read -rsn1
     return
     ;;
   esac
-  #done
 }
 
 main
@@ -193,5 +177,3 @@ if [[ -e "$HOME/.password.tomb" ]]; then
   "$pass" close
   sudo swapon -a && sudo swapon "${swapfile}" 2>/dev/null
 fi
-
-#printf "\nPress any key to quit. " && read -rsn1
