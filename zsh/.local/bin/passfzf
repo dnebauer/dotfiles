@@ -65,9 +65,10 @@ main() {
         --no-multi \
         --cycle \
         --header='
-Ret: copy, C-s: show, C-e: edit, C-r: rename, C-d: duplicate, C-a: add,
-C-g: generate and copy new password, C-t: trash, C-o: copy OTP
-M-<: git pull, M->: git push, C-c/C-q/Esc: clear query or exit' \
+| Ret: copy | C-t: trash    | M-<: git pull  | C-a: add/insert   |
+| C-s: show | C-r: rename   | M->: git push  | C-c/C-q/Esc: exit |
+| C-e: edit | C-o: copy OTP | C-d: duplicate |
+| C-g: generate and copy new password        |' \
         --margin='1,2,1,2' \
         --color='16,gutter:-1' \
         --bind="tab:down" \
