@@ -1,56 +1,203 @@
 #!/usr/bin/env bash
-# This script unlocks the pass tomb, if any, and then usess fzf to find
-# passwords and copy, show, delete, rename and duplicate them, as well as
-# to add or generate new passwords, and synchronize them (with git).
-# Dependencies: fd, fzf, mktemp, pass
-# Optional dependencies: git, pass-tomb
-#
-# Based on Mathieu Laparie's passfzf available from
-# https://git.sr.ht/~mlaparie/passfzf
-#
-# MIT License
-#
-# Copyright © [2022] Mathieu Laparie <mlaparie [at] disr [dot] it>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 
-# configuration
-fd='fdfind' # debian provides `fdfind` rather than `fd`
-fzf='fzf'
-pass='pass'
-store="$HOME/.password-store/"
-swapfile="/swap/swapfile" # set path to any swapfile not listed in /etc/fstab
+# File: passfzf
+# Author: David Nebauer, Mathieu Laparie
+# Purpose: use fzf and pass to perform password operations
+# Created: 2025-11-03
 
-# open pass tomb, if any
-if [[ -e "$HOME/.password.tomb" ]]; then
-  sudo swapoff -a && sudo swapoff "${swapfile}" 2>/dev/null
-  "$pass" open 2>/dev/null
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# CONFIGURE    {{{1
+
+FD='fdfind' # debian provides `fdfind` rather than `fd`
+FZF='fzf'
+PASS='pass'
+STORE="$HOME/.password-store/"
+SWAPFILE="/swap/swapfile" # set path to any swapfile not listed in /etc/fstab
+TOMB="$HOME/.password.tomb"
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+required_system_tools=(echo fdfind fzf getopt git mktemp pass printf read rm trap)
+required_local_tools=() # required tools specified by full path
+# • optional dependencies: git, pass-tomb, pass-otp
+# }}}1
+
+# PROCEDURES
+
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+function checkPrereqs() {
+  local missing tool
+  missing=()
+  # these tools can be found on the base system path
+  for tool in "${required_system_tools[@]}"; do
+    command -v "$tool" &>/dev/null || missing+=("$tool")
+  done
+  # these tools are specified by absolute path
+  for tool in "${required_local_tools[@]}"; do
+    [[ -x "$tool" ]] || missing+=("$tool")
+  done
+  if [[ ${#missing[@]} -ne 0 ]]; then
+    local msg
+    msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+    echo "$self: $msg" 1>&2
+    exit 1
+  fi
+  unset required_system_tools required_local_tools
+}
+# displayUsage()    {{{1
+#   intent: display usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage() {
+  cat <<_USAGE
+$self: use fzf and pass to perform password operations
+
+The user selects the desired pass name from a list (partial
+exception for generating passwords) and then selects an
+action to perform on the name.
+
+Available actions with their corresponding commands:
+  add/insert = 'pass insert NAME'
+  clip = 'pass show --clip NAME'
+  clip OTP = 'pass otp --clip NAME'
+  copy = 'pass cp NAME COPY_NAME'
+  edit = 'pass edit NAME'
+  exit = 'pkill -P \$\$'
+  git pull = 'pass git pull'
+  git push = 'pass git push --set-upstream --all'
+  rename = 'pass mv NAME NEW_NAME'
+  show = 'pass show NAME'
+  trash = 'pass rm NAME'
+  generate and clip new password
+    = 'pass generate --clip [--no-symbols] --in-place \\
+       NAME LENGTH'
+
+where:
+* the NAME is the one selected in the initial step
+* the user enters NEW_NAME, COPY_NAME, and LENGTH
+  as necessary
+* the user selects whether to include the option
+  '--no-symbols' as necessary.
+
+In the 'generate' action the user can select an existing
+name or enter a new one. The script first tries to execute
+the command with the '--in-place' option, but this fails if
+the name does not already exist. In that case it runs the
+command again without the '--in-place' option, creating a
+new name entry.
+
+Before executing the 'pass otp' command, the script first
+checks that the OTP module is installed. If it is not, the
+action is abandoned with an error message.
+
+Usage: $self
+       $self -h
+
+Options: -v = print input lines as they are read
+              (equivalent to 'set -o verbose')
+         -d = print input lines after command expansion
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# processOptions([@options])    {{{1
+#   intent: process all command line options
+#   params: @options - all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable @ARGS contains
+#           remaining command line args (after options removed)
+processOptions() {
+  # read the command line options
+  local OPTIONS
+  if ! OPTIONS="$(
+    getopt \
+      --options hvd \
+      --long help,verbose,debug \
+      --name "${BASH_SOURCE[0]}" \
+      -- "$@"
+  )"; then
+    # getopt displays errors
+    exit 1
+  fi
+  eval set -- "$OPTIONS"
+  while true; do
+    case "$1" in
+    -h | --help)
+      displayUsage
+      exit 0
+      ;;
+    -v | --verbose)
+      set -o verbose
+      shift 1
+      ;;
+    -d | --debug)
+      set -o xtrace
+      shift 1
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *) break ;;
+    esac
+  done
+}
+# joinBy($delim, @items)    {{{1
+#   intent: join all items using delimiter
+#   params: delim - delimiter
+#           items - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy() {
+  local delimiter first_item
+  delimiter="${1:-}"
+  shift
+  first_item="${1:-}"
+  shift
+  printf %b%s "$first_item" "${@/#/$delimiter}"
+}
+# }}}1
+
+# MAIN
+
+# check for required tools    {{{1
+checkPrereqs
+
+# process command line options    {{{1
+processOptions "$@"
+
+# open pass tomb if necessary    {{{1
+if [[ -e "$TOMB" ]]; then
+  sudo swapoff -a && sudo swapoff "$SWAPFILE" 2>/dev/null
+  "$PASS" open 2>/dev/null
 fi
 
-# use temporary file
+# use temporary file    {{{1
 tmpfile="$(mktemp)"
 trap '[[ -f "${tmpfile:-}" ]] && rm -rf "$tmpfile"' EXIT
 
-# select pass entry and user action
+# select pass entry and user action    {{{1
 selection=$(
-  "$fd" .gpg ~/.password-store/ -d 8 |
-    "$fzf" \
+  "$FD" .gpg "$STORE" -d 8 |
+    "$FZF" \
       --prompt="# " \
       --ansi \
       --extended \
@@ -63,8 +210,8 @@ selection=$(
       --header='
 | Ret: clip | C-t: trash    | M-<: git pull | C-a: add/insert   |
 | C-s: show | C-r: rename   | M->: git push | C-c/C-q/Esc: exit |
-| C-e: edit | C-o: copy OTP | C-d: copy     |
-| C-g: generate and copy new password       |' \
+| C-e: edit | C-o: clip OTP | C-d: copy     |
+| C-g: generate and clip new password       |' \
       --margin='1,2,1,2' \
       --color='16,gutter:-1' \
       --bind="tab:down" \
@@ -83,22 +230,22 @@ selection=$(
       --bind="ctrl-c,ctrl-q,esc:execute(echo 'quit' > $tmpfile)+cancel"
 )
 
-# get user action
+# get user action    {{{1
 arg="$(cat "$tmpfile")"
 rm "$tmpfile"
 trap - EXIT
 
-# process actions that do not use selected pass entry
+# process actions that do not use selected pass entry    {{{1
 action_taken=false
 case "$arg" in
 "git pull")
   echo -e "\033[0;32m\nPerforming git pull...\033[0m"
-  "$pass" git pull
+  "$PASS" git pull
   action_taken=true
   ;;
 "git push -u --all")
   echo -e "\033[0;32m\nPerforming git push...\033[0m"
-  "$pass" git push --set-upstream --all
+  "$PASS" git push --set-upstream --all
   action_taken=true
   ;;
 quit)
@@ -107,29 +254,29 @@ quit)
   ;;
 esac
 
-# process actions that use selected pass entry
+# process actions that use selected pass entry    {{{1
 if [[ $action_taken = false ]]; then
   if { ! [[ -v "selection" ]]; } || [[ -z "$selection" ]]; then
     echo -e "\033[0;31mError:\033[0m no name selected" 1>&2
   else
     # trim '.gpg' extension and path to store directory
-    selection=${selection%.gpg} && selection=${selection#"$store"}
+    selection=${selection%.gpg} && selection=${selection#"$STORE"}
     case "$arg" in
     "add")
-      "$pass" insert "${selection}" # 'add' is a synonym for 'insert'
+      "$PASS" insert "$selection" # 'add' is a synonym for 'insert'
       ;;
     "cp")
-      printf "\033[0;32m\nNew name to copy '%s' to:\033[0m\n" "${selection}"
+      printf "\033[0;32m\nNew name to copy '%s' to:\033[0m\n" "$selection"
       read -r -e
       if [[ -n "$REPLY" ]]; then
-        "$pass" cp "${selection}" "${REPLY}"
+        "$PASS" cp "$selection" "$REPLY"
       fi
       ;;
     "edit")
-      "$pass" edit "${selection}"
+      "$PASS" edit "$selection"
       ;;
     "generate --clip")
-      printf "\033[0;32mSelected name:\033[0m %s" "${selection}"
+      printf "\033[0;32mSelected name:\033[0m %s" "$selection"
       printf "\033[0;32m\nName to generate password for (default=selection):\033[0m\n"
       read -r -e
       if [[ -n "$REPLY" ]]; then
@@ -148,48 +295,81 @@ if [[ $action_taken = false ]]; then
       if [[ "${REPLY,,}" == 'y' ]]; then # ${var,,} converts to lowercase
         gen_args+=('--no-symbols')
       fi
-      "$pass" "${gen_args[@]}" --in-place "${selection}" "${num_chars}" 2>/dev/null ||
-        "$pass" "${gen_args[@]}" "${selection}" "${num_chars}"
+      "$PASS" "${gen_args[@]}" --in-place "$selection" "$num_chars" 2>/dev/null ||
+        "$PASS" "${gen_args[@]}" "$selection" "$num_chars"
       ;;
     "mv")
-      printf "\033[0;32m\nNew name to rename '%s' to:\033[0m\n" "${selection}"
+      printf "\033[0;32m\nNew name to rename '%s' to:\033[0m\n" "$selection"
       read -r -e
       if [[ -n "$REPLY" ]]; then
-        "$pass" mv "${selection}" "${REPLY}"
+        "$PASS" mv "$selection" "$REPLY"
       fi
       ;;
     "otp --clip")
-      if ! "$pass" otp 2>&1 | grep -q "Usage: $pass otp"; then
+      if ! "$PASS" otp 2>&1 | grep -q "Usage: $PASS otp"; then
         echo -e "\033[0;31mError:\033[0m the pass-otp extension not installed" 1>&2
       else
-        "$pass" otp --clip "${selection}"
+        "$PASS" otp --clip "$selection"
       fi
       ;;
     "rm")
-      "$pass" rm "${selection}"
+      "$PASS" rm "$selection"
       ;;
     "show")
-      "$pass" show "${selection}"
+      "$PASS" show "$selection"
       ;;
     "show --clip")
-      "$pass" show --clip "${selection}"
+      "$PASS" show --clip "$selection"
       ;;
     *)
-      printf "\033[0;32mSelected name:\033[0m %s" "${selection}"
+      printf "\033[0;32mSelected name:\033[0m %s" "$selection"
       echo -e "\033[0;31mError:\033[0m unknown action: '$arg'" 1>&2
       if [[ -n "$selection" ]]; then
-        "$pass" "${arg}" "${selection}"
+        "$PASS" "$arg" "$selection"
       else
-        "$pass" "${arg}"
+        "$PASS" "$arg"
       fi
       ;;
     esac
   fi
 fi
 
-# close pass tomb, if any
-if [[ -e "$HOME/.password.tomb" ]]; then
+# close pass tomb if necessary    {{{1
+if [[ -e "$TOMB" ]]; then
   printf "\n"
-  "$pass" close
-  sudo swapon -a && sudo swapon "${swapfile}" 2>/dev/null
+  "$PASS" close
+  sudo swapon -a && sudo swapon "$SWAPFILE" 2>/dev/null
 fi
+# }}}1
+
+# CREDITS    {{{1
+
+# Based on Mathieu Laparie's passfzf available from
+# https://git.sr.ht/~mlaparie/passfzf
+
+# COPYRIGHT AND LICENSE    {{{1
+
+# MIT License
+#
+# Copyright © [2022] Mathieu Laparie <mlaparie [at] disr [dot] it>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+# }}}1
+
+# vim:foldmethod=marker:
