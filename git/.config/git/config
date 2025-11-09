@@ -38,8 +38,6 @@
 [core]
 	editor = /usr/bin/editor
 	attributesfile = ~/.config/git/attributes
-[oh-my-zsh]
-	git-commit-alias = 1dc87da9e6d67c4057303124d2ebcd8c93eb6141
 [sendemail]
 	sendmailCmd = /usr/bin/msmtp
 	annotate = yes
