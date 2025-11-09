@@ -53,7 +53,7 @@ return {
           markdown = markdown_opts,
           ["markdown.pandoc"] = markdown_opts,
           pandoc = markdown_opts,
-          perl = { "perlimports", "perltidy" }, -- unavailable: perlimports, perltidy
+          perl = { "perltidy" }, -- do NOT use 'perlimports'
           -- python = { "isort", "black" },
           -- python = function(bufnr)
           --  if require("conform").get_formatter_info("ruff_format", bufnr).available then
