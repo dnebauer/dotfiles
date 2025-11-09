@@ -25,10 +25,15 @@ image/*;  LESSQUIET=1 $HOME/.local/bin/lesspipe.sh %s; copiousoutput
 
 # text
 
-text/html;  $HOME/.local/bin/qutebrowser --restore tmp %s >/dev/null 2>&1; \
-            test=test -n "$DISPLAY"
-text/html;  w3m -I %{charset} -T text/html 2>&1;  copiousoutput
-text/html;  lynx -dump %s >/dev/null 2>&1;  copiousoutput
+###text/html;  $HOME/.local/bin/qutebrowser --restore tmp %s >/dev/null 2>&1; \
+###            test=test -n "$DISPLAY"
+## this entry ('qutebrowser') is used when forcing view with mailcap
+text/html; qutebrowser %s && sleep 5; test=test -n "$DISPLAY"; \
+           nametemplate=%s.html; needsterminal
+## this entry ('w3m') is default since it is the first  with 'copiousoutput'
+text/html; w3m -I %{charset} -T text/html 2>&1; copiousoutput
+text/html; lynx -dump %s >/dev/null 2>&1; copiousoutput
+## macro 'V' forces view with mailcap
 
 ###text/*;     more "%s"; print=enscript -2Gr "%s"
 text/*;  LESSQUIET=1 $HOME/.local/bin/lesspipe.sh %s; copiousoutput
