@@ -53,6 +53,7 @@
 # |           nvim-qt | gui editor                                           |
 # |             pactl | PulseAudio controller                                |
 # |        parcellite | clipboard manager                                    |
+# |           passfzf | password manager                                     |
 # |              perl | perl 5 language interpreter                          |
 # |      perl modules | IPC::Cmd, IPC::Run, JSON::MaybeXS, Net::DBus         |
 # |             picom | X11 compositor                                       |
@@ -575,10 +576,15 @@ bindsym F1 exec --no-startup-id $clipboard_loader
 ## shortcut help
 bindsym F2 exec --no-startup-id ~/.local/bin/i3-my-help
 
+# passfzf    {{{2
+
+## passfzf password manager
+bindsym F3 exec passfzf-capture
+
 # tellico    {{{2
 
 ## tellico collection manager
-bindsym F3 exec --no-startup-id tellico
+bindsym Shift+F3 exec --no-startup-id tellico
 
 # find cursor {{{2
 
@@ -740,6 +746,7 @@ for_window [class="gwenview" instance="gwenview"] floating enable
 for_window [class="Gxmessage" instance="gxmessage"] floating enable
 for_window [class="mpv" instance="gl"] floating enable
 for_window [class="okular" instance="okular"] floating enable
+for_window [class="PassFzf_Capture" instance="PassFzf_Capture"] floating enable
 for_window [class="Perl/Tk widget"] floating enable
 for_window [class="smplayer" instance="smplayer"] floating enable
 for_window [title="Showtime" class="python3" instance="python3"] floating enable
