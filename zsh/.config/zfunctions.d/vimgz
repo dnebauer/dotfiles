@@ -1,0 +1,2 @@
+# open gzipped file without unzipping it first
+gunzip --stdout "$1" | vim -
