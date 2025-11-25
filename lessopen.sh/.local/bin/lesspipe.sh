@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lesspipe.sh, a preprocessor for less
-lesspipe_version=2.20
+lesspipe_version=2.21
 # Author: Wolfgang Friebel (wp.friebel AT gmail.com)
 
 has_cmd () {
@@ -90,7 +90,7 @@ filetype () {
 	### get file type from 'file' command for an unspecific result
 	[[ "$fcat" == message && $ftype == plain ]] && ftype=msg
 	[[ "$fcat" == message && $ftype == rfc822 ]] && fcat=text && ftype=email
-	if [[ "$fcat" == application && "$ftype" == octet-stream || "$fcat" == text && $ftype == plain ]]; then
+	if [[ "$fcat" == application && "$ftype" == octet-stream || "$ftype" == pem-file  || "$fcat" == text && $ftype == plain ]]; then
 		ft=$(file -L -s -b "$1" 2> /dev/null)
 		# first check if the file command yields something
 		case $ft in
@@ -183,17 +183,9 @@ istemp () {
 		shift
 		t=$(nexttmp)
 		cat > "$t"
-		if [[ $prog == "ccze -A" ]]; then
-			$prog < "$t" "$@"
-		else
-			$prog "$t" "$@"
-		fi
+		$prog "$t" "$@"
 	else
-		if [[ $prog == "ccze -A" ]]; then
-			$prog < "$@"
-		else
-			$prog "$@"
-		fi
+		$prog "$@"
 	fi
 }
 
@@ -532,20 +524,14 @@ isfinal () {
 		java-applet)
 			# filename needs to end in .class
 			has_cmd procyon && t=$t.class && cat "$1" > "$t" && cmd=(procyon "$t") ;;
-		markdown)
-			[[ $COLOR = *always ]] && mdopt=(--ansi ) || mdopt=(-c)
-			{ has_cmd mdcat && cmd=(mdcat "${mdopt[@]}" "$1"); } ||
-			{ has_cmd pandoc && cmd=(pandoc -t plain "$1"); } ;;
 		docx)
 			{ has_cmd pandoc && cmd=(pandoc -f docx -t plain "$1"); } ||
 			{ has_cmd docx2txt && cmd=(docx2txt "$1" -); } ||
 			{ has_cmd libreoffice && cmd=(isoffice2 "$1"); } ;;
 		pptx)
-			{ has_cmd pptx2md && t2=$(nexttmp) &&
-				{ { has_cmd mdcat && istemp "pptx2md --disable-image --disable-wmf \
-					-o $t2" "$1" && cmd=(mdcat "$t2"); } ||
-				{ has_cmd pandoc && istemp "pptx2md --disable-image --disable-wmf \
-					-o $t2" "$1" && cmd=(pandoc -f markdown -t plain "$t2"); } }; } ||
+			{ has_cmd pptx2md && has_cmd pandoc && t2=$(nexttmp) &&
+				istemp "pptx2md --disable-image --disable-wmf -o $t2" "$1" && \
+					cmd=(pandoc -f markdown -t plain "$t2"); } ||
 			{ can_do_office && cmd=(isoffice "$1" ppt); } ;;
 		xlsx|ods)
 			{ has_cmd xlscat && cmd=(istemp "xlscat -L -R all" "$1"); } ||
@@ -596,10 +582,9 @@ isfinal () {
 			has_cmd matdump && cmd=(istemp "matdump -d" "$1") ;;
 		djvu)
 			has_cmd djvutxt && cmd=(djvutxt "$1") ;;
-		x509|crl)
-			has_cmd openssl && cmd=(openssl x509 -text -noout "$1") ;;
-		csr)
-			has_cmd openssl && cmd=(openssl req -text -noout -in "$1") ;;
+		x509|crl|pem-file|csr)
+			[[ "$x" = csr ]] && x509=req || x509="$x"
+			has_cmd openssl && cmd=(istemp "openssl $x509 -text -noout -in" "$1") ;;
 		pgp)
 			has_cmd gpg && cmd=(gpg --decrypt --quiet --no-tty --batch --yes "$1") ;;
 		bplist|plist)
@@ -609,9 +594,6 @@ isfinal () {
 			{ has_cmd ffprobe && cmd=(ffprobe -hide_banner -- "$1"); } ||
 			{ has_cmd eyeD3 && cmd=(istemp "eyeD3" "$1"); } ||
 			{ has_cmd id3v2 && cmd=(istemp "id3v2 --list" "$1"); } ;;
-		log)
-			has_cmd ccze && [[ $COLOR = *always ]] && cmd=(istemp "ccze -A" "$1") ;;
-			#return ;;
 		csv)
 			msg "type -S<ENTER> for better display of very wide tables"
 			{ has_cmd csvtable && csvtable -h >/dev/null 2>&1 && cmd=(csvtable "$1"); } ||
@@ -628,14 +610,14 @@ isfinal () {
 	esac
 	fi
 	# not a specific file format
-	if [[ -z ${cmd[*]} ]]; then
-		fext=$(fileext "$1")
+	fext=$(fileext "$1")
+	if [[ -z ${cmd[*]} && "$fchar" == binary ]]; then
 		if [[ $fcat == audio || $fcat == video || $fcat == image ]]; then
 			{ has_cmd ffprobe && [[ $fcat != image ]] && cmd=(ffprobe -hide_banner -- "$1"); } ||
 			{ [[ "$1" != '-' ]] && has_cmd mediainfo && cmd=(mediainfo --Full "$1"); } ||
 			{ has_cmd exiftool && cmd=(exiftool "$1"); } ||
 			{ has_cmd identify && [[ $fcat == image ]] && cmd=(identify -verbose "$1"); }
-		elif [[ "$fchar" == binary ]]; then
+		else
 			cmd=(nodash strings "$1")
 		fi
 	fi
@@ -647,6 +629,7 @@ isfinal () {
 	[[ $fcat == text && $x != plain ]] && fext=$x
 	[[ -z "$fext" ]] && fext=$(fileext "$fileext")
 	fext=${fext##*/}
+	[[ -z $fext ]] && fext=$x
 	[[ -z ${colorizer[*]} ]] && has_colorizer "$1" "$fext" "$fileext"
 	if [[ -n ${cmd[*]} ]]; then
 		# TAU: When cmd starts with environment variable settings, bash will refuse to execute it via : "${cmd[@]}"
@@ -859,7 +842,7 @@ ishtml () {
 	has_cmd elinks && nodash "elinks -dump -force-html" "$1" && return ||
 	has_cmd w3m && handle_w3m "$1" && return ||
 	has_cmd lynx && lynx -force_html -dump "$arg1" && return ||
-	# different versions of html2text existingi, force unicode
+	# different versions of html2text existing, force unicode
 	[[ "$1" == https://* ]] && return ||
 	has_cmd html2text && nodash html2text "$htmlopt" "$1"
 }
