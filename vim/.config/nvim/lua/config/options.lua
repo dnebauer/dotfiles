@@ -80,6 +80,13 @@ vim.diagnostic.config({
 
 --[[ options ]]
 
+-- add system-wide configuration directories to runtimepath
+-- • for an unknown reason they are not added to rtp by default
+-- • adding before calling 'lazy'
+for _, rtpdir in ipairs(vim.fn.stdpath("data_dirs")) do
+  vim.opt.rtp:append(rtpdir .. "/site")
+end
+
 -- colour
 vim.o.termguicolors = true -- true color support (but nvim tries to use true color if present by default!)
 -- • colour column: managed by "ecthelionvi/NeoColumn.nvim" plugin

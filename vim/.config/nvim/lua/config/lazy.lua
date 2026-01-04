@@ -34,6 +34,11 @@ require("lazy").setup({
   },
   performance = {
     rtp = {
+      -- add paths not included by default
+      -- • system-wide plugins
+      paths = {
+        "/usr/share/nvim/site/",
+      },
       -- disable some rtp plugins
       disabled_plugins = {
         "gzip",
