@@ -119,9 +119,11 @@ Numbered list:
 .SH "NAME"
 \*[self] \- color tar output like ls does
 .SH "SYNOPSIS"
+.\" do not use .SY ... .YS because it would bolden 'tar' incorrectly
 tar tvzf
 .I "tarball.tar.gz"
-.RB "| " "\*[self]"
+|
+.B "\*[self]"
 .SH "DESCRIPTION"
 \*[self] is a modified tarcolor that also works for
 other archive listings such as rpm, debian, ar, and isoinfo archives.
