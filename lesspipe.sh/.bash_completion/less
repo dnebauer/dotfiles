@@ -24,7 +24,7 @@ _list_archive()
 		cur=${cur#:}
 		local IFS=$'\n'
 		COMPREPLY=($(compgen -o filenames -W "$(
-			/home/david/tmp/lesspipe.sh/install/bin/lesscomplete "$fn"|
+			/tmp/tmp.vQohOq9y2L/bin/lesscomplete "$fn"|
 				while read line; do
 					printf "%q\n" "$(printf %q"\n" "$line")"
 				done

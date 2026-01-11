@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lesspipe.sh, a preprocessor for less
-lesspipe_version=2.21
+lesspipe_version=2.22
 # Author: Wolfgang Friebel (wp.friebel AT gmail.com)
 
 has_cmd () {
@@ -69,6 +69,8 @@ filetype () {
 	esac
 	# correct for a more specific file type
 	case "$fext" in
+		sxi)
+			[[ $ftype == zip ]] && ftype=ooffice1 ;;
 		epub)
 			[[ $ftype == zip ]] && ftype=epub ;;
 		ipynb)
@@ -411,7 +413,10 @@ analyze_args () {
 		r_string=($lessarg)
 		for i in "${r_string[@]}"
 		do
-			[[ $i =~ ^-[A-Za-z~]*[rR] || $i = --raw-control-chars || $i = --RAW-CONTROL-CHARS ]] && COLOR="--color=always"
+			[[ $i = --raw-control-chars || $i = --RAW-CONTROL-CHARS ]] && COLOR="--color=always"
+			[[ $i = --* ]] && continue
+			[[ $i = -- ]] && break
+			[[ $i =~ ^-[aABcCdeEfFgGiIJKLmMnNqQsSuUwWX~]*[rR] ]] && COLOR="--color=always"
 		done
 	fi
 	# last argument starting with colon or equal sign is used for piping into less
@@ -471,7 +476,7 @@ has_colorizer () {
 			[[ -n $lang ]] && opt+=(-s "$lang")
 			style=esc
 			[[ $colors -ge 256 ]] && style=esc256
-			opt+=(--failsafe -f "$style") ;;
+			opt+=(--failsafe -f "$style" --style-file "$style".style) ;;
 		code2color|vimcolor)
 			opt=("$1")
 			[[ -n "$3" ]] && opt=(-l "$3" "$1") ;;
@@ -552,8 +557,7 @@ isfinal () {
 		ms-excel)
 			{ can_do_office && cmd=(isoffice "$1" xls); } ;;
 		ooffice1)
-			{ has_cmd sxw2txt && cmd=(istemp sxw2txt "$1"); } ||
-			{ can_do_office && cmd=(isoffice "$1" odt); } ;;
+			has_cmd odt2txt && cmd=(istemp odt2txt "$1") ;;
 		ipynb|epub)
 			has_cmd pandoc && cmd=(pandoc -f "$x" -t plain "$1") ;;
 		troff)
