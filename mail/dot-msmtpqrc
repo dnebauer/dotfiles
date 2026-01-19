@@ -1,0 +1,7 @@
+# set variables for msmtpq and msmtp-queue scripts
+
+# queue directory
+MSMTPQ_Q="$HOME/.local/mail/queue"
+
+# log file
+MSMTPQ_LOG="$HOME/.local/mail/log/msmtpq.queue.log"
