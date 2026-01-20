@@ -72,7 +72,6 @@ checkPrereqs() {
     logger --priority "user.err" --tag "$dn_self" "$msg"
     exit 1
   fi
-  unset required_system_tools required_local_tools
 }
 # displayUsage()    {{{1
 #   intent: display usage information
@@ -196,6 +195,7 @@ joinBy() {
 
 # check for required tools    {{{1
 checkPrereqs
+unset required_system_tools required_local_tools
 
 # process configuration files    {{{1
 msg='Reading configuration files'
