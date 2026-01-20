@@ -206,6 +206,7 @@ unset system_conf local_conf msg
 
 # process command line options    {{{1
 processOptions "${@}" # leaves ${ARGS[@]} holding positional arguments
+unset parameters usage usage_indent
 
 # check arguments    {{{1
 # Check that argument supplied
