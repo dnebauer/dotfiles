@@ -20,20 +20,20 @@ set -o pipefail
 
 # VARIABLES    {{{1
 
-msg="Loading libraries"
+msg='Loading libraries'
 echo -ne "\\033[1;37;41m${msg}\\033[0m"
 # shellcheck disable=SC1091
-source "@libexec_dir@/libdncommon-bash/liball" # supplies functions
+source '@libexec_dir@/libdncommon-bash/liball' # supplies functions
 dnEraseText "${msg}"
 # provided by libdncommon-bash: dn_self,dn_divider[_top|_bottom]
 # shellcheck disable=SC2154
 system_conf="@pkgconf_dir@/${dn_self}rc"
 local_conf="${HOME}/.${dn_self}rc"
-usage="Usage:"
+usage='Usage:'
 usage_indent="$(tr "${usage}" '[ *]' <<<"${usage}")"
 # shellcheck disable=SC2034
 param_pad="$(dnRightPad "$(dnStrLen "${usage} ${dn_self}")")"
-parameters=" [-v] [-d]" # **
+parameters=' [-v] [-d]' # **
 #parameters="${parameters}\n${param_pad}"
 #parameters="${parameters} ..."
 # required tools findable on system path
@@ -198,7 +198,7 @@ function joinBy() {
 checkPrereqs
 
 # process configuration files    {{{1
-msg="Reading configuration files"
+msg='Reading configuration files'
 echo -ne "$(dnRedReverseText "${msg}")"
 processConfigFiles "${system_conf}" "${local_conf}"
 dnEraseText "${msg}"
