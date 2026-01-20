@@ -52,7 +52,7 @@ unset param_pad msg
 #   params: nil
 #   prints: error message if tool(s) missing
 #   return: n/a, aborts scipts on failure
-function checkPrereqs() {
+checkPrereqs() {
   local missing tool
   missing=()
   # these tools can be found on the base system path
@@ -182,7 +182,7 @@ processOptions() {
 #           items - items to be joined
 #   prints: string containing joined items
 #   return: nil
-function joinBy() {
+joinBy() {
   local delimiter first_item
   delimiter="${1:-}"
   shift
