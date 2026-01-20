@@ -24,18 +24,18 @@ msg='Loading libraries'
 echo -ne "\\033[1;37;41m${msg}\\033[0m"
 # shellcheck disable=SC1091
 source '@libexec_dir@/libdncommon-bash/liball' # supplies functions
-dnEraseText "${msg}"
+dnEraseText "$msg"
 # provided by libdncommon-bash: dn_self,dn_divider[_top|_bottom]
 # shellcheck disable=SC2154
 system_conf="@pkgconf_dir@/${dn_self}rc"
-local_conf="${HOME}/.${dn_self}rc"
+local_conf="$HOME/.${dn_self}rc"
 usage='Usage:'
-usage_indent="$(tr "${usage}" '[ *]' <<<"${usage}")"
+usage_indent="$(tr "$usage" '[ *]' <<<"$usage")"
 # shellcheck disable=SC2034
-param_pad="$(dnRightPad "$(dnStrLen "${usage} ${dn_self}")")"
+param_pad="$(dnRightPad "$(dnStrLen "$usage $dn_self")")"
 parameters=' [-v] [-d]' # **
-#parameters="${parameters}\n${param_pad}"
-#parameters="${parameters} ..."
+#parameters="$parameters\n$param_pad"
+#parameters="$parameters ..."
 # required tools findable on system path
 required_system_tools=(
   getopt
@@ -81,12 +81,12 @@ checkPrereqs() {
 #   return: nil
 displayUsage() {
   cat <<_USAGE
-${dn_self}: <BRIEF>
+$dn_self: <BRIEF>
 
 <LONG>
 
-${usage} ${dn_self} ${parameters}
-${usage_indent} ${dn_self} -h
+$usage $dn_self $parameters
+$usage_indent $dn_self -h
 
 Options: -x OPT  =
          -v      = print input lines as they are read
@@ -106,24 +106,24 @@ processConfigFiles() {
   # set variables
   local conf name val
   local system_conf
-  system_conf="$(dnNormalisePath "${1}")"
+  system_conf="$(dnNormalisePath "$1")"
   local local_conf
-  local_conf="$(dnNormalisePath "${2}")"
+  local_conf="$(dnNormalisePath "$2")"
   # process config files
-  for conf in "${system_conf}" "${local_conf}"; do
-    if [ -r "${conf}" ]; then
+  for conf in "$system_conf" "$local_conf"; do
+    if [ -r "$conf" ]; then
       while read -r name val; do
-        if [ -n "${val}" ]; then
+        if [ -n "$val" ]; then
           # remove enclosing quotes if present
-          val="$(dnStripEnclosingQuotes "${val}")"
+          val="$(dnStripEnclosingQuotes "$val")"
           # load vars depending on name
-          case ${name} in
-          'key1') key="${val}" ;;
-          'key2') key="${val}" ;;
-          'key3') key="${val}" ;;
+          case $name in
+          'key1') key="$val" ;;
+          'key2') key="$val" ;;
+          'key3') key="$val" ;;
           esac
         fi
-      done <"${conf}"
+      done <"$conf"
     fi
   done
   unset system_conf local_conf msg
@@ -143,16 +143,16 @@ processOptions() {
       --options hvdx: \
       --long xoption:,help,verbose,debug \
       --name "${BASH_SOURCE[0]}" \
-      -- "${@}"
+      -- "$@"
   )"; then
     # getopt displays errors
     exit 1
   fi
-  eval set -- "${OPTIONS}"
+  eval set -- "$OPTIONS"
   while true; do
-    case "${1}" in
+    case "$1" in
     -x | --xoption)
-      varx="${2}"
+      varx="$2"
       shift 2
       ;;
     -h | --help)
@@ -174,7 +174,7 @@ processOptions() {
     *) break ;;
     esac
   done
-  ARGS=("${@}") # remaining arguments
+  ARGS=("$@") # remaining arguments
 }
 # joinBy($delim, @items)    {{{1
 #   intent: join all items using delimiter
@@ -199,28 +199,28 @@ checkPrereqs
 
 # process configuration files    {{{1
 msg='Reading configuration files'
-echo -ne "$(dnRedReverseText "${msg}")"
-processConfigFiles "${system_conf}" "${local_conf}"
-dnEraseText "${msg}"
+echo -ne "$(dnRedReverseText "$msg")"
+processConfigFiles "$system_conf" "$local_conf"
+dnEraseText "$msg"
 unset system_conf local_conf msg
 
 # process command line options    {{{1
-processOptions "${@}" # leaves ${ARGS[@]} holding positional arguments
+processOptions "$@" # leaves ${ARGS[@]} holding positional arguments
 unset parameters usage usage_indent
 
 # check arguments    {{{1
 # Check that argument supplied
 #[ $# -eq 0 ] && dnFailScript "No wibble supplied"
 # Check value of option-set variable
-#case ${var} in
+#case $var in
 #    val ) var2="val2";;
-#    *   ) dnFailScript "'${val}' is an inappropriate wibble";;
+#    *   ) dnFailScript "'$val' is an inappropriate wibble";;
 #esac
 # Check for option-set variable
-#[ -z "${var}" ] && dnFailScript "You did not specify a wibble"
+#[ -z "$var" ] && dnFailScript "You did not specify a wibble"
 
 # informational message    {{{1
-dnInfo "${dn_self} is running..."
+dnInfo "$dn_self is running..."
 # }}}1
 
 # vim:foldmethod=marker:
