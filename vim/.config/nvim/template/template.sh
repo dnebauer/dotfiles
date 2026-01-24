@@ -30,7 +30,8 @@ dnEraseText "$msg"
 system_conf="@pkgconf_dir@/${dn_self}rc"
 local_conf="$HOME/.${dn_self}rc"
 usage='Usage:'
-usage_indent="$(tr "$usage" '[ *]' <<<"$usage")"
+# shellcheck disable=SC2046
+printf -v 'usage_indent' -- ' %.s' $(eval echo "{1..${#usage}}")
 # shellcheck disable=SC2034
 param_pad="$(dnRightPad "$(dnStrLen "$usage $dn_self")")"
 parameters=' [-v] [-d]' # **
