@@ -5,10 +5,6 @@ date: ""
 style: [Standard, Latex14pt] # Latex8-12|14|17|20pt; SectNewpage; PageBreak; Include
 ---
 
+[author]:
 
-
-[comment]: # (URLs)
-
-   [author]:
-
-   [source]:
+[source]:
