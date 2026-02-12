@@ -34,7 +34,7 @@ usage='Usage:'
 printf -v 'usage_indent' -- ' %.s' $(eval echo "{1..${#usage}}")
 # shellcheck disable=SC2034
 param_pad="$(dnRightPad "$(dnStrLen "$usage $dn_self")")"
-parameters=' [-v] [-d]' # **
+parameters='[-v] [-d]' # **
 #parameters="$parameters\n$param_pad"
 #parameters="$parameters ..."
 # required tools findable on system path
