@@ -35,6 +35,10 @@ text/html; w3m -I %{charset} -T text/html 2>&1; copiousoutput
 text/html; lynx -dump %s >/dev/null 2>&1; copiousoutput
 ## macro 'V' forces view with mailcap
 
+## cannot use lesspipe.sh on text/plain because it produces empty output
+## cannot enclose %s in double quotes
+text/plain; less %s; copiousoutput
+
 ###text/*;     more "%s"; print=enscript -2Gr "%s"
 text/*;  LESSQUIET=1 $HOME/.local/bin/lesspipe.sh %s; copiousoutput
 
