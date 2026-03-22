@@ -80,7 +80,8 @@ source_dir: /home/david/.recoll-ntg-context/
 source_dir: /home/david/.recoll-skeptical-inquirer/
 source_dir: /home/david/.screenlayout/
 source_dir: /home/david/.ssh/
-source_dir: /home/david/.texlive2022/
+source_dir: /home/david/.texlive2024/
+source_dir: /home/david/.texlive2025/
 source_dir: /home/david/.tmux/
 source_dir: /home/david/.turboprint/
 source_dir: /home/david/.var/
