@@ -72,7 +72,7 @@ return {
     config = function()
       -- set key mappings
       local function map(mode, lhs, rhs, desc)
-        vim.keymap.set(mode, lhs, rhs, { buffer = 0, silent = true, desc = desc })
+        vim.keymap.set(mode, lhs, rhs, { buf = 0, silent = true, desc = desc })
       end
       map("i", "<cr>", "<Plug>(bullets-newline)", "Insert bullet on newline")
       map("n", "o", "<Plug>(bullets-newline)", "Insert bullet on newline")

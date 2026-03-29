@@ -27,7 +27,7 @@ return {
         -- `<esc>` is often mapped to `<c-\><c-n>` for terminals, and
         -- this can get in the way when interacting with TUIs,
         -- so map the escape key back to itself for this buffer to fix this
-        vim.keymap.set("t", "<Esc>", "<Esc>", { buffer = true, desc = "Reset to default behaviour" })
+        vim.keymap.set("t", "<Esc>", "<Esc>", { buf = true, desc = "Reset to default behaviour" })
 
         -- go into insert mode
         --
