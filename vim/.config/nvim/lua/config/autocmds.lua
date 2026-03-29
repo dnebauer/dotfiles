@@ -78,7 +78,7 @@ autocmd_create("FileType", {
         vim.cmd("close")
         pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
       end, {
-        buffer = event.buf,
+        buf = event.buf,
         silent = true,
         desc = "Quit buffer",
       })
@@ -175,7 +175,7 @@ autocmd_create("LspAttach", {
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     if client and client.server_capabilities.hoverProvider then
-      vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = args.buf })
+      vim.keymap.set("n", "K", vim.lsp.buf.hover, { buf = args.buf })
     end
   end,
   desc = "Delete K mapping if LSP provides hover",
