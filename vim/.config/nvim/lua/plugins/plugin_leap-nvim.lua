@@ -32,50 +32,34 @@ return {
       leap_user.set_repeat_keys("<Enter>", "<Backspace>")
 
       -- enhance 1-key searching with f,F,t,T
-      local function as_ft(key_specific_args)
-        local common_args = {
+      local function ft(key_specific_args)
+        require("leap").leap(vim.tbl_deep_extend("keep", key_specific_args, {
           inputlen = 1,
           inclusive = true,
           opts = {
-            labels = "", -- force autojump
-            safe_labels = vim.fn.mode(1):match("[no]") and "" or nil, -- [1]
-            case_sensitive = true, -- [2]
+            -- force autojump
+            labels = "",
+            -- match the modes where you don't need labels (`:h mode()`)
+            safe_labels = vim.fn.mode(1):match("o") and "" or nil,
           },
-        }
-        return vim.tbl_deep_extend("keep", common_args, key_specific_args)
+        }))
       end
-      local clever = require("leap.user").with_traversal_keys -- [3]
-      local key_args = {
-        f = {
-          args = { opts = clever("f") },
-          keymap_opts = { desc = "Clever 1-key forward search" },
-        },
-        F = {
-          args = { backward = true, opts = clever("F") },
-          keymap_opts = { desc = "Clever 1-key backward search for char" },
-        },
-        t = {
-          args = { offset = -1, opts = clever("t") },
-          keymap_opts = { desc = "Clever 1-key forward search till char" },
-        },
-        T = {
-          args = { backward = true, offset = 1, opts = clever("T") },
-          keymap_opts = { desc = "Clever 1-key backward search till char" },
-        },
-      }
-      for key, key_specific_args in pairs(key_args) do
-        vim.keymap.set({ "n", "x", "o" }, key, function()
-          require("leap").leap(as_ft(key_specific_args.args))
-        end, key_specific_args.keymap_opts)
-      end
-      -- [1] Match the modes here for which you don't want to use labels
-      --     (`:h mode()`, `:h lua-pattern`).
-      -- [2] For 1-char search, you might want to aim for precision instead of
-      --     typing comfort, to get as many direct jumps as possible.
-      -- [3] This helper function makes it easier to set "clever-f"-like
-      --     functionality (https://github.com/rhysd/clever-f.vim), returning
-      --     an `opts` table derived from the defaults, where the given keys
-      --     are added to `keys.next_target` and `keys.prev_target`
+      -- with_traversal_keys is a helper function making it easier to set
+      -- "clever-f" behavior
+      local clever = require("leap.user").with_traversal_keys
+      local clever_f, clever_t = clever("f", "F"), clever("t", "T")
+      vim.keymap.set({ "n", "x", "o" }, "f", function()
+        ft({ opts = clever_f })
+      end, { desc = "Clever 1-key forward search" })
+      vim.keymap.set({ "n", "x", "o" }, "F", function()
+        ft({ backward = true, opts = clever_f })
+      end, { desc = "Clever 1-key backward search for char" })
+      vim.keymap.set({ "n", "x", "o" }, "t", function()
+        ft({ offset = -1, opts = clever_t })
+      end, { desc = "Clever 1-key forward search till char" })
+      vim.keymap.set({ "n", "x", "o" }, "T", function()
+        ft({ backward = true, offset = 1, opts = clever_t })
+      end, { desc = "Clever 1-key backward search till char" })
     end,
   },
 }
