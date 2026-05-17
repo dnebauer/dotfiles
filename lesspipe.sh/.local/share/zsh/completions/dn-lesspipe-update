@@ -1,0 +1,15 @@
+#compdef dn-lesspipe-update
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help)'{-h,--help}'[Show a help message]' \
+    '--usage[Show a short help message]' \
+    '--man[Show the manual]' \
+  - 'build_options' \
+    '(-b --build_only)'{-b,--build_only}'[Download and build only]' \
+    '(-t --tests)'{-t,--tests}'[Run tests during project build]' \
+  && rc=0
+
+return rc

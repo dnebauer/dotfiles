@@ -1,0 +1,359 @@
+#!/usr/bin/perl
+
+use strictures 2;
+use 5.006;
+use 5.038_001;
+use version; our $VERSION = qv('0.1');
+use namespace::clean;
+use File::FindLib 'share/perl5';
+use App::Dn::LesspipeUpdate::Update;
+
+App::Dn::LesspipeUpdate::Update->new_with_options->run;
+
+1;
+
+# POD    {{{1
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+dn-lesspipe-update - update a local lesspipe.sh installation
+
+=head1 USAGE
+
+B<dn-lesspipe-update> [B<-b>] [B<-t>]
+
+B<dn-lesspipe-update> B<-h>
+
+=head1 DESCRIPTION
+
+Update a local installation of the S<< F<lesspipe.sh> >> preprocessor for
+F<less>. The preprocessor is available from the github repository
+L<wofr06/lesspipe|https://github.com/wofr06/lesspipe>.
+
+It is assumed the lesspipe.sh project files are installed via a F<stow>
+package. The structure of the stow package at time of writing is:
+
+    ├── .bash_completion
+    │   └── less
+    ├── .config
+    │   ├── zshenv.d
+    │   │   └── lesspipe.sh.zsh [EXTRA]
+    │   └── zshrc.d
+    │       └── 80-options-lessopen.sh.zsh [EXTRA]
+    └── .local
+        ├── bin
+        │   ├── archive_color
+        │   └── lesspipe.sh
+        ├── libexec
+        │   └── lesspipe
+        │       └── lesscomplete
+        └── share
+            ├── man
+            │   └── man1
+            │       ├── archive_color.1 [EXTRA]
+            │       ├── lesscomplete.1 [EXTRA]
+            │       └── lesspipe.sh.1
+            └── zsh
+                └── completions
+                    └── _less
+
+File marked "[EXTRA]" were added to the stow package by this script's creator.
+All other files are provided by the lesspipe.sh project.
+
+=head2 Update process
+
+The update process consists of the following steps:
+
+=over
+
+=item 1.
+
+download the lesspipe.sh project to a temporary directory
+
+=item 2.
+
+build the project files in another temporary directory
+
+=item 3.
+
+perform substitutions on file content
+
+=item 4.
+
+copy build files to the stow package, renaming where necessary.
+
+=back
+
+The temporary directories are automatically deleted.
+
+Over time the files contained in the lesspipe.sh project change, as can their
+name and subdirectory location. Rather than encode this information into this
+script, it is captured in a configuration file. See L</CONFIGURATION> below
+for details.
+
+The script performs checks on the project build files at attempts it identify
+any changes that have occurred since the previous update. If changes are
+detected, they are reported to the user who decides whether to proceed with
+updating the stow package.
+
+=head1 CONFIGURATION
+
+The module looks for a configuration file with the base name
+F<dn-lesspipe-update> in the standard configuration locations. Supported file
+formats include ini, json, xml, and yaml. The file extension should match the
+file format, for example, F<.json> for json formatted files. Warning: only the
+json format has been thoroughly tested with this module.
+
+The easiest way to show the configuration file format is with an example, in
+this case in json format:
+
+    {
+      "repo": {
+        "clone_url": "<lesspipe-github-project-url>"
+      },
+      "stow": {
+        "root": "<path-to-stow-root-dir>",
+        "pkg": "<name-of-lesspipe-stow-package-root-directory>",
+        "extra": [ "<file-path>", ... ]
+      },
+      "install": {
+        "filepath_maps": [
+          [ "<path-to-install-file>", "<path-to-same-file-in-stow-package>" ],
+          ...
+        ],
+        "substitutions": [
+          ["<string-to-match>", "<replacement-string>"],
+          ...
+        ]
+      }
+    }
+
+The following placeholders can be used in configuration file values:
+
+=over
+
+=item *
+
+HOME
+
+The current user's home directory path.
+
+Used in:
+
+=over
+
+=item *
+
+S<stow → root>
+
+=item *
+
+S<install → substitutions> S<→ replacement-string>
+
+=back
+
+=item *
+
+STOW_PKG_DIR
+
+The stow package root directory. This is obtained by joining the values from
+S<stow → root> and S<stow → pkg>.
+
+Used in:
+
+=over
+
+=item *
+
+S<stow → extra>
+
+=item *
+
+S<install → filepath_maps> S<→ mapped-stow-file>
+
+=back
+
+=item *
+
+INSTALL_DIR
+
+The temporary directory used by the module to install/build the project files.
+
+Used in:
+
+=over
+
+=item *
+
+S<install → filepath_maps> S<→ install-file-path>
+
+=item *
+
+S<install → substitutions> S<→ match-string>
+
+=back
+
+=back
+
+=head1 REQUIRED ARGUMENTS
+
+None.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-b>  B<--build_only>
+
+Download and build only. Does not install project files into the stow package.
+Default: false.
+
+=item B<-t>  B<--tests>
+
+Run tests during the project build. Default: false.
+
+Note: At the time of writing the build tests fail on linux systems, halting
+indefinitely on S<test 67>: xlsx (neu).
+
+=item B<-h>  B<--help>
+
+Show a help message.
+
+=item B<--usage>
+
+Show a short help message.
+
+=item B<--man>
+
+Show the manual.
+
+=back
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly
+the error code is that given by the system.
+
+=head1 DIAGNOSTICS
+
+=head2 Expected config data HASH, got: VAR_TYPE
+
+=head2 Expected KEY value to be TYPE, got TYPE
+
+=head2 Expected KEY->SUBKEY value to be TYPE, got TYPE
+
+=head2 Invalid primary key KEY
+
+=head2 Invalid key KEY->SUBKEY
+
+=head2 No config file key: KEY
+
+=head2 No config file key: KEY->SUBKEY
+
+=head2 Expected array with 1 element, got NUM
+
+=head2 Expected TYPE, got: TYPE
+
+=head2 No config section named NAME
+
+=head2 No key named NAME in section NAME
+
+These errors occur when the configuration file is being read and the data is
+in an unexpected format.
+
+=head2 Copying current project files into stow package ... ERROR
+
+This occurs when a file copy fails. The most likely cause is that the target
+stow package subdirectory does not exist.
+
+=head2 INSTALL_DIR not set
+
+=head2 STOW_ROOT not set
+
+=head2 STOW_PKG not set
+
+These errors occur if values for any of these placeholders are not set. These
+errors should not occur as earlier errors should have halted processing before
+these errors are generated.
+
+=head2 No configuration files located
+
+Occurs if none of the combinations of candidate configuration directories,
+file stem, and suffixes result in a locatable filepath.
+
+=head2 No stem name provided
+
+Occurs if no configuration file base name is available.
+
+=head2 Slurp failed
+
+This error occurs during an attempt to perform a search and replace on build
+files. If the operating system provided an error message it will be displayed
+as well.
+
+=head2 There are no loaders available for .EXT files
+
+The file format inferred from the configuration file extension is not
+supported.
+
+=head2 These expected extra files are missing: FILES
+
+=head2 These expected install files are missing from the build: FILES
+
+=head2 These install files were not expected: FILES
+
+=head2 These expected stow files are missing from the stow package: FILES
+
+=head2 These stow package files were not expected: FILES
+
+These warning messages are displayed when the module detects changes between
+the newly downloaded project files and those project files defined in the
+configuration and present in the stow package.
+
+=head2 Unable to generate list of candidate configuration directories
+
+Occurs if the module is unable to generate any candidate configuration
+directories.
+
+=head2 Write failed
+
+This error occurs during an attempt to perform a search and replace on build
+files. If the operating system provided an error message it will be displayed
+as well.
+
+There are no known incompatibilities.
+
+=head1 INCOMPATIBILITIES
+
+None known.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs to the author.
+
+=head1 DEPENDENCIES
+
+=head2 Perl modules
+
+App::Dn::LesspipeUpdate::Update, File::FindLib, namespace::clean, strictures,
+version.
+
+=head1 AUTHOR
+
+L<David Nebauer|mailto:david@nebauer.org>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (c) 2026 L<David Nebauer|mailto:david@nebauer.org>
+
+This script is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut
+
+# vim:foldmethod=marker:

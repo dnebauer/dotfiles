@@ -1,0 +1,53 @@
+{
+  "repo": {
+    "clone_url": "https://github.com/wofr06/lesspipe.git"
+  },
+  "stow": {
+    "root": "HOME/.config/dotfiles",
+    "pkg": "lesspipe.sh",
+    "extra": [
+      "STOW_PKG_DIR/.config/zshenv.d/lesspipe.sh.zsh",
+      "STOW_PKG_DIR/.config/zshrc.d/80-options-lessopen.sh.zsh",
+      "STOW_PKG_DIR/.local/share/man/man1/archive_color.1",
+      "STOW_PKG_DIR/.local/share/man/man1/lesscomplete.1",
+      "STOW_PKG_DIR/.config/dn-lesspipe-update/dn-lesspipe-update.json",
+      "STOW_PKG_DIR/.local/bin/dn-lesspipe-update",
+      "STOW_PKG_DIR/.local/share/man/man1/App::Dn::LesspipeUpdate::InstallFile.1",
+      "STOW_PKG_DIR/.local/share/man/man1/App::Dn::LesspipeUpdate::Substitution.1",
+      "STOW_PKG_DIR/.local/share/man/man1/App::Dn::LesspipeUpdate::Update.1",
+      "STOW_PKG_DIR/.local/share/man/man1/dn-lesspipe-update.1",
+      "STOW_PKG_DIR/.local/share/perl5/App/Dn/LesspipeUpdate/InstallFile.pm",
+      "STOW_PKG_DIR/.local/share/perl5/App/Dn/LesspipeUpdate/Substitution.pm",
+      "STOW_PKG_DIR/.local/share/perl5/App/Dn/LesspipeUpdate/Update.pm",
+      "STOW_PKG_DIR/.local/share/zsh/completions/dn-lesspipe-update"
+    ]
+  },
+  "install": {
+    "filepath_maps": [
+      [
+        "INSTALL_DIR/bin/archive_color",
+        "STOW_PKG_DIR/.local/bin/archive_color"
+      ],
+      ["INSTALL_DIR/bin/lesspipe.sh", "STOW_PKG_DIR/.local/bin/lesspipe.sh"],
+      [
+        "INSTALL_DIR/etc/bashcompletion.d/less",
+        "STOW_PKG_DIR/.bash_completion/less"
+      ],
+      [
+        "INSTALL_DIR/libexec/lesspipe/lesscomplete",
+        "STOW_PKG_DIR/.local/libexec/lesspipe/lesscomplete"
+      ],
+      [
+        "INSTALL_DIR/share/man/man1/lesspipe.1",
+        "STOW_PKG_DIR/.local/share/man/man1/lesspipe.sh.1"
+      ],
+      [
+        "INSTALL_DIR/share/zsh/completions/_less",
+        "STOW_PKG_DIR/.local/share/zsh/completions/_less"
+      ]
+    ],
+    "substitutions": [
+      ["INSTALL_DIR/libexec/lesspipe", "HOME/.local/libexec/lesspipe"]
+    ]
+  }
+}
