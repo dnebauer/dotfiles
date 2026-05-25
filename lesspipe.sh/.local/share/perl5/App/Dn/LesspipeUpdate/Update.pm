@@ -22,6 +22,7 @@ use Feature::Compat::Try;
 use File::chdir;
 use File::Copy;
 use Git::Repository;
+use JSON::Validator::Schema::Draft201909;
 use List::SomeUtils;
 use MooX::HandlesVia;
 use MooX::Options (
@@ -286,145 +287,6 @@ sub _build_project ($self) {
   return $FALSE;
 }
 
-# _check_config_file_data()    {{{1
-#
-# does:   checks all configuration data is present and correct
-# params: nil
-# prints: feedback
-# return: n/a, dies on failure
-sub _check_config_file_data ($self, $data) {    ## no critic (ProhibitExcessComplexity)
-
-  # assume data structure looks like:
-  #
-  # {
-  #   "repo" : {
-  #     "clone_url" : "https://github.com/wofr06/lesspipe.git"
-  #   },
-  #   "stow" : {
-  #     "root" : "HOME/.config/dotfiles",
-  #     "pkg" : "lesspipe.sh",
-  #     "extra" : [ "STOW_PKG_DIR/.config/zshenv.d/lesspipe.sh.zsh", ... ],
-  #   },
-  #   "install" : {
-  #     "filepath_maps" : [
-  #       [ "INSTALL_DIR/subdir/file",
-  #         "STOW_PKG_DIR/subdir/file"
-  #       ],
-  #       ...,
-  #     ],
-  #     "substitutions" : [
-  #       [ "INSTALL_DIR/libexec/lpipe", "HOME/.local/libexec/lpipe" ],
-  #       ...,
-  #     ],
-  #   },
-  # }
-
-  ## no critic (ProhibitDuplicateLiteral)
-
-  # entire structure
-  my $data_ref = ref $data;
-  croak "Expected config data HASH, got: $data_ref"
-      if $data_ref ne 'HASH';
-
-  # required keys
-  my %primary_keys = map { $_ => $TRUE } qw(repo stow install);
-  my %repo_keys    = map { $_ => $TRUE } qw(clone_url);
-  my %stow_keys    = map { $_ => $TRUE } qw(root pkg extra);
-  my %install_keys = map { $_ => $TRUE } qw(filepath_maps substitutions);
-
-  # check primary keys
-  # • values are HASHs
-  for my $key (keys %primary_keys) {
-    croak "No config file key: $key" if not exists $data->{$key};
-    my $key_data = $data->{$key};
-    my $key_ref  = ref $key_data;
-    croak "Expected '$key' value to be HASH, got scalar"
-        if $key_ref eq q{};
-    croak "Expected '$key' value to be HASH, got $key_ref"
-        if $key_ref ne 'HASH';
-  }
-
-  # repo->clone_url
-  # • value is scalar
-  croak 'No config file key: repo → clone_url'
-      if not exists $data->{'repo'}->{'clone_url'};
-  my $repo_clone_url_data = $data->{'repo'}->{'clone_url'};
-  my $repo_clone_url_ref  = ref $repo_clone_url_data;
-  croak "Expected clone url value to be scalar, got $repo_clone_url_ref"
-      if $repo_clone_url_ref ne q{};
-
-  # stow->root, stow->pkg
-  # • values are scalars
-  my $stow_data        = $data->{'stow'};
-  my @stow_scalar_keys = qw(root pkg);
-  for my $key (@stow_scalar_keys) {
-    croak "No config file key: stow->$key"
-        if not exists $stow_data->{$key};
-    my $key_data = $stow_data->{$key};
-    my $key_ref  = ref $key_data;
-    croak "Expected stow->$key value to be scalar, got $key_ref"
-        if $key_ref ne q{};
-  }
-
-  # stow->extra
-  # • value is ARRAY of scalars
-  croak 'No config file key: stow->extra'
-      if not exists $stow_data->{'extra'};
-  my $stow_extra_data = $stow_data->{'extra'};
-  my $stow_extra_ref  = ref $stow_extra_data;
-  croak 'Expected stow->extra value to be ARRAY, got scalar'
-      if $stow_extra_ref eq q{};
-  croak "Expected stow->extra value to be ARRAY, got $stow_extra_ref"
-      if $stow_extra_ref ne 'ARRAY';
-  for my $item (@{$stow_extra_data}) {
-    my $item_ref = ref $item;
-    croak "Expected stow->extra value to be scalar, got $item_ref"
-        if $item_ref ne q{};
-  }
-
-  # install->filepath_maps, install->substitutions
-  # • values are ARRAYs of 2-item ARRAYs
-  my $install_data = $data->{'install'};
-  for my $key (keys %install_keys) {
-    croak "No config file key: install->$key"
-        if not exists $install_data->{$key};
-    my $key_data = $install_data->{$key};
-    my $key_ref  = ref $key_data;
-    croak "Expected install->$key value to be ARRAY, got scalar"
-        if $key_ref eq q{};
-    croak "Expected install->$key value to be ARRAY, got $key_ref"
-        if $key_ref ne 'ARRAY';
-    for my $item (@{$key_data}) {
-      my $item_ref = ref $item;
-      croak "Expected install->$key ARRAY value to be ARRAY, got scalar"
-          if $item_ref eq q{};
-      croak "Expected install->$key ARRAY value to be ARRAY, got $item_ref"
-          if $item_ref ne 'ARRAY';
-      my $item_array_length = scalar @{$item};
-      croak "Expected install->$key ARRAY value to be ARRAY of length 2, "
-          . "got $item_array_length"
-          if $item_array_length != 2;
-    }
-  }
-
-  # check for invalid keys
-  for my $key (keys %{$data}) {
-    croak "Invalid primary key '$key'" if not $primary_keys{$key};
-  }
-  for my $key (keys %{ $data->{'repo'} }) {
-    croak "Invalid key 'repo->$key'" if not $repo_keys{$key};
-  }
-  for my $key (keys %{ $data->{'stow'} }) {
-    croak "Invalid key 'stow->$key'" if not $stow_keys{$key};
-  }
-  for my $key (keys %{ $data->{'install'} }) {
-    croak "Invalid key 'install->$key'" if not $install_keys{$key};
-  }
-  ## use critic
-
-  return $FALSE;
-}
-
 # _copy_project_files()    {{{1
 #
 # does:   copy built project files into stow package
@@ -544,7 +406,7 @@ sub _load_from_config_file ($self) {
   my $data = $conf->data;
 
   # check integrity of config data (dies on failure)
-  $self->_check_config_file_data($data);
+  $self->_validate_config_data($data);
 
   # assume data structure looks like this
   # • note placeholders HOME, INSTALL_DIR and STOW_PKG_DIR
@@ -756,6 +618,142 @@ sub _structural_project_changes ($self) {
   }
 
   return $structure_change_detected;
+}
+
+# _validate_config_data($data)    {{{1
+#
+# does:   validate config data
+# params: $data - extracted config data [hash, required]
+# prints: feedback
+# return: n/a, dies on invalid data
+sub _validate_config_data ($self, $data) {
+
+  # assume data structure looks like this
+  # • note placeholders HOME, INSTALL_DIR and STOW_PKG_DIR
+  #   which are replaced using $self->_replace_placeholders()
+  #
+  # {
+  #   "repo" : {
+  #     "clone_url" : "https://github.com/wofr06/lesspipe.git"
+  #   },
+  #   "stow" : {
+  #     "root" : "HOME/.config/dotfiles",
+  #     "pkg" : "lesspipe.sh",
+  #     "extra" : [ "STOW_PKG_DIR/.config/zshenv.d/lesspipe.sh.zsh", ... ],
+  #   },
+  #   "install" : {
+  #     "filepath_maps" : [
+  #       [ "INSTALL_DIR/subdir/file",
+  #         "STOW_PKG_DIR/subdir/file"
+  #       ],
+  #       ...,
+  #     ],
+  #     "substitutions" : [
+  #       [ "INSTALL_DIR/libexec/lpipe", "HOME/.local/libexec/lpipe" ],
+  #       ...,
+  #     ],
+  #   },
+  # }
+
+  ## no critic (ProhibitDuplicateLiteral ProhibitInterpolationOfLiterals RequireInterpolationOfMetachars)
+  my $schema = {
+
+    # definitions
+    '$defs' => {
+      url => {
+        type      => 'string',
+        format    => 'uri',
+        pattern   => '^(https?|http?)://',
+        minLength => 10,
+        maxLength => 2000,
+      }
+    },
+    type       => 'object',
+    required   => [ 'repo', 'stow', 'install' ],
+    properties => {
+
+      # /repo
+      repo => {
+        type       => 'object',
+        required   => ['clone_url'],
+        properties => {
+
+          # /repo/clone_url
+          clone_url => { '$ref' => '#/$defs/url' }
+        },
+        additionalProperties => $FALSE,
+      },
+
+      # /stow
+      stow => {
+        type       => 'object',
+        required   => [ 'root', 'pkg', 'extra' ],
+        properties => {
+
+          # /stow/root
+          root => { type => 'string' },
+
+          # /stow/pkg
+          pkg => { type => 'string' },
+
+          # /stow/extra
+          extra => {
+            type  => 'array',
+            items => { type => 'string' }
+          },
+        },
+        additionalProperties => $FALSE,
+      },
+
+      # /install
+      install => {
+        type       => 'object',
+        required   => [ 'filepath_maps', 'substitutions' ],
+        properties => {
+
+          # /install/filepath_maps
+          filepath_maps => {
+            type  => 'array',
+            items => {
+              type     => 'array',
+              items    => [ { type => 'string' }, { type => 'string' } ],
+              minItems => 2,
+              maxItems => 2,
+              additionalItems => $FALSE,
+            },
+          },
+
+          # /install/substitutions
+          substitutions => {
+            type  => 'array',
+            items => {
+              type     => 'array',
+              items    => [ { type => 'string' }, { type => 'string' } ],
+              minItems => 2,
+              maxItems => 2,
+              additionalItems => $FALSE,
+            },
+          },
+        },
+        additionalProperties => $FALSE,
+      },
+    },
+    additionalProperties => $FALSE,
+  };
+  ## use critic
+
+  my $validator = JSON::Validator::Schema::Draft201909->new($schema);
+  my @errors    = $validator->validate($data);
+
+  if (@errors) {
+    my $tpl = 'Config file data error(s) detected:';
+    my $msg = $self->pluralise($tpl, scalar @errors);
+    $self->vim_print($ERROR, "\n$msg");
+    for my $error (@errors) { $self->vim_print($ERROR, "• $error"); }
+    die "\nAborting\n";
+  }
+
+  return $FALSE;
 }    # }}}1
 
 1;
