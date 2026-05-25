@@ -666,7 +666,14 @@ sub _validate_config_data ($self, $data) {
         pattern   => '^(https?|http?)://',
         minLength => 10,
         maxLength => 2000,
-      }
+      },
+      pair => {
+        type            => 'array',
+        items           => [ { type => 'string' }, { type => 'string' } ],
+        minItems        => 2,
+        maxItems        => 2,
+        additionalItems => $FALSE,
+      },
     },
     type       => 'object',
     required   => [ 'repo', 'stow', 'install' ],
@@ -714,25 +721,13 @@ sub _validate_config_data ($self, $data) {
           # /install/filepath_maps
           filepath_maps => {
             type  => 'array',
-            items => {
-              type     => 'array',
-              items    => [ { type => 'string' }, { type => 'string' } ],
-              minItems => 2,
-              maxItems => 2,
-              additionalItems => $FALSE,
-            },
+            items => { '$ref' => '#/$defs/pair' },
           },
 
           # /install/substitutions
           substitutions => {
             type  => 'array',
-            items => {
-              type     => 'array',
-              items    => [ { type => 'string' }, { type => 'string' } ],
-              minItems => 2,
-              maxItems => 2,
-              additionalItems => $FALSE,
-            },
+            items => { '$ref' => '#/$defs/pair' },
           },
         },
         additionalProperties => $FALSE,
