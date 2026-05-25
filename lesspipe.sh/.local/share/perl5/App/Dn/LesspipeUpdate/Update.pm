@@ -661,13 +661,15 @@ sub _validate_config_data ($self, $data) {
     # definitions
     '$defs' => {
       url => {
-        type      => 'string',
-        format    => 'uri',
-        pattern   => '^(https?|http?)://',
-        minLength => 10,
-        maxLength => 2000,
+        description => 'model a complete url, requires url scheme',
+        type        => 'string',
+        format      => 'uri',
+        pattern     => '^(https?|http?)://',
+        minLength   => 10,
+        maxLength   => 2000,
       },
       pair => {
+        description     => 'array with 2 string items',
         type            => 'array',
         items           => [ { type => 'string' }, { type => 'string' } ],
         minItems        => 2,
@@ -686,7 +688,10 @@ sub _validate_config_data ($self, $data) {
         properties => {
 
           # /repo/clone_url
-          clone_url => { '$ref' => '#/$defs/url' }
+          clone_url => {
+            description => q{url of lesspipe's (github) repository},
+            '$ref'      => '#/$defs/url'
+          }
         },
         additionalProperties => $FALSE,
       },
@@ -698,15 +703,22 @@ sub _validate_config_data ($self, $data) {
         properties => {
 
           # /stow/root
-          root => { type => 'string' },
+          root => {
+            description => 'root directory for stow packages',
+            type        => 'string'
+          },
 
           # /stow/pkg
-          pkg => { type => 'string' },
+          pkg => {
+            description => 'name of stow package holding lesspipe files',
+            type        => 'string'
+          },
 
           # /stow/extra
           extra => {
-            type  => 'array',
-            items => { type => 'string' }
+            description => 'files added by user, not part of lesspipe repo',
+            type        => 'array',
+            items       => { type => 'string' }
           },
         },
         additionalProperties => $FALSE,
@@ -720,14 +732,16 @@ sub _validate_config_data ($self, $data) {
 
           # /install/filepath_maps
           filepath_maps => {
-            type  => 'array',
-            items => { '$ref' => '#/$defs/pair' },
+            description => 'install filepaths and related stow filepaths',
+            type        => 'array',
+            items       => { '$ref' => '#/$defs/pair' },
           },
 
           # /install/substitutions
           substitutions => {
-            type  => 'array',
-            items => { '$ref' => '#/$defs/pair' },
+            description => 'strings to match and replace in repo files',
+            type        => 'array',
+            items       => { '$ref' => '#/$defs/pair' },
           },
         },
         additionalProperties => $FALSE,
