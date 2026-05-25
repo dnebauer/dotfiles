@@ -658,6 +658,10 @@ sub _validate_config_data ($self, $data) {
   ## no critic (ProhibitDuplicateLiteral ProhibitInterpolationOfLiterals RequireInterpolationOfMetachars)
   my $schema = {
 
+    '$schema'   => 'https://json-schema.org/draft/2019-09/schema',
+    title       => 'dn-lesspipe-update config file schema',
+    description => 'validate data from the dn-lesspipe-update config file',
+
     # definitions
     '$defs' => {
       url => {
