@@ -16,6 +16,7 @@ use App::Dn::LesspipeUpdate::InstallFile;
 use App::Dn::LesspipeUpdate::Substitution;
 use Carp qw(croak);
 use Const::Fast;
+use Data::Visitor::Callback;
 use English;
 use Env qw($HOME);
 use Feature::Compat::Try;
@@ -435,9 +436,9 @@ sub _load_from_config_file ($self) {
   #   },
   # }
 
-  # set attributes
-  ## no critic (ProhibitDuplicateLiteral)
+  # set attributes needed to replace placeholders
 
+  ## no critic (ProhibitDuplicateLiteral)
   # • _repo_clone_url
   my $url_string = $data->{'repo'}->{'clone_url'};
   my $url_object = URI->new($url_string);
@@ -451,24 +452,25 @@ sub _load_from_config_file ($self) {
   # • _stow_pkg
   my $stow_pkg = $data->{'stow'}->{'pkg'};
   $self->_stow_pkg($stow_pkg);
+  ## use critic
 
-  my $stow_pkg_dir = "$stow_root/$stow_pkg";
-  my $install_dir  = $self->_install_dir->canonpath;
+  # replace placeholders in config file data
+  $self->_replace_placeholders($data);
 
+  # set remaining attributes
+
+  ## no critic (ProhibitDuplicateLiteral)
   # • _stow_extras
-  my $stow_extras_array   = $data->{'stow'}->{'extra'};
-  my @stow_extras_orig    = @{$stow_extras_array};
-  my @stow_extras_replace = $self->_replace_placeholders(@stow_extras_orig);
-  my @stow_extras         = map { Path::Tiny->new($_) } @stow_extras_replace;
+  my $stow_extras_array = $data->{'stow'}->{'extra'};
+  my @stow_extras_orig  = @{$stow_extras_array};
+  my @stow_extras       = map { Path::Tiny->new($_) } @stow_extras_orig;
   $self->_load_stow_extras(@stow_extras);
 
   # • _install_files
   my $install_mappings_array = $data->{'install'}->{'filepath_maps'};
   my @install_mappings_orig  = @{$install_mappings_array};
-  for my $install_mapping_array (@install_mappings_orig) {
-    my @install_mapping =
-        $self->_replace_placeholders(@{$install_mapping_array});
-    my ($install_file_path, $stow_file_path) = @install_mapping;
+  for my $install_mapping (@install_mappings_orig) {
+    my ($install_file_path, $stow_file_path) = @{$install_mapping};
     $self->_add_install_file(
       App::Dn::LesspipeUpdate::InstallFile->new(
         install_file_path => $install_file_path,
@@ -480,10 +482,8 @@ sub _load_from_config_file ($self) {
   # • _substitutions
   my $substitution_pairs_array = $data->{'install'}->{'substitutions'};
   my @substitution_pairs       = @{$substitution_pairs_array};
-  for my $substitution_pair_array (@substitution_pairs) {
-    my @substitution_pair =
-        $self->_replace_placeholders(@{$substitution_pair_array});
-    my ($pattern, $replacement) = @substitution_pair;
+  for my $substitution_pair (@substitution_pairs) {
+    my ($pattern, $replacement) = @{$substitution_pair};
     $self->_add_substitution(
       App::Dn::LesspipeUpdate::Substitution->new(
         pattern     => $pattern,
@@ -496,17 +496,17 @@ sub _load_from_config_file ($self) {
   return $FALSE;
 }
 
-# _replace_placeholders(@strings)    {{{1
+# _replace_placeholders($data)    {{{1
 #
-# does:   replace config file placeholders in strings
+# does:   replace config file placeholders in config file data
 # params: nil
 # prints: feedback
-# return: n/a, dies on failure
+# return: n/a, operates on $data by reference
 # note:   this method handles placeholders:
 #         HOME, INSTALL_DIR and STOW_PKG_DIR
 # note:   this method can only be called after the
 #         'stow_root' and 'stow_pkg' attributes are set
-sub _replace_placeholders ($self, @strings) {
+sub _replace_placeholders ($self, $data) {
 
   croak 'INSTALL_DIR not set' if not $self->_install_dir;
   croak 'STOW_ROOT not set'   if not $self->_stow_root;
@@ -515,12 +515,24 @@ sub _replace_placeholders ($self, @strings) {
   my $install_dir  = $self->_install_dir->canonpath;
   my $stow_pkg_dir = $self->path_join($self->_stow_root, $self->_stow_pkg);
 
-  my @replaced = List::SomeUtils::apply {s{HOME}{$HOME}gsm}
-  List::SomeUtils::apply {s{STOW_PKG_DIR}{$stow_pkg_dir}gsm}
-  List::SomeUtils::apply {s{INSTALL_DIR}{$install_dir}gsm}
-  @strings;
+  my %placeholder_values = (
+    INSTALL_DIR  => $install_dir,
+    STOW_PKG_DIR => $stow_pkg_dir,
+    HOME         => $HOME,
+  );
 
-  return @replaced;
+  my $visitor = Data::Visitor::Callback->new(
+    plain_value => sub {
+      for my $placeholder (keys %placeholder_values) {
+        my $replace = $placeholder_values{$placeholder};
+        s/$placeholder/$replace/xsmg;
+      }
+    }
+  );
+
+  $visitor->visit($data);
+
+  return $FALSE;
 }
 
 # _structural_project_changes()    {{{1
