@@ -16,7 +16,6 @@ use App::Dn::LesspipeUpdate::InstallFile;
 use App::Dn::LesspipeUpdate::Substitution;
 use Carp qw(croak);
 use Const::Fast;
-use Data::Visitor::Callback;
 use English;
 use Env qw($HOME);
 use Feature::Compat::Try;
@@ -515,22 +514,13 @@ sub _replace_placeholders ($self, $data) {
   my $install_dir  = $self->_install_dir->canonpath;
   my $stow_pkg_dir = $self->path_join($self->_stow_root, $self->_stow_pkg);
 
-  my %placeholder_values = (
+  my $placeholder_values = {
     INSTALL_DIR  => $install_dir,
     STOW_PKG_DIR => $stow_pkg_dir,
     HOME         => $HOME,
-  );
+  };
 
-  my $visitor = Data::Visitor::Callback->new(
-    plain_value => sub {
-      for my $placeholder (keys %placeholder_values) {
-        my $replace = $placeholder_values{$placeholder};
-        s/$placeholder/$replace/xsmg;
-      }
-    }
-  );
-
-  $visitor->visit($data);
+  $self->replace_tokens($data, $placeholder_values);
 
   return $FALSE;
 }
