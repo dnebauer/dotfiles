@@ -20,6 +20,7 @@ use English;
 use Env qw($HOME);
 use Feature::Compat::Try;
 use File::chdir;
+use File::Compare;
 use File::Copy;
 use Git::Repository;
 use JSON::Validator::Schema::Draft201909;
@@ -37,11 +38,12 @@ use URI;
 
 with qw(Role::Utils::Dn);
 
-const my $TRUE         => 1;
-const my $FALSE        => 0;
-const my $DIR_TEMPLATE => 'tmp.XXXXXXXXXX';
-const my $WARNING      => 'warning';
-const my $ERROR        => 'error';            # }}}1
+const my $TRUE            => 1;
+const my $FALSE           => 0;
+const my $DIR_TEMPLATE    => 'tmp.XXXXXXXXXX';
+const my $WARNING         => 'warning';
+const my $ERROR           => 'error';
+const my $FILE_COMP_ERROR => -1;                 # }}}1
 
 # options
 
@@ -293,18 +295,69 @@ sub _build_project ($self) {
 # params: nil
 # prints: feedback
 # return: n/a
-sub _copy_project_files ($self) {
+sub _copy_project_files ($self) {    ## no critic (ProhibitExcessComplexity)
 
-  # get source and target filepaths
-  my %replacements =
+  my (@new, @changed, @new_and_changed);
+
+  # find new or updated project files
+  say "\nChecking for new or changed project files" or croak;
+  for my $install_file_obj ($self->_install_files) {
+    my $install_fp_obj = $install_file_obj->install_file_path;
+    my $install_fp     = $install_fp_obj->canonpath;
+    my $stow_fp_obj    = $install_file_obj->stow_file_path;
+    my $stow_fp        = $stow_fp_obj->canonpath;
+    if ($install_fp_obj->is_file) {
+      my $file_compare = File::Compare::compare($install_fp, $stow_fp);
+      if ($file_compare == $FILE_COMP_ERROR) {
+        my $msg = "Fatal error comparing $install_fp and $stow_fp";
+        $self->vim_print($ERROR, $msg);
+        die "Aborting\n";
+      }
+      elsif ($file_compare == 1) {
+        push @changed, $install_file_obj;
+      }
+    }
+    else {
+      push @new, $install_file_obj;
+    }
+  }
+  push @new_and_changed, @new, @changed;
+
+  # nothing to do if no new or changed install files
+  if (not @new_and_changed) {
+    say "\nNo new or changed project files to install" or croak;
+    say 'Update is complete'                           or croak;
+    return $FALSE;
+  }
+
+  # report on files to update
+  if (@new) {
+    my $tpl = 'New project file(s) to install:';
+    my $msg = $self->pluralise($tpl, scalar @new);
+    $self->vim_print($WARNING, "\n$msg");
+    for my $install_file_obj (@new) {
+      my $fp = $install_file_obj->install_file_path->canonpath;
+      $self->vim_print($WARNING, "• $fp");
+    }
+  }
+  if (@changed) {
+    my $tpl = '(This|These) project file(s) (is|are) changed:';
+    my $msg = $self->pluralise($tpl, scalar @changed);
+    $self->vim_print($WARNING, "\n$msg");
+    for my $install_file_obj (@changed) {
+      my $fp = $install_file_obj->install_file_path->canonpath;
+      $self->vim_print($WARNING, "• $fp");
+    }
+  }
+
+  # copy new and changed project files
+  my %replacing =
       map {
     $_->install_file_path->canonpath => $_->stow_file_path->canonpath
-      } $self->_install_files;
-
-  # perform file copy
-  say "\nCopying current project files into stow package:" or croak;
-  for my $install_fp (sort keys %replacements) {
-    my $stow_fp = $replacements{$install_fp};
+      } @new_and_changed;
+  say "\nCopying updated project files into stow package:" or croak;
+  for my $install_fp (sort keys %replacing) {
+    my $stow_fp = $replacing{$install_fp};
     say "\n• $install_fp\n  -> $stow_fp" or croak;
     if (File::Copy::copy($install_fp, $stow_fp)) {
       say '  -- copied' or croak;
