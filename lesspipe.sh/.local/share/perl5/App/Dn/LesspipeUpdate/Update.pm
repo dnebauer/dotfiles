@@ -655,7 +655,7 @@ sub _update_stow_package_files ($self) {
     my $install_fp     = $install_fp_obj->canonpath;
     my $stow_fp_obj    = $install_file_obj->stow_file_path;
     my $stow_fp        = $stow_fp_obj->canonpath;
-    if ($install_fp_obj->is_file) {
+    if ($stow_fp_obj->is_file) {
       my $file_compare = File::Compare::compare($install_fp, $stow_fp);
       if ($file_compare == $FILE_COMP_ERROR) {
         my $msg = "Fatal error comparing $install_fp and $stow_fp";
