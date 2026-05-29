@@ -175,7 +175,145 @@ has '_substitutions_array' => (
     _add_substitution => 'push',
   },
   doc => 'String substitutions for repo files',
-);    # }}}1
+);
+
+# _config_schema    {{{1
+has '_config_schema' => (
+  is  => 'lazy',
+  isa => Types::Standard::HashRef,
+  doc => 'JSON schema used by configuration file data',
+);
+
+sub _build__config_schema ($self) {    ## no critic (ProhibitUnusedPrivateSubroutines)
+
+  # assume data structure looks like this
+  # • note placeholders HOME, INSTALL_DIR and STOW_PKG_DIR
+  #   which are replaced using $self->_replace_placeholders()
+  #
+  # {
+  #   "repo" : {
+  #     "clone_url" : "https://github.com/wofr06/lesspipe.git"
+  #   },
+  #   "stow" : {
+  #     "root" : "HOME/.config/dotfiles",
+  #     "pkg" : "lesspipe.sh",
+  #     "extra" : [ "STOW_PKG_DIR/.config/zshenv.d/lesspipe.sh.zsh", ... ],
+  #   },
+  #   "install" : {
+  #     "filepath_maps" : [
+  #       [ "INSTALL_DIR/subdir/file",
+  #         "STOW_PKG_DIR/subdir/file"
+  #       ],
+  #       ...,
+  #     ],
+  #     "substitutions" : [
+  #       [ "INSTALL_DIR/libexec/lpipe", "HOME/.local/libexec/lpipe" ],
+  #       ...,
+  #     ],
+  #   },
+  # }
+
+  ## no critic (ProhibitDuplicateLiteral ProhibitInterpolationOfLiterals RequireInterpolationOfMetachars)
+  my $schema = {
+
+    '$schema'   => 'https://json-schema.org/draft/2019-09/schema',
+    title       => 'dn-lesspipe-update config file schema',
+    description => 'validate data from the dn-lesspipe-update config file',
+
+    # definitions
+    '$defs' => {
+      url => {
+        description => 'model a complete url, requires url scheme',
+        type        => 'string',
+        format      => 'uri',
+        pattern     => '^(https?|http?)://',
+        minLength   => 10,
+        maxLength   => 2000,
+      },
+      pair => {
+        description     => 'array with 2 string items',
+        type            => 'array',
+        items           => [ { type => 'string' }, { type => 'string' } ],
+        minItems        => 2,
+        maxItems        => 2,
+        additionalItems => $FALSE,
+      },
+    },
+    type       => 'object',
+    required   => [ 'repo', 'stow', 'install' ],
+    properties => {
+
+      # /repo
+      repo => {
+        type       => 'object',
+        required   => ['clone_url'],
+        properties => {
+
+          # /repo/clone_url
+          clone_url => {
+            description => q{url of lesspipe's (github) repository},
+            '$ref'      => '#/$defs/url'
+          }
+        },
+        additionalProperties => $FALSE,
+      },
+
+      # /stow
+      stow => {
+        type       => 'object',
+        required   => [ 'root', 'pkg', 'extra' ],
+        properties => {
+
+          # /stow/root
+          root => {
+            description => 'root directory for stow packages',
+            type        => 'string'
+          },
+
+          # /stow/pkg
+          pkg => {
+            description => 'name of stow package holding lesspipe files',
+            type        => 'string'
+          },
+
+          # /stow/extra
+          extra => {
+            description => 'files added by user, not part of lesspipe repo',
+            type        => 'array',
+            items       => { type => 'string' }
+          },
+        },
+        additionalProperties => $FALSE,
+      },
+
+      # /install
+      install => {
+        type       => 'object',
+        required   => [ 'filepath_maps', 'substitutions' ],
+        properties => {
+
+          # /install/filepath_maps
+          filepath_maps => {
+            description => 'install filepaths and related stow filepaths',
+            type        => 'array',
+            items       => { '$ref' => '#/$defs/pair' },
+          },
+
+          # /install/substitutions
+          substitutions => {
+            description => 'strings to match and replace in repo files',
+            type        => 'array',
+            items       => { '$ref' => '#/$defs/pair' },
+          },
+        },
+        additionalProperties => $FALSE,
+      },
+    },
+    additionalProperties => $FALSE,
+  };
+  ## use critic
+  return $schema;
+}    # }}}1
 
 # methods
 
@@ -712,134 +850,7 @@ sub _update_stow_package_files ($self) {
 # prints: feedback
 # return: n/a, dies on invalid data
 sub _validate_config_data ($self, $data) {
-
-  # assume data structure looks like this
-  # • note placeholders HOME, INSTALL_DIR and STOW_PKG_DIR
-  #   which are replaced using $self->_replace_placeholders()
-  #
-  # {
-  #   "repo" : {
-  #     "clone_url" : "https://github.com/wofr06/lesspipe.git"
-  #   },
-  #   "stow" : {
-  #     "root" : "HOME/.config/dotfiles",
-  #     "pkg" : "lesspipe.sh",
-  #     "extra" : [ "STOW_PKG_DIR/.config/zshenv.d/lesspipe.sh.zsh", ... ],
-  #   },
-  #   "install" : {
-  #     "filepath_maps" : [
-  #       [ "INSTALL_DIR/subdir/file",
-  #         "STOW_PKG_DIR/subdir/file"
-  #       ],
-  #       ...,
-  #     ],
-  #     "substitutions" : [
-  #       [ "INSTALL_DIR/libexec/lpipe", "HOME/.local/libexec/lpipe" ],
-  #       ...,
-  #     ],
-  #   },
-  # }
-
-  ## no critic (ProhibitDuplicateLiteral ProhibitInterpolationOfLiterals RequireInterpolationOfMetachars)
-  my $schema = {
-
-    '$schema'   => 'https://json-schema.org/draft/2019-09/schema',
-    title       => 'dn-lesspipe-update config file schema',
-    description => 'validate data from the dn-lesspipe-update config file',
-
-    # definitions
-    '$defs' => {
-      url => {
-        description => 'model a complete url, requires url scheme',
-        type        => 'string',
-        format      => 'uri',
-        pattern     => '^(https?|http?)://',
-        minLength   => 10,
-        maxLength   => 2000,
-      },
-      pair => {
-        description     => 'array with 2 string items',
-        type            => 'array',
-        items           => [ { type => 'string' }, { type => 'string' } ],
-        minItems        => 2,
-        maxItems        => 2,
-        additionalItems => $FALSE,
-      },
-    },
-    type       => 'object',
-    required   => [ 'repo', 'stow', 'install' ],
-    properties => {
-
-      # /repo
-      repo => {
-        type       => 'object',
-        required   => ['clone_url'],
-        properties => {
-
-          # /repo/clone_url
-          clone_url => {
-            description => q{url of lesspipe's (github) repository},
-            '$ref'      => '#/$defs/url'
-          }
-        },
-        additionalProperties => $FALSE,
-      },
-
-      # /stow
-      stow => {
-        type       => 'object',
-        required   => [ 'root', 'pkg', 'extra' ],
-        properties => {
-
-          # /stow/root
-          root => {
-            description => 'root directory for stow packages',
-            type        => 'string'
-          },
-
-          # /stow/pkg
-          pkg => {
-            description => 'name of stow package holding lesspipe files',
-            type        => 'string'
-          },
-
-          # /stow/extra
-          extra => {
-            description => 'files added by user, not part of lesspipe repo',
-            type        => 'array',
-            items       => { type => 'string' }
-          },
-        },
-        additionalProperties => $FALSE,
-      },
-
-      # /install
-      install => {
-        type       => 'object',
-        required   => [ 'filepath_maps', 'substitutions' ],
-        properties => {
-
-          # /install/filepath_maps
-          filepath_maps => {
-            description => 'install filepaths and related stow filepaths',
-            type        => 'array',
-            items       => { '$ref' => '#/$defs/pair' },
-          },
-
-          # /install/substitutions
-          substitutions => {
-            description => 'strings to match and replace in repo files',
-            type        => 'array',
-            items       => { '$ref' => '#/$defs/pair' },
-          },
-        },
-        additionalProperties => $FALSE,
-      },
-    },
-    additionalProperties => $FALSE,
-  };
-  ## use critic
-
+  my $schema    = $self->_config_schema;
   my $validator = JSON::Validator::Schema::Draft201909->new($schema);
   my @errors    = $validator->validate($data);
 
