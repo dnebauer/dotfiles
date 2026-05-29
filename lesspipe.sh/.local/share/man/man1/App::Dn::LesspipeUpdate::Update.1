@@ -327,14 +327,6 @@ supported.
 These warning messages are displayed when the module detects changes between
 the newly downloaded project files and those project files defined in the
 configuration and present in the stow package.
-.SS "Fatal error comparing FILEPATH and FILEPATH"
-.IX Subsection "Fatal error comparing FILEPATH and FILEPATH"
-This error occurs when the module is comparing newly downloaded project files
-with their corresponding stow package files to detect differences. The error
-indicates that the subsidiary module performing the file comparison
-(File::Compare) has reported an error when comparing files. The
-File::Compare module unfortunately does not issue a message explaining the
-nature of the error.
 .SS "Unable to generate list of candidate configuration directories"
 .IX Subsection "Unable to generate list of candidate configuration directories"
 Occurs if the module is unable to generate any candidate configuration
@@ -352,11 +344,10 @@ None known.
 .SS "Perl modules"
 .IX Subsection "Perl modules"
 App::Dn::LesspipeUpdate::InstallFile, App::Dn::LesspipeUpdate::Substitution,
-Carp, Const::Fast, English, Env, Feature::Compat::Try, File::Compare,
-File::Copy, File::chdir, Git::Repository, JSON::Validator::Schema::Draft201909,
-List::SomeUtils, Moo, MooX::HandlesVia, MooX::Options, namespace::clean,
-Path::Tiny, Role::Utils::Dn, Scalar::Util, strictures, Types::Path::Tiny,
-Types::Standard, URI, version.
+Carp, Const::Fast, English, Env, Feature::Compat::Try, File::Copy, File::chdir,
+Git::Repository, JSON::Validator::Schema::Draft201909, List::SomeUtils, Moo,
+MooX::HandlesVia, MooX::Options, namespace::clean, Path::Tiny, Role::Utils::Dn,
+Scalar::Util, strictures, Types::Path::Tiny, Types::Standard, URI, version.
 .SS INCOMPATIBILITIES
 .IX Subsection "INCOMPATIBILITIES"
 There are no known incompatibilities with other modules.

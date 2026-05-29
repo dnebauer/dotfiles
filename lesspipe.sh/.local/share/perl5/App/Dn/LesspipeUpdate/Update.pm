@@ -20,7 +20,6 @@ use English;
 use Env qw($HOME);
 use Feature::Compat::Try;
 use File::chdir;
-use File::Compare;
 use File::Copy;
 use Git::Repository;
 use JSON::Validator::Schema::Draft201909;
@@ -794,13 +793,7 @@ sub _update_stow_package_files ($self) {
     my $stow_fp_obj    = $install_file_obj->stow_file_path;
     my $stow_fp        = $stow_fp_obj->canonpath;
     if ($stow_fp_obj->is_file) {
-      my $file_compare = File::Compare::compare($install_fp, $stow_fp);
-      if ($file_compare == $FILE_COMP_ERROR) {
-        my $msg = "Fatal error comparing $install_fp and $stow_fp";
-        $self->vim_print($ERROR, $msg);
-        die "Aborting\n";
-      }
-      elsif ($file_compare == 1) {
+      if (not $self->file_identical($install_fp, $stow_fp)) {
         push @changed, $install_file_obj;
       }
     }
@@ -1179,15 +1172,6 @@ These warning messages are displayed when the module detects changes between
 the newly downloaded project files and those project files defined in the
 configuration and present in the stow package.
 
-=head2 Fatal error comparing FILEPATH and FILEPATH
-
-This error occurs when the module is comparing newly downloaded project files
-with their corresponding stow package files to detect differences. The error
-indicates that the subsidiary module performing the file comparison
-(L<File::Compare>) has reported an error when comparing files. The
-L<File::Compare> module unfortunately does not issue a message explaining the
-nature of the error.
-
 =head2 Unable to generate list of candidate configuration directories
 
 Occurs if the module is unable to generate any candidate configuration
@@ -1208,11 +1192,10 @@ None known.
 =head2 Perl modules
 
 App::Dn::LesspipeUpdate::InstallFile, App::Dn::LesspipeUpdate::Substitution,
-Carp, Const::Fast, English, Env, Feature::Compat::Try, File::Compare,
-File::Copy, File::chdir, Git::Repository, JSON::Validator::Schema::Draft201909,
-List::SomeUtils, Moo, MooX::HandlesVia, MooX::Options, namespace::clean,
-Path::Tiny, Role::Utils::Dn, Scalar::Util, strictures, Types::Path::Tiny,
-Types::Standard, URI, version.
+Carp, Const::Fast, English, Env, Feature::Compat::Try, File::Copy, File::chdir,
+Git::Repository, JSON::Validator::Schema::Draft201909, List::SomeUtils, Moo,
+MooX::HandlesVia, MooX::Options, namespace::clean, Path::Tiny, Role::Utils::Dn,
+Scalar::Util, strictures, Types::Path::Tiny, Types::Standard, URI, version.
 
 =head2 INCOMPATIBILITIES
 
