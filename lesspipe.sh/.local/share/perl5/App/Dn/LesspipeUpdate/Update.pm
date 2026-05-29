@@ -935,7 +935,7 @@ perform substitutions on file content
 
 =item 4.
 
-copy build files to the stow package, renaming where necessary.
+copy new and changed build files to the stow package, renaming where necessary.
 
 =back
 
@@ -1168,6 +1168,15 @@ These warning messages are displayed when the module detects changes between
 the newly downloaded project files and those project files defined in the
 configuration and present in the stow package.
 
+=head2 Fatal error comparing FILEPATH and FILEPATH
+
+This error occurs when the module is comparing newly downloaded project files
+with their corresponding stow package files to detect differences. The error
+indicates that the subsidiary module performing the file comparison
+(L<File::Compare>) has reported an error when comparing files. The
+L<File::Compare> module unfortunately does not issue a message explaining the
+nature of the error.
+
 =head2 Unable to generate list of candidate configuration directories
 
 Occurs if the module is unable to generate any candidate configuration
@@ -1188,9 +1197,10 @@ None known.
 =head2 Perl modules
 
 App::Dn::LesspipeUpdate::InstallFile, App::Dn::LesspipeUpdate::Substitution,
-Carp, Const::Fast, English, Env, Feature::Compat::Try, File::Copy, File::chdir,
-Git::Repository, List::SomeUtils, Moo, MooX::HandlesVia, MooX::Options,
-namespace::clean, Path::Tiny, Role::Utils::Dn, strictures, Types::Path::Tiny,
+Carp, Const::Fast, English, Env, Feature::Compat::Try, File::Compare,
+File::Copy, File::chdir, Git::Repository, JSON::Validator::Schema::Draft201909,
+List::SomeUtils, Moo, MooX::HandlesVia, MooX::Options, namespace::clean,
+Path::Tiny, Role::Utils::Dn, Scalar::Util, strictures, Types::Path::Tiny,
 Types::Standard, URI, version.
 
 =head2 INCOMPATIBILITIES
