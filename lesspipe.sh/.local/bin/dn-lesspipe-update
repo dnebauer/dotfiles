@@ -100,6 +100,9 @@ any changes that have occurred since the previous update. If changes are
 detected, they are reported to the user who decides whether to proceed with
 updating the stow package.
 
+Because the script may require the user to choose whether to proceed, it is
+I<not> intended to be run unattended, for example, as a cron job.
+
 =head1 CONFIGURATION
 
 The module looks for a configuration file with the base name
