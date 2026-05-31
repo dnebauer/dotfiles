@@ -1,4 +1,4 @@
-#compdef dn-lesspipe-update
+#compdef lesspipe-my-update
 
 local rc=1
 

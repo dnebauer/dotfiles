@@ -54,17 +54,17 @@
 .rr rF
 .\" ========================================================================
 .\"
-.IX Title "App::Dn::LesspipeUpdate::Update 3"
-.TH App::Dn::LesspipeUpdate::Update 3 2026-05-29 "perl v5.40.1" "User Contributed Perl Documentation"
+.IX Title "App::My::LesspipeUpdate::Update 3"
+.TH App::My::LesspipeUpdate::Update 3 2026-05-29 "perl v5.40.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH NAME
-App::Dn::LesspipeUpdate::Update \- update a local lesspipe.sh installation
+App::My::LesspipeUpdate::Update \- update a local lesspipe.sh installation
 .SH VERSION
 .IX Header "VERSION"
-This documentation is for App::Dn::LesspipeUpdate::Update version 0.1.
+This documentation is for App::My::LesspipeUpdate::Update version 0.1.
 .SH SYNOPSIS
 .IX Header "SYNOPSIS"
 .Vb 5
@@ -72,9 +72,9 @@ This documentation is for App::Dn::LesspipeUpdate::Update version 0.1.
 \&    use 5.006;
 \&    use 5.038_001;
 \&    use namespace::clean;
-\&    use App::Dn::LesspipeUpdate::Update;
+\&    use App::My::LesspipeUpdate::Update;
 \&
-\&    App::Dn::LesspipeUpdate::Update\->new_with_options\->run;
+\&    App::My::LesspipeUpdate::Update\->new_with_options\->run;
 .Ve
 .SH DESCRIPTION
 .IX Header "DESCRIPTION"
@@ -159,7 +159,7 @@ No public properties/attributes.
 .SS "Configuration file"
 .IX Subsection "Configuration file"
 The module looks for a configuration file with the base name
-\&\fIdn-lesspipe-update\fR in the standard configuration locations. Supported file
+\&\fIlesspipe-my-update\fR in the standard configuration locations. Supported file
 formats include ini, json, xml, and yaml. The file extension should match the
 file format, for example, \fI.json\fR for json formatted files. Warning: only the
 json format has been thoroughly tested with this module.
@@ -343,7 +343,7 @@ None known.
 .IX Header "DEPENDENCIES"
 .SS "Perl modules"
 .IX Subsection "Perl modules"
-App::Dn::LesspipeUpdate::InstallFile, App::Dn::LesspipeUpdate::Substitution,
+App::My::LesspipeUpdate::InstallFile, App::My::LesspipeUpdate::Substitution,
 Carp, Const::Fast, English, Env, Feature::Compat::Try, File::Copy, File::chdir,
 Git::Repository, JSON::Validator::Schema::Draft201909, List::SomeUtils, Moo,
 MooX::HandlesVia, MooX::Options, namespace::clean, Path::Tiny, Role::Utils::Dn,

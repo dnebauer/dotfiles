@@ -6,9 +6,9 @@ use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
 use File::FindLib 'share/perl5';
-use App::Dn::LesspipeUpdate::Update;
+use App::My::LesspipeUpdate::Update;
 
-App::Dn::LesspipeUpdate::Update->new_with_options->run;
+App::My::LesspipeUpdate::Update->new_with_options->run;
 
 1;
 
@@ -20,13 +20,13 @@ __END__
 
 =head1 NAME
 
-dn-lesspipe-update - update a local lesspipe.sh installation
+lesspipe-my-update - update a local lesspipe.sh installation
 
 =head1 USAGE
 
-B<dn-lesspipe-update> [B<-b>] [B<-t>]
+B<lesspipe-my-update> [B<-b>] [B<-t>]
 
-B<dn-lesspipe-update> B<-h>
+B<lesspipe-my-update> B<-h>
 
 =head1 DESCRIPTION
 
@@ -106,7 +106,7 @@ I<not> intended to be run unattended, for example, as a cron job.
 =head1 CONFIGURATION
 
 The module looks for a configuration file with the base name
-F<dn-lesspipe-update> in the standard configuration locations. Supported file
+F<lesspipe-my-update> in the standard configuration locations. Supported file
 formats include ini, json, xml, and yaml. The file extension should match the
 file format, for example, F<.json> for json formatted files. Warning: only the
 json format has been thoroughly tested with this module.
@@ -343,7 +343,7 @@ Please report any bugs to the author.
 
 =head2 Perl modules
 
-App::Dn::LesspipeUpdate::Update, File::FindLib, namespace::clean, strictures,
+App::My::LesspipeUpdate::Update, File::FindLib, namespace::clean, strictures,
 version.
 
 =head1 AUTHOR

@@ -1,4 +1,4 @@
-package App::Dn::LesspipeUpdate::Update;
+package App::My::LesspipeUpdate::Update;
 
 use Moo;    # {{{1
 use strictures 2;
@@ -12,8 +12,8 @@ use namespace::clean -except => [ '_options_data', '_options_config' ];
 #   to @INC with File::FindLib
 # • The App::... modules loaded below are in the same directory, but the
 #   perlcritic static analyser does not know that, and hence the error
-use App::Dn::LesspipeUpdate::InstallFile;
-use App::Dn::LesspipeUpdate::Substitution;
+use App::My::LesspipeUpdate::InstallFile;
+use App::My::LesspipeUpdate::Substitution;
 use Carp qw(croak);
 use Const::Fast;
 use English;
@@ -148,7 +148,7 @@ has '_stow_extra_array' => (
 has '_install_filepath_array' => (
   is  => 'rw',
   isa => Types::Standard::ArrayRef [
-    Types::Standard::InstanceOf ['App::Dn::LesspipeUpdate::InstallFile'],
+    Types::Standard::InstanceOf ['App::My::LesspipeUpdate::InstallFile'],
   ],
   required    => $TRUE,
   default     => sub { [] },
@@ -164,7 +164,7 @@ has '_install_filepath_array' => (
 has '_substitutions_array' => (
   is  => 'rw',
   isa => Types::Standard::ArrayRef [
-    Types::Standard::InstanceOf ['App::Dn::LesspipeUpdate::Substitution'],
+    Types::Standard::InstanceOf ['App::My::LesspipeUpdate::Substitution'],
   ],
   required    => $TRUE,
   default     => sub { [] },
@@ -216,8 +216,8 @@ sub _build__config_schema ($self) {    ## no critic (ProhibitUnusedPrivateSubrou
   my $schema = {
 
     '$schema'   => 'https://json-schema.org/draft/2019-09/schema',
-    title       => 'dn-lesspipe-update config file schema',
-    description => 'validate data from the dn-lesspipe-update config file',
+    title       => 'lesspipe-my-update config file schema',
+    description => 'validate data from the lesspipe-my-update config file',
 
     # definitions
     '$defs' => {
@@ -431,7 +431,7 @@ sub _build_project ($self) {
 #
 # does:   copy new and changed project files into stow package
 # params: @install_file_objs
-#         [required, App::Dn::LesspipeUpdate::InstallFile objects]
+#         [required, App::My::LesspipeUpdate::InstallFile objects]
 # prints: feedback
 # return: n/a
 sub _copy_files ($self, @install_file_objs) {
@@ -440,7 +440,7 @@ sub _copy_files ($self, @install_file_objs) {
   my @not_path_tiny = grep {
     my $bls = Scalar::Util::blessed $_;
     not(defined $bls
-      and $bls eq 'App::Dn::LesspipeUpdate::InstallFile');    ## no critic (ProhibitDuplicateLiteral)
+      and $bls eq 'App::My::LesspipeUpdate::InstallFile');    ## no critic (ProhibitDuplicateLiteral)
   } @install_file_objs;
   if (@not_path_tiny) {
     my $count = @not_path_tiny;
@@ -555,7 +555,7 @@ sub _download_repo ($self) {
 sub _load_from_config_file ($self) {
 
   # load config file data
-  my $conf = $self->config_file('dn-lesspipe-update');
+  my $conf = $self->config_file('lesspipe-my-update');
   my $data = $conf->data;
 
   # check integrity of config data (dies on failure)
@@ -624,7 +624,7 @@ sub _load_from_config_file ($self) {
   for my $install_mapping (@install_mappings_orig) {
     my ($install_file_path, $stow_file_path) = @{$install_mapping};
     $self->_add_install_file(
-      App::Dn::LesspipeUpdate::InstallFile->new(
+      App::My::LesspipeUpdate::InstallFile->new(
         install_file_path => $install_file_path,
         stow_file_path    => $stow_file_path,
       )
@@ -637,7 +637,7 @@ sub _load_from_config_file ($self) {
   for my $substitution_pair (@substitution_pairs) {
     my ($pattern, $replacement) = @{$substitution_pair};
     $self->_add_substitution(
-      App::Dn::LesspipeUpdate::Substitution->new(
+      App::My::LesspipeUpdate::Substitution->new(
         pattern     => $pattern,
         replacement => $replacement,
       )
@@ -867,11 +867,11 @@ __END__
 
 =head1 NAME
 
-App::Dn::LesspipeUpdate::Update - update a local lesspipe.sh installation
+App::My::LesspipeUpdate::Update - update a local lesspipe.sh installation
 
 =head1 VERSION
 
-This documentation is for App::Dn::LesspipeUpdate::Update version 0.1.
+This documentation is for App::My::LesspipeUpdate::Update version 0.1.
 
 =head1 SYNOPSIS
 
@@ -879,9 +879,9 @@ This documentation is for App::Dn::LesspipeUpdate::Update version 0.1.
     use 5.006;
     use 5.038_001;
     use namespace::clean;
-    use App::Dn::LesspipeUpdate::Update;
+    use App::My::LesspipeUpdate::Update;
 
-    App::Dn::LesspipeUpdate::Update->new_with_options->run;
+    App::My::LesspipeUpdate::Update->new_with_options->run;
 
 =head1 DESCRIPTION
 
@@ -978,7 +978,7 @@ No public properties/attributes.
 =head2 Configuration file
 
 The module looks for a configuration file with the base name
-F<dn-lesspipe-update> in the standard configuration locations. Supported file
+F<lesspipe-my-update> in the standard configuration locations. Supported file
 formats include ini, json, xml, and yaml. The file extension should match the
 file format, for example, F<.json> for json formatted files. Warning: only the
 json format has been thoroughly tested with this module.
@@ -1191,7 +1191,7 @@ None known.
 
 =head2 Perl modules
 
-App::Dn::LesspipeUpdate::InstallFile, App::Dn::LesspipeUpdate::Substitution,
+App::My::LesspipeUpdate::InstallFile, App::My::LesspipeUpdate::Substitution,
 Carp, Const::Fast, English, Env, Feature::Compat::Try, File::Copy, File::chdir,
 Git::Repository, JSON::Validator::Schema::Draft201909, List::SomeUtils, Moo,
 MooX::HandlesVia, MooX::Options, namespace::clean, Path::Tiny, Role::Utils::Dn,

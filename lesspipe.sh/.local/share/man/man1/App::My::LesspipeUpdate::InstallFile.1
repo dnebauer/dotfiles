@@ -61,10 +61,10 @@
 .if n .ad l
 .nh
 .SH NAME
-App::Dn::LesspipeUpdate::InstallFile \- update a local lesspipe.sh installation
+App::My::LesspipeUpdate::InstallFile \- update a local lesspipe.sh installation
 .SH VERSION
 .IX Header "VERSION"
-This documentation is for App::Dn::LesspipeUpdate::InstallFile version 0.1.
+This documentation is for App::My::LesspipeUpdate::InstallFile version 0.1.
 .SH SYNOPSIS
 .IX Header "SYNOPSIS"
 .Vb 5
@@ -72,14 +72,14 @@ This documentation is for App::Dn::LesspipeUpdate::InstallFile version 0.1.
 \&    use Const::Fast;
 \&    use MooX::HandlesVia;
 \&    use Types::Standard;
-\&    use App::Dn::LesspipeUpdate::InstallFile;
+\&    use App::My::LesspipeUpdate::InstallFile;
 \&
 \&    const my $TRUE => 1;
 \&
 \&    has \*(Aq_install_filepath_array\*(Aq => (
 \&      is  => \*(Aqrw\*(Aq,
 \&      isa => Types::Standard::ArrayRef [
-\&        Types::Standard::InstanceOf [\*(AqApp::Dn::LesspipeUpdate::InstallFile\*(Aq],
+\&        Types::Standard::InstanceOf [\*(AqApp::My::LesspipeUpdate::InstallFile\*(Aq],
 \&      ],
 \&      required    => $TRUE,
 \&      default     => sub { [] },
@@ -93,7 +93,7 @@ This documentation is for App::Dn::LesspipeUpdate::InstallFile version 0.1.
 .Ve
 .SH DESCRIPTION
 .IX Header "DESCRIPTION"
-This is an accessory module for App::Dn::LesspipeUpdate::Update that models
+This is an accessory module for App::My::LesspipeUpdate::Update that models
 a single file from a build of the lesspipe.sh project and the stow package
 file it maps to.
 .SH "CONFIGURATION AND ENVIRONMENT"

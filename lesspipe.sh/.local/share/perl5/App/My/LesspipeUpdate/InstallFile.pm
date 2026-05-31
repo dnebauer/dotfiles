@@ -1,4 +1,4 @@
-package App::Dn::LesspipeUpdate::InstallFile;
+package App::My::LesspipeUpdate::InstallFile;
 
 use Moo;    # {{{1
 use strictures 2;
@@ -41,11 +41,11 @@ __END__
 
 =head1 NAME
 
-App::Dn::LesspipeUpdate::InstallFile - model a build file
+App::My::LesspipeUpdate::InstallFile - model a build file
 
 =head1 VERSION
 
-This documentation is for App::Dn::LesspipeUpdate::InstallFile version 0.1.
+This documentation is for App::My::LesspipeUpdate::InstallFile version 0.1.
 
 =head1 SYNOPSIS
 
@@ -53,14 +53,14 @@ This documentation is for App::Dn::LesspipeUpdate::InstallFile version 0.1.
     use Const::Fast;
     use MooX::HandlesVia;
     use Types::Standard;
-    use App::Dn::LesspipeUpdate::InstallFile;
+    use App::My::LesspipeUpdate::InstallFile;
 
     const my $TRUE => 1;
 
     has '_install_filepath_array' => (
       is  => 'rw',
       isa => Types::Standard::ArrayRef [
-        Types::Standard::InstanceOf ['App::Dn::LesspipeUpdate::InstallFile'],
+        Types::Standard::InstanceOf ['App::My::LesspipeUpdate::InstallFile'],
       ],
       required    => $TRUE,
       default     => sub { [] },
@@ -74,7 +74,7 @@ This documentation is for App::Dn::LesspipeUpdate::InstallFile version 0.1.
 
 =head1 DESCRIPTION
 
-This is an accessory module for L<App::Dn::LesspipeUpdate::Update> that models
+This is an accessory module for L<App::My::LesspipeUpdate::Update> that models
 a single file from a build of the lesspipe.sh project and the stow package
 file it maps to.
 

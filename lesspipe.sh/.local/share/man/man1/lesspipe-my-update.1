@@ -54,8 +54,8 @@
 .rr rF
 .\" ========================================================================
 .\"
-.IX Title "DN-LESSPIPE-UPDATE 1"
-.TH DN-LESSPIPE-UPDATE 1 2026-05-31 "perl v5.40.1" "User Contributed Perl Documentation"
+.IX Title "lesspipe-my-update 1"
+.TH lesspipe-my-update 1 2026-05-31 "perl v5.40.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -64,9 +64,9 @@
 dn\-lesspipe\-update \- update a local lesspipe.sh installation
 .SH USAGE
 .IX Header "USAGE"
-\&\fBdn-lesspipe-update\fR [\fB\-b\fR] [\fB\-t\fR]
+\&\fBlesspipe-my-update\fR [\fB\-b\fR] [\fB\-t\fR]
 .PP
-\&\fBdn-lesspipe-update\fR \fB\-h\fR
+\&\fBlesspipe-my-update\fR \fB\-h\fR
 .SH DESCRIPTION
 .IX Header "DESCRIPTION"
 Update a local installation of the \fIlesspipe.sh\fR preprocessor for
@@ -133,7 +133,7 @@ Because the script may require the user to choose whether to proceed, it is
 .SH CONFIGURATION
 .IX Header "CONFIGURATION"
 The module looks for a configuration file with the base name
-\&\fIdn-lesspipe-update\fR in the standard configuration locations. Supported file
+\&\fIlesspipe-my-update\fR in the standard configuration locations. Supported file
 formats include ini, json, xml, and yaml. The file extension should match the
 file format, for example, \fI.json\fR for json formatted files. Warning: only the
 json format has been thoroughly tested with this module.
@@ -326,7 +326,7 @@ Please report any bugs to the author.
 .IX Header "DEPENDENCIES"
 .SS "Perl modules"
 .IX Subsection "Perl modules"
-App::Dn::LesspipeUpdate::Update, File::FindLib, namespace::clean, strictures,
+App::My::LesspipeUpdate::Update, File::FindLib, namespace::clean, strictures,
 version.
 .SH AUTHOR
 .IX Header "AUTHOR"

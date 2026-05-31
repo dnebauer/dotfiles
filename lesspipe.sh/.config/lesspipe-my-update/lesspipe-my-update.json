@@ -10,16 +10,16 @@
       "STOW_PKG_DIR/.config/zshrc.d/80-options-lessopen.sh.zsh",
       "STOW_PKG_DIR/.local/share/man/man1/archive_color.1",
       "STOW_PKG_DIR/.local/share/man/man1/lesscomplete.1",
-      "STOW_PKG_DIR/.config/dn-lesspipe-update/dn-lesspipe-update.json",
-      "STOW_PKG_DIR/.local/bin/dn-lesspipe-update",
-      "STOW_PKG_DIR/.local/share/man/man1/App::Dn::LesspipeUpdate::InstallFile.1",
-      "STOW_PKG_DIR/.local/share/man/man1/App::Dn::LesspipeUpdate::Substitution.1",
-      "STOW_PKG_DIR/.local/share/man/man1/App::Dn::LesspipeUpdate::Update.1",
-      "STOW_PKG_DIR/.local/share/man/man1/dn-lesspipe-update.1",
-      "STOW_PKG_DIR/.local/share/perl5/App/Dn/LesspipeUpdate/InstallFile.pm",
-      "STOW_PKG_DIR/.local/share/perl5/App/Dn/LesspipeUpdate/Substitution.pm",
-      "STOW_PKG_DIR/.local/share/perl5/App/Dn/LesspipeUpdate/Update.pm",
-      "STOW_PKG_DIR/.local/share/zsh/completions/dn-lesspipe-update"
+      "STOW_PKG_DIR/.config/lesspipe-my-update/lesspipe-my-update.json",
+      "STOW_PKG_DIR/.local/bin/lesspipe-my-update",
+      "STOW_PKG_DIR/.local/share/man/man1/App::My::LesspipeUpdate::InstallFile.1",
+      "STOW_PKG_DIR/.local/share/man/man1/App::My::LesspipeUpdate::Substitution.1",
+      "STOW_PKG_DIR/.local/share/man/man1/App::My::LesspipeUpdate::Update.1",
+      "STOW_PKG_DIR/.local/share/man/man1/lesspipe-my-update.1",
+      "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/InstallFile.pm",
+      "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/Substitution.pm",
+      "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/Update.pm",
+      "STOW_PKG_DIR/.local/share/zsh/completions/lesspipe-my-update"
     ]
   },
   "install": {

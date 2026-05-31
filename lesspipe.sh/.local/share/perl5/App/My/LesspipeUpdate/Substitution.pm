@@ -1,4 +1,4 @@
-package App::Dn::LesspipeUpdate::Substitution;
+package App::My::LesspipeUpdate::Substitution;
 
 use Moo;    # {{{1
 use strictures 2;
@@ -39,11 +39,11 @@ __END__
 
 =head1 NAME
 
-App::Dn::LesspipeUpdate::Substitution - model a single file substitution
+App::My::LesspipeUpdate::Substitution - model a single file substitution
 
 =head1 VERSION
 
-This documentation is for App::Dn::LesspipeUpdate::Substitution version 0.1.
+This documentation is for App::My::LesspipeUpdate::Substitution version 0.1.
 
 =head1 SYNOPSIS
 
@@ -51,7 +51,7 @@ This documentation is for App::Dn::LesspipeUpdate::Substitution version 0.1.
     use Const::Fast;
     use MooX::HandlesVia;
     use Types::Standard;
-    use App::Dn::LesspipeUpdate::Substitution;
+    use App::My::LesspipeUpdate::Substitution;
 
     const my $TRUE => 1;
 
@@ -72,7 +72,7 @@ This documentation is for App::Dn::LesspipeUpdate::Substitution version 0.1.
 
 =head1 DESCRIPTION
 
-This is an accessory module for L<App::Dn::LesspipeUpdate::Update> that models
+This is an accessory module for L<App::My::LesspipeUpdate::Update> that models
 a single text file substitution.
 
 =head1 CONFIGURATION AND ENVIRONMENT
