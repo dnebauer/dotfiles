@@ -6,9 +6,9 @@ use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
 use File::FindLib 'share/perl5';
-use App::Dn::RTNG::Stop;
+use App::My::RTNG::Stop;
 
-App::Dn::RTNG::Stop->new_with_options->run;
+App::My::RTNG::Stop->new_with_options->run;
 
 1;
 
@@ -85,7 +85,7 @@ Please report any bugs to the author.
 
 =head2 Perl modules
 
-App::Dn::RTNG::Stop, File::FindLib, namespace::clean, strictures, version.
+App::My::RTNG::Stop, File::FindLib, namespace::clean, strictures, version.
 
 =head1 AUTHOR
 

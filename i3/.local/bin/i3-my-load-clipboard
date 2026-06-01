@@ -6,9 +6,9 @@ use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
 use File::FindLib 'share/perl5';
-use App::Dn::Clipboard::Load;
+use App::My::Clipboard::Load;
 
-App::Dn::Clipboard::Load->new_with_options->run;
+App::My::Clipboard::Load->new_with_options->run;
 
 1;
 
@@ -276,7 +276,7 @@ Please report any bugs to the author.
 
 =head2 Perl modules
 
-App::Dn::Clipboard::Load, File::FindLib, namespace::clean, strictures, version.
+App::My::Clipboard::Load, File::FindLib, namespace::clean, strictures, version.
 
 =head1 AUTHOR
 

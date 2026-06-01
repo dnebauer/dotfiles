@@ -6,9 +6,9 @@ use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
 use File::FindLib 'share/perl5';
-use App::Dn::KDEConnect::Monitor;
+use App::My::KDEConnect::Monitor;
 
-App::Dn::KDEConnect::Monitor->new_with_options->run;
+App::My::KDEConnect::Monitor->new_with_options->run;
 
 1;
 
@@ -88,7 +88,7 @@ error code is that given by the system.
 
 =head1 DIAGNOSTICS
 
-See L<App::Dn::KDEConnect::Monitor>.
+See L<App::My::KDEConnect::Monitor>.
 
 =head1 INCOMPATIBILITIES
 
@@ -102,7 +102,7 @@ Please report any bugs to the author.
 
 =head2 Perl modules
 
-App::Dn::KDEConnect::Monitor, File::FindLib, namespace::clean, strictures,
+App::My::KDEConnect::Monitor, File::FindLib, namespace::clean, strictures,
 version.
 
 =head1 AUTHOR

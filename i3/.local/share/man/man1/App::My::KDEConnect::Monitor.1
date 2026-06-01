@@ -54,31 +54,38 @@
 .rr rF
 .\" ========================================================================
 .\"
-.IX Title "I3-MY-KDECONNECT-MONITOR 1"
-.TH I3-MY-KDECONNECT-MONITOR 1 2025-04-02 "perl v5.40.1" "User Contributed Perl Documentation"
+.IX Title "Monitor 3"
+.TH Monitor 3 2025-04-02 "perl v5.40.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH NAME
-i3\-my\-kdeconnect\-monitor \- monitor connected devices using kdeconnect
-.SH USAGE
-.IX Header "USAGE"
-\&\fBi3\-my\-kdeconnect\-monitor\fR
-.PP
-\&\fBi3\-my\-kdeconnect\-monitor \-h\fR
+App::My::KDEConnect::Monitor \- monitor connected devices using kdeconnect
+.SH VERSION
+.IX Header "VERSION"
+This documentation applies to App::My::KDEConnect::Monitor version 0.1.
+.SH SYNOPSIS
+.IX Header "SYNOPSIS"
+.Vb 2
+\&    use App::My::KDEConnect::Monitor;
+\&    App::My::KDEConnect::Monitor\->new_with_options\->run;
+.Ve
 .SH DESCRIPTION
 .IX Header "DESCRIPTION"
 Periodically uses \f(CW\*(C`kdeconnect\-cli\*(C'\fR to try and connect unconnected devices.
 The user is notified if 3\ consecutive attempts to connect a device fail,
 following which the check interval lengthens with each failed connection
-attempt until the interval is at least 30\ minutes.
+attempt until the interval is at least 1.5\ hours.
 .PP
 Devices are specified in a configuration file.
-.SH CONFIGURATION
-.IX Header "CONFIGURATION"
-.SS "Configuration file"
-.IX Subsection "Configuration file"
+.SH "CONFIGURATION AND ENVIRONMENT"
+.IX Header "CONFIGURATION AND ENVIRONMENT"
+.SS Properties
+.IX Subsection "Properties"
+None.
+.SS "Configuration files"
+.IX Subsection "Configuration files"
 Uses a configuration file with the file name stem 'kdeconnect\-monitor\-data'
 placed in one of the usual configuration file locations.
 (See File::ConfigDir and Config::Any for further details.)
@@ -86,6 +93,8 @@ placed in one of the usual configuration file locations.
 Any of the file formats supported by Config::Any can be used.
 There must be a section called 'devices' within which are key:value pairs where
 keys are device names and values are corresponding ids.
+Device names and ids can be obtained using \f(CW\*(C`kdeconnect\-cli\*(C'\fR once they are
+connected.
 .PP
 Here is an example configuration file located in
 \&\fR\f(CI$HOME\fR\fI/.config/kdeconnect\-monitor\-data.json\fR:
@@ -97,28 +106,42 @@ Here is an example configuration file located in
 \&      }
 \&    }
 .Ve
-.SH "REQUIRED ARGUMENTS"
-.IX Header "REQUIRED ARGUMENTS"
-Nil.
-.SH OPTIONS
-.IX Header "OPTIONS"
-.IP "\fB\-h\fR  \fB\-\-help\fR" 4
-.IX Item "-h --help"
-Show a help message.
-.IP \fB\-\-usage\fR 4
-.IX Item "--usage"
-Show a short help message.
-.IP \fB\-\-man\fR 4
-.IX Item "--man"
-Show the manual.
-.SH "EXIT STATUS"
-.IX Header "EXIT STATUS"
-The exit code is 0 for successful execution and 1 if the script does a
-controlled exit following an error. If the script crashes unexpectedly the
-error code is that given by the system.
+.SS "Environment variables"
+.IX Subsection "Environment variables"
+None used.
+.SH SUBROUTINES/METHODS
+.IX Header "SUBROUTINES/METHODS"
+.SS \fBrun()\fP
+.IX Subsection "run()"
+The only public method. This method enables the monitoring of connectable
+devices as described in "DESCRIPTION".
 .SH DIAGNOSTICS
 .IX Header "DIAGNOSTICS"
-See App::My::KDEConnect::Monitor.
+.SS "Expected hashref config data, got a non-ref"
+.IX Subsection "Expected hashref config data, got a non-ref"
+.SS "Expected hashref config data, got a REF_TYPE ref"
+.IX Subsection "Expected hashref config data, got a REF_TYPE ref"
+These fatal errors occur when the retrieved configuration data is in an
+unexpected format. See App::My::KDEConnect::Config for more details.
+.SS "No 'devices' section found in configuration file"
+.IX Subsection "No 'devices' section found in configuration file"
+.SS "No device data found in configuration files"
+.IX Subsection "No device data found in configuration files"
+These fatal errors occur when the configuration data contains no defined
+devices.
+.SS "kdeconnect-cli list devices command failed: ERROR_MESSAGE"
+.IX Subsection "kdeconnect-cli list devices command failed: ERROR_MESSAGE"
+.SS "kdeconnect-cli refresh command failed: ERROR_MESSAGE"
+.IX Subsection "kdeconnect-cli refresh command failed: ERROR_MESSAGE"
+.SS "kdeconnect-cli list available devices command failed: ERROR_MESSAGE"
+.IX Subsection "kdeconnect-cli list available devices command failed: ERROR_MESSAGE"
+These fatal errors occurs when \f(CW\*(C`kdeconnect\-cli\*(C'\fR exits with an error status.
+.SS "Incomprehensible data from kdeconnect-cli: 'LINE'"
+.IX Subsection "Incomprehensible data from kdeconnect-cli: 'LINE'"
+This fatal error occurs when a line of output from \f(CW\*(C`kdeconnect\-cli\*(C'\fR cannot be
+parsed.
+.PP
+\&\fINote:\fR Subsidiary modules may emit their own warning and error messages.
 .SH INCOMPATIBILITIES
 .IX Header "INCOMPATIBILITIES"
 There are no known incompatibilities.
@@ -129,7 +152,9 @@ Please report any bugs to the author.
 .IX Header "DEPENDENCIES"
 .SS "Perl modules"
 .IX Subsection "Perl modules"
-App::My::KDEConnect::Monitor, File::FindLib, namespace::clean, strictures,
+App::My::KDEConnect::CommandResult, App::My::KDEConnect::Config,
+App::My::KDEConnect::Device, Carp, Const::Fast, Desktop::Notify, IPC::Cmd, Moo,
+MooX::HandlesVia, MooX::Options, Types::Standard, namespace::clean, strictures,
 version.
 .SH AUTHOR
 .IX Header "AUTHOR"

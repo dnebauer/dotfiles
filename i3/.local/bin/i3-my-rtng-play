@@ -6,9 +6,9 @@ use 5.038_001;
 use version; our $VERSION = qv('0.1');
 use namespace::clean;
 use File::FindLib 'share/perl5';
-use App::Dn::RTNG::Play;
+use App::My::RTNG::Play;
 
-App::Dn::RTNG::Play->new_with_options->run;
+App::My::RTNG::Play->new_with_options->run;
 
 1;
 
@@ -32,7 +32,7 @@ Uses the S<Radiotray NG> DBus interface to play the last station if none is
 currently playing, or pause the current station if one is currently playing.
 
 Attempts to set the volume to the configured default value for the station.
-See L<App::Dn::RTNG::Play> for further details.
+See L<App::My::RTNG::Play> for further details.
 
 =head1 CONFIGURATION
 
@@ -107,7 +107,7 @@ Please report any bugs to the author.
 
 =head2 Perl modules
 
-App::Dn::RTNG::Play, File::FindLib, namespace::clean, strictures, version.
+App::My::RTNG::Play, File::FindLib, namespace::clean, strictures, version.
 
 =head1 AUTHOR
 
