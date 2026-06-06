@@ -19,7 +19,7 @@
       "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/InstallFile.pm",
       "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/Substitution.pm",
       "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/Update.pm",
-      "STOW_PKG_DIR/.local/share/zsh/completions/lesspipe-my-update"
+      "STOW_PKG_DIR/.local/share/zsh/completions/_lesspipe-my-update"
     ]
   },
   "install": {
