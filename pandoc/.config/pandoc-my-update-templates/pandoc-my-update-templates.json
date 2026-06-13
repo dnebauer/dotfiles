@@ -51,7 +51,7 @@
     {
       "name": "pandoc-templates",
       "description": "personal github fork of the jgm/pandoc-templates repo",
-      "download-url": "https://github.com/dnebauer/pandoc-templates.git",
+      "download-url": "https://github.com/dnebauer/pandoc-jgm-templates.git",
       "obtain-method": "git-clone-repository",
       "filepath-mappings": [
         [
