@@ -2,7 +2,7 @@
 
 _repos() {
   local -a _repos
-  _repos=(buttondown eisvogel pandoc-templates)
+  _repos=(buttondown eisvogel templates-jgm templates-dn)
   _values 'Repository names' "${_repos[@]}"
 }
 

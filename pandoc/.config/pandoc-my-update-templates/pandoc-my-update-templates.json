@@ -49,9 +49,9 @@
       "substitutions": []
     },
     {
-      "name": "pandoc-templates",
+      "name": "templates-jgm",
       "description": "personal github fork of the jgm/pandoc-templates repo",
-      "download-url": "https://github.com/dnebauer/pandoc-jgm-templates.git",
+      "download-url": "https://github.com/dnebauer/pandoc-templates-jgm.git",
       "obtain-method": "git-clone-repository",
       "filepath-mappings": [
         [
@@ -185,6 +185,28 @@
           "DOWNLOAD_ROOT/hypersetup.latex",
           "STOW_TEMPLATES_DIR/hypersetup.latex"
         ],
+        ["DOWNLOAD_ROOT/my-custom.latex", "STOW_TEMPLATES_DIR/my-custom.latex"],
+        [
+          "DOWNLOAD_ROOT/passoptions.latex",
+          "STOW_TEMPLATES_DIR/passoptions.latex"
+        ],
+        [
+          "DOWNLOAD_ROOT/styles.citations.html",
+          "STOW_TEMPLATES_DIR/styles.citations.html"
+        ],
+        ["DOWNLOAD_ROOT/styles.html", "STOW_TEMPLATES_DIR/styles.html"],
+        ["DOWNLOAD_ROOT/template.typst", "STOW_TEMPLATES_DIR/template.typst"]
+      ],
+      "delete-after-download": [],
+      "ignore": ["DOWNLOAD_ROOT/README.markdown", "DOWNLOAD_ROOT/README.md"],
+      "substitutions": []
+    },
+    {
+      "name": "templates-dn",
+      "description": "personal collection of untracked templates",
+      "download-url": "https://github.com/dnebauer/pandoc-templates-dn.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
         [
           "DOWNLOAD_ROOT/my-css/github-otsaloma.css",
           "STOW_TEMPLATES_DIR/my-css/github-otsaloma.css"
@@ -293,7 +315,6 @@
           "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff",
           "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff"
         ],
-        ["DOWNLOAD_ROOT/my-custom.latex", "STOW_TEMPLATES_DIR/my-custom.latex"],
         [
           "DOWNLOAD_ROOT/my-tufte-jez.html5",
           "STOW_TEMPLATES_DIR/my-tufte-jez.html5"
@@ -301,20 +322,10 @@
         [
           "DOWNLOAD_ROOT/my-tufte-jez.latex",
           "STOW_TEMPLATES_DIR/my-tufte-jez.latex"
-        ],
-        [
-          "DOWNLOAD_ROOT/passoptions.latex",
-          "STOW_TEMPLATES_DIR/passoptions.latex"
-        ],
-        [
-          "DOWNLOAD_ROOT/styles.citations.html",
-          "STOW_TEMPLATES_DIR/styles.citations.html"
-        ],
-        ["DOWNLOAD_ROOT/styles.html", "STOW_TEMPLATES_DIR/styles.html"],
-        ["DOWNLOAD_ROOT/template.typst", "STOW_TEMPLATES_DIR/template.typst"]
+        ]
       ],
       "delete-after-download": [],
-      "ignore": ["DOWNLOAD_ROOT/README.markdown", "DOWNLOAD_ROOT/README.md"],
+      "ignore": ["DOWNLOAD_ROOT/README.md"],
       "substitutions": []
     }
   ],
