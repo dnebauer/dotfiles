@@ -1,0 +1,325 @@
+{
+  "repos": [
+    {
+      "name": "buttondown",
+      "description": "personal github fork of the ryangray/buttondown repo",
+      "download-url": "https://github.com/dnebauer/buttondown.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        ["DOWNLOAD_ROOT/buttondown.css", "STOW_TEMPLATES_DIR/buttondown.css"]
+      ],
+      "delete-after-download": [
+        "DOWNLOAD_ROOT/LICENSE.md",
+        "DOWNLOAD_ROOT/pandoc_example.bat",
+        "DOWNLOAD_ROOT/pandoc_example.html",
+        "DOWNLOAD_ROOT/pandoc_example.md",
+        "DOWNLOAD_ROOT/pandoc_example.sh",
+        "DOWNLOAD_ROOT/README.md"
+      ],
+      "ignore": [],
+      "substitutions": []
+    },
+    {
+      "name": "eisvogel",
+      "description": "extract eisvogel templates from current repo release archive",
+      "download-url": "https://github.com/Wandmalfarbe/pandoc-latex-template/releases/latest/download/Eisvogel.tar.gz",
+      "asset-type": "targz",
+      "obtain-method": "download-release-asset",
+      "release-path-extraction-regex": "^DOWNLOAD_ROOT\/(Eisvogel-[^.]+[.][^.]+[.][^/]+)[/].*$",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/RELEASE_PATH/eisvogel.beamer",
+          "STOW_TEMPLATES_DIR/my-eisvogel.beamer"
+        ],
+        [
+          "DOWNLOAD_ROOT/RELEASE_PATH/eisvogel.latex",
+          "STOW_TEMPLATES_DIR/my-eisvogel.latex"
+        ]
+      ],
+      "delete-after-download": [
+        "DOWNLOAD_ROOT/RELEASE_PATH/examples",
+        "DOWNLOAD_ROOT/RELEASE_PATH/template-multi-file"
+      ],
+      "ignore": [
+        "DOWNLOAD_ROOT/RELEASE_PATH/CHANGELOG.md",
+        "DOWNLOAD_ROOT/RELEASE_PATH/icon.png",
+        "DOWNLOAD_ROOT/RELEASE_PATH/LICENSE",
+        "DOWNLOAD_ROOT/RELEASE_PATH/README.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "pandoc-templates",
+      "description": "personal github fork of the jgm/pandoc-templates repo",
+      "download-url": "https://github.com/dnebauer/pandoc-templates.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/affiliations.jats",
+          "STOW_TEMPLATES_DIR/affiliations.jats"
+        ],
+        [
+          "DOWNLOAD_ROOT/after-header-includes.latex",
+          "STOW_TEMPLATES_DIR/after-header-includes.latex"
+        ],
+        [
+          "DOWNLOAD_ROOT/article.jats_publishing",
+          "STOW_TEMPLATES_DIR/article.jats_publishing"
+        ],
+        ["DOWNLOAD_ROOT/common.latex", "STOW_TEMPLATES_DIR/common.latex"],
+        ["DOWNLOAD_ROOT/default.ansi", "STOW_TEMPLATES_DIR/default.ansi"],
+        [
+          "DOWNLOAD_ROOT/default.asciidoc",
+          "STOW_TEMPLATES_DIR/default.asciidoc"
+        ],
+        ["DOWNLOAD_ROOT/default.bbcode", "STOW_TEMPLATES_DIR/default.bbcode"],
+        ["DOWNLOAD_ROOT/default.beamer", "STOW_TEMPLATES_DIR/default.beamer"],
+        [
+          "DOWNLOAD_ROOT/default.biblatex",
+          "STOW_TEMPLATES_DIR/default.biblatex"
+        ],
+        ["DOWNLOAD_ROOT/default.bibtex", "STOW_TEMPLATES_DIR/default.bibtex"],
+        [
+          "DOWNLOAD_ROOT/default.chunkedhtml",
+          "STOW_TEMPLATES_DIR/default.chunkedhtml"
+        ],
+        [
+          "DOWNLOAD_ROOT/default.commonmark",
+          "STOW_TEMPLATES_DIR/default.commonmark"
+        ],
+        ["DOWNLOAD_ROOT/default.context", "STOW_TEMPLATES_DIR/default.context"],
+        ["DOWNLOAD_ROOT/default.djot", "STOW_TEMPLATES_DIR/default.djot"],
+        [
+          "DOWNLOAD_ROOT/default.docbook4",
+          "STOW_TEMPLATES_DIR/default.docbook4"
+        ],
+        [
+          "DOWNLOAD_ROOT/default.docbook5",
+          "STOW_TEMPLATES_DIR/default.docbook5"
+        ],
+        [
+          "DOWNLOAD_ROOT/default.dokuwiki",
+          "STOW_TEMPLATES_DIR/default.dokuwiki"
+        ],
+        [
+          "DOWNLOAD_ROOT/default.dzslides",
+          "STOW_TEMPLATES_DIR/default.dzslides"
+        ],
+        ["DOWNLOAD_ROOT/default.epub2", "STOW_TEMPLATES_DIR/default.epub2"],
+        ["DOWNLOAD_ROOT/default.epub3", "STOW_TEMPLATES_DIR/default.epub3"],
+        ["DOWNLOAD_ROOT/default.haddock", "STOW_TEMPLATES_DIR/default.haddock"],
+        ["DOWNLOAD_ROOT/default.html4", "STOW_TEMPLATES_DIR/default.html4"],
+        ["DOWNLOAD_ROOT/default.html5", "STOW_TEMPLATES_DIR/default.html5"],
+        ["DOWNLOAD_ROOT/default.icml", "STOW_TEMPLATES_DIR/default.icml"],
+        [
+          "DOWNLOAD_ROOT/default.jats_archiving",
+          "STOW_TEMPLATES_DIR/default.jats_archiving"
+        ],
+        [
+          "DOWNLOAD_ROOT/default.jats_articleauthoring",
+          "STOW_TEMPLATES_DIR/default.jats_articleauthoring"
+        ],
+        [
+          "DOWNLOAD_ROOT/default.jats_publishing",
+          "STOW_TEMPLATES_DIR/default.jats_publishing"
+        ],
+        ["DOWNLOAD_ROOT/default.jira", "STOW_TEMPLATES_DIR/default.jira"],
+        ["DOWNLOAD_ROOT/default.latex", "STOW_TEMPLATES_DIR/default.latex"],
+        [
+          "DOWNLOAD_ROOT/default.latex.orig",
+          "STOW_TEMPLATES_DIR/default.latex.orig"
+        ],
+        ["DOWNLOAD_ROOT/default.man", "STOW_TEMPLATES_DIR/default.man"],
+        [
+          "DOWNLOAD_ROOT/default.markdown",
+          "STOW_TEMPLATES_DIR/default.markdown"
+        ],
+        ["DOWNLOAD_ROOT/default.markua", "STOW_TEMPLATES_DIR/default.markua"],
+        [
+          "DOWNLOAD_ROOT/default.mediawiki",
+          "STOW_TEMPLATES_DIR/default.mediawiki"
+        ],
+        ["DOWNLOAD_ROOT/default.ms", "STOW_TEMPLATES_DIR/default.ms"],
+        ["DOWNLOAD_ROOT/default.muse", "STOW_TEMPLATES_DIR/default.muse"],
+        [
+          "DOWNLOAD_ROOT/default.opendocument",
+          "STOW_TEMPLATES_DIR/default.opendocument"
+        ],
+        ["DOWNLOAD_ROOT/default.openxml", "STOW_TEMPLATES_DIR/default.openxml"],
+        ["DOWNLOAD_ROOT/default.opml", "STOW_TEMPLATES_DIR/default.opml"],
+        ["DOWNLOAD_ROOT/default.org", "STOW_TEMPLATES_DIR/default.org"],
+        ["DOWNLOAD_ROOT/default.plain", "STOW_TEMPLATES_DIR/default.plain"],
+        [
+          "DOWNLOAD_ROOT/default.revealjs",
+          "STOW_TEMPLATES_DIR/default.revealjs"
+        ],
+        ["DOWNLOAD_ROOT/default.rst", "STOW_TEMPLATES_DIR/default.rst"],
+        ["DOWNLOAD_ROOT/default.rtf", "STOW_TEMPLATES_DIR/default.rtf"],
+        ["DOWNLOAD_ROOT/default.s5", "STOW_TEMPLATES_DIR/default.s5"],
+        [
+          "DOWNLOAD_ROOT/default.slideous",
+          "STOW_TEMPLATES_DIR/default.slideous"
+        ],
+        ["DOWNLOAD_ROOT/default.slidy", "STOW_TEMPLATES_DIR/default.slidy"],
+        ["DOWNLOAD_ROOT/default.tei", "STOW_TEMPLATES_DIR/default.tei"],
+        ["DOWNLOAD_ROOT/default.texinfo", "STOW_TEMPLATES_DIR/default.texinfo"],
+        ["DOWNLOAD_ROOT/default.textile", "STOW_TEMPLATES_DIR/default.textile"],
+        ["DOWNLOAD_ROOT/default.typst", "STOW_TEMPLATES_DIR/default.typst"],
+        ["DOWNLOAD_ROOT/default.vimdoc", "STOW_TEMPLATES_DIR/default.vimdoc"],
+        ["DOWNLOAD_ROOT/default.xwiki", "STOW_TEMPLATES_DIR/default.xwiki"],
+        ["DOWNLOAD_ROOT/default.zimwiki", "STOW_TEMPLATES_DIR/default.zimwiki"],
+        [
+          "DOWNLOAD_ROOT/definitions.typst",
+          "STOW_TEMPLATES_DIR/definitions.typst"
+        ],
+        [
+          "DOWNLOAD_ROOT/document-metadata.latex",
+          "STOW_TEMPLATES_DIR/document-metadata.latex"
+        ],
+        [
+          "DOWNLOAD_ROOT/font-settings.latex",
+          "STOW_TEMPLATES_DIR/font-settings.latex"
+        ],
+        ["DOWNLOAD_ROOT/fonts.latex", "STOW_TEMPLATES_DIR/fonts.latex"],
+        [
+          "DOWNLOAD_ROOT/hypersetup.latex",
+          "STOW_TEMPLATES_DIR/hypersetup.latex"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/github-otsaloma.css",
+          "STOW_TEMPLATES_DIR/my-css/github-otsaloma.css"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/jez-pandoc.css",
+          "STOW_TEMPLATES_DIR/my-css/jez-pandoc.css"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/killercup-pandoc.css",
+          "STOW_TEMPLATES_DIR/my-css/killercup-pandoc.css"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/manuelp-pub.css",
+          "STOW_TEMPLATES_DIR/my-css/manuelp-pub.css"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/posaune-theme.css",
+          "STOW_TEMPLATES_DIR/my-css/posaune-theme.css"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-nikoheikkila.css",
+          "STOW_TEMPLATES_DIR/my-css/tufte-nikoheikkila.css"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma.css",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma.css"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-bold-line-figures/et-book-bold-line-figures.eot",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-bold-line-figures/et-book-bold-line-figures.eot"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-bold-line-figures/et-book-bold-line-figures.svg",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-bold-line-figures/et-book-bold-line-figures.svg"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-bold-line-figures/et-book-bold-line-figures.ttf",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-bold-line-figures/et-book-bold-line-figures.ttf"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.eot",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.eot"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.svg",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.svg"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.ttf",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.ttf"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-roman-line-figures/et-book-roman-line-figures.eot",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-roman-line-figures/et-book-roman-line-figures.eot"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-roman-line-figures/et-book-roman-line-figures.svg",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-roman-line-figures/et-book-roman-line-figures.svg"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-roman-line-figures/et-book-roman-line-figures.ttf",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-roman-line-figures/et-book-roman-line-figures.ttf"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.eot",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.eot"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.svg",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.svg"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.ttf",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.ttf"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.woff",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.woff"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.eot",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.eot"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.svg",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.svg"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.ttf",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.ttf"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff",
+          "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff"
+        ],
+        ["DOWNLOAD_ROOT/my-custom.latex", "STOW_TEMPLATES_DIR/my-custom.latex"],
+        [
+          "DOWNLOAD_ROOT/my-tufte-jez.html5",
+          "STOW_TEMPLATES_DIR/my-tufte-jez.html5"
+        ],
+        [
+          "DOWNLOAD_ROOT/my-tufte-jez.latex",
+          "STOW_TEMPLATES_DIR/my-tufte-jez.latex"
+        ],
+        [
+          "DOWNLOAD_ROOT/passoptions.latex",
+          "STOW_TEMPLATES_DIR/passoptions.latex"
+        ],
+        [
+          "DOWNLOAD_ROOT/styles.citations.html",
+          "STOW_TEMPLATES_DIR/styles.citations.html"
+        ],
+        ["DOWNLOAD_ROOT/styles.html", "STOW_TEMPLATES_DIR/styles.html"],
+        ["DOWNLOAD_ROOT/template.typst", "STOW_TEMPLATES_DIR/template.typst"]
+      ],
+      "delete-after-download": [],
+      "ignore": ["DOWNLOAD_ROOT/README.markdown", "DOWNLOAD_ROOT/README.md"],
+      "substitutions": []
+    }
+  ],
+  "stow": {
+    "template-dir": "HOME/.config/dotfiles/pandoc/.local/share/pandoc/templates",
+    "extra": []
+  }
+}
