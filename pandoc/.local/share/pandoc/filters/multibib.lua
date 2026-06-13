@@ -1,7 +1,7 @@
 --[[
-multiple-bibliographies – create multiple bibliographies
+multibib – create multiple bibliographies
 
-Copyright © 2018-2021 Albert Krewinkel
+Copyright © 2018-2024 Albert Krewinkel
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -15,71 +15,69 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]
-local List = require 'pandoc.List'
-local utils = require 'pandoc.utils'
+PANDOC_VERSION:must_be_at_least '2.11'
+
+local pandoc = require 'pandoc'
+local List   = require 'pandoc.List'
+local utils  = require 'pandoc.utils'
 local stringify = utils.stringify
 local run_json_filter = utils.run_json_filter
+
+--- get the type of meta object
+local metatype = pandoc.utils.type or
+  function (v)
+    local metatag = type(v) == 'table' and v.t and v.t:gsub('^Meta', '')
+    return metatag and metatag ~= 'Map' and metatag or type(v)
+  end
 
 --- Collection of all cites in the document
 local all_cites = {}
 --- Document meta value
 local doc_meta = pandoc.Meta{}
 
---- Div used by pandoc-citeproc to insert the bibliography.
+--- Div used by citeproc to insert the bibliography.
 local refs_div = pandoc.Div({}, pandoc.Attr('refs'))
 
 -- Div filled by citeproc with properties set according to
 -- the output format and the attributes of cs:bibliography
 local refs_div_with_properties
 
-local supports_quiet_flag = (function ()
-  -- We use pandoc instead of pandoc-citeproc starting with pandoc 2.11
-  if PANDOC_VERSION >= "2.11" then
-    return true
+--- Run citeproc on a pandoc document
+--
+-- Falls back to the external `pandoc-citeproc` filter if the built-in
+-- citeproc processor is not available. Tries to silence all citeproc
+-- warnings, which isn't possible in some versions.
+local citeproc = utils.citeproc
+if pcall(require, 'pandoc.log') and citeproc then
+  -- silence all warnings if possible
+  local log = require 'pandoc.log'
+  citeproc = function (...)
+    return select(2, log.silence(utils.citeproc, ...))
   end
-  local version = pandoc.pipe('pandoc-citeproc', {'--version'}, '')
-  local major, minor, patch = version:match 'pandoc%-citeproc (%d+)%.(%d+)%.?(%d*)'
-  major, minor, patch = tonumber(major), tonumber(minor), tonumber(patch)
-  return major > 0
-    or minor > 14
-    or (minor == 14 and patch >= 5)
-end)()
-
-local function run_citeproc(doc, quiet)
-  if PANDOC_VERSION >= "2.11" then
-    return run_json_filter(
-      doc,
-      'pandoc',
-      {'--from=json', '--to=json', '--citeproc', quiet and '--quiet' or nil}
-    )
-  else
-    -- doc = run_json_filter(doc, 'pandoc-citeproc')
-    return run_json_filter(
-      doc,
-      'pandoc-citeproc',
-      {FORMAT, (quiet and supports_quiet_flag) and '-q' or nil}
-    )
+elseif not citeproc then
+  -- Use pandoc as a citeproc processor
+  citeproc = function (doc)
+    local opts = {'--from=json', '--to=json', '--citeproc', '--quiet'}
+    return run_json_filter(doc, 'pandoc', opts)
   end
 end
 
-
 --- Resolve citations in the document by combining all bibliographies
--- before running pandoc-citeproc on the full document.
+-- before running citeproc on the full document.
 local function resolve_doc_citations (doc)
   -- combine all bibliographies
   local meta = doc.meta
-  local orig_bib = meta.bibliography
-  meta.bibliography = pandoc.MetaList{orig_bib}
-  for name, value in pairs(meta) do
-    if name:match('^bibliography_') then
-      table.insert(meta.bibliography, value)
+  local bibconf = meta.bibliography
+  meta.bibliography = pandoc.MetaList{}
+  if metatype(bibconf) == 'table' then
+    for _, value in pairs(bibconf) do
+      table.insert(meta.bibliography, stringify(value))
     end
   end
-  -- add dummy div to catch the created bibliography
+  -- add refs div to catch the created bibliography
   table.insert(doc.blocks, refs_div)
   -- resolve all citations
-  -- doc = run_json_filter(doc, 'pandoc-citeproc')
-  doc = run_citeproc(doc)
+  doc = citeproc(doc)
   -- remove catch-all bibliography and keep it for future use
   refs_div_with_properties = table.remove(doc.blocks)
   -- restore bibliography to original value
@@ -122,21 +120,28 @@ end
 -- ID starts with "refs", followed by nothing but underscores and
 -- alphanumeric characters.
 local function create_topic_bibliography (div)
-  local name = div.identifier:match('^refs([_%w]*)$')
-  local bibfile = name and doc_meta['bibliography' .. name]
+  local name = div.identifier:match('^refs[-_]?([-_%w]*)$')
+  local bibfile = name and (doc_meta.bibliography or {})[name]
   if not bibfile then
     return nil
   end
   local tmp_blocks = {pandoc.Para(all_cites), refs_div}
   local tmp_meta = meta_for_pandoc_citeproc(bibfile)
   local tmp_doc = pandoc.Pandoc(tmp_blocks, tmp_meta)
-  local res = run_citeproc(tmp_doc, true) -- try to be quiet
+  local res = citeproc(tmp_doc)
   -- First block of the result contains the dummy paragraph, second is
-  -- the refs Div filled by pandoc-citeproc.
+  -- the refs Div filled by citeproc.
   div.content = res.blocks[2].content
-  -- Set the classes and attributes as pandoc-citeproc did it on refs_div
+  -- Set the classes and attributes as citeproc did it on refs_div
   div.classes = remove_duplicates(refs_div_with_properties.classes)
   div.attributes = refs_div_with_properties.attributes
+  if FORMAT == 'odt' or FORMAT == 'docx' then
+    -- Pandoc assignes the "Bibliography" to reference sections in Word, so
+    -- let's do it here, too, unless it's already set.
+    div.attributes['custom-style'] = div.attributes['custom-style']
+      or 'Bibliography'
+  end
+
   return div
 end
 

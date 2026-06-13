@@ -1,0 +1,542 @@
+#!/usr/bin/perl
+
+use strictures 2;
+use 5.006;
+use 5.038_001;
+use version; our $VERSION = qv('0.1');
+use namespace::clean;
+use File::FindLib 'share/perl5';
+use App::My::PandocUpdateFilters::Update;
+
+App::My::PandocUpdateFilters::Update->new_with_options->run;
+
+1;
+
+# POD    {{{1
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+pandoc-my-update-filters - update local pandoc filters
+
+=head1 USAGE
+
+B<pandoc-my-update-filters> [B<-r>]
+
+B<pandoc-my-update-filters> [B<-c>]
+
+B<pandoc-my-update-filters> B<-h>
+
+=head1 DESCRIPTION
+
+This script updates local pandoc filters. It relies on the following
+assumptions:
+
+=over
+
+=item *
+
+The filter files are installed via a F<stow> package.
+
+=item *
+
+All filter files originate from online repositories.
+
+=item *
+
+All repositories can be downloaded by either a C<git clone> command or by
+downloading and extracting a single asset release file (github sematics are
+assumed)
+
+=back
+
+=head2 Update process
+
+The update process consists of the following steps:
+
+=over
+
+=item 1.
+
+Download the specified repositories to temporary directories
+
+=item 2.
+
+perform substitutions on file content
+
+=item 3.
+
+copy new and changed build files to the stow package, renaming where necessary.
+
+=back
+
+The temporary directories are automatically deleted.
+
+Key directory and repository information information is specified in a
+configuration file. See L</CONFIGURATION AND ENVIRONMENT> below for details.
+
+The module performs checks on the downloaded files and attempts to identify
+any changes that have occurred since the previous update. If changes are
+detected, they are reported to the user who decides whether to proceed with
+updating the stow package.
+
+=head1 CONFIGURATION
+
+=head2 Location and format
+
+The module looks for a configuration file with the base name
+F<pandoc-my-update-filters> in the standard configuration locations.
+Supported file formats include ini, json, xml, and yaml. The file extension
+should match the file format, for example, F<.json> for json formatted files.
+Warning: only the json format has been thoroughly tested with this module.
+
+=head2 Structure
+
+The easiest way to show the configuration file format is with an example, in
+this case in json format:
+
+  {
+    "repos": [
+      {
+        "name": "buttondown",
+        "description": "personal github fork of the ryangray/buttondown repo",
+        "download-url": "https://github.com/dnebauer/buttondown.git",
+        "obtain-method": "git-clone-repository",
+        "filepath-mappings": [
+          ["DOWNLOAD_ROOT/buttondown.css", "STOW_FILTERS_DIR/buttondown.css"]
+        ],
+        "ignore": [
+          "DOWNLOAD_ROOT/LICENSE.md",
+          "DOWNLOAD_ROOT/pandoc_example.bat",
+          "DOWNLOAD_ROOT/pandoc_example.html",
+          "DOWNLOAD_ROOT/pandoc_example.md",
+          "DOWNLOAD_ROOT/pandoc_example.sh",
+          "DOWNLOAD_ROOT/README.md"
+        ],
+        "substitutions": []
+      },
+      {
+        "name": "eisvogel",
+        "description": "extract eisvogel filters from current repo release",
+        "download-url": "https://github.com/Wandmalfarbe/.../Eisvogel.tar.gz",
+        "asset-type": "targz",
+        "obtain-method": "download-release-asset",
+        "release-path-extraction-regex": "^DOWNLOAD_ROOT\/(Eisvogel-[^.]+[.][^.]+[.][^/]+)[/].*$",
+        "filepath-mappings": [
+          [
+            "DOWNLOAD_ROOT/RELEASE_PATH/eisvogel.beamer",
+            "STOW_FILTERS_DIR/my-eisvogel.beamer"
+          ],
+          [
+            "DOWNLOAD_ROOT/RELEASE_PATH/eisvogel.latex",
+            "STOW_FILTERS_DIR/my-eisvogel.latex"
+          ]
+        ],
+        "delete-after-download": [
+          "DOWNLOAD_ROOT/RELEASE_PATH/examples",
+          "DOWNLOAD_ROOT/RELEASE_PATH/filter-multi-file"
+        ],
+        "ignore": [
+          "DOWNLOAD_ROOT/RELEASE_PATH/CHANGELOG.md",
+        ],
+        "substitutions": []
+      },
+    ],
+    "stow": {
+      "filter-dir": "HOME/.config/dotfiles/pandoc/.local/share/pandoc/filters",
+      "extra": ["MyReadme.md"]
+    }
+  }
+
+The components of the configuration file are explained here. JSON schema
+terminology is used: arrays and strings are easily understood;
+objects correspond to hashes, dicts and dictionaries in other languages and
+schemas; properties correspond to hash/dict/dictionary keys; and a
+string(enumeration) means a string that must be one of a set of allowed values.
+
+=over
+
+=over
+
+=item / → stow
+
+Object. Required. Required children: <filter-dir>, <extra>.
+
+=item / → stow → filter-dir
+
+String. Required. Absolute path to pandoc filters directory in stow package.
+Often corresponds to F<~/.local/share/pandoc/filters/>.
+
+=item / → stow → extras
+
+Array of strings. Required (but can be empty). Absolute paths of files under
+the stow package directory which are I<not> provided by any of the online
+repositories, that is, they are maintained manually by the user.
+
+=item / → repos
+
+Array of <repo> objects. Required (can be empty, but what would be the point).
+
+=item / → repos → repo
+
+Object. Optional (but what would be the point of an empty <repos> array).
+Models a single online repository.
+
+=item / → repos → repo → name
+
+String. Required. Human-understable name of repository. Used in feedback to
+user and should be short. Can contain spaces but visual output is more legible
+when it does not.
+
+=item / → repos → repo → description
+
+String. Required. Brief desciption of repository that is not used by the
+module.
+
+=item / → repos → repo → download-url
+
+String (url). Required. Currently only 2 kinds of url are supported and they
+correspond to the allowable S<< <obtain-method> >> values: a url that can be
+used by the S<< <git clone> >> command (corresponding to the
+S<< <obtain-method> >> value "git-clone-repository") or the url of one of a
+repository's current/latest release asset files (corresponding to the
+S<< <obtain-method> >> value "download-release-asset").
+
+Release asset files are either versioned or unversioned according to the
+preferences of the repository release manager. This module only supports
+unversioned file names. As noted in the discussion of
+S<< <release-path-extraction-regex> >>, however, the file tree extracted from
+the release asset (archive) file may include a versioned subdirectory.
+
+=item / → repos → repo → obtain-method
+
+String (enumeration). Required. Allowed values: S<"git-clone-repository",>
+S<"download-release-asset">. See the discussion of S<< <obtain-method> >> to
+understand the effect of these values.
+
+When set to S<"download-release-asset"> the <repo> properties
+S<< <asset-type> >> and S<< <release-path-extraction-regex> >> are also
+required. (These properties cannot be included when S<< <obtain-method> >> is
+set to a different value.)
+
+=item / → repos → repo → asset-type
+
+String (enumeration). Required if and only if S<< <obtain-method> >> is set to
+S<"download-release-asset">. Allowed value: "targz". This value is used to
+determine the command used to extract the contents of the downloaded release
+asset file.
+
+=item / → repos → repo → release-path-extraction-regex
+
+String. Required if and only if S<< <obtain-method> >> is set to
+S<"download-release-asset">. A regular expression representing the absolute
+path of files extracted from the downloaded release asset file. All capture
+groups are joined to form a single string representing the part of the file
+path that changes with each version change, that is, the part of the file path
+reflecting the release version. The example above includes one capture group in
+this regex that corresponds to S<< F<Eisvogel-X.Y.Z> >> where F<X>, F<Y> and
+F<Z> are version numbers. For release v3.4.0 it would extract
+S<< F<Eisovogel-3.4.0> >>.
+
+Warning: if this regular expression does not match each extracted file value
+the module will throw a fatal error.
+
+If the paths of the files extracted from the downloaded release asset archive
+do not contained a versioned portion, the RELEASE_PATH token will not be used
+in any configuration file values. In that case, simply set this property to
+C<.*> to ensure it matches any value and this does not cause a fatal error.
+
+The extracted regex value corresponds to the "RELEASE_PATH" token used in
+S<< <filepath-mappings> >> (see the discussion of that property for more
+details).
+
+=item / → repos → repo → filepath-mappings
+
+Array of arrays. Required (can be empty but what would be the point). Each
+contained array corresponds to a downloaded repository file that will be copied
+to the stow package filter directory.
+
+Each contained array has two elements: the first is the absolute path of a
+downloaded repository file and the second is the absolute path of the
+corresponding file in the stow filters directory. The absolute path of the
+downloaded repository file can contain the "DOWNLOAD_ROOT" and "RELEASE_PATH"
+placeholder tokens. The stow filter file paths can contain the
+"STOW_FILTERS_DIR" placeholder token. Placeholder tokens are discussed below.
+
+=item / → repos → repo → delete-after-download
+
+Array of strings. Required (can be empty). Each string is the absolute filepath
+of a downloaded repository file or directory that will be deleted immediately
+after download and so will not be copied into the stow filters directory.
+Each path can contain the "DOWNLOAD_ROOT" and "RELEASE_PATH" placeholder
+tokens. Placeholder tokens are discussed below.
+
+This property has the same final effect as the S<< <repo> → <ignore> >>
+property. The S<< <delete-after-download> >> property is useful because a
+single directory entry results in the recursive deletion of all the files and
+directories it contains. Use it when it is not necessary to track the
+individual files in a subdirectory.
+
+=item / → repos → repo → ignore
+
+Array of strings. Required (can be empty). Each string is the absolute filepath
+of a downloaded repository file that will I<not> be copied to the stow package
+filter directory. Each path can contain the "DOWNLOAD_ROOT" and
+"RELEASE_PATH" placeholder tokens. Placeholder tokens are discussed below.
+
+This property has the same final effect as the
+S<< <repo> → <delete-after-download> >> property, except that every file must
+be individually specified. Use S<< <repo> → <ignore> >> when you are deleting
+a subset of files from a subdirectory or when it is important to know when the
+repository adds or removes individual files from the subdirectory.
+
+=item / → repos → repo → substitutions
+
+Array of arrays. Required (but can be empty). Each contained array represents
+a text substitution made to the content of the downloaded repository files.
+Each contained array contains two elements: the first is a plain string to be
+searched for and the second is a plain string to replace each occurrence of the
+first string.
+
+This is a very unsophisticated mechanism: every downloaded repository file to
+be copied to the stow package filters directory undergoes a complete search
+and replace. The search and replace string can contain placeholder tokens which
+are themselves replaced before they are used in the search and replace
+operations.
+
+=back
+
+=back
+
+=head2 Placeholder tokens
+
+The following placeholders can be used in configuration file values. The tokens
+can be used in any string configuration value.
+
+=over
+
+=over
+
+=item DOWNLOAD_ROOT
+
+The absolute path of a repository's download directory (with no trailing slash).
+
+Commonly used in:
+
+=over
+
+=item *
+
+/ → repos → repo → filepath-mappings → [first array value]
+
+=item *
+
+/ → repos → repo → delete-after-download
+
+=item *
+
+/ → repos → repo → ignore
+
+=item *
+
+/ → repos → repo → release-path-extraction-regex
+
+=back
+
+=item HOME
+
+The absolute path of the user's home directory (with no trailing slash).
+
+Commonly used in:
+
+=over
+
+=item *
+
+/ → stow → filter-dir
+
+=back
+
+=item RELEASE_PATH
+
+Will be replaced with the part of the absolute path for all downloaded
+repository files extracted by the regular expression defined in
+<S<< release-path-extraction-regex> >>.
+
+As noted in the discussion of <S<< release-path-extraction-regex> >>, this
+token is not needed if files extracted from a downloaded release asset archive
+do not contain a versioned portion. If it is used, it is cmmonly used in:
+
+=over
+
+=item *
+
+/ → repos → repo → filepath-mappings → [first array value]
+
+=item *
+
+/ → repos → repo → delete-after-download
+
+=item *
+
+/ → repos → repo → ignore
+
+=back
+
+=item STOW_FILTERS_DIR
+
+The absolute path to the stow package pandoc filters directory (with no trailing slash).
+
+Defined in the configuration file's property: / → stow → filter-dir.
+
+Commonly used in:
+
+=over
+
+=item *
+
+/ → repos → repo → filepath-mappings → [second array value]
+
+=back
+
+=back
+
+=back
+
+=head1 REQUIRED ARGUMENTS
+
+None.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-r>  B<--repository>
+
+Name of a repository to update. String. Multiple allowed.
+This enables the user to specify which repository or repositories to update.
+Default if this option is not used: update all repositories.
+
+Repository names are specified in the configuration file an can be displayed
+with the C<-c> option.
+
+=item B<-c>  B<--show_config_data>
+
+Show configuration data and exit. Flag. Default: false.
+
+=item B<-h>  B<--help>
+
+Show a help message and exit. Flag. Default: false.
+
+=item B<--usage>
+
+Show a short help message and exit. Flag. Default: false.
+
+=item B<--man>
+
+Show the manual and exit. Flag. Default: false.
+
+=back
+
+=head1 EXIT STATUS
+
+The exit code is 0 for successful execution and 1 if the script does a
+controlled exit following an error. If the script crashes unexpectedly
+the error code is that given by the system.
+
+=head1 DIAGNOSTICS
+
+=head2 Can't extract release-path from repo 'NAME'
+
+For repositories obtained by downloading and extracting a release asset archive
+file, the module matches a regular expression against the filepaths of the
+extracted files to obtain the versioned part of the path. This error occurs if
+the regular expression provided by the configuration file does not match the
+filepaths of the extracted files. It indicates that the regular expression is
+incorrect.
+
+=head2 Clone failed with error code: ERROR
+
+Occurs when an attempt to clone an online repository fails.
+
+=head2 Config file data error(s) detected: ...
+
+Occurs when the configuration file fails validation. The module reports a
+specicific error giving the part of the configuration file where validation
+failed and an explanation of how validation failed.
+
+While most messages are easily understood, one validation error is cryptic:
+"/repos/X: Should not match". While there may be other possible causes for this
+error, it most commonly means that the S<< <obtain-method> >> property is
+I<not> set to "download-release-asset" and yet it has either or both of the
+properties S<< <asset-type> >> or S<< <release-path-extraction-regex> >>.
+
+=head2 Slurp failed
+
+This error occurs during an attempt to perform a search and replace on build
+files. If the operating system provided an error message it will be displayed
+as well.
+
+=head2 These repo files were not expected: FILES
+
+=head2 These files are missing: FILES
+
+=head2 These expected stow extra files are missing: FILES
+
+=head2 These expected stow files are missing from the stow package: FILES
+
+=head2 These stow package files were not expected: FILES
+
+These warning messages are displayed when the module detects changes between
+newly downloaded project files and those project files defined in the
+configuration and present in the stow filters directory.
+
+=head2 Unable to remove .git dir: ERROR
+
+After cloning a repository any F<.git> directory is deleted. This error occurs
+if that delete operation fails.
+
+=head2 Unable to delete asset release file: ERROR
+
+After downloading and extracting the contents of a repository release asset
+file, the module attempts to delete the downloaded file. This error occurs if
+that operation fails.
+
+=head2 Write failed
+
+This error occurs during an attempt to perform a search and replace on build
+files. If the operating system provided an error message it will be displayed
+as well.
+
+=head1 INCOMPATIBILITIES
+
+None known.
+
+=head1 BUGS AND LIMITATIONS
+
+Please report any bugs to the author.
+
+=head1 DEPENDENCIES
+
+=head2 Perl modules
+
+App::My::PandocUpdateFilters::Update, File::FindLib, namespace::clean,
+strictures, version.
+
+=head1 AUTHOR
+
+L<David Nebauer|mailto:david@nebauer.org>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (c) 2026 L<David Nebauer|mailto:david@nebauer.org>
+
+This script is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut
+
+# vim:foldmethod=marker:

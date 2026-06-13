@@ -1,0 +1,21 @@
+#compdef pandoc-my-update-filters
+
+_repos() {
+  local -a _repos
+  _repos=(buttondown eisvogel filters-jgm filters-dn)
+  _values 'Repository names' "${_repos[@]}"
+}
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help)'{-h,--help}'[Show a help message]' \
+    '--usage[Show a short help message]' \
+    '--man[Show the manual]' \
+  - 'run_options' \
+    '(-c --show_config_data)'{-c,--show_config_data}'[Show configuration data]' \
+    '(-r --repository)'{-r,--repository}'[Repository name (multiple allowed)]:repo names:_repos' \
+  && rc=0
+
+return rc

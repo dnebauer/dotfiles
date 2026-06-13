@@ -1,0 +1,375 @@
+{
+  "repos": [
+    {
+      "name": "lua-filters",
+      "description": "original pandoc lua filters collection",
+      "download-url": "https://github.com/pandoc/lua-filters.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/author-info-blocks/author-info-blocks.lua",
+          "STOW_FILTERS_DIR/author-info-blocks.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/doi2cite/doi2cite.lua",
+          "STOW_FILTERS_DIR/doi2cite.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/first-line-indent/first-line-indent.lua",
+          "STOW_FILTERS_DIR/first-line-indent.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/include-code-files/include-code-files.lua",
+          "STOW_FILTERS_DIR/include-code-files.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/latex-hyphen/latex-hyphen.lua",
+          "STOW_FILTERS_DIR/latex-hyphen.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/not-in-format/not-in-format.lua",
+          "STOW_FILTERS_DIR/not-in-format.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/scholarly-metadata/scholarly-metadata.lua",
+          "STOW_FILTERS_DIR/scholarly-metadata.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/short-captions/short-captions.lua",
+          "STOW_FILTERS_DIR/short-captions.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/spellcheck/spellcheck.lua",
+          "STOW_FILTERS_DIR/spellcheck.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/table-short-captions/table-short-captions.lua",
+          "STOW_FILTERS_DIR/table-short-captions.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/wordcount/wordcount.lua",
+          "STOW_FILTERS_DIR/wordcount.lua"
+        ]
+      ],
+      "delete-after-download": [
+        "DOWNLOAD_ROOT/abstract-to-meta",
+        "DOWNLOAD_ROOT/bibexport",
+        "DOWNLOAD_ROOT/cito",
+        "DOWNLOAD_ROOT/diagram-generator",
+        "DOWNLOAD_ROOT/.github",
+        "DOWNLOAD_ROOT/include-files",
+        "DOWNLOAD_ROOT/lilypond",
+        "DOWNLOAD_ROOT/list-table",
+        "DOWNLOAD_ROOT/lua-debug-example",
+        "DOWNLOAD_ROOT/math2svg",
+        "DOWNLOAD_ROOT/mhchem",
+        "DOWNLOAD_ROOT/minted",
+        "DOWNLOAD_ROOT/multiple-bibliographies",
+        "DOWNLOAD_ROOT/pagebreak",
+        "DOWNLOAD_ROOT/pandoc-quotes.lua",
+        "DOWNLOAD_ROOT/revealjs-codeblock",
+        "DOWNLOAD_ROOT/scrlttr2",
+        "DOWNLOAD_ROOT/section-refs",
+        "DOWNLOAD_ROOT/.tools",
+        "DOWNLOAD_ROOT/track-changes"
+      ],
+      "ignore": [
+        "DOWNLOAD_ROOT/CONTRIBUTING.md",
+        "DOWNLOAD_ROOT/.editorconfig",
+        "DOWNLOAD_ROOT/.gitignore",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/README.md",
+        "DOWNLOAD_ROOT/runtests.sh",
+        "DOWNLOAD_ROOT/author-info-blocks/expected.native",
+        "DOWNLOAD_ROOT/author-info-blocks/.gitignore",
+        "DOWNLOAD_ROOT/author-info-blocks/Makefile",
+        "DOWNLOAD_ROOT/author-info-blocks/README.md",
+        "DOWNLOAD_ROOT/author-info-blocks/sample.md",
+        "DOWNLOAD_ROOT/author-info-blocks/sample.png",
+        "DOWNLOAD_ROOT/doi2cite/expected1.md",
+        "DOWNLOAD_ROOT/doi2cite/expected1.pdf",
+        "DOWNLOAD_ROOT/doi2cite/expected2.md",
+        "DOWNLOAD_ROOT/doi2cite/__from_DOI.bib",
+        "DOWNLOAD_ROOT/doi2cite/Makefile",
+        "DOWNLOAD_ROOT/doi2cite/my_refs.bib",
+        "DOWNLOAD_ROOT/doi2cite/README.md",
+        "DOWNLOAD_ROOT/doi2cite/sample1.csl",
+        "DOWNLOAD_ROOT/doi2cite/sample1.md",
+        "DOWNLOAD_ROOT/doi2cite/sample2.md",
+        "DOWNLOAD_ROOT/first-line-indent/expected.html",
+        "DOWNLOAD_ROOT/first-line-indent/expected.tex",
+        "DOWNLOAD_ROOT/first-line-indent/LICENSE",
+        "DOWNLOAD_ROOT/first-line-indent/Makefile",
+        "DOWNLOAD_ROOT/first-line-indent/README.md",
+        "DOWNLOAD_ROOT/first-line-indent/sample.md",
+        "DOWNLOAD_ROOT/include-code-files/expected.native",
+        "DOWNLOAD_ROOT/include-code-files/Makefile",
+        "DOWNLOAD_ROOT/include-code-files/README.md",
+        "DOWNLOAD_ROOT/include-code-files/sample.md",
+        "DOWNLOAD_ROOT/latex-hyphen/expected.tex",
+        "DOWNLOAD_ROOT/latex-hyphen/Makefile",
+        "DOWNLOAD_ROOT/latex-hyphen/README.md",
+        "DOWNLOAD_ROOT/latex-hyphen/sample.md",
+        "DOWNLOAD_ROOT/latex-hyphen/with-filter.png",
+        "DOWNLOAD_ROOT/latex-hyphen/without-filter.png",
+        "DOWNLOAD_ROOT/not-in-format/expected.html",
+        "DOWNLOAD_ROOT/not-in-format/expected.tex",
+        "DOWNLOAD_ROOT/not-in-format/LICENSE",
+        "DOWNLOAD_ROOT/not-in-format/Makefile",
+        "DOWNLOAD_ROOT/not-in-format/README.md",
+        "DOWNLOAD_ROOT/not-in-format/sample.md",
+        "DOWNLOAD_ROOT/scholarly-metadata/expected.md",
+        "DOWNLOAD_ROOT/scholarly-metadata/Makefile",
+        "DOWNLOAD_ROOT/scholarly-metadata/README.md",
+        "DOWNLOAD_ROOT/scholarly-metadata/sample.md",
+        "DOWNLOAD_ROOT/short-captions/expected-1.tex",
+        "DOWNLOAD_ROOT/short-captions/expected-2.tex",
+        "DOWNLOAD_ROOT/short-captions/fig.pdf",
+        "DOWNLOAD_ROOT/short-captions/Makefile",
+        "DOWNLOAD_ROOT/short-captions/README.md",
+        "DOWNLOAD_ROOT/spellcheck/expected.txt",
+        "DOWNLOAD_ROOT/spellcheck/Makefile",
+        "DOWNLOAD_ROOT/spellcheck/README.md",
+        "DOWNLOAD_ROOT/spellcheck/sample.md",
+        "DOWNLOAD_ROOT/table-short-captions/Makefile",
+        "DOWNLOAD_ROOT/table-short-captions/README.md",
+        "DOWNLOAD_ROOT/table-short-captions/sample.md",
+        "DOWNLOAD_ROOT/table-short-captions/test-table-short-captions-crossref.sh",
+        "DOWNLOAD_ROOT/table-short-captions/test-table-short-captions.sh",
+        "DOWNLOAD_ROOT/wordcount/expected.txt",
+        "DOWNLOAD_ROOT/wordcount/Makefile",
+        "DOWNLOAD_ROOT/wordcount/README.md",
+        "DOWNLOAD_ROOT/wordcount/sample.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "filters-dn",
+      "description": "personal collection of untracked filters",
+      "download-url": "https://github.com/dnebauer/pandoc-filters-dn.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        ["DOWNLOAD_ROOT/heading2bold.py", "STOW_FILTERS_DIR/heading2bold.py"],
+        [
+          "DOWNLOAD_ROOT/keyboard-font.lua",
+          "STOW_FILTERS_DIR/keyboard-font.lua"
+        ],
+        [
+          "DOWNLOAD_ROOT/line-break-between-paras.lua",
+          "STOW_FILTERS_DIR/line-break-between-paras.lua"
+        ],
+        ["DOWNLOAD_ROOT/paginatesects.py", "STOW_FILTERS_DIR/paginatesects.py"],
+        ["DOWNLOAD_ROOT/text-colour.lua", "STOW_FILTERS_DIR/text-colour.lua"]
+      ],
+      "delete-after-download": [],
+      "ignore": ["DOWNLOAD_ROOT/README.md"],
+      "substitutions": []
+    },
+    {
+      "name": "ext-abstract",
+      "description": "part of pandoc-ext family of repositories",
+      "download-url": "https://github.com/pandoc-ext/abstract-section.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/_extensions/abstract-section/abstract-section.lua",
+          "STOW_FILTERS_DIR/abstract-section.lua"
+        ]
+      ],
+      "delete-after-download": ["DOWNLOAD_ROOT/.github", "DOWNLOAD_ROOT/test"],
+      "ignore": [
+        "DOWNLOAD_ROOT/abstract-section.lua",
+        "DOWNLOAD_ROOT/CHANGELOG.md",
+        "DOWNLOAD_ROOT/.editorconfig",
+        "DOWNLOAD_ROOT/_extensions/abstract-section/_extension.yaml",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/README.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "ext-diagram",
+      "description": "part of pandoc-ext family of repositories",
+      "download-url": "https://github.com/pandoc-ext/diagram.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/_extensions/diagram/diagram.lua",
+          "STOW_FILTERS_DIR/diagram.lua"
+        ]
+      ],
+      "delete-after-download": ["DOWNLOAD_ROOT/.github", "DOWNLOAD_ROOT/test"],
+      "ignore": [
+        "DOWNLOAD_ROOT/CHANGELOG.md",
+        "DOWNLOAD_ROOT/diagram.lua",
+        "DOWNLOAD_ROOT/.editorconfig",
+        "DOWNLOAD_ROOT/_extensions/diagram/_extension.yaml",
+        "DOWNLOAD_ROOT/.gitignore",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/README.md",
+        "DOWNLOAD_ROOT/sample.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "ext-include-files",
+      "description": "part of pandoc-ext family of repositories",
+      "download-url": "https://github.com/pandoc-ext/include-files.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/include-files.lua",
+          "STOW_FILTERS_DIR/include-files.lua"
+        ]
+      ],
+      "delete-after-download": ["DOWNLOAD_ROOT/subdir"],
+      "ignore": [
+        "DOWNLOAD_ROOT/expected-auto.native",
+        "DOWNLOAD_ROOT/expected.native",
+        "DOWNLOAD_ROOT/file-a.md",
+        "DOWNLOAD_ROOT/file-b.md",
+        "DOWNLOAD_ROOT/file-c.md",
+        "DOWNLOAD_ROOT/file-d.org",
+        "DOWNLOAD_ROOT/file-f.md",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/README.md",
+        "DOWNLOAD_ROOT/sample.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "ext-list-table",
+      "description": "part of pandoc-ext family of repositories",
+      "download-url": "https://github.com/pandoc-ext/list-table.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/_extensions/list-table/list-table.lua",
+          "STOW_FILTERS_DIR/list-table.lua"
+        ]
+      ],
+      "delete-after-download": ["DOWNLOAD_ROOT/test"],
+      "ignore": [
+        "DOWNLOAD_ROOT/_extensions/list-table/_extension.yaml",
+        "DOWNLOAD_ROOT/.gitignore",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/list-table.lua",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/README.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "ext-multibib",
+      "description": "part of pandoc-ext family of repositories",
+      "download-url": "https://github.com/pandoc-ext/multibib.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/_extensions/multibib/multibib.lua",
+          "STOW_FILTERS_DIR/multibib.lua"
+        ]
+      ],
+      "delete-after-download": ["DOWNLOAD_ROOT/.github", "DOWNLOAD_ROOT/test"],
+      "ignore": [
+        "DOWNLOAD_ROOT/changelog.md",
+        "DOWNLOAD_ROOT/.editorconfig",
+        "DOWNLOAD_ROOT/_extensions/multibib/_extension.yaml",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/multibib.lua",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/README.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "ext-pagebreak",
+      "description": "part of pandoc-ext family of repositories",
+      "download-url": "https://github.com/pandoc-ext/pagebreak.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        ["DOWNLOAD_ROOT/pagebreak.lua", "STOW_FILTERS_DIR/pagebreak.lua"]
+      ],
+      "delete-after-download": ["DOWNLOAD_ROOT/.github", "DOWNLOAD_ROOT/test"],
+      "ignore": [
+        "DOWNLOAD_ROOT/.editorconfig",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/README.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "ext-pretty-urls",
+      "description": "part of pandoc-ext family of repositories",
+      "download-url": "https://github.com/pandoc-ext/pretty-urls.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/_extensions/pretty-urls/pretty-urls.lua",
+          "STOW_FILTERS_DIR/pretty-urls.lua"
+        ]
+      ],
+      "delete-after-download": [
+        "DOWNLOAD_ROOT/test",
+        "DOWNLOAD_ROOT/.github",
+        "DOWNLOAD_ROOT/.tools"
+      ],
+      "ignore": [
+        "DOWNLOAD_ROOT/.editorconfig",
+        "DOWNLOAD_ROOT/_extensions/pretty-urls/_extension.yml",
+        "DOWNLOAD_ROOT/.gitignore",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/pretty-urls.lua",
+        "DOWNLOAD_ROOT/README.md"
+      ],
+      "substitutions": []
+    },
+    {
+      "name": "ext-section-bibs",
+      "description": "part of pandoc-ext family of repositories",
+      "download-url": "https://github.com/pandoc-ext/section-bibliographies.git",
+      "obtain-method": "git-clone-repository",
+      "filepath-mappings": [
+        [
+          "DOWNLOAD_ROOT/_extensions/section-bibliographies/section-bibliographies.lua",
+          "STOW_FILTERS_DIR/section-bibliographies.lua"
+        ]
+      ],
+      "delete-after-download": [
+        "DOWNLOAD_ROOT/test",
+        "DOWNLOAD_ROOT/.github",
+        "DOWNLOAD_ROOT/.tools"
+      ],
+      "ignore": [
+        "DOWNLOAD_ROOT/CHANGELOG.md",
+        "DOWNLOAD_ROOT/.editorconfig",
+        "DOWNLOAD_ROOT/_extensions/section-bibliographies/_extension.yml",
+        "DOWNLOAD_ROOT/.gitignore",
+        "DOWNLOAD_ROOT/LICENSE",
+        "DOWNLOAD_ROOT/Makefile",
+        "DOWNLOAD_ROOT/paths",
+        "DOWNLOAD_ROOT/README.md",
+        "DOWNLOAD_ROOT/section-bibliographies.lua"
+      ],
+      "substitutions": []
+    }
+  ],
+  "stow": {
+    "filter-dir": "HOME/.config/dotfiles/pandoc/.local/share/pandoc/filters",
+    "extra": []
+  }
+}
