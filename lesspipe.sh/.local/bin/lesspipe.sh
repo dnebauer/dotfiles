@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lesspipe.sh, a preprocessor for less
-lesspipe_version=2.25
+lesspipe_version=2.27
 # Author: Wolfgang Friebel (wp.friebel AT gmail.com)
 # LICENSE: GPL-2.0-or-later
 
@@ -389,7 +389,10 @@ get_unpack_cmd () {
 		case "$x" in
 			dmg)
 				has_cmd 7z && 7z l "$2" >/dev/null 2>&1 && prog=7z ;;
-			7z-compressed|lzma|xz|cab|arj|bzip2|cpio|iso)
+			cpio|iso)
+				{ has_cmd 7z && prog=7z; } ||
+				{ has_cmd 7zz && prog=7zz; } ;;
+			7z-compressed|lzma|xz|cab|arj|bzip2)
 				{ has_cmd 7zz && prog=7zz; } ||
 				{ has_cmd 7zr && prog=7zr; } ||
 				{ has_cmd 7z && prog=7z; } ||
@@ -412,6 +415,7 @@ get_unpack_cmd () {
 analyze_args () {
 	# determine how we are called
 	cmdtree=$(ps -oargs= 2>/dev/null)
+	[[ $cmdtree == *perldoc\ * ]] && exit 0
 	while read -r line; do
 		arg1=${line%% *}; arg1=${arg1##*/}
 		[[ $arg1 == less ]] && lessarg=$line
@@ -668,7 +672,11 @@ isfinal () {
 			has_cmd djvutxt && cmd=(djvutxt "$1") ;;
 		x509|crl|pem-file|csr)
 			[[ "$x" = csr ]] && x509=req || x509="$x"
-			has_cmd openssl && cmd=(istemp "openssl $x509 -text -noout -in" "$1") ;;
+			if has_cmd openssl; then
+				[[ "$1" == - ]] && set "$1" /dev/stdin
+				while openssl "$x509" -noout -text 2>/dev/null; do :; done < "$1";
+				return
+			fi ;;
 		pgp)
 			has_cmd gpg && cmd=(gpg --decrypt --quiet --no-tty --batch --yes "$1") ;;
 		bplist|plist)
@@ -694,6 +702,8 @@ isfinal () {
 			[[ $1 == - ]] && arg='/dev/stdin' || arg="$1"
 			{ has_cmd pigz && pigz -d -z < "$arg" && return ; } ||
 			{ has_cmd zlib-flate && zlib-flate -uncompress < "$arg" && return ; } ;;
+		sqlite3)
+			has_cmd sqlite3 && cmd=(sqlite3  "$1" .dbinfo .dump) ;;
 	esac
 	fi
 	# not a specific file format
@@ -724,7 +734,7 @@ isfinal () {
 		"${cmd[@]}" 2>&1
 	else
 		local final_input="$1"
-		if [[ -n $fileext && "$1" == - && ${colorizer[0]} != archive_color ]]; then
+		if [[ -n $fileext && "$1" == - && ${colorizer[*]} != archive_color ]]; then
 			final_input=$(nexttmp)
 			cat "$1" > "$final_input"
 		fi
@@ -793,7 +803,11 @@ isarchive () {
 				separatorline
 				isoinfo -fR"$joliet" -i "$t" ;;
 			cpio)
-				cpio -tv --quiet < "$2" ;;
+				if [[ "$2" == - ]]; then
+					cpio -tv --quiet
+				else
+					cpio -tv --quiet < "$2"
+				fi ;;
 			7z|7zz|7za|7zr)
 				istemp "$prog l" "$2" ;;
 		esac
