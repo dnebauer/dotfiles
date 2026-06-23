@@ -65,6 +65,7 @@
 # |                   | tempfile, textwrap, threading, time                  |
 # |             pywal | used by networkmanager_dmenu (polybar themes)        |
 # |       qutebrowser | web browser                                          |
+# |          radicale | caldav and carddav server                            |
 # |      radiotray-ng | radio streaming app                                  |
 # |               rev | reverse lines character-wise                         |
 # |              rofi | run dialog (terminal commands and desktop apps)      |
@@ -74,6 +75,7 @@
 # |             sleep | pause execution                                      |
 # |         systemctl | service manager                                      |
 # |           tellico | collection management software                       |
+# |       thunderbird | personal information manager                         |
 # |        tiddlywiki | non-linear notebook                                  |
 # |           udiskie | automount removable media                            |
 # |             xclip | interface to system clipboard                        |
@@ -338,6 +340,10 @@ exec --no-startup-id parcellite &
 
 ## display clipboard history
 #@ Ctrl+$alt+h
+
+# radicale    {{{2
+
+exec --no-startup-id systemctl --user start radicale.service
 
 # radiotray-ng    {{{2
 #

@@ -25,23 +25,24 @@ self="$(basename "$0")"
 # at startup i3 uses path that does not contain ~/.local/bin
 # - these tools can be found on base system path
 required_system_tools=(
-	'alacritty'
-	'bc'
-	'date'
-	'dn-neovide'
-	'exec'
-	'getopt'
-	'i3-msg'
-	'logger'
-	'mkfifo'
-	'mktemp'
-	'neomutt'
-	'newsboat'
-	'printf'
-	'sleep'
-	'tmux'
-	'trap'
-	'yad'
+  'alacritty'
+  'bc'
+  'date'
+  'dn-neovide'
+  'exec'
+  'getopt'
+  'i3-msg'
+  'logger'
+  'mkfifo'
+  'mktemp'
+  'neomutt'
+  'newsboat'
+  'printf'
+  'sleep'
+  'thunderbird'
+  'tmux'
+  'trap'
+  'yad'
 )
 # - these tools have to be searched for in specified locations
 #   . note especially the local qutebrowser wrapper which is
@@ -74,28 +75,28 @@ qutebrowser_sessions=('games' 'mail' 'music' 'porn' 'vim' 'wiki')
 #   prints: nil
 #   return: n/a
 function applyLayouts() {
-	local elapsed layout_file task tmr workspace_name workspace_number
-	for workspace in "${workspaces[@]}"; do
-		# extract workspace number and name
-		workspace_number="${workspace%:*}"
-		workspace_name="${workspace#*:}"
-		# logging
-		tmr="$(timer)"
-		task="applying layout to workspace $workspace_number ($workspace_name)"
-		log "Begin ${task}"
-		notifyMessage "Applying layout $workspace_number ($workspace_name)..."
+  local elapsed layout_file task tmr workspace_name workspace_number
+  for workspace in "${workspaces[@]}"; do
+    # extract workspace number and name
+    workspace_number="${workspace%:*}"
+    workspace_name="${workspace#*:}"
+    # logging
+    tmr="$(timer)"
+    task="applying layout to workspace $workspace_number ($workspace_name)"
+    log "Begin ${task}"
+    notifyMessage "Applying layout $workspace_number ($workspace_name)..."
 
-		# apply layout
-		# shellcheck disable=SC2088
-		layout_file="~/.config/i3/sessions/workspace_${workspace_number}.json"
-		i3-msg "workspace $workspace; append_layout $layout_file"
+    # apply layout
+    # shellcheck disable=SC2088
+    layout_file="~/.config/i3/sessions/workspace_${workspace_number}.json"
+    i3-msg "workspace $workspace; append_layout $layout_file"
 
-		# logging
-		if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-		log " Finished ${task}"
-		elapsed="$(timer "${tmr}")"
-		log " Elapsed time ${elapsed}"
-	done
+    # logging
+    if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+    log " Finished ${task}"
+    elapsed="$(timer "${tmr}")"
+    log " Elapsed time ${elapsed}"
+  done
 }
 # assignWorkspaces()    {{{1
 #   intent: check for required tools
@@ -103,12 +104,12 @@ function applyLayouts() {
 #   prints: nil
 #   return: n/a
 function assignWorkspaces() {
-	# Assign workspaces to monitors
-	# - this must be done in the i3 config file
-	# - there appears to be no way to construct the workspace command in
-	#   shell script using i3-msg without i3 interpreting the workspace name
-	#   as being everything following the token 'workspace'
-	: "this task is done in the i3 config file"
+  # Assign workspaces to monitors
+  # - this must be done in the i3 config file
+  # - there appears to be no way to construct the workspace command in
+  #   shell script using i3-msg without i3 interpreting the workspace name
+  #   as being everything following the token 'workspace'
+  : "this task is done in the i3 config file"
 }
 # checkPrereqs()    {{{1
 #   intent: check for required tools
@@ -116,27 +117,27 @@ function assignWorkspaces() {
 #   prints: error message if tool(s) missing
 #   return: n/a, aborts scipts on failure
 function checkPrereqs() {
-	local missing tool
-	missing=()
-	# these tools can be found on the base system path
-	# - at i3 startup the path does not include ~/.local/bin
-	for tool in "${required_system_tools[@]}"; do
-		command -v "$tool" &>/dev/null || missing+=("$tool")
-	done
-	# these tools are specified by absolute path
-	for tool in "${required_local_tools[@]}"; do
-		[[ -x "$tool" ]] || missing+=("$tool")
-	done
-	if [[ ${#missing[@]} -ne 0 ]]; then
-		local msg
-		msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
-		echo "$msg" >/dev/stderr
-		# cannot use 'log' function here:
-		# - options have not yet been processed
-		# - logging only happens if '--log' option used
-		logger --priority "user.err" --tag "i3-SETUP" "$msg"
-		exit 1
-	fi
+  local missing tool
+  missing=()
+  # these tools can be found on the base system path
+  # - at i3 startup the path does not include ~/.local/bin
+  for tool in "${required_system_tools[@]}"; do
+    command -v "$tool" &>/dev/null || missing+=("$tool")
+  done
+  # these tools are specified by absolute path
+  for tool in "${required_local_tools[@]}"; do
+    [[ -x "$tool" ]] || missing+=("$tool")
+  done
+  if [[ ${#missing[@]} -ne 0 ]]; then
+    local msg
+    msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+    echo "$msg" >/dev/stderr
+    # cannot use 'log' function here:
+    # - options have not yet been processed
+    # - logging only happens if '--log' option used
+    logger --priority "user.err" --tag "i3-SETUP" "$msg"
+    exit 1
+  fi
 }
 # displayUsage()    {{{1
 #   intent: display usage message in console
@@ -144,7 +145,7 @@ function checkPrereqs() {
 #   prints: nil
 #   return: nil
 function displayUsage() {
-	cat <<_USAGE
+  cat <<_USAGE
 $self: setup i3 session on startup
 
 This script is called by the i3 config file during startup
@@ -181,11 +182,11 @@ _USAGE
 #   prints: string containing joined items
 #   return: nil
 function joinBy() {
-	local d=$1
-	shift
-	local f=$1
-	shift
-	printf %s "$f" "${@/#/$d}"
+  local d=$1
+  shift
+  local f=$1
+  shift
+  printf %s "$f" "${@/#/$d}"
 }
 # launchGoogleChrome()    {{{1
 #   intent: launch google chrome
@@ -193,24 +194,24 @@ function joinBy() {
 #   prints: nil
 #   return: nil
 function launchGoogleChrome() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching google chrome'
-	log "Begin ${task}"
-	notifyMessage 'Launching google chrome...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='launching google chrome'
+  log "Begin ${task}"
+  notifyMessage 'Launching google chrome...'
 
-	# launch google chrome
-	google-chrome &
-	sleep $delay_post_launch
+  # launch google chrome
+  google-chrome &
+  sleep "$delay_post_launch"
 
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # launchNeomutt()    {{{1
 #   intent: launch neomutt mail client
@@ -218,27 +219,27 @@ function launchGoogleChrome() {
 #   prints: nil
 #   return: nil
 function launchNeomutt() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching neomutt mail client'
-	log "Begin ${task}"
-	notifyMessage 'Launching neomutt mail client...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='launching neomutt mail client'
+  log "Begin ${task}"
+  notifyMessage 'Launching neomutt mail client...'
 
-	# launch neomutt
-	alacritty \
-		--class 'AlacrittyNeomutt,AlacrittyNeomutt' \
-		--title AlacrittyNeomutt \
-		--command neomutt &
-	sleep $delay_post_launch
+  # launch neomutt
+  alacritty \
+    --class 'AlacrittyNeomutt,AlacrittyNeomutt' \
+    --title AlacrittyNeomutt \
+    --command neomutt &
+  sleep $delay_post_launch
 
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # launchNewsboat()    {{{1
 #   intent: launch newsboat news client
@@ -246,27 +247,27 @@ function launchNeomutt() {
 #   prints: nil
 #   return: nil
 function launchNewsboat() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching newsboat news client'
-	log "Begin ${task}"
-	notifyMessage 'Launching newsboat news client...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='launching newsboat news client'
+  log "Begin ${task}"
+  notifyMessage 'Launching newsboat news client...'
 
-	# launch newsboat
-	alacritty \
-		--class 'AlacrittyNewsboat,AlacrittyNewsboat' \
-		--title AlacrittyNewsboat \
-		--command newsboat &
-	sleep $delay_post_launch
+  # launch newsboat
+  alacritty \
+    --class 'AlacrittyNewsboat,AlacrittyNewsboat' \
+    --title AlacrittyNewsboat \
+    --command newsboat &
+  sleep $delay_post_launch
 
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # launchNvimGui()    {{{1
 #   intent: launch nvim gui (currently neovide)
@@ -278,24 +279,24 @@ function launchNewsboat() {
 #           /usr/local/bin/nvim.appimage to force neovim to
 #           use that nvim binary
 function launchNvimGui() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching nvim gui'
-	log "Begin ${task}"
-	notifyMessage 'Launching nvim gui...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='launching nvim gui'
+  log "Begin ${task}"
+  notifyMessage 'Launching nvim gui...'
 
-	# launch neovide
-	dn-neovide &
-	sleep $delay_post_launch
+  # launch neovide
+  dn-neovide &
+  sleep $delay_post_launch
 
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # launchQutebrowserSessions()    {{{1
 #   intent: launch qutebrowser sessions
@@ -310,29 +311,54 @@ function launchNvimGui() {
 #   note:   the qutebrowser session names are defined in
 #           script variable $qutebrowser_sessions
 function launchQutebrowserSessions() {
-	# loop through session names
-	for session in "${qutebrowser_sessions[@]}"; do
-		# logging
-		local tmr
-		tmr="$(timer)"
-		local task
-		task="launching qutebrowser session '$session'"
-		log "Begin ${task}"
-		notifyMessage "Launching qutebrowser session '$session'..."
+  # loop through session names
+  for session in "${qutebrowser_sessions[@]}"; do
+    # logging
+    local tmr
+    tmr="$(timer)"
+    local task
+    task="launching qutebrowser session '$session'"
+    log "Begin ${task}"
+    notifyMessage "Launching qutebrowser session '$session'..."
 
-		# launch qutebrowser instance
-		$qutebrowser \
-			--set window.title_format "qutebrowser/$session" \
-			--restore "$session" &
-		sleep $delay_post_launch
+    # launch qutebrowser instance
+    $qutebrowser \
+      --set window.title_format "qutebrowser/$session" \
+      --restore "$session" &
+    sleep $delay_post_launch
 
-		# logging
-		if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-		log "  Finished ${task}"
-		local elapsed
-		elapsed="$(timer "${tmr}")"
-		log "  Elapsed time ${elapsed}"
-	done
+    # logging
+    if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+    log "  Finished ${task}"
+    local elapsed
+    elapsed="$(timer "${tmr}")"
+    log "  Elapsed time ${elapsed}"
+  done
+}
+# launchThunderbird()    {{{1
+#   intent: launch thunderbird
+#   params: nil
+#   prints: nil
+#   return: nil
+function launchThunderbird() {
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='launching thunderbird'
+  log "Begin ${task}"
+  notifyMessage 'Launching thunderbird...'
+
+  # launch thunderbird
+  thunderbird &
+  sleep $delay_post_launch
+
+  # logging
+  if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # launchTiddlywiki()    {{{1
 #   intent: launch tiddlywiki
@@ -340,29 +366,29 @@ function launchQutebrowserSessions() {
 #   prints: nil
 #   return: nil
 function launchTiddlywiki() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching tiddlywiki'
-	log "Begin ${task}"
-	notifyMessage 'Launching tiddlywiki server...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='launching tiddlywiki'
+  log "Begin ${task}"
+  notifyMessage 'Launching tiddlywiki server...'
 
-	# launch tiddlywiki
-	plugin_path='/usr/local/share/tiddlywiki/plugins'
-	alacritty \
-		--title launcher_tiddlywiki \
-		--option "env.TIDDLYWIKI_PLUGIN_PATH=\"$plugin_path\"" \
-		--command "$tiddlywiki" "$HOME/data/misc/auxiliary-memory" \
-		--listen port=10744 &
-	sleep $delay_post_launch
+  # launch tiddlywiki
+  plugin_path='/usr/local/share/tiddlywiki/plugins'
+  alacritty \
+    --title launcher_tiddlywiki \
+    --option "env.TIDDLYWIKI_PLUGIN_PATH=\"$plugin_path\"" \
+    --command "$tiddlywiki" "$HOME/data/misc/auxiliary-memory" \
+    --listen port=10744 &
+  sleep $delay_post_launch
 
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # launchTmux()    {{{1
 #   intent: launch alacritty terminal running tmux
@@ -370,27 +396,27 @@ function launchTiddlywiki() {
 #   prints: nil
 #   return: nil
 function launchTmux() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='launching alacritty terminal running tmux'
-	log "Begin ${task}"
-	notifyMessage 'Launching tmux...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='launching alacritty terminal running tmux'
+  log "Begin ${task}"
+  notifyMessage 'Launching tmux...'
 
-	# launch alacritty terminal running tmux
-	alacritty \
-		--class 'AlacrittyTmux,AlacrittyTmux' \
-		--title 'AlacrittyTmux' \
-		--command tmux &
-	sleep $delay_post_launch
+  # launch alacritty terminal running tmux
+  alacritty \
+    --class 'AlacrittyTmux,AlacrittyTmux' \
+    --title 'AlacrittyTmux' \
+    --command tmux &
+  sleep $delay_post_launch
 
-	# logging
-	if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  if test ${?} -ne 0; then log "**FAILED ${task}" 'err'; fi
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # log(message, [priority])    {{{1
 #   intent: write message to system log
@@ -400,18 +426,18 @@ function launchTmux() {
 #   prints: toggled value
 #   return: toggled value
 function log() {
-	# process parameters
-	local prefix
-	prefix="i3-SETUP"
-	local message
-	message="${1:-EMPTY}"
-	local priority
-	priority="${2:-info}"
+  # process parameters
+  local prefix
+  prefix="i3-SETUP"
+  local message
+  message="${1:-EMPTY}"
+  local priority
+  priority="${2:-info}"
 
-	# log message
-	if logging; then
-		logger --priority "user.$priority" --tag "$prefix" "$message"
-	fi
+  # log message
+  if logging; then
+    logger --priority "user.$priority" --tag "$prefix" "$message"
+  fi
 }
 # logging()    {{{1
 #   intent: signal whether logging messages during script execution
@@ -421,7 +447,7 @@ function log() {
 #   note:   function is redefined to return 1 (false)
 #           if param '--no-log' is used
 function logging() {
-	return 0
+  return 0
 }
 # notifyCleanup()    {{{1
 #   intent: cleanup on exit from yad dialog
@@ -429,16 +455,16 @@ function logging() {
 #   prints: nil
 #   return: n/a
 function notifyCleanup() {
-	# delete pipe files
-	rm -f "$notify_text_pipe" 2>/dev/null || true
-	rm -f "$notify_progress_pipe" 2>/dev/null || true
-	# cancel redirections
-	exec 3>&-
-	exec 4>&-
-	# kill yad process
-	for notify_pid in "${notify_pids[@]}"; do
-		kill -9 "$notify_pid" || true
-	done
+  # delete pipe files
+  rm -f "$notify_text_pipe" 2>/dev/null || true
+  rm -f "$notify_progress_pipe" 2>/dev/null || true
+  # cancel redirections
+  exec 3>&-
+  exec 4>&-
+  # kill yad process
+  for notify_pid in "${notify_pids[@]}"; do
+    kill -9 "$notify_pid" || true
+  done
 }
 # notifyCompletion()    {{{1
 #   intent: notify user that i3 setup is complete
@@ -446,8 +472,8 @@ function notifyCleanup() {
 #   prints: nil
 #   return: nil
 function notifyCompletion() {
-	notifyMessage 'Session setup complete'
-	sleep 3
+  notifyMessage 'Session setup complete'
+  sleep 3
 }
 # notifyDisplay()    {{{1
 #   intent: display multi-pane dialog with text and progress bar widgets
@@ -455,52 +481,52 @@ function notifyCompletion() {
 #   prints: nil
 #   return: n/a
 function notifyDisplay() {
-	fkey=$RANDOM
-	width=900
-	height=90
-	font='Monospace 18'
+  fkey=$RANDOM
+  width=900
+  height=90
+  font='Monospace 18'
 
-	# construct text-info pane
-	mkfifo "$notify_text_pipe"
-	exec 3<>"$notify_text_pipe"
-	yad \
-		--plug="$fkey" \
-		--tabnum=1 \
-		--text-info \
-		--fontname="$font" \
-		--wrap \
-		--listen \
-		<&3 &
-	sleep $delay_post_launch
-	notify_pids+=($!)
+  # construct text-info pane
+  mkfifo "$notify_text_pipe"
+  exec 3<>"$notify_text_pipe"
+  yad \
+    --plug="$fkey" \
+    --tabnum=1 \
+    --text-info \
+    --fontname="$font" \
+    --wrap \
+    --listen \
+    <&3 &
+  sleep $delay_post_launch
+  notify_pids+=($!)
 
-	# construct progress bar pane
-	mkfifo "$notify_progress_pipe"
-	exec 4<>"$notify_progress_pipe"
-	yad \
-		--plug="$fkey" \
-		--tabnum=2 \
-		--progress \
-		<&4 &
-	sleep $delay_post_launch
-	notify_pids+=($!)
+  # construct progress bar pane
+  mkfifo "$notify_progress_pipe"
+  exec 4<>"$notify_progress_pipe"
+  yad \
+    --plug="$fkey" \
+    --tabnum=2 \
+    --progress \
+    <&4 &
+  sleep $delay_post_launch
+  notify_pids+=($!)
 
-	#construct and display dialog
-	yad \
-		--width=$width \
-		--height=$height \
-		--on-top \
-		--no-escape \
-		--no-buttons \
-		--sticky \
-		--skip-taskbar \
-		--title='i3 session setup' \
-		--window-icon='start' \
-		--paned \
-		--key="$fkey" \
-		&
-	sleep $delay_post_launch
-	notify_pids+=($!)
+  #construct and display dialog
+  yad \
+    --width=$width \
+    --height=$height \
+    --on-top \
+    --no-escape \
+    --no-buttons \
+    --sticky \
+    --skip-taskbar \
+    --title='i3 session setup' \
+    --window-icon='start' \
+    --paned \
+    --key="$fkey" \
+    &
+  sleep $delay_post_launch
+  notify_pids+=($!)
 }
 # notifyMessage(msg)    {{{1
 #   intent: send a message to the yad text-info widget
@@ -508,12 +534,12 @@ function notifyDisplay() {
 #   prints: nil
 #   return: n/a
 function notifyMessage() {
-	local msg
-	msg=${1:-}
-	if [[ -n "$msg" ]]; then
-		echo -e '\f' >&3
-		echo "$msg" >&3
-	fi
+  local msg
+  msg=${1:-}
+  if [[ -n "$msg" ]]; then
+    echo -e '\f' >&3
+    echo "$msg" >&3
+  fi
 }
 # processOptions(params[@])    {{{1
 #   intent: process command line parameters
@@ -523,44 +549,44 @@ function notifyMessage() {
 #   note:   after execution variable ARGS contains
 #           remaining command line args (after options removed)
 function processOptions() {
-	# read the command line options
-	local OPTIONS
-	if ! OPTIONS="$(
-		getopt \
-			--options nhvd \
-			--long no-log,help,verbose,debug \
-			--name "${BASH_SOURCE[0]}" \
-			-- "$@"
-	)"; then
-		echo 'Invalid command line options' 1>&2
-		exit 1
-	fi
-	eval set -- "$OPTIONS"
-	while true; do
-		case "$1" in
-		-n | --no-log)
-			logging() { return 1; }
-			shift 1
-			;;
-		-h | --help)
-			displayUsage
-			exit 0
-			;;
-		-v | --verbose)
-			set -o verbose
-			shift 1
-			;;
-		-d | --debug)
-			set -o xtrace
-			shift 1
-			;;
-		--)
-			shift
-			break
-			;;
-		*) break ;;
-		esac
-	done
+  # read the command line options
+  local OPTIONS
+  if ! OPTIONS="$(
+    getopt \
+      --options nhvd \
+      --long no-log,help,verbose,debug \
+      --name "${BASH_SOURCE[0]}" \
+      -- "$@"
+  )"; then
+    echo 'Invalid command line options' 1>&2
+    exit 1
+  fi
+  eval set -- "$OPTIONS"
+  while true; do
+    case "$1" in
+    -n | --no-log)
+      logging() { return 1; }
+      shift 1
+      ;;
+    -h | --help)
+      displayUsage
+      exit 0
+      ;;
+    -v | --verbose)
+      set -o verbose
+      shift 1
+      ;;
+    -d | --debug)
+      set -o xtrace
+      shift 1
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *) break ;;
+    esac
+  done
 }
 # reloadWikiQutebrowserTab()    {{{1
 #   intent: reload tiddlywiki browser tab on assumption that tiddlywiki
@@ -578,26 +604,26 @@ function processOptions() {
 #           which usually resolves to:
 #             /run/user/1000/qutebrowser/SESSION/
 function reloadWikiQutebrowserTab() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='reload of tiddlywiki client qutebrowser tab'
-	log "Begin ${task}"
-	notifyMessage 'Reloading tiddlywiki client qutebrowser tab...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='reload of tiddlywiki client qutebrowser tab'
+  log "Begin ${task}"
+  notifyMessage 'Reloading tiddlywiki client qutebrowser tab...'
 
-	# reload qutebrowser tab showing tiddlywiki client
-	local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
-	basedir="$runtime_dir/qutebrowser/wiki"
-	qutebrowser --basedir "$basedir" ':tab-focus --no-last 1'
-	sleep 2
-	qutebrowser --basedir "$basedir" ':reload'
+  # reload qutebrowser tab showing tiddlywiki client
+  local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+  basedir="$runtime_dir/qutebrowser/wiki"
+  qutebrowser --basedir "$basedir" ':tab-focus --no-last 1'
+  sleep 2
+  qutebrowser --basedir "$basedir" ':reload'
 
-	# logging
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # resetQutebrowserDownloadDirectory()    {{{1
 #   intent: reset default download directory of all qutebrowser instances
@@ -612,31 +638,31 @@ function reloadWikiQutebrowserTab() {
 #           and this procedure resets it to:
 #             ~/Downloads/
 function resetQutebrowserDownloadDirectory() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='resetting qutebrowser default download directories'
-	log "Begin ${task}"
-	notifyMessage 'Resetting qutebrowser default download directories...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='resetting qutebrowser default download directories'
+  log "Begin ${task}"
+  notifyMessage 'Resetting qutebrowser default download directories...'
 
-	# reset qutebrowser download directories
-	local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
-	# shellcheck disable=SC2088
-	local download_dir='~/Downloads'
-	local msg
-	for session in "${qutebrowser_sessions[@]}"; do
-		msg="Resetting qutebrowser download directory for session '$session'"
-		notifyMessage "$msg"
-		basedir="$runtime_dir/qutebrowser/$session"
-		qutebrowser --basedir "$basedir" ":set downloads.location.directory $download_dir"
-	done
+  # reset qutebrowser download directories
+  local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+  # shellcheck disable=SC2088
+  local download_dir='~/Downloads'
+  local msg
+  for session in "${qutebrowser_sessions[@]}"; do
+    msg="Resetting qutebrowser download directory for session '$session'"
+    notifyMessage "$msg"
+    basedir="$runtime_dir/qutebrowser/$session"
+    qutebrowser --basedir "$basedir" ":set downloads.location.directory $download_dir"
+  done
 
-	# logging
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # resetQutebrowserWindowTitles()    {{{1
 #   intent: reset title of all qutebrowser instances to display the
@@ -655,30 +681,30 @@ function resetQutebrowserDownloadDirectory() {
 #           which usually resolves to:
 #             /run/user/1000/qutebrowser/SESSION/
 function resetQutebrowserWindowTitles() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='resetting qutebrowser window titles'
-	log "Begin ${task}"
-	notifyMessage 'Resetting qutebrowser window titles...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='resetting qutebrowser window titles'
+  log "Begin ${task}"
+  notifyMessage 'Resetting qutebrowser window titles...'
 
-	# reset qutebrowser window titles
-	local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
-	local title='{perc}{current_title}{title_sep}qutebrowser'
-	local msg
-	for session in "${qutebrowser_sessions[@]}"; do
-		msg="Resetting qutebrowser window title for session '$session'"
-		notifyMessage "$msg"
-		basedir="$runtime_dir/qutebrowser/$session"
-		qutebrowser --basedir "$basedir" ":set window.title_format $title"
-	done
+  # reset qutebrowser window titles
+  local runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+  local title='{perc}{current_title}{title_sep}qutebrowser'
+  local msg
+  for session in "${qutebrowser_sessions[@]}"; do
+    msg="Resetting qutebrowser window title for session '$session'"
+    notifyMessage "$msg"
+    basedir="$runtime_dir/qutebrowser/$session"
+    qutebrowser --basedir "$basedir" ":set window.title_format $title"
+  done
 
-	# logging
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # setInitialContainerFocus()    {{{1
 #   intent: set focus on two containers so tab-switch alternates between them
@@ -686,25 +712,25 @@ function resetQutebrowserWindowTitles() {
 #   prints: nil
 #   return: n/a
 function setInitialContainerFocus() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task='setting initial container focus'
-	log "Begin ${task}"
-	notifyMessage 'Setting initial container focus...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task='setting initial container focus'
+  log "Begin ${task}"
+  notifyMessage 'Setting initial container focus...'
 
-	# focus on neomutt in workspace 2:mail
-	i3-msg [class='AlacrittyNeomutt' instance='AlacrittyNeomutt'] focus
+  # focus on neomutt in workspace 2:mail
+  i3-msg [class='AlacrittyNeomutt' instance='AlacrittyNeomutt'] focus
 
-	# focus on terminal in workspace 1:term
-	i3-msg [class='AlacrittyTmux' instance='AlacrittyTmux'] focus
+  # focus on terminal in workspace 1:term
+  i3-msg [class='AlacrittyTmux' instance='AlacrittyTmux'] focus
 
-	# logging
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # timer([start])    {{{1
 #   intent: get elapsed time
@@ -716,24 +742,24 @@ function setInitialContainerFocus() {
 #           # ...
 #           $elapsed="$(timer $tmr)"    # '12:34:56'
 timer() {
-	if test ${#} -eq 0; then # no param - return seconds since epoch
-		date '+%s'
-	else # time param - return elapsed time
-		local stime
-		stime="${1}"
-		local etime
-		etime="$(date '+%s')"
-		if test -z "${stime}"; then stime="${etime}"; fi
-		local dt
-		dt="$((etime - stime))"
-		local ds
-		ds="$((dt % 60))"
-		local dm
-		dm="$(((dt / 60) % 60))"
-		local dh
-		dh="$((dt / 3600))"
-		printf '%d:%02d:%02d' ${dh} ${dm} ${ds}
-	fi
+  if test ${#} -eq 0; then # no param - return seconds since epoch
+    date '+%s'
+  else # time param - return elapsed time
+    local stime
+    stime="${1}"
+    local etime
+    etime="$(date '+%s')"
+    if test -z "${stime}"; then stime="${etime}"; fi
+    local dt
+    dt="$((etime - stime))"
+    local ds
+    ds="$((dt % 60))"
+    local dm
+    dm="$(((dt / 60) % 60))"
+    local dh
+    dh="$((dt / 3600))"
+    printf '%d:%02d:%02d' ${dh} ${dm} ${ds}
+  fi
 }
 # waitForAppsToLoad()    {{{1
 #   intent: allow time for apps to load - some tasks cannot be performed
@@ -742,31 +768,31 @@ timer() {
 #   prints: nil
 #   return: n/a
 function waitForAppsToLoad() {
-	# logging
-	local tmr
-	tmr="$(timer)"
-	local task
-	task="delay for apps to load ($delay_app_loading seconds)"
-	log "Begin ${task}"
-	notifyMessage 'Waiting for apps to load...'
+  # logging
+  local tmr
+  tmr="$(timer)"
+  local task
+  task="delay for apps to load ($delay_app_loading seconds)"
+  log "Begin ${task}"
+  notifyMessage 'Waiting for apps to load...'
 
-	# $delay_app_loading is set to 30 seconds
-	# - trial and error showed this is sufficient for the computer and
-	#   internet speeds in use at the time this script was written
-	for ((i = 1; i <= "$delay_app_loading"; i++)); do
-		percent=$(echo "$i*100/$delay_app_loading" | bc)
-		remaining=$((delay_app_loading - i))
-		echo "$percent" >&4
-		echo "# Remaining delay: $remaining seconds" >&4
-		sleep 1
-	done
-	echo '# ' >&4
+  # $delay_app_loading is set to 30 seconds
+  # - trial and error showed this is sufficient for the computer and
+  #   internet speeds in use at the time this script was written
+  for ((i = 1; i <= "$delay_app_loading"; i++)); do
+    percent=$(echo "$i*100/$delay_app_loading" | bc)
+    remaining=$((delay_app_loading - i))
+    echo "$percent" >&4
+    echo "# Remaining delay: $remaining seconds" >&4
+    sleep 1
+  done
+  echo '# ' >&4
 
-	# logging
-	log "  Finished ${task}"
-	local elapsed
-	elapsed="$(timer "${tmr}")"
-	log "  Elapsed time ${elapsed}"
+  # logging
+  log "  Finished ${task}"
+  local elapsed
+  elapsed="$(timer "${tmr}")"
+  log "  Elapsed time ${elapsed}"
 }
 # }}}1
 
@@ -782,6 +808,7 @@ launchNvimGui
 launchNeomutt
 launchNewsboat
 launchGoogleChrome
+launchThunderbird
 launchTiddlywiki
 launchQutebrowserSessions
 launchTmux
