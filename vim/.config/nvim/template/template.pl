@@ -216,81 +216,10 @@ B<myscript param> [ B<-o> ]
 
 B<myscript -h>
 
-=head1 OPTIONS
-
-=over
-
-=item B<option>
-
-Does...
-
-=back
-
-=head1 REQUIRED ARGUMENTS
-
-=over
-
-=item B<param>
-
-Does...
-
-Scalar string. Required.
-
-=back
-
-=head1 REQUIRED OPTIONS
-
-=over
-
-=item B<-o>  B<--option>
-
-Does...
-
-Scalar string. Required.
-
-=back
-
-=head1 OPTIONS
-
-=over
-
-=item B<-o>  B<--option>
-
-Whether to .
-
-Boolean. Optional. Default: false.
-
-=item B<-h>
-
-Display help and exit.
-
-=back
-
 =head1 DESCRIPTION
 
 A full description of the application and its features. May include numerous
 subsections (i.e., =head2, =head3, etc.).
-
-=head1 DIAGNOSTICS
-
-Supposedly a listing of every error and warning message that the module can
-generate (even the ones that will "never happen"), with a full explanation of
-each problem, one or more likely causes, and any suggested remedies.
-
-Really?
-
-=head1 DEPENDENCIES
-
-=head2 Perl modules
-
-autodie, Carp, Const::Fast, Dn::Role::HasPath, English, experimental,
-Moo, MooX::HandlesVia, MooX::Options, namespace::clean, Path::Tiny, strictures,
-Syntax::Keyword::Try, Types::Common::Numeric, Types::Common::String,
-Types::Path::Tiny, Types::Standard, version.
-
-=head2 Executables
-
-wget.
 
 =head1 CONFIGURATION
 
@@ -319,9 +248,39 @@ Configuration file
 
 This script does not use environmental variables.
 
-=head1 INCOMPATIBILITIES
+=head1 REQUIRED ARGUMENTS
 
-There are no known incompatibilities.
+=over
+
+=item B<-o>  B<--option>
+
+Does...
+
+Scalar string. Required.
+
+=item B<param>
+
+Does...
+
+Scalar string. Required.
+
+=back
+
+=head1 OPTIONS
+
+=over
+
+=item B<-o>  B<--option>
+
+Whether to .
+
+Boolean. Optional. Default: false.
+
+=item B<-h>
+
+Display help and exit.
+
+=back
 
 =head1 EXIT STATUS
 
@@ -329,9 +288,34 @@ The exit code is 0 for successful execution and 1 if the script does a
 controlled exit following an error. If the script crashes unexpectedly the
 error code is that given by the system.
 
+=head1 DIAGNOSTICS
+
+Supposedly a listing of every error and warning message that the module can
+generate (even the ones that will "never happen"), with a full explanation of
+each problem, one or more likely causes, and any suggested remedies.
+
+Really?
+
+=head1 INCOMPATIBILITIES
+
+There are no known incompatibilities.
+
 =head1 BUGS AND LIMITATIONS
 
 Please report any bugs to the author.
+
+=head1 DEPENDENCIES
+
+=head2 Perl modules
+
+autodie, Carp, Const::Fast, Dn::Role::HasPath, English, experimental,
+Moo, MooX::HandlesVia, MooX::Options, namespace::clean, Path::Tiny, strictures,
+Syntax::Keyword::Try, Types::Common::Numeric, Types::Common::String,
+Types::Path::Tiny, Types::Standard, version.
+
+=head2 Executables
+
+wget.
 
 =head1 AUTHOR
 
@@ -339,7 +323,7 @@ ${author}
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2024 ${author}
+Copyright (c) 2026 ${author}
 
 This script is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
