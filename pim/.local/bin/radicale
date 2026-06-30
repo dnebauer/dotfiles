@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+
+# File: radicale
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose:
+# Created: 2026-06-21
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+self_fp="$(realpath --no-symlinks "$0")"
+radicale_bin="/usr/bin/radicale"
+radicale_dir="$HOME/.local/share/radicale"
+config_file='config.ini'
+config_fp="$radicale_dir/$config_file"
+log_dir="$HOME/.local/state/radicale"
+log_fp="$log_dir/radicale_$(date --utc +%Y%m%d%H%M%S).log"
+# required tools findable on system path
+required_system_tools=(
+  cd
+  echo
+  exec
+  getopt
+  mkdir
+  tee
+)
+# required tools specified by full path
+required_local_tools=(
+  "$radicale_bin"
+)
+# }}}1
+
+# PROCEDURES
+
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+function checkPrereqs() {
+  local missing tool
+  missing=()
+  # these tools can be found on the base system path
+  for tool in "${required_system_tools[@]}"; do
+    command -v "$tool" &>/dev/null || missing+=("$tool")
+  done
+  # these tools are specified by absolute path
+  for tool in "${required_local_tools[@]}"; do
+    [[ -x "$tool" ]] || missing+=("$tool")
+  done
+  if [[ ${#missing[@]} -ne 0 ]]; then
+    local msg
+    msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+    echo "$self: $msg" >/dev/stderr
+    exit 1
+  fi
+  unset required_system_tools required_local_tools
+}
+# displayUsage()    {{{1
+#   intent: display usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage() {
+  cat <<_USAGE
+$self: wrapper for radicale
+
+This wrapper script for $radicale_bin is located at:
+
+  $self_fp
+
+This wrapper calls $radicale_bin with the --config
+option to specify use of the configuration file:
+
+  $config_fp
+
+All other command-line parameters are passed unchanged to
+$radicale_bin.
+
+What follows is the help output from $radicale_bin.
+
+==========================================================
+
+_USAGE
+
+  exec $radicale_bin --help
+}
+# processOptions([@options])    {{{1
+#   intent: process all command line options
+#   params: @options - all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable @ARGS contains
+#           remaining command line args (after options removed)
+processOptions() {
+  # read the command line options
+  local OPTIONS
+  if ! OPTIONS="$(
+    getopt \
+      --options hvdx: \
+      --long xoption:,help,verbose,debug \
+      --name "${BASH_SOURCE[0]}" \
+      -- "$@"
+  )"; then
+    # getopt displays errors
+    exit 1
+  fi
+  eval set -- "$OPTIONS"
+  while true; do
+    case "$1" in
+    -h | --help)
+      displayUsage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *) break ;;
+    esac
+  done
+  ARGS=("$@") # remaining arguments
+}
+# joinBy($delim, @items)    {{{1
+#   intent: join all items using delimiter
+#   params: delim - delimiter
+#           items - items to be joined
+#   prints: string containing joined items
+#   return: nil
+function joinBy() {
+  local delimiter first_item
+  delimiter="${1:-}"
+  shift
+  first_item="${1:-}"
+  shift
+  printf %b%s "$first_item" "${@/#/$delimiter}"
+}
+# }}}1
+
+# MAIN
+
+# check for required tools    {{{1
+checkPrereqs
+
+# check whether help invoked    {{{1
+# • leaves ${ARGS[@]} holding positional arguments
+processOptions "$@"
+
+# check for config file    {{{1
+if ! [[ -f "$config_fp" ]]; then
+  echo "$self: cannot locate config file: $config_fp" >/dev/stderr
+  exit 1
+fi
+
+# check for log dir    {{{1
+if ! [[ -d "$log_dir" ]]; then
+  mkdir -p "$log_dir"
+  if ! [[ -d "$log_dir" ]]; then
+    echo "$self: unable to create log directory: $log_dir" >/dev/stderr
+    exit 1
+  fi
+fi
+
+# run radicale    {{{1
+cd "$radicale_dir"
+exec $radicale_bin --config "$config_file" "${ARGS[@]}" 2>&1 | tee "$log_fp"
+# }}}1
+
+# vim:foldmethod=marker:
