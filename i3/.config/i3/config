@@ -1095,8 +1095,10 @@ workspace $ws3 output $secondary_monitor
 workspace $ws4 output $primary_monitor
 # $ws5 = wiki
 workspace $ws5 output $secondary_monitor
-## $ws6 = sync
-#workspace $ws6 output $secondary_monitor
+# $ws6 = sync
+workspace $ws6 output $secondary_monitor
+# $ws7 = PIM
+workspace $ws7 output $primary_monitor
 
 exec --no-startup-id ~/.config/polybar/launch
 

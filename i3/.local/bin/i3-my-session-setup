@@ -57,7 +57,7 @@ required_local_tools=("$qutebrowser" "$tiddlywiki")
 delay_post_launch=1
 delay_app_loading=40
 # workspace names
-workspaces=('1:term' '2:mail' '3:chrome' '4:qute' '5:wiki')
+workspaces=('1:term' '2:mail' '3:chrome' '4:qute' '5:wiki' '6:sync' '7:PIM')
 # notification dialog named pipe handling
 notify_text_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
 notify_progress_pipe="$(mktemp -u --tmpdir find.XXXXXXXX)"
