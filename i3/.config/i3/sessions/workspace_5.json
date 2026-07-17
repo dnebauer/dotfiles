@@ -23,24 +23,24 @@
 }
 
 {
-    "border": "normal",
-    "current_border_width": 2,
-    "floating": "auto_off",
-    "geometry": {
-       "height": 1024,
-       "width": 1916,
-       "x": 2,
-       "y": 54
-    },
-    "marks": [],
-    "name": "launcher_tiddlywiki",
-    "percent": 0.25,
-    "swallows": [
-       {
-          "class": "^Alacritty$",
-          "instance": "^Alacritty$",
-          "title": "^launcher_tiddlywiki"
-       }
-    ],
-    "type": "con"
+  "border": "normal",
+  "current_border_width": 2,
+  "floating": "auto_off",
+  "geometry": {
+     "height": 1024,
+     "width": 1916,
+     "x": 2,
+     "y": 54
+  },
+  "marks": [],
+  "name": "launcher_tiddlywiki",
+  "percent": 0.25,
+  "swallows": [
+     {
+      "class": "^Alacritty$",
+      "instance": "^Alacritty$",
+      "title": "^launcher_tiddlywiki"
+     }
+  ],
+  "type": "con"
 }

@@ -2,7 +2,7 @@
 {
   "border": "normal",
   "current_border_width": 2,
-  "floating": "user_off",
+  "floating": "auto_off",
   "geometry": {
     "height": 1024,
     "width": 1916,
