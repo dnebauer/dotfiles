@@ -129,7 +129,7 @@ set spool_file = +INBOX
 
 set nm_default_url = 'notmuch:///home/david/.local/mail/maildirs'
     # cannot use 'folder', must use 'nm_default_url'
-set vfolder_format = '%6n(%6N) %f'
+set folder_format = '%6n(%6N) %f'
     # file browser display format for vfolders
 set maildir_check_cur
     # poll maildir 'cur' directory as well as 'new' directory
@@ -838,7 +838,7 @@ set print = ask-yes
 set nomark_old
     # no 'old' tag, 'new' is good enough
 set header_cache = $my_header_cache
-set message_cachedir = $my_message_cache
+set message_cache_dir = $my_message_cache
     # try to speed up by caching
 set pager_context = 3
     # lines of overlap when PgUp and PgDown
@@ -998,7 +998,7 @@ set nosig_dashes
     # no dashes before sig
 set sig_on_top
     # place signature before quoted text
-set attribution="* %n <%a> [%{%Y-%m-%d %H:%M:%S %Z}]:\n"
+set attribution_intro="* %n <%a> [%{%Y-%m-%d %H:%M:%S %Z}]:\n"
     # string preceding message included in reply
 set nocompose_confirm_detach_first
     # do not prompt for confirmation on removing first entry
