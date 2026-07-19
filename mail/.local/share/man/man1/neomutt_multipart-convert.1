@@ -1,0 +1,247 @@
+.\" Hey, EMACS: -*- nroff -*-
+
+.\" Filename: neomutt_multipart-convert.1
+.\" Author:   David Nebauer
+.\" History:  2026-07-03 - created
+
+.\" -----------------------------------------------------------------
+.\" NOTES
+.\" -----------------------------------------------------------------
+.ig
+
+For header (.TH), first parameter, NAME, should be all caps
+Second parameter, SECTION, should be 1-8, maybe w/ subsection
+Other parameters are allowed: see man(7), man(1)
+Please adjust the date whenever revising the manpage.
+
+Some roff macros, for reference:
+.nh        disable hyphenation
+.hy        enable hyphenation
+.ad l      left justify
+.ad b      justify to both left and right margins
+.nf        disable filling
+.fi        enable filling
+.br        insert line break
+.sp <n>    insert n+1 empty lines
+for manpage-specific macros, see groff_man(7) and man(7)
+
+Formatting [see groff_char (7) and man (7) for details]:
+\(aq  : escape sequence for (')
+\[dq] : plain double quote
+\[lq] : left/open double quote
+\[rq] : right/close double quote
+`     : left/open single quote
+'     : right/close single quote
+\(em  : escape sequence for em dash
+\(en  : escape sequence for en dash
+\.    : escape sequence for period/dot
+\(rg  : registration symbol
+\(tm  : trademark symbol
+\fX   : escape sequence that changes font, where 'X' can be 'R|I|B|BI'
+        (R = roman/normal | I = italic | B = bold | BI = bold-italic)
+\fP   : switch to previous font
+        in this case '\fR' could also have been used
+.B    : following arguments are boldened
+.I    : following arguments are italicised
+.BI   : following arguments are bold alternating with italics
+.BR   : following arguments are bold alternating with roman
+.IB   : following arguments are italics alternating with bold
+.IR   : following arguments are italics alternating with roman
+.RB   : following arguments are roman alternating with bold
+.RI   : following arguments are roman alternating with italics
+.SM   : following arguments are small (scaled 9/10 of the regular size)
+.SB   : following arguments are small bold (not small alternating with bold)
+        [note: if argument in alternating pattern contains whitespace,
+               enclose in whitespace]
+.RS x : indent following lines by x characters
+.RE   : end indent
+
+Bulleted list:
+   A bulleted list:
+   .IP \[bu] 2
+   lawyers
+   .IP \[bu]
+   guns
+   .IP \[bu]
+   money
+Numbered list:
+   A numbered list:
+   .nr step 1 1
+   .IP \n[step]. 3
+   lawyers
+   .IP \n+[step].
+   guns
+   .IP \n+[step].
+   money
+..
+
+.\" -----------------------------------------------------------------
+.\" SETUP
+.\" -----------------------------------------------------------------
+
+.\" Macro: Format URL
+.\"  usage:  .URL "http:\\www.gnu.org" "GNU Project" " of the"
+.\"  params: 1 = url
+.\"          2 = link text/name
+.\"          3 = postamble (optional)
+.\"  note:   The www.tmac macro provides a .URL macro package; this
+.\"          is a local fallback in case www.tmac is unavailable
+.\"  credit: man(7)
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+
+.\" Prefer .URL macro from www.tmac macro package if it is available
+.\"  note: In the conditional below the '\n' escape returns the value of
+.\"        a register, in this the '.g'
+.\"        The '.g' register is only found in GNU 'troff', and it is
+.\"        assumed that GNU troff will always include the www.tmac
+.\"        macro package
+.if \n[.g] .mso www.tmac
+
+.\" Macro: Ellipsis
+.\"  usage: .ellipsis
+.\"  note: only works at beginning of line
+.de ellipsis
+.cc ^
+...
+^cc
+..
+
+.\" String: Command name
+.ds self neomutt_multipart-convert
+
+.\" -----------------------------------------------------------------
+.\" MANPAGE CONTENT
+.\" -----------------------------------------------------------------
+
+.TH "NEOMUTT_MULTIPART-CONVERT" "1" "2026-07-03" "" "NEOMUTT_MULTIPART-CONVERT Manual"
+.SH "NAME"
+\*[self] \- convert text email to multipart email in neomutt
+.SH "SYNOPSIS"
+.SY "\*[self]"
+[
+.B "\-v"
+]
+[
+.B "\-d"
+]
+.YS
+.SY "\*[self]"
+.B "\-h"
+.YS
+.SH "DESCRIPTION"
+\*[self] is part of a method to send multipart-related emails from neomutt.
+It performs the following tasks:
+.IP \[bu] 2
+inlines images in markdown original as cids (Content-IDs) using md5sum as a
+quick-and-dirty cid generator
+.IP \[bu]
+create an html version of the email using pandoc
+.IP \[bu]
+create a command file which, when executed by neomutt, generates a
+multipart-related email (if there are inline images) or multipart-alternative
+email (if there are no inline images).
+.PP
+Here is the structure of the email that is created when there are inline
+images:
+.PP
+.EX
+.RS 4
+Multipart Related
+├─>Multipart Alternative
+│ ├─>Plain Text Email
+│ └─>HTML Email
+└─>Inline Image Attachment
+Non-Inline Attachment
+.RE
+.EE
+.PP
+Here is the structure of the email that is created when there are no inline
+images:
+.PP
+.EX
+.RS 4
+Multipart Alternative
+├─>Plain Text Email
+└─>HTML Email
+Non-Inline Attachment
+.RE
+.EE
+.PP
+Here is an example configuration file setting in which this script is run to
+generate the command file and then executes the command file:
+.PP
+.EX
+.RS 4
+macro compose Y "<first-entry>\\
+<pipe-entry>path/to/\*[self]<enter>\\
+<enter-command>source /path/to/multipart-commands<enter>\\
+"    'send multipart text and html message'
+.RE
+.EE
+.PP
+The pandoc conversion to html relies on the pandoc html template:
+.IP \[bu] 2
+.IR "~/.local/share/mail/utils/neomutt_pandoc-template.html" "."
+.PP
+The pandoc handling of inline images and cids relies on these pandoc filters:
+.IP \[bu] 2
+.I "~/.local/mail/utils/neomutt_pandoc-filter_image-src-list.lua"
+.IP \[bu]
+.IR "~/.local/mail/utils/neomutt_pandoc-filter_image-src-to-cid.lua" "."
+.SH "OPTIONS"
+.TP
+.B "\-v  \-\-verbose"
+Print input lines as they are read (equivalent to \(aqset -o verbose\(aq).
+Optional.
+.TP
+.B "\-d  \-\-debug"
+Print input lines after command expansion
+(equivalent to \(aqset -o xtrace\(aq). Optional.
+.TP
+.B "\-h  \-\-help"
+Print help text and exit. Optional.
+.SH "FILES"
+.I ~/.local/share/mail/utils/neomutt_pandoc-template.html
+.IP
+Pandoc html template file.
+.PP
+.I ~/.local/mail/utils/neomutt_pandoc-filter_image-src-list.lua
+.IP
+Pandoc filter that lists inline image filepaths in a markdown file.
+.PP
+.I ~/.local/mail/utils/neomutt_pandoc-filter_image-src-to-cid.lua
+.IP
+Pandoc filter that replaces inline image filepaths with a Content-ID (cid)
+derived from each image file's md5sum.
+.PP
+.I ~/.cache/neomutt/multipart-commands
+.IP
+Temporary commands file used to generate multipart-related email.
+.PP
+.I ~/.cache/neomutt/multipart-markdown-original.md
+.IP
+Temporary file holding original email content.
+.PP
+.I ~/.cache/neomutt/multipart-markdown.md
+.IP
+Temporary working copy of original email content.
+.PP
+.I ~/.cache/neomutt/multipart-conversion.html
+.IP
+Temporary file holding html version of original markdown email content.
+.SH "SEE ALSO"
+.BR "neomutt " "(1),"
+.BR "pandoc " "(1),"
+.BR "md5sum " "(1)."
+.SH "AUTHOR"
+\*[self] was written by
+.URL "mailto:david at nebauer.org" "David Nebauer"
+based on blog entry
+.URL "https://jonathanh.co.uk/blog/multipart-emails-in-neomutt/" "Multipart Emails in Neomutt"
+by Jonathan Hodgson, 27 May 2022.
+.PP
+This manual page was written by
+.URL "mailto:david at nebauer.org" "David Nebauer"
+for the Debian project (but may be used by others).

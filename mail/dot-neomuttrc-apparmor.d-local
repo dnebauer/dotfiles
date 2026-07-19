@@ -1,0 +1,28 @@
+# Author: David Nebauer <david@nebauer.id.au>
+# File: /etc/apparmor.d/local/usr.bin.neomutt
+
+## errors sourcing files in ~/.cache/neomutt
+
+# example errors:
+# > source: file /home/david/.cacge/neomutt/multipart-commands could not be sourced
+
+# cause
+# - unknown
+
+# fix:
+# - this file informs apparmor about symlinked files 
+
+# access modes (file permissions):
+# - r = read mode
+# - w = write mode
+# - k = lock mode
+
+owner @{HOME}/.cache/neomutt/** rwk,
+
+# post-install instructions:
+# - after installing this file restart apparmor with:
+#   > systemctl restart apparmor
+#   or
+#   > service apparmor restart
+
+# vim:syntax=apparmor:

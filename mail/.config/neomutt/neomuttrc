@@ -52,6 +52,9 @@
 #   - p = pager
 #   - e = editor
 #   - a = attach
+# Setting boolean variables    {{{1
+# * there are various ways to set to 'no'
+# * use the "set novariable" method
 # }}}1
 
 
@@ -79,6 +82,7 @@ set my_fetch_script = $my_utils/my-get-mail
 set my_nvim_args = $my_utils/neomutt_nvim-args.vim
 set my_print_pdf = $my_utils/neomutt_print-to-pdf
 set my_save_eml = $my_utils/neomutt_save-eml-file
+set my_multipart_convert = $my_utils/neomutt_multipart-convert
 set my_send_clipboard = $my_utils/neomutt_eml-content-to-clipboard
 set my_trim_quotes = $my_utils/neomutt_trim-quotes
 set my_signature = $my_cfgdir_d/signature
@@ -86,6 +90,7 @@ set my_download_dir = $HOME/Downloads
 set my_cache = $HOME/.cache/neomutt
 set my_header_cache = $my_cache/cache-headers
 set my_message_cache = $my_cache/cache-messages
+set my_multipart_commands = $my_cache/multipart-commands
 set my_msmtpq = $HOME/.local/bin/msmtpq
 set my_file_picker = $my_utils/neomutt_file-picker
 set my_picker_cache = $my_cache/picker-cache
@@ -961,10 +966,28 @@ set query_command = "echo '' && notmuch address from:/%s/"
    # so the 'echo' command is a workaround for this
 set editor = "\
 $my_trim_quotes %s ;\
-editor -S '$my_nvim_args' +/^$/+1 '+nohlsearch' '+startinsert!' %s\
+editor -S '$my_nvim_args'\
+        +/^$/+1\
+        '+nohlsearch'\
+        '+MUMailMDFormatSilent'\
+        '+startinsert!'\
+        %s\
 "
     # editor invocation, assumes 'editor' is set to nvim
-    # uses external file for initial arguments
+    # first runs a script to declutter the message
+    # then runs these commands on nvim start up:
+    # -S '$my_nvim_args'
+    #   * use external file for initial settings
+    # +/^$/+1
+    #   * move cursor to first empty line, i.e., past header lines
+    #   * then move to the following line, i.e., in the message body
+    # '+nohlsearch'
+    #   * cancel any existing search highlighting
+    # '+MUMailMDFormatSilent'
+    #   * use markdown syntax highlighting for the message body
+    #   * command provided by plugin at github repo dnebauer/dn-mail.nvim
+    # '+startinsert!'
+    #   * start in insert mode
 set text_flowed
     # generate content type 'text/plain; format-flowed'
 set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
@@ -977,6 +1000,9 @@ set sig_on_top
     # place signature before quoted text
 set attribution="* %n <%a> [%{%Y-%m-%d %H:%M:%S %Z}]:\n"
     # string preceding message included in reply
+set nocompose_confirm_detach_first
+    # do not prompt for confirmation on removing first entry
+    # * required by compose "y" binding
 set mime_forward = ask-no
     # asks whether to forward message as mime attachment rather than inline
 set fast_reply
@@ -1047,6 +1073,9 @@ bind editor <Up> history-up
 bind editor \ck kill-eol
 # [e] <Ctrl>+v : quote the next typed key (default binding)
 bind editor \cv quote-char
+# [e] <Ctrl>+u : delete from cursor to beginning of line (default binding)
+    # * required by compose "y" binding
+bind editor \cu kill-line
 # [e] <Ctrl>+w : delete the word in front of the cursor (default binding)
 bind editor \cw kill-word
 # [c] A : attach multiple files with file manager
@@ -1075,24 +1104,17 @@ set abort_noattach = ask-yes
 
 # Bindings    {{{1
 
-# [c] Y : convert markdown to html and send
+# [c] y : convert markdown to html and send
+# - overrides [c] y = <send-message> (send the message)
+macro compose y "<first-entry>\
+<pipe-entry>$my_multipart_convert<enter>\
+<enter-command>source $my_multipart_commands<enter>\
+"    'send multipart text and html message'
+
+# [c] Y : send message
 # - no default [c] Y binding
-# - macro solution from NeoMutt Guide (https://neomutt.org/guide),
-#   Chapter 5.2 'Composing Multipart Alternative Emails'
-macro compose Y "\
-<first-entry>\
-<enter-command>set my_wait_key=\$wait_key<enter>\
-<enter-command>unset wait_key<enter>\
-<pipe-entry>\
-pandoc -o $my_cache/text-alternative.html<enter>\
-<attach-file>\
-$my_cache/text-alternative.html<enter>\
-<toggle-unlink><toggle-disposition>\
-<tag-entry><first-entry><tag-entry><group-alternatives>\
-<enter-command>set wait_key=\$my_wait_key<enter>\
-<enter-command>unset my_wait_key<enter>\
-<send-message>\
-"    "send the message as 'multipart/alternative'"
+# - set to function bound by default to [c] y
+bind compose Y send-message
 # }}}1
 
 

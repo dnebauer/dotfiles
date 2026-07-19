@@ -1,0 +1,414 @@
+#!/usr/bin/env bash
+
+# File: neomutt_send-multipart
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: send multipart emails in neomutt
+# Created: 2026-07-02
+# Credits:
+# • Jonathan Hodgson blog post "Multipart Emails in Neomutt", 2022-05-27
+#   https://jonathanh.co.uk/blog/multipart-emails-in-neomutt/
+# who, in turn, credits:
+# • https://github.com/anufrievroman/Neomutt-File-Picker/blob/master/filepicker
+# • https://github.com/neomutt/neomutt/issues/3229
+# • https://unix.stackexchange.com/a/612194
+
+# REQUIREMENTS    {{{1
+
+# access to ~/.cache/neomutt    {{{2
+# • temporary files are written to and read from this directory
+# • AppArmor can silently block this access
+
+# config variable 'compose_confirm_detach_first' must be unset    {{{2
+# • this boolean variable must be unset (same as set to 'no')
+# • can do this in config file
+# • can use command 'set nocompose_confirm_detach_first'
+# • can use command 'unset compose_confirm_detach_first'
+
+# Ctrl-u is bound to the <kill-line> function    {{{2
+
+# custom pandoc filters    {{{2
+# • neomutt_pandoc-filter_image-src-list.lua:   {{{3
+#     ```lua
+#     srcs = {}
+#     src_list = {
+#       Image = function(el)
+#         src = el.src
+#         table.insert(srcs, src)
+#       end,
+#     }
+#     function Pandoc(el)
+#       pandoc.walk_block(pandoc.Div(el.blocks), src_list)
+#       for _, src in ipairs(srcs) do
+#         print(src)
+#       end
+#       os.exit(0)
+#     end
+#     ```
+# • neomutt_pandoc-filter_image-src-to-cid.lua   {{{3
+#     ```lua
+#     function Image(el)
+#       src = el.src
+#       cmd = "md5sum " .. src .. "|cut -d ' ' -f 1"
+#       handle = io.popen(cmd, "r")
+#       cid = handle:read("*a")
+#       handle:close()
+#       el.src = "cid:" .. cid
+#       return el
+#     end
+#     ```
+# }}}2
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+self="$(basename "$0")"
+# directories used by script
+# • synchronise with neomutt config script:
+#   $cache_dir must match $my_cache and $utils_dir must match $my_utils
+cache_dir="$HOME/.cache/neomutt"
+utils_dir="$HOME/.local/mail/utils"
+# holds neomutt commands to create multipart email
+commands_file="$cache_dir/multipart-commands"
+# original email message
+markdown_file_original="$cache_dir/multipart-markdown-original.md"
+# message with cid inline image paths
+markdown_file="$cache_dir/multipart-markdown.md"
+# html version of email
+html_file="$cache_dir/multipart-conversion.html"
+# pandoc html template
+html_template="$utils_dir/neomutt_pandoc-template.html"
+# assumed maximum number of attachments
+max_attachments=20
+# pandoc filters
+filter_stem="$utils_dir/neomutt_pandoc-filter"
+filter_img_src_list="${filter_stem}_image-src-list.lua"
+filter_img_src_to_cid="${filter_stem}_image-src-to-cid.lua"
+# required tools findable on system path
+required_system_tools=(cd cut echo getopt grep md5sum pandoc read sed)
+# required tools and files specified by full path
+required_local_tools=()
+required_local_files=("$html_template")
+unset cache_dir utils_dir
+
+# FLAGS    {{{1
+
+declare -A flag_values=(
+  [inline_images]=1 # default=false
+)
+inline_images() {
+  flag 'inline_images' "$@"
+  return $?
+}
+# }}}1
+
+# PROCEDURES
+
+# checkPrereqs()    {{{1
+#   intent: check for required tools
+#   params: nil
+#   prints: error message if tool(s) missing
+#   return: n/a, aborts scipts on failure
+checkPrereqs() {
+  local missing tool
+  missing=()
+  # these tools can be found on the base system path
+  for tool in "${required_system_tools[@]}"; do
+    command -v "$tool" &>/dev/null || missing+=("$tool")
+  done
+  # these tools are specified by absolute path
+  for tool in "${required_local_tools[@]}"; do
+    [[ -x "$tool" ]] || missing+=("$tool")
+  done
+  # these files are specified by absolute path
+  for file in "${required_local_files[@]}"; do
+    [[ -e "$file" ]] || missing+=("$file")
+  done
+  if [[ ${#missing[@]} -ne 0 ]]; then
+    local msg
+    msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+    echo "$self: $msg" >/dev/stderr
+    exit 1
+  fi
+}
+# displayUsage()    {{{1
+#   intent: display usage information
+#   params: nil
+#   prints: nil
+#   return: nil
+displayUsage() {
+  cat <<_USAGE
+$self: create multipart email in neomutt
+
+This script is part of a method to send multipart-related
+emails from neomutt. It performs the following tasks:
+
+* embeds inline images using cids (Content-IDs), with
+  md5sum used as a quick-and-dirty cid generator
+* creates an html version of the email using pandoc
+* creates a command file which, when executed by neomutt,
+  generates a multipart-related email (if there are inline
+  images) or multipart-alternative email (if there are no
+  inline images).
+
+Here is the structure of the email that is created when
+there are inline images:
+
+    Multipart Related
+    ├─>Multipart Alternative
+    │ ├─>Plain Text Email
+    │ └─>HTML Email
+    └─>Inline Image Attachment
+    Non-Inline Attachment
+
+Here is the structure of the email that is created when
+there are no inline images:
+
+    Multipart Alternative
+    ├─>Plain Text Email
+    └─>HTML Email
+    Non-Inline Attachment
+
+Here is an example configuration file setting in which this
+script is run to generate the temporary command file and
+then executes the command file:
+
+    macro compose Y "<first-entry>\\
+    <pipe-entry>/path/to/$self<enter>\\
+    <enter-command>source /path/to/multipart-commands<enter>\\
+    "    'send multipart text and html message'
+
+The pandoc conversion to html relies on the pandoc html
+template:
+* $html_template
+
+The pandoc handling of inline images and cids relies on
+these pandoc filters:
+* $filter_img_src_list
+* $filter_img_src_to_cid
+
+Usage: $self [-v] [-d]
+       $self -h
+
+Options: -v = print input lines as they are read
+              (equivalent to 'set -o verbose')
+         -d = print input lines after command expansion
+              (equivalent to 'set -o xtrace')
+_USAGE
+}
+# processOptions([@options])    {{{1
+#   intent: process all command line options
+#   params: @options - all command line parameters
+#   prints: feedback
+#   return: nil
+#   note:   after execution variable @ARGS contains
+#           remaining command line args (after options removed)
+processOptions() {
+  # read the command line options
+  local OPTIONS
+  if ! OPTIONS="$(
+    getopt \
+      --options hvd \
+      --long help,verbose,debug \
+      --name "${BASH_SOURCE[0]}" \
+      -- "$@"
+  )"; then
+    # getopt displays errors
+    exit 1
+  fi
+  eval set -- "$OPTIONS"
+  while true; do
+    case "$1" in
+    -h | --help)
+      displayUsage
+      exit 0
+      ;;
+    -v | --verbose)
+      set -o verbose
+      shift 1
+      ;;
+    -d | --debug)
+      set -o xtrace
+      shift 1
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *) break ;;
+    esac
+  done
+}
+# joinBy($delim, @items)    {{{1
+#   intent: join all items using delimiter
+#   params: delim - delimiter
+#           items - items to be joined
+#   prints: string containing joined items
+#   return: nil
+joinBy() {
+  local delimiter first_item
+  delimiter="${1:-}"
+  shift
+  first_item="${1:-}"
+  shift
+  printf %b%s "$first_item" "${@/#/$delimiter}"
+}
+# flag($name, [$value])
+#   intent: flag getter/setter
+#   params: $name  - flag name, also key in 'flag_values' associative array
+#           $value - new flag value, boolean {'true','false'} [optional]
+#   prints: nil
+#   return: setter=nil, getter=boolean flag value
+flag() {
+  case $# in
+  1) return "${flag_values[$1]}" ;;
+  2)
+    [[ "$2" = 'true' ]] && flag_values[$1]=0 || true
+    [[ "$2" = 'false' ]] && flag_values[$1]=1 || true
+    ;;
+  *)
+    echo "Bad param count: $#" >/dev/stderr
+    exit 2
+    ;;
+  esac
+}
+# }}}1
+
+# MAIN
+
+# check for required tools    {{{1
+checkPrereqs
+unset required_system_tools required_local_tools
+
+# process command line options    {{{1
+processOptions "$@"
+
+# clean up from previous run    {{{1
+# • markdown file - original
+[[ -e "$markdown_file_original" ]] && rm "$markdown_file_original"
+# • markdown file - modified
+[[ -e "$markdown_file" ]] && rm "$markdown_file"
+# • html conversion file
+[[ -e "$html_file" ]] && rm "$html_file"
+# • commands file
+[[ -e "$commands_file" ]] && rm "$commands_file"
+
+# create a html version of the email    {{{1
+cat - >"${markdown_file_original}"
+# • look for inline images
+cmd=('pandoc' "--lua-filter=$filter_img_src_list" "$markdown_file_original")
+mapfile -t inline_image_filepaths < <("${cmd[@]}")
+[ ${#inline_image_filepaths[@]} -gt 0 ] && inline_images 'true'
+# • convert inline image filepaths to cids
+pandoc \
+  --from='markdown' \
+  --to='markdown' \
+  --lua-filter="$filter_img_src_to_cid" \
+  --output="$markdown_file" \
+  "$markdown_file_original"
+# • convert markdown to html
+pandoc \
+  --from='markdown+smart+footnotes+inline_notes' \
+  --to='html5' \
+  --standalone \
+  --template="$html_template" \
+  --output="$html_file" \
+  "$markdown_file"
+
+# create file containing neomutt commands    {{{1
+# • these commands will assemble a multipart email
+# • notes on the position of attachments in the attachment list
+#   - for the emails to be read and displayed correctly by readers,
+#     the markdown and html files must come first in the list,
+#     grouped as multipart/alternative; followed by any inline image files;
+#     with markdown, html, and inline image files grouped as multipart/related;
+#     followed by any manually attached files
+#   - when files are added as attachments they are added to the end
+#     of the attachment list, and will thus be listed after any
+#     manually added attachments
+#   - because of this there is not way to predict what number an added file
+#     may be in the attachment list
+#   - for this reason the heuristic used is to move a new entry to
+#     the first entry position with a large number of <move-up> commands,
+#     and then use a specific number of <move-down> commands to place it
+#     in the correct list position as measured from the start of the list
+move_first=''
+for ((i = 0; i < max_attachments; i++)); do move_first+='<move-up>'; done
+{
+  # issue all commands as a single push command split over multiple lines
+  echo -n 'push '
+  # attach modified markdown file, mark as inline, and tag it
+  echo -n "<attach-file>$markdown_file<enter>"
+  echo -n '<toggle-disposition><tag-entry>'
+  # make sure this markdown file is attachment #2
+  echo "\\"
+  echo -n "$move_first"
+  echo "\\"
+  entry_num=2
+  for ((i = 1; i < entry_num; i++)); do echo -n '<move-down>'; done
+  echo "\\"
+  # detach the original markdown file
+  echo -n '<first-entry><detach-file>'
+  echo "\\"
+  # attach the html file, mark as inline, and tag it
+  echo -n "<attach-file>$html_file<enter>"
+  echo -n '<toggle-disposition><tag-entry>'
+  echo "\\"
+  # make sure this html file is attachment #2
+  echo -n "$move_first"
+  echo "\\"
+  entry_num=2
+  for ((i = 1; i < entry_num; i++)); do echo -n '<move-down>'; done
+  echo "\\"
+  # group the tagged messages as alternatives
+  # • this untags the markdown and html file entries
+  # • this also adds a new multipart-alternative entry as attachment #1,
+  #   so the markdown and html files take up attachment entries #1-#3
+  echo -n '<group-alternatives>'
+  # additional processing is required if inline images are present
+  if inline_images; then
+    # attach image files, mark as inline, set cids, tag and reorder them
+    entry_num=4
+    for file in "${inline_image_filepaths[@]}"; do
+      id="$(md5sum "${file/#\~/$HOME}" | cut -d ' ' -f 1)"
+      echo "\\"
+      echo -n "<attach-file>$file<enter>"
+      echo -n '<toggle-disposition>'
+      # setting the Content-ID requires that Ctrl-u (^U, \Cu) is mapped
+      # to the 'kill-line' command; the 'edit-content-id' command opens
+      # an input field with a unique ID already entered by default; it
+      # is necessary to delete the default ID with ^U and enter the ID
+      # generated by this script
+      echo -n "<edit-content-id>\\Cu$id<enter>"
+      echo -n '<tag-entry>'
+      echo "\\"
+      echo -n "$move_first"
+      echo "\\"
+      for ((i = 1; i < entry_num; i++)); do echo -n '<move-down>'; done
+      ((entry_num++))
+    done
+    # select the first entry (the multipart-alternative already created),
+    # tag it, and mark everything tagged as multipart-related
+    echo "\\"
+    echo -n '<first-entry><tag-entry>'
+    echo "\\"
+    echo -n '<group-related>'
+  fi
+  # send email
+  echo "\\"
+  echo -n '<send-message>'
+} >"$commands_file"
+# }}}1
+
+# vim:foldmethod=marker:
