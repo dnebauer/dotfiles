@@ -1084,7 +1084,7 @@ macro compose A "\
 <shell-escape>bash $my_file_picker<enter>\
 <enter-command>source $my_picker_cache<enter>\
 <shell-escape>bash $my_file_picker clean<enter>\
-"    'Attach files using file manager'
+"    'attach files using file manager'
 # }}}1
 
 
