@@ -1,22 +1,26 @@
 #! /home/david/.venvs/neomutt/bin/python
 
-# * the unusual shebang is because the 'xerox' and
+# • the unusual shebang is because the 'xerox' and
 #   'html2text' modules are installed in a virtual
 #   environment (~/.venvs/neomutt)
-# * if the script is run using the python excecutable
+# • if the script is run using the python excecutable
 #   from that virtual environment it automatically
 #   finds those modules
-# * the modules are installed in the virtual
+# • the modules are installed in the virtual
 #   environment in a subdirectory specific to the
 #   version of python in use at the time the module
 #   was installed
-# * when the system python is upgraded to a new
+# • when the system python is upgraded to a new
 #   version, e.g., python3 3.12→3.13, this script
 #   will be unable to locate the modules, and will
 #   fail with a ModulNotFound error for 'html2text'
-# * the solution is to delete and re-create the
+# • the solution is to delete and re-create the
 #   virtual environment and reinstall into it the
-#   'xerox' and 'html2text' modules.
+#   'xerox' and 'html2text' modules
+# • use these commands:
+#     rm -fr ~/.venvs/neomutt
+#     python3 -m venv ~/.venvs/neomutt
+#     ~/.venvs/neomutt/bin/python -m pip install html2text xerox
 
 # pyright: reportAny=false
 # pyright: reportAttributeAccessIssue=false
@@ -28,7 +32,7 @@
 # pylint: disable=invalid-name
 
 # module docstring    {{{1
-""" script to send email content to clipboard
+"""script to send email content to clipboard
 
 This script reads an email from stdin, extracts the
 content/payload as plain text, and sends it to the system
@@ -40,11 +44,12 @@ License: GPL-3+
 
 # import    {{{1
 
-import sys
-import logging as log
-import textwrap
 import argparse
 import email
+import logging as log
+import sys
+import textwrap
+
 import html2text
 
 # xerox module is part of a virtual environment (see shebang)
@@ -57,7 +62,7 @@ class ContentToClipboard:  # {{{1
     """send content to clipboard as plain text
 
     assumes:
-    * email is supplied via stdin
+    • email is supplied via stdin
 
     usage:
 
@@ -122,13 +127,13 @@ class ContentToClipboard:  # {{{1
 
     def _pullout(self, msg) -> str:  # {{{2
         """pull out email content
-        * handles multipart and nested multipart messages
+        • handles multipart and nested multipart messages
 
         args:
-        * msg email.Message()
+        • msg email.Message()
 
         return:
-        * all text/html content from all parts (as plaintext string)
+        • all text/html content from all parts (as plaintext string)
         """
         text = ""
         # 1. handle part that is an email object
@@ -189,19 +194,19 @@ class ContentToClipboard:  # {{{1
     def send_to_clipboard(self):  # {{{2
         """send extracted plaintext content to clipboard
         use xerox.copy():
-        * homepage is https://github.com/adityarathod/xerox
-        * packaged to install with pip (see https://pypi.org/project/xerox/)
+        • homepage is https://github.com/adityarathod/xerox
+        • packaged to install with pip (see https://pypi.org/project/xerox/)
         before using xerox.copy() tried:
-        * pyperclip.copy(content)
-        * - failed silently
-        * tkinter.Tk.clipboard_append(content)
-        * - if used 'mainloop' it worked but that showed the main window,
-        *   which halted execution until the user dismissed it
-        * - a workaround was supposedly to use 'update' instead of
-        *   'mainloop', but that failed silently
-        * pandas.DataFrame([content]).to_clipboard(index=False, header=False)
-        * - works successfully, but wraps the content in double quotes
-        * - could not find a workaround to prevent this
+        • pyperclip.copy(content)
+          - failed silently
+        • tkinter.Tk.clipboard_append(content)
+          - if used 'mainloop' it worked but that showed the main window,
+            which halted execution until the user dismissed it
+          - a workaround was supposedly to use 'update' instead of
+            'mainloop', but that failed silently
+        • pandas.DataFrame([content]).to_clipboard(index=False, header=False)
+          - works successfully, but wraps the content in double quotes
+          - could not find a workaround to prevent this
         """
         xerox.copy(self._content)
 
