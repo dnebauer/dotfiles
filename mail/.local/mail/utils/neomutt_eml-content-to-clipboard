@@ -1,4 +1,5 @@
 #! /home/david/.venvs/neomutt/bin/python
+# vim: set fileencoding=utf8 :
 
 # • the unusual shebang is because the 'xerox' and
 #   'html2text' modules are installed in a virtual
@@ -45,16 +46,18 @@ License: GPL-3+
 # import    {{{1
 
 import argparse
-import email
+import io
 import logging as log
 import sys
 import textwrap
+from email import message_from_string, policy
+from email.message import EmailMessage, Message
 
 import html2text
 
 # xerox module is part of a virtual environment (see shebang)
 # • although linter cannot find it, python finds it at runtime
-import xerox  # type: ignore[reportMissingImports] # noqa: E402
+import xerox  # type: ignore[import-not-found] # noqa: E402
 
 
 class ContentToClipboard:  # {{{1
@@ -74,22 +77,31 @@ class ContentToClipboard:  # {{{1
     """
 
     # the 'reportMissingSuperCall' error displays erroneously on base classes
-    def __init__(self) -> None:  # type: ignore[reportMissingSuperCall] {{{2
+    def __init__(self) -> None:
         """initialise variables"""
         # configure logging
         log.basicConfig(format="%(message)s")
 
         # email object
-        self._email = None
+        self._email: EmailMessage[str, str] | None = None
 
         # email content/payload
-        self._content = None
+        self._content: str | None = None
 
     @staticmethod
     def _abort(msg: str) -> None:  # {{{2
         """display error and exit"""
         log.error(msg)
         sys.exit(msg)
+
+    @staticmethod
+    def _stringify_payload(payload):  # {{{2
+        """convert bytes or Message payload to string"""
+        if isinstance(payload, bytes):
+            return payload.decode()
+        if isinstance(payload, Message):
+            return payload.as_string()
+        return payload
 
     @staticmethod
     def process_args() -> None:  # {{{2
@@ -111,13 +123,15 @@ class ContentToClipboard:  # {{{1
         """create email object from stdin"""
         # save stdin to string
         # - ignore UnicodeDecodeErrors from sys.stdin.readlines
-        sys.stdin.reconfigure(encoding="utf-8", errors="ignore")
+        if isinstance(sys.stdin, io.TextIOWrapper):
+            sys.stdin.reconfigure(encoding="utf-8", errors="ignore")
         if sys.stdin.isatty():
             self._abort(msg="No data has been piped into script")
         lines: list[str] = sys.stdin.readlines()
         data: str = "".join(lines)
         # create email object
-        self._email = email.message_from_string(data)
+        # • default policy forces creation of EmailMessage instead of Message
+        self._email = message_from_string(data, policy=policy.default)
 
     def extract_content(self) -> None:  # {{{2
         """extract email content as plain text"""
@@ -130,16 +144,14 @@ class ContentToClipboard:  # {{{1
         • handles multipart and nested multipart messages
 
         args:
-        • msg email.Message()
+        • msg email.message.EmailMessage()
 
         return:
         • all text/html content from all parts (as plaintext string)
         """
         text = ""
         # 1. handle part that is an email object
-        if isinstance(
-            msg, (email.message.EmailMessage, email.message.Message)
-        ):  # stub comment to force line wrapping
+        if isinstance(msg, EmailMessage):
             # 1.a. handle part that is an email object with multiple parts
             if msg.is_multipart():
                 # - iterate over message parts and recurse
@@ -159,14 +171,12 @@ class ContentToClipboard:  # {{{1
             #   strings
             if content_type == "text/plain":
                 payload = msg.get_payload(decode=True)
-                if isinstance(payload, bytes):
-                    payload = payload.decode()
-                text += payload
+                payload = self._stringify_payload(payload)
+                text += payload + "\n"
             elif content_type == "text/html":
                 payload = msg.get_payload(decode=True)
-                if isinstance(payload, bytes):
-                    payload = payload.decode()
-                text += html2text.html2text(payload)
+                payload = self._stringify_payload(payload)
+                text += html2text.html2text(payload) + "\n"
             else:
                 text += "Skipping part that is neither plaintext nor html\n"
             return text
@@ -182,7 +192,7 @@ class ContentToClipboard:  # {{{1
                 # experimenting with Latin-1 encodingto see if it reduces
                 # decoding errors, that is, dropped bytes
                 payload = msg.decode(encoding="latin-1", errors="ignore")
-                text += payload
+                text += payload + "\n"
             except ValueError as err:
                 errmsg = getattr(err, "message", str(err))
                 print(f"Unable to decode bytes part: {errmsg}")
