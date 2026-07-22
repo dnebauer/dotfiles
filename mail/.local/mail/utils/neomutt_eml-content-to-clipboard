@@ -95,13 +95,16 @@ class ContentToClipboard:  # {{{1
         sys.exit(msg)
 
     @staticmethod
-    def _stringify_payload(payload):  # {{{2
-        """convert bytes or Message payload to string"""
+    def _stringify_payload(payload) -> str:  # {{{2
+        """convert payload to string"""
+        text: str = ""
         if isinstance(payload, bytes):
-            return payload.decode()
+            text = payload.decode()
         if isinstance(payload, Message):
-            return payload.as_string()
-        return payload
+            text = payload.as_string()
+        else:
+            text = str(payload, errors="replace")
+        return text
 
     @staticmethod
     def process_args() -> None:  # {{{2
