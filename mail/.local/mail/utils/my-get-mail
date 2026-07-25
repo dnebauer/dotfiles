@@ -269,7 +269,7 @@ echo -e "\n------------------------------" # demarcate new feedback
 echo "$self: $now"                         # timestamp
 
 # set boolean values    {{{1
--[[ "x$DISPLAY" != "x" ]] && has_display 'true'
+[[ -n "$DISPLAY" ]] && has_display 'true'
 [[ -e "$mail_icon" ]] && use_icon 'true'
 
 # abort if script is already running    {{{1
