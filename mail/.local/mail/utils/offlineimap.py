@@ -7,7 +7,7 @@
 
 # offlineimap pythonfile
 
-""" Convert utf-7 imap directory names to utf-8
+"""Convert utf-7 imap directory names to utf-8
 
 Source: https://crazycmd.blogspot.com/2011/11/enable-utf8-for-offlineimap.html
 
@@ -58,8 +58,13 @@ file:
   nametrans = lambda foldername: convert_utf7_to_utf8(foldername)
 
 """
-# subprocess is required for reading passwords
-import subprocess  # noqa: F401 # pyright: ignore[reportUnusedImport]
+
+# WARNING: the 'subprocess' module is required for reading passwords
+# • 'noqa' prevents pyflakes flagging import as error and autodeleting
+#    the command, but does not prevent the warning message
+# • I can find no method of preventing the F401 (imported but unused) warning
+import subprocess  # noqa: F401
+
 from imap_tools.imap_utf7 import utf7_encode
 
 # import re
