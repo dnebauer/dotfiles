@@ -10,7 +10,7 @@
 # pyright: reportUnknownVariableType=false
 
 # module docstring    {{{1
-""" script to save email as pdf
+"""script to save email as pdf
 
 This script was designed for use with neomutt's
 "print_command" variable:
@@ -68,22 +68,22 @@ License: GPL-3+
 
 # import    {{{1
 
-import sys
-import os
-import os.path
-import logging as log
-import re
-import subprocess
-import textwrap
 import argparse
-import tempfile
-import shutil
-import glob
-import types
 import atexit
 import email
+import glob
+import logging as log
+import os
+import os.path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import textwrap
 import tkinter
 import tkinter.filedialog
+import types
 
 
 class SaveAsPdf:  # {{{1
@@ -236,7 +236,7 @@ class SaveAsPdf:  # {{{1
         if shutil.which("wkhtmltopdf") is None:
             self._abort("Cannot locate: wkhtmltopdf")
 
-    def write_eml_file(self):  # {{{2
+    def write_eml_file(self) -> None:  # {{{2
         """save eml file to temporary directory
         * save stdin to temporary eml file
         * extract email subject
@@ -246,9 +246,10 @@ class SaveAsPdf:  # {{{1
         # save stdin to temporary file
         if sys.stdin.isatty():
             self._abort("No data has been piped into script")
-        with os.fdopen(sys.stdin.fileno(), "rb") as input_file, open(
-            self._tmp.eml, "wb"
-        ) as output_file:
+        with (
+            os.fdopen(sys.stdin.fileno(), "rb") as input_file,
+            open(self._tmp.eml, "wb") as output_file,
+        ):
             shutil.copyfileobj(input_file, output_file)
         # get email subject
         subject = ""
@@ -264,7 +265,7 @@ class SaveAsPdf:  # {{{1
                 r"(-)\1+", "\\1", re.sub(r"[^A-Za-z0-9_-]", "-", subject)
             )
             # lower case, truncate to 20 chars, remove lead/trail dashes
-            new_base: str = new_base.lower()[:20].strip("-")
+            new_base = new_base.lower()[:20].strip("-")
             new_eml: str = os.path.join(self._tmp.email, new_base + ".eml")
             os.rename(src=self._tmp.eml, dst=new_eml)
             self._tmp.eml = new_eml
