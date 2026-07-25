@@ -105,12 +105,11 @@ use namespace::clean;    # }}}1
   # params: nil
   # prints: feedback
   # return: n/a, dies on failure
-  method _abort ($msg) {    ## no critic (RequireInterpolationOfMetachars)
+  method _abort ($msg) {
 
     # display notification error
     my $subject = 'Neomutt aliases refresh FAILED';
     my %opts    = (summary => $subject, body => $msg, timeout => 5000);
-    ## no critic (ValuesAndExpressions::ProhibitFiletest_f)
     if (-f "$ICON" or -l "$ICON" or -p "$ICON") {
 
       # app_icon not supported as of Desktop::Notify v0.05
@@ -254,7 +253,7 @@ use namespace::clean;    # }}}1
   # params: $cmd - command [string or arrayref]
   # prints: error message if dies
   # return: output (stdout) of command, dies on failure
-  method _run_cmd ($cmd) {    ## no critic (RequireInterpolationOfMetachars)
+  method _run_cmd ($cmd) {
 
     # run command
     my ($success, $err, $full, $stdout, $stderr) =
