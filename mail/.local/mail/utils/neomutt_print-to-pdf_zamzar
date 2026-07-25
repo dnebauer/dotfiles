@@ -14,7 +14,7 @@
 # pyright: reportCallIssue=false
 
 # module docstring    {{{1
-""" script to save email as pdf
+"""script to save email as pdf
 
 This script was designed for use with neomutt's
 "print_command" variable:
@@ -88,31 +88,33 @@ License: GPL-3+
 #   occurs), but linters do not understand this and think the Gtk import
 #   command is no longer at the top of the module, so ignore that error
 
-import sys
+import argparse
+import atexit
+import email
+import glob
+import json
+import logging as log
 import os
 import os.path
-import logging as log
 import re
-import socket
-import textwrap
-import argparse
-import tempfile
 import shutil
-import glob
+import socket
+import sys
+import tempfile
+import textwrap
 import time
-import atexit
-import json
-import email
 import tkinter
 import tkinter.filedialog
 
+import gi  # type: ignore[import-untyped]
 import keyring
+import notify2  # type: ignore[import-untyped]
 import requests.auth
-import notify2
-import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk  # noqa: E402 # pylint:disable=C0413
+from gi.repository import (  # type: ignore[import-untyped] # noqa: E402 # pylint:disable=C0413
+    Gtk,
+)
 
 log.basicConfig(format="%(message)s")
 
@@ -421,14 +423,15 @@ class SaveAsPdf:  # {{{1
         try:
             socket.setdefaulttimeout(timeout)
             socket.socket(
-                family=socket.AF_INET, type=socket.SOCK_STREAM  # force wrap
+                family=socket.AF_INET,
+                type=socket.SOCK_STREAM,  # force wrap
             ).connect(address=(host, port))
         except OSError as err:
             opts = [err.strerror, err.errno]
             msg = "No internet connection: {}: {}".format(*opts)
             self._abort(msg)
 
-    def get_file_details(self):  # {{{2
+    def get_file_details(self) -> None:  # {{{2
         """convert eml to pdf
         * locates filepath of email file
           - start with message id and look it up in notmuch database
@@ -440,11 +443,12 @@ class SaveAsPdf:  # {{{1
         if sys.stdin.isatty():
             self._abort("No data has been piped into script")
         self._tmp_dir = tempfile.mkdtemp()
-        base = "email"
+        base: str = "email"
         tmp_eml = os.path.join(self._tmp_dir, base + ".eml")
-        with os.fdopen(sys.stdin.fileno(), "rb") as input_file, open(
-            tmp_eml, "wb"
-        ) as output_file:
+        with (
+            os.fdopen(sys.stdin.fileno(), "rb") as input_file,
+            open(tmp_eml, "wb") as output_file,
+        ):
             shutil.copyfileobj(input_file, output_file)
         self._tmp_eml = tmp_eml
         # get email subject
@@ -457,11 +461,11 @@ class SaveAsPdf:  # {{{1
             subject = candidate_subject.strip()
             subject = subject[:20]  # truncate long subject lines
             # replace non-word chars with dashes, remove duplicate dashes
-            base: str = re.sub(  # pyright: ignore[reportRedeclaration]
+            base = re.sub(  # pyright: ignore[reportRedeclaration]
                 r"(-)\1+", "\\1", re.sub(r"[^A-Za-z0-9_-]", "-", subject)
             )
             # lower case, truncate to 20 chars, remove lead/trail dashes
-            base: str = base.lower()[:20].strip(chars="-")
+            base = base.lower()[:20].strip("-")
             self._tmp_eml = os.path.join(self._tmp_dir, base + ".eml")
             os.rename(tmp_eml, self._tmp_eml)
 
