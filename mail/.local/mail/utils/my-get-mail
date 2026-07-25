@@ -24,9 +24,9 @@ self="$(basename "$0")"
 parameters=" [-v] [-d]"
 # tools on the system path
 required_system_tools=(
-	awk grep pgrep
-	cat notify-send ping
-	getopt offlineimap wc
+  awk grep pgrep
+  cat notify-send ping
+  getopt offlineimap wc
 )
 # local tools specified by absolute path
 msmtpq="$HOME/.local/bin/msmtpq"
@@ -45,21 +45,21 @@ now="$(date '+%T, %-A %d %B %Y')"
 # flags
 
 declare -A flag_values=(
-	[use_icon]=1
-	[has_display]=1
-	[synced_ok]=0
+  [use_icon]=1
+  [has_display]=1
+  [synced_ok]=0
 )
 use_icon() {
-	flag 'use_icon' "$@"
-	return $?
+  flag 'use_icon' "$@"
+  return $?
 }
 has_display() {
-	flag 'has_display' "$@"
-	return $?
+  flag 'has_display' "$@"
+  return $?
 }
 synced_ok() {
-	flag 'synced_ok' "$@"
-	return $?
+  flag 'synced_ok' "$@"
+  return $?
 }
 # }}}1
 
@@ -71,21 +71,21 @@ synced_ok() {
 #   prints: nil
 #   return: nil
 abortScript() {
-	local body subject
-	subject='Offlineimap mail fetch FAILED'
-	body="${1:-}"
-	if has_display; then
-		if use_icon; then
-			notify-send --icon="$mail_icon" \
-				"$subject" \
-				"$body"
-		else
-			notify-send "$subject" \
-				"$body"
-		fi
-	fi
-	echo "$self: offlineimap mail fetch failed: $body"
-	exit 1
+  local body subject
+  subject='Offlineimap mail fetch FAILED'
+  body="${1:-}"
+  if has_display; then
+    if use_icon; then
+      notify-send --icon="$mail_icon" \
+        "$subject" \
+        "$body"
+    else
+      notify-send "$subject" \
+        "$body"
+    fi
+  fi
+  echo "$self: offlineimap mail fetch failed: $body"
+  exit 1
 }
 # checkPrereqs()    {{{1
 #   intent: check for required tools
@@ -93,33 +93,33 @@ abortScript() {
 #   prints: error message if tool(s) missing
 #   return: n/a, aborts scipts on failure
 checkPrereqs() {
-	# need bash version containing builtin 'mapfile'
-	if ! echo 'test' | mapfile -t 2>/dev/null; then
-		local msg
-		msg='Bash does not have the builtin feature: mapfile'
-		echo "$msg" 1>&2
-		logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
-		exit 1
-	fi
-	# check for tools
-	local missing tool
-	missing=()
-	# these tools can be found on the base system path
-	for tool in "${required_system_tools[@]}"; do
-		command -v "$tool" &>/dev/null || missing+=("$tool")
-	done
-	# these tools are specified by absolute path
-	for tool in "${required_local_tools[@]}"; do
-		[[ -x "$tool" ]] || missing+=("$tool")
-	done
-	if [[ ${#missing[@]} -ne 0 ]]; then
-		local msg
-		msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
-		echo "$msg" 1>&2
-		logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
-		exit 1
-	fi
-	unset missing tools required_tools
+  # need bash version containing builtin 'mapfile'
+  if ! echo 'test' | mapfile -t 2>/dev/null; then
+    local msg
+    msg='Bash does not have the builtin feature: mapfile'
+    echo "$msg" 1>&2
+    logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
+    exit 1
+  fi
+  # check for tools
+  local missing tool
+  missing=()
+  # these tools can be found on the base system path
+  for tool in "${required_system_tools[@]}"; do
+    command -v "$tool" &>/dev/null || missing+=("$tool")
+  done
+  # these tools are specified by absolute path
+  for tool in "${required_local_tools[@]}"; do
+    [[ -x "$tool" ]] || missing+=("$tool")
+  done
+  if [[ ${#missing[@]} -ne 0 ]]; then
+    local msg
+    msg="Can't run without: $(joinBy ', ' "${missing[@]}")"
+    echo "$msg" 1>&2
+    logger --priority "user.err" --tag "CHECK-MAIL" "$msg"
+    exit 1
+  fi
+  unset missing tools required_tools
 }
 # displayUsage()    {{{1
 #   intent: display script usage information
@@ -127,7 +127,7 @@ checkPrereqs() {
 #   prints: nil
 #   return: nil
 displayUsage() {
-	cat <<_USAGE
+  cat <<_USAGE
 ${self}: check for and download emails
 
 Runs offlineimap to fetch emails. A quick synchronisation is
@@ -185,23 +185,23 @@ _USAGE
 #   prints: nil
 #   return: setter=nil, getter=boolean flag value
 flag() {
-	case $# in
-	1)
-		return "${flag_values[$1]}"
-		;;
-	2)
-		if [[ "$2" = 'true' ]]; then
-			flag_values[$1]=0
-		fi
-		if [[ "$2" = 'false' ]]; then
-			flag_values[$1]=1
-		fi
-		;;
-	*)
-		echo "$self: bad param count: $#" 1>&2
-		exit 2
-		;;
-	esac
+  case $# in
+  1)
+    return "${flag_values[$1]}"
+    ;;
+  2)
+    if [[ "$2" = 'true' ]]; then
+      flag_values[$1]=0
+    fi
+    if [[ "$2" = 'false' ]]; then
+      flag_values[$1]=1
+    fi
+    ;;
+  *)
+    echo "$self: bad param count: $#" 1>&2
+    exit 2
+    ;;
+  esac
 }
 # joinBy($delim, $item1[, $item2[, ...]])    {{{1
 #   intent: join items with given delimiter
@@ -210,12 +210,12 @@ flag() {
 #   prints: string containing joined items
 #   return: nil
 joinBy() {
-	local delim first_item
-	delim="${1:-}"
-	shift
-	first_item="${1:-}"
-	shift
-	printf %s "$first_item" "${@/#/$delim}"
+  local delim first_item
+  delim="${1:-}"
+  shift
+  first_item="${1:-}"
+  shift
+  printf %s "$first_item" "${@/#/$delim}"
 }
 # processOptions(@opts)    {{{1
 #   intent: process command line options
@@ -223,40 +223,40 @@ joinBy() {
 #   prints: feedback
 #   return: nil
 processOptions() {
-	# read the command line options
-	local OPTIONS
-	if ! OPTIONS="$(
-		getopt \
-			--options hvd \
-			--long help,verbose,debug \
-			--name "${BASH_SOURCE[0]}" \
-			-- "${@}"
-	)"; then
-		# getopt displays errors
-		exit 1
-	fi
-	eval set -- "${OPTIONS}"
-	while true; do
-		case "${1}" in
-		-h | --help)
-			displayUsage
-			exit 0
-			;;
-		-v | --verbose)
-			set -o verbose
-			shift 1
-			;;
-		-d | --debug)
-			set -o xtrace
-			shift 1
-			;;
-		--)
-			shift
-			break
-			;;
-		*) break ;;
-		esac
-	done
+  # read the command line options
+  local OPTIONS
+  if ! OPTIONS="$(
+    getopt \
+      --options hvd \
+      --long help,verbose,debug \
+      --name "${BASH_SOURCE[0]}" \
+      -- "${@}"
+  )"; then
+    # getopt displays errors
+    exit 1
+  fi
+  eval set -- "${OPTIONS}"
+  while true; do
+    case "${1}" in
+    -h | --help)
+      displayUsage
+      exit 0
+      ;;
+    -v | --verbose)
+      set -o verbose
+      shift 1
+      ;;
+    -d | --debug)
+      set -o xtrace
+      shift 1
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *) break ;;
+    esac
+  done
 }
 # }}}1
 
@@ -269,7 +269,7 @@ echo -e "\n------------------------------" # demarcate new feedback
 echo "$self: $now"                         # timestamp
 
 # set boolean values    {{{1
-[[ "x$DISPLAY" != "x" ]] && has_display 'true'
+-[[ "x$DISPLAY" != "x" ]] && has_display 'true'
 [[ -e "$mail_icon" ]] && use_icon 'true'
 
 # abort if script is already running    {{{1
@@ -279,18 +279,18 @@ echo "$self: $now"                         # timestamp
 ##	sleep 3 # give the other process time to write its pid
 ##fi
 if [[ -f "$pidfile" ]]; then
-	# is process actually still running under this pid
-	oldpid="$(cat "$pidfile")"
-	# pid file can be empty
-	if [[ -n "${oldpid}" ]]; then
-		result="$(pgrep -af "$oldpid" | grep -v 'grep' | grep "$ps_grep" || true)"
-		[[ -n "$result" ]] &&
-			abortScript "$self is already running (PID=$oldpid)"
-	fi
+  # is process actually still running under this pid
+  oldpid="$(cat "$pidfile")"
+  # pid file can be empty
+  if [[ -n "${oldpid}" ]]; then
+    result="$(pgrep -af "$oldpid" | grep -v 'grep' | grep "$ps_grep" || true)"
+    [[ -n "$result" ]] &&
+      abortScript "$self is already running (PID=$oldpid)"
+  fi
 fi
 mkdir -p "$piddir" &>/dev/null || true
 [[ -d "$piddir" ]] ||
-	abortScript "Unexpected deletion of pid locking directory: $piddir"
+  abortScript "Unexpected deletion of pid locking directory: $piddir"
 #pid="$(pgrep -f "$ps_grep" | head -n1)"
 # in February 2025 'pgrep -f' began exiting with error status if no matches,
 # which caused script failure with 'pipefail' set
@@ -303,7 +303,7 @@ unset oldpid pid piddir pidfile result
 
 # abort if offlineimap is already running    {{{1
 pgrep -x offlineimap &>/dev/null &&
-	abortScript 'Offlineimap is already running'
+  abortScript 'Offlineimap is already running'
 
 # give user chance to force quick syncronisation    {{{1
 # • default to full sync to avoid delay (requires removing cache file)
@@ -321,34 +321,34 @@ rm -f "$cache_fp"
 # flush queued mail    {{{1
 num_queue=$("$msmtpq" --q-mgmt -d | grep -c "num" || true)
 if [[ $num_queue -gt 0 ]]; then
-	msg="$self: flushing $num_queue queued message"
-	[[ $num_queue -gt 1 ]] && msg+='s'
-	echo "$msg"
-	"$msmtpq" --q-mgmt -r
+  msg="$self: flushing $num_queue queued message"
+  [[ $num_queue -gt 1 ]] && msg+='s'
+  echo "$msg"
+  "$msmtpq" --q-mgmt -r
 fi
 unset msg num_queue
 
 # check that mail servers are reachable    {{{1
 [[ -e "$offlineimaprc" ]] ||
-	abortScript "Cannot locate offlineimap config file: $offlineimaprc"
+  abortScript "Cannot locate offlineimap config file: $offlineimaprc"
 mapfile -t mail_servers < <(grep "^remotehost" <"$offlineimaprc" | awk '{print $3}')
 missing=()
 for server in "${mail_servers[@]}"; do
-	echo "$self: checking for mail server $server"
-	ping -c1 "$server" &>/dev/null || missing+=("$server")
+  echo "$self: checking for mail server $server"
+  ping -c1 "$server" &>/dev/null || missing+=("$server")
 done
 [[ ${#missing[@]} -eq 0 ]] ||
-	abortScript "unable to reach $(joinBy ', ' "${missing[@]}")"
+  abortScript "unable to reach $(joinBy ', ' "${missing[@]}")"
 unset mail_servers missing
 
 # get time since last full sync    {{{1
 [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
 [[ -d "$cache_dir" ]] ||
-	abortScript "Unable to create cache directory: $cache_dir"
+  abortScript "Unable to create cache directory: $cache_dir"
 if [ -f "$cache_fp" ]; then
-	time_of_last_full_sync="$(cat "$cache_fp")"
+  time_of_last_full_sync="$(cat "$cache_fp")"
 else
-	time_of_last_full_sync=0
+  time_of_last_full_sync=0
 fi
 time_now=$(date +%s)
 time_since_last_full_sync=$((time_now - time_of_last_full_sync))
@@ -356,12 +356,12 @@ unset cache_dir time_of_last_full_sync
 
 # fetch new mail with offlineimap    {{{1
 if [[ $time_since_last_full_sync -gt $full_sync_interval ]]; then
-	echo "$self: full offlineimap sync"
-	offlineimap -o -u quiet -l "$log_file" || synced_ok 'false'
-	echo -n "$time_now" >"$cache_fp"
+  echo "$self: full offlineimap sync"
+  offlineimap -o -u quiet -l "$log_file" || synced_ok 'false'
+  echo -n "$time_now" >"$cache_fp"
 else
-	echo "$self: quick offlineimap sync"
-	offlineimap -o -q -u quiet -l "$log_file" || synced_ok 'false'
+  echo "$self: quick offlineimap sync"
+  offlineimap -o -q -u quiet -l "$log_file" || synced_ok 'false'
 fi
 synced_ok || abortScript "See offlineimap log: $log_file"
 unset cache_fp full_sync_interval log_file time_now time_since_last_full_sync
@@ -369,7 +369,7 @@ unset cache_fp full_sync_interval log_file time_now time_since_last_full_sync
 # update notmuch    {{{1
 echo "$self: update notmuch database"
 while IFS= read -r line; do
-	echo "notmuch-new: $line"
+  echo "notmuch-new: $line"
 done < <(notmuch new)
 
 # pause to review feedback    {{{1
