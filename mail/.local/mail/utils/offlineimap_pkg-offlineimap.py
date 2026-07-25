@@ -14,7 +14,7 @@
 # encoding and decoding taken from:
 # http://piao-tech.blogspot.no/2010/03/get-offlineimap-working-with-non-ascii.html#resources
 
-""" Convert utf-7 imap directory names to utf-8
+"""Convert utf-7 imap directory names to utf-8
 
 Imap folder names are encoded using a special version of utf-7 as defined in
 RFC 2060 section 5.1.3:
@@ -63,10 +63,17 @@ file line:
 nametrans = lambda foldername: foldername.decode('imap4-utf-7').encode('utf-8')
 
 """
+
 import binascii
 import codecs
-import six
 
+# WARNING: the 'subprocess' module is required for reading passwords
+# • 'noqa' prevents pyflakes flagging import as error and autodeleting
+#    the command, but does not prevent the warning message
+# • I can find no method of preventing the F401 (imported but unused) warning
+import subprocess  # noqa: F401
+
+import six
 
 # encoding
 
@@ -160,8 +167,3 @@ def imap4_utf_7(name):
 
 
 codecs.register(imap4_utf_7)
-
-
-# required for reading passwords
-
-import subprocess  # noqa: F401 # pyright: ignore[reportUnusedImport] # flake8: noqa
