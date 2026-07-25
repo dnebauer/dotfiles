@@ -48,6 +48,7 @@ License: GPL-3+
 import argparse
 import io
 import logging as log
+import re
 import sys
 import textwrap
 from email import message_from_string, policy
@@ -76,7 +77,6 @@ class ContentToClipboard:  # {{{1
     sendclip.send_to_clipboard()
     """
 
-    # the 'reportMissingSuperCall' error displays erroneously on base classes
     def __init__(self) -> None:
         """initialise variables"""
         # configure logging
@@ -85,7 +85,7 @@ class ContentToClipboard:  # {{{1
         # email object
         self._email: EmailMessage[str, str] | None = None
 
-        # email content/payload
+        # email content
         self._content: str | None = None
 
     @staticmethod
@@ -95,15 +95,24 @@ class ContentToClipboard:  # {{{1
         sys.exit(msg)
 
     @staticmethod
-    def _stringify_payload(payload) -> str:  # {{{2
-        """convert payload to string"""
+    def _tidy_content(content) -> str:  # {{{2
+        """tidy up content"""
+        # first, ensure content is a string
+        # • in case EmailMessage.get_content() returned
+        #   something funky instead of a string
         text: str = ""
-        if isinstance(payload, bytes):
-            text = payload.decode()
-        if isinstance(payload, Message):
-            text = payload.as_string()
+        if isinstance(content, bytes):
+            text = content.decode()
+        elif isinstance(content, Message):
+            text = content.as_string()
+        elif isinstance(content, str):
+            text = content
         else:
-            text = str(payload, errors="replace")
+            text = str(content, errors="replace")
+        # have no more than 1 empty line at a time
+        text = re.sub(r"(\n\s*)+\n", "\n\n", text)
+        # remove terminal spaces from lines
+        text = "\n".join(line.strip() for line in text.splitlines())
         return text
 
     @staticmethod
@@ -113,8 +122,9 @@ class ContentToClipboard:  # {{{1
             text="""\
         script to send email content to clipboard as plain text
 
-        This script reads an email from stdin, extracts the content
-        as plaint text, and sends it to the system clipboard.
+        This script reads an email from stdin, extracts any
+        text/plain, text/markdown, and text/html content as
+        plain text and sends it to the system clipboard.
         """
         )
         _ = argparse.ArgumentParser(
@@ -137,55 +147,66 @@ class ContentToClipboard:  # {{{1
         self._email = message_from_string(data, policy=policy.default)
 
     def extract_content(self) -> None:  # {{{2
-        """extract email content as plain text"""
-        text = self._pullout(msg=self._email)
-        text = text.strip()
-        self._content = text
-
-    def _pullout(self, msg) -> str:  # {{{2
-        """pull out email content
+        """extract email content as plain text
         • handles multipart and nested multipart messages
-
-        args:
-        • msg email.message.EmailMessage()
 
         return:
         • all text/html content from all parts (as plaintext string)
         """
+        msg = self._email
+        sep = "\n\n\n"
         text = ""
-        # 1. handle part that is an email object
-        if isinstance(msg, EmailMessage):
-            # 1.a. handle part that is an email object with multiple parts
-            if msg.is_multipart():
-                # - iterate over message parts and recurse
-                for part in msg.walk():
-                    payload = part.get_payload(decode=True)
-                    t = self._pullout(payload)
-                    text += t
-                return text
-            # 1.b. handle part that is an email object with 1 part
-            #      - ignore attachments
-            if msg.get_filename():
-                return text
-            content_type = msg.get_content_type()
-            # - in following commands note that 'get_payload' can
-            #   return bytes objects which can confuse 'html2text'
-            #   and may also cause problems when contenated with
-            #   strings
-            if content_type == "text/plain":
-                payload = msg.get_payload(decode=True)
-                payload = self._stringify_payload(payload)
-                text += payload + "\n"
-            elif content_type == "text/html":
-                payload = msg.get_payload(decode=True)
-                payload = self._stringify_payload(payload)
-                text += html2text.html2text(payload) + "\n"
-            else:
-                text += "Skipping part that is neither plaintext nor html\n"
-            return text
-        # 2. handle part that is not an email object
-        #    - so far can handle 'bytes' and 'None' types
-        if isinstance(msg, bytes):
+        # deal with message extraction failure
+        if msg is None:
+            raise ValueError("No message found")
+        # message should be an EmailMessage
+        elif isinstance(msg, EmailMessage):
+            plain_text_types = ["text/plain", "text/markdown"]
+            html_text_types = ["text/html"]
+            # iterate through message parts
+            # • walk() iterates through all parts depth-first
+            # • walk() handles simple, non-multipart messages
+            for part in msg.walk():
+                # 'get_content_disposition()' returns 'inline',
+                # 'attachment' or NoneType
+                content_disposition = part.get_content_disposition()
+                if content_disposition is None:
+                    content_disposition = "inline"
+                content_disposition = content_disposition.capitalize()
+                content_type = part.get_content_type()
+                # ignore 'packaging', that is, multipart parts
+                if content_type.startswith("multipart/"):
+                    continue
+                # skip attachments
+                if content_disposition == "Attachment":
+                    header = f"*** <Attachment ({content_type})>"
+                    header += " -- skipping ***"
+                    text += header + sep
+                    continue
+                # deal with remaining message parts
+                # • stringify content in case 'get_content_type' returned
+                #   a bytes object, as these can confuse 'html2text' and
+                #   cause string concatenation problems
+                if content_type in plain_text_types:
+                    content = part.get_content()
+                    content = self._tidy_content(content)
+                    header = f"*** <{content_disposition}"
+                    header += f" ({content_type})> ***"
+                    text += header + sep + content + sep
+                elif content_type in html_text_types:
+                    content = part.get_content()
+                    content = html2text.html2text(content)
+                    content = self._tidy_content(content)
+                    header = f"*** <{content_disposition}"
+                    header += f" ({content_type})> ***"
+                    text += header + sep + content + sep
+                else:
+                    header = f"*** <{content_disposition} ({content_type})>"
+                    header += " -- skipping ***"
+                    text += header + sep
+        # handle edge cases where value is not an email object
+        # • so far we handle 'bytes' and 'str' types
+        elif isinstance(msg, bytes):
             try:
                 # if 'msg.decode()' then 'errors' defaults to 'strict'
                 # • script works in terminal but *not* in neomutt (no output)
@@ -194,15 +215,20 @@ class ContentToClipboard:  # {{{1
                 # • but undecodable bytes are silently dropped from output
                 # experimenting with Latin-1 encodingto see if it reduces
                 # decoding errors, that is, dropped bytes
-                payload = msg.decode(encoding="latin-1", errors="ignore")
-                text += payload + "\n"
+                content = msg.decode(encoding="latin-1", errors="ignore")
+                header = "*** <bytes> ***"
+                text += header + sep + content + "\n\n"
             except ValueError as err:
                 errmsg = getattr(err, "message", str(err))
-                print(f"Unable to decode bytes part: {errmsg}")
-            return text
-        if msg is None:
-            return text
-        raise ValueError(f"Script can't handle {str(type(msg))} part")
+                header = f"*** <bytes> -- decode error: {errmsg} ***"
+                text += header + sep
+        elif isinstance(msg, str):
+            content = msg
+            header = "*** <str> ***"
+            text += header + sep + content + "\n\n"
+        else:
+            raise ValueError(f"Unknown message format {str(type(msg))}")
+        self._content = text
 
     def send_to_clipboard(self):  # {{{2
         """send extracted plaintext content to clipboard
