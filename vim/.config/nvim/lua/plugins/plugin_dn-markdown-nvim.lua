@@ -5,7 +5,7 @@
 return {
   {
     "dnebauer/dn-markdown.nvim",
-    ft = { "markdown", "markdown.pandoc", "pandoc" },
+    ft = { "markdown", "markdown.pandoc", "pandoc", "mail" },
     dependencies = { "dnebauer/dn-utils.nvim" },
     opts = {}, -- required for plugin to load
   },
