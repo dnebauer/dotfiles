@@ -217,7 +217,7 @@ autocmd_create("FileType", {
 -- markdown/pandoc {{{1
 autocmd_create("FileType", {
   group = augroup_create("my_markdown_support", { clear = true }),
-  pattern = { "markdown", "markdown.pandoc", "pandoc" },
+  pattern = { "markdown", "markdown.pandoc", "pandoc", "mail" },
   callback = function()
     -- plugin: echasnovski/mini.surround
     local opts = {
@@ -260,7 +260,7 @@ autocmd_create({ "BufRead", "BufNewFile" }, {
 -- text {{{1
 autocmd_create("FileType", {
   group = augroup_create("my_text_support", { clear = true }),
-  pattern = { "text", "plaintex", "typst", "gitcommit", "markdown", "pandoc", "markdown.pandoc" },
+  pattern = { "text", "plaintex", "typst", "gitcommit", "markdown", "pandoc", "markdown.pandoc", "mail" },
   callback = function()
     -- rewrap paragraph using <M-q>, i.e., <Alt-q>
     map(
