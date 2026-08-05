@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
+# METADATA    {{{1
+
 # File: neomutt_send-multipart
 # Author: David Nebauer (david at nebauer dot org)
 # Purpose: send multipart emails in neomutt
 # Created: 2026-07-02
 # Credits:
-# • Jonathan Hodgson blog post "Multipart Emails in Neomutt", 2022-05-27
-#   https://jonathanh.co.uk/blog/multipart-emails-in-neomutt/
-# who, in turn, credits:
+# • Jonathan Hodgson blog post "Multipart Emails in Neomutt", 2022-05-27,
+#   <https://jonathanh.co.uk/blog/multipart-emails-in-neomutt/>,
+#   who, in turn, credits:
 # • https://github.com/anufrievroman/Neomutt-File-Picker/blob/master/filepicker
 # • https://github.com/neomutt/neomutt/issues/3229
 # • https://unix.stackexchange.com/a/612194
@@ -58,6 +60,37 @@
 #     ```
 # }}}2
 
+# NOTES ON ENTERING FIELD CONTENT    {{{1
+
+# delete existing field content before entering new text    {{{2
+# • this script enters text into Content-ID and Content-Description fields
+#   of inline attachments
+# • this is done via the <edit-content-id> and <edit-description> functions
+# • any existing field content must first be deleted
+# • the Content-ID field always contains a default value
+# • the Content-Description field for the markdown and html attachments
+#   are always empty
+# • nonetheless, for both field types any existing text is deleted before
+#   entering new text
+# • in each case existing field text is deleted with a 'kill-line' command
+# • the script assumes the 'kill-line' command is bound to Ctrl-u (^U, \Cu)
+# • this is an example command:
+#     ```
+#     echo -n "<edit-description>\\Cu$description<enter>"
+#     ```
+
+# backslash-escape spaces in field content    {{{2
+# • text entered into Content-ID and Content-Description fields cannot
+#   contain spaces
+# • any spaces in the field content must be backslash-escaped
+# • the script uses the following construction to ensure this:
+#     ```
+#     description='original markdown text'
+#     description="${description// /\\ }"
+#     echo -n "<edit-description>\\Cu$description<enter>"
+#     ```
+# }}}2
+
 # ERROR HANDLING    {{{1
 
 # Exit on error. Append "|| true" if you expect an error.
@@ -96,10 +129,13 @@ filter_stem="$utils_dir/neomutt_pandoc-filter"
 filter_img_src_list="${filter_stem}_image-src-list.lua"
 filter_img_src_to_cid="${filter_stem}_image-src-to-cid.lua"
 # required tools findable on system path
-required_system_tools=(cd cut echo getopt grep md5sum pandoc read sed)
-# required tools and files specified by full path
-required_local_tools=()
-required_local_files=("$html_template")
+required_system_tools=(basename cd cut echo getopt grep md5sum pandoc read sed)
+# required files specified by full path
+required_local_files=(
+  "$filter_img_src_list"
+  "$filter_img_src_to_cid"
+  "$html_template"
+)
 unset cache_dir utils_dir
 
 # FLAGS    {{{1
@@ -126,10 +162,6 @@ checkPrereqs() {
   # these tools can be found on the base system path
   for tool in "${required_system_tools[@]}"; do
     command -v "$tool" &>/dev/null || missing+=("$tool")
-  done
-  # these tools are specified by absolute path
-  for tool in "${required_local_tools[@]}"; do
-    [[ -x "$tool" ]] || missing+=("$tool")
   done
   # these files are specified by absolute path
   for file in "${required_local_files[@]}"; do
@@ -289,7 +321,7 @@ flag() {
 
 # check for required tools    {{{1
 checkPrereqs
-unset required_system_tools required_local_tools
+unset required_system_tools
 
 # process command line options    {{{1
 processOptions "$@"
@@ -348,9 +380,13 @@ for ((i = 0; i < max_attachments; i++)); do move_first+='<move-up>'; done
 {
   # issue all commands as a single push command split over multiple lines
   echo -n 'push '
-  # attach modified markdown file, mark as inline, and tag it
+  # attach modified markdown file, mark as inline, add description, and tag it
   echo -n "<attach-file>$markdown_file<enter>"
-  echo -n '<toggle-disposition><tag-entry>'
+  echo -n '<toggle-disposition>'
+  description='original markdown text'
+  description="${description// /\\ }"
+  echo -n "<edit-description>\\Cu$description<enter>"
+  echo -n '<tag-entry>'
   # make sure this markdown file is attachment #2
   echo "\\"
   echo -n "$move_first"
@@ -361,9 +397,13 @@ for ((i = 0; i < max_attachments; i++)); do move_first+='<move-up>'; done
   # detach the original markdown file
   echo -n '<first-entry><detach-file>'
   echo "\\"
-  # attach the html file, mark as inline, and tag it
+  # attach the html file, mark as inline, add description, and tag it
   echo -n "<attach-file>$html_file<enter>"
-  echo -n '<toggle-disposition><tag-entry>'
+  echo -n '<toggle-disposition>'
+  description='html conversion'
+  description="${description// /\\ }"
+  echo -n "<edit-description>\\Cu$description<enter>"
+  echo -n '<tag-entry>'
   echo "\\"
   # make sure this html file is attachment #2
   echo -n "$move_first"
@@ -378,19 +418,18 @@ for ((i = 0; i < max_attachments; i++)); do move_first+='<move-up>'; done
   echo -n '<group-alternatives>'
   # additional processing is required if inline images are present
   if inline_images; then
-    # attach image files, mark as inline, set cids, tag and reorder them
+    # attach image files, mark as inline, set cids and descriptions,
+    # tag and reorder them
     entry_num=4
     for file in "${inline_image_filepaths[@]}"; do
       id="$(md5sum "${file/#\~/$HOME}" | cut -d ' ' -f 1)"
       echo "\\"
       echo -n "<attach-file>$file<enter>"
       echo -n '<toggle-disposition>'
-      # setting the Content-ID requires that Ctrl-u (^U, \Cu) is mapped
-      # to the 'kill-line' command; the 'edit-content-id' command opens
-      # an input field with a unique ID already entered by default; it
-      # is necessary to delete the default ID with ^U and enter the ID
-      # generated by this script
       echo -n "<edit-content-id>\\Cu$id<enter>"
+      description="$(basename "$file")"
+      description="${description// /\\ }"
+      echo -n "<edit-description>\\Cu$description<enter>"
       echo -n '<tag-entry>'
       echo "\\"
       echo -n "$move_first"
