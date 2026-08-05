@@ -315,6 +315,39 @@ flag() {
     ;;
   esac
 }
+# content($text)
+#   intent: prepare field content by prepending 'kill-line' binding and
+#           backslash-escaping spaces
+#   params: $text - text to enter into field [required]
+#   prints: altered text
+#   return: n/a
+content() {
+  local text
+  text="${1:-}"
+  # escape spaces
+  text="${text// /\\ }"
+  # prepend Ctrl-u binding for 'kill-line' command
+  text="\\Cu$text"
+  echo -n "$text"
+}
+# move($direction, $moves)
+#   intent: assemble the specified number and type of move commands
+#   params: $direction - whether move is up or down {'up','down'} [required]
+#           $moves     - number of moves [integer, required]
+#   prints: assembled command
+#   return: n/a
+move() {
+  local direction moves cmd fn
+  direction="${1:-}"
+  shift
+  moves="${1:-}"
+  fn="<move-$direction>"
+  cmd=''
+  for ((i = 0; i < moves; i++)); do
+    cmd+="$fn"
+  done
+  echo -n "$cmd"
+}
 # }}}1
 
 # MAIN
@@ -375,24 +408,20 @@ pandoc \
 #     the first entry position with a large number of <move-up> commands,
 #     and then use a specific number of <move-down> commands to place it
 #     in the correct list position as measured from the start of the list
-move_first=''
-for ((i = 0; i < max_attachments; i++)); do move_first+='<move-up>'; done
+move_to_first="$(move up $max_attachments)"
 {
   # issue all commands as a single push command split over multiple lines
   echo -n 'push '
   # attach modified markdown file, mark as inline, add description, and tag it
   echo -n "<attach-file>$markdown_file<enter>"
   echo -n '<toggle-disposition>'
-  description='original markdown text'
-  description="${description// /\\ }"
-  echo -n "<edit-description>\\Cu$description<enter>"
+  echo -n "<edit-description>$(content "original message")<enter>"
   echo -n '<tag-entry>'
   # make sure this markdown file is attachment #2
   echo "\\"
-  echo -n "$move_first"
+  echo -n "$move_to_first"
   echo "\\"
-  entry_num=2
-  for ((i = 1; i < entry_num; i++)); do echo -n '<move-down>'; done
+  echo -n "$(move down 2)"
   echo "\\"
   # detach the original markdown file
   echo -n '<first-entry><detach-file>'
@@ -400,16 +429,13 @@ for ((i = 0; i < max_attachments; i++)); do move_first+='<move-up>'; done
   # attach the html file, mark as inline, add description, and tag it
   echo -n "<attach-file>$html_file<enter>"
   echo -n '<toggle-disposition>'
-  description='html conversion'
-  description="${description// /\\ }"
-  echo -n "<edit-description>\\Cu$description<enter>"
+  echo -n "<edit-description>$(content "html conversion")<enter>"
   echo -n '<tag-entry>'
   echo "\\"
   # make sure this html file is attachment #2
-  echo -n "$move_first"
+  echo -n "$move_to_first"
   echo "\\"
-  entry_num=2
-  for ((i = 1; i < entry_num; i++)); do echo -n '<move-down>'; done
+  echo -n "$(move down 2)"
   echo "\\"
   # group the tagged messages as alternatives
   # • this untags the markdown and html file entries
@@ -426,15 +452,13 @@ for ((i = 0; i < max_attachments; i++)); do move_first+='<move-up>'; done
       echo "\\"
       echo -n "<attach-file>$file<enter>"
       echo -n '<toggle-disposition>'
-      echo -n "<edit-content-id>\\Cu$id<enter>"
-      description="$(basename "$file")"
-      description="${description// /\\ }"
-      echo -n "<edit-description>\\Cu$description<enter>"
+      echo -n "<edit-content-id>$(content "$id")<enter>"
+      echo -n "<edit-description>$(content "$(basename "$file")")<enter>"
       echo -n '<tag-entry>'
       echo "\\"
-      echo -n "$move_first"
+      echo -n "$move_to_first"
       echo "\\"
-      for ((i = 1; i < entry_num; i++)); do echo -n '<move-down>'; done
+      echo -n "$(move down $entry_num)"
       ((entry_num++))
     done
     # select the first entry (the multipart-alternative already created),
