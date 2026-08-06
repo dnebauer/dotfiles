@@ -421,7 +421,7 @@ move_to_first="$(move up $max_attachments)"
   echo "\\"
   echo -n "$move_to_first"
   echo "\\"
-  echo -n "$(move down 2)"
+  echo -n "$(move down 1)"
   echo "\\"
   # detach the original markdown file
   echo -n '<first-entry><detach-file>'
@@ -435,7 +435,7 @@ move_to_first="$(move up $max_attachments)"
   # make sure this html file is attachment #2
   echo -n "$move_to_first"
   echo "\\"
-  echo -n "$(move down 2)"
+  echo -n "$(move down 1)"
   echo "\\"
   # group the tagged messages as alternatives
   # • this untags the markdown and html file entries
@@ -446,7 +446,11 @@ move_to_first="$(move up $max_attachments)"
   if inline_images; then
     # attach image files, mark as inline, set cids and descriptions,
     # tag and reorder them
-    entry_num=4
+    # • for reordering purposes, the current top-level multipart/alternative
+    #   'attachment' and the markdown original and html conversion attachments
+    #   that it contains are counted as a single item, that is, it takes only
+    #   one <move-down> function call to move from above them to below them
+    entry_num=1
     for file in "${inline_image_filepaths[@]}"; do
       id="$(md5sum "${file/#\~/$HOME}" | cut -d ' ' -f 1)"
       echo "\\"
