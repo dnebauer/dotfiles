@@ -124,6 +124,8 @@ html_file="$cache_dir/multipart-conversion.html"
 html_template="$utils_dir/neomutt_pandoc-template.html"
 # assumed maximum number of attachments
 max_attachments=20
+# command to move attachment to first (assembled later)
+move_to_first_command=''
 # pandoc filters
 filter_stem="$utils_dir/neomutt_pandoc-filter"
 filter_img_src_list="${filter_stem}_image-src-list.lua"
@@ -315,13 +317,13 @@ flag() {
     ;;
   esac
 }
-# content($text)
+# prepare_content($text)
 #   intent: prepare field content by prepending 'kill-line' binding and
 #           backslash-escaping spaces
 #   params: $text - text to enter into field [required]
 #   prints: altered text
 #   return: n/a
-content() {
+prepare_content() {
   local text
   text="${1:-}"
   # escape spaces
@@ -330,22 +332,34 @@ content() {
   text="\\Cu$text"
   echo -n "$text"
 }
-# move($direction, $moves)
-#   intent: assemble the specified number and type of move commands
-#   params: $direction - whether move is up or down {'up','down'} [required]
-#           $moves     - number of moves [integer, required]
-#   prints: assembled command
+# move_down_from_first_by($number)
+#   intent: echo commands to move the current attachment the specified number
+#           of steps below the first attachment
+#           • first issues $max_attachments number of <move-up> function calls
+#           • then issues $number of <move-down> function calls
+#           • note that a set of grouped attachments counts as a single step
+#           • a terminal backslash plus newline is issued between each set'
+#             of function calls
+#   params: $number - steps to move down from first [integer, required]
+#   prints: assembled commands
 #   return: n/a
-move() {
-  local direction moves cmd fn
-  direction="${1:-}"
-  shift
-  moves="${1:-}"
-  fn="<move-$direction>"
+move_down_from_first_by() {
+  # if necessary, assemble command to move to first
+  if [[ -z "$move_to_first_command" ]]; then
+    for ((i = 0; i < max_attachments; i++)); do
+      move_to_first_command+='<move-up>'
+    done
+  fi
+  # assemble command to move attachment down
+  local number cmd
+  number="$1"
   cmd=''
-  for ((i = 0; i < moves; i++)); do
-    cmd+="$fn"
+  for ((i = 0; i < number; i++)); do
+    cmd+='<move-down>'
   done
+  # echo commands
+  echo -n "$move_to_first_command"
+  echo "\\"
   echo -n "$cmd"
 }
 # }}}1
@@ -408,20 +422,17 @@ pandoc \
 #     the first entry position with a large number of <move-up> commands,
 #     and then use a specific number of <move-down> commands to place it
 #     in the correct list position as measured from the start of the list
-move_to_first="$(move up $max_attachments)"
 {
   # issue all commands as a single push command split over multiple lines
   echo -n 'push '
   # attach modified markdown file, mark as inline, add description, and tag it
   echo -n "<attach-file>$markdown_file<enter>"
   echo -n '<toggle-disposition>'
-  echo -n "<edit-description>$(content "original message")<enter>"
+  echo -n "<edit-description>$(prepare_content "original message")<enter>"
   echo -n '<tag-entry>'
+  echo "\\"
   # make sure this markdown file is attachment #2
-  echo "\\"
-  echo -n "$move_to_first"
-  echo "\\"
-  echo -n "$(move down 1)"
+  echo -n "$(move_down_from_first_by 1)"
   echo "\\"
   # detach the original markdown file
   echo -n '<first-entry><detach-file>'
@@ -429,13 +440,11 @@ move_to_first="$(move up $max_attachments)"
   # attach the html file, mark as inline, add description, and tag it
   echo -n "<attach-file>$html_file<enter>"
   echo -n '<toggle-disposition>'
-  echo -n "<edit-description>$(content "html conversion")<enter>"
+  echo -n "<edit-description>$(prepare_content "html conversion")<enter>"
   echo -n '<tag-entry>'
   echo "\\"
   # make sure this html file is attachment #2
-  echo -n "$move_to_first"
-  echo "\\"
-  echo -n "$(move down 1)"
+  echo -n "$(move_down_from_first_by 1)"
   echo "\\"
   # group the tagged messages as alternatives
   # • this untags the markdown and html file entries
@@ -451,18 +460,17 @@ move_to_first="$(move up $max_attachments)"
     #   that it contains are counted as a single item, that is, it takes only
     #   one <move-down> function call to move from above them to below them
     entry_num=1
-    for file in "${inline_image_filepaths[@]}"; do
-      id="$(md5sum "${file/#\~/$HOME}" | cut -d ' ' -f 1)"
+    for filepath in "${inline_image_filepaths[@]}"; do
+      id="$(md5sum "${filepath/#\~/$HOME}" | cut -d ' ' -f 1)"
       echo "\\"
-      echo -n "<attach-file>$file<enter>"
+      echo -n "<attach-file>$filepath<enter>"
       echo -n '<toggle-disposition>'
-      echo -n "<edit-content-id>$(content "$id")<enter>"
-      echo -n "<edit-description>$(content "$(basename "$file")")<enter>"
+      echo -n "<edit-content-id>$(prepare_content "$id")<enter>"
+      file="$(basename "$filepath")"
+      echo -n "<edit-description>$(prepare_content "$file")<enter>"
       echo -n '<tag-entry>'
       echo "\\"
-      echo -n "$move_to_first"
-      echo "\\"
-      echo -n "$(move down $entry_num)"
+      echo -n "$(move_down_from_first_by $entry_num)"
       ((entry_num++))
     done
     # select the first entry (the multipart-alternative already created),
