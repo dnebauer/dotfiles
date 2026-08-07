@@ -22,11 +22,22 @@
 
 # config variable 'compose_confirm_detach_first' must be unset    {{{2
 # • this boolean variable must be unset (same as set to 'no')
-# • can do this in config file
-# • can use command 'set nocompose_confirm_detach_first'
-# • can use command 'unset compose_confirm_detach_first'
+# • config file:
+#     ```
+#     set nocompose_confirm_detach_first
+#     ```
+#   or:
+#     ```
+#     unset compose_confirm_detach_first
+#     ```
 
 # Ctrl-u is bound to the <kill-line> function    {{{2
+# • config file:
+#     ```
+#     # [e] <Ctrl>+u : delete from cursor to start of line (default binding)
+#     # * required by compose "y" binding
+#     bind editor \cu kill-line
+#     ```
 
 # custom pandoc filters    {{{2
 # • neomutt_pandoc-filter_image-src-list.lua:   {{{3
@@ -58,36 +69,24 @@
 #       return el
 #     end
 #     ```
-# }}}2
 
-# NOTES ON ENTERING FIELD CONTENT    {{{1
-
-# delete existing field content before entering new text    {{{2
-# • this script enters text into Content-ID and Content-Description fields
-#   of inline attachments
-# • this is done via the <edit-content-id> and <edit-description> functions
-# • any existing field content must first be deleted
-# • the Content-ID field always contains a default value
-# • the Content-Description field for the markdown and html attachments
-#   are always empty
-# • nonetheless, for both field types any existing text is deleted before
-#   entering new text
-# • in each case existing field text is deleted with a 'kill-line' command
-# • the script assumes the 'kill-line' command is bound to Ctrl-u (^U, \Cu)
-# • this is an example command:
+# change compose menu 'y' and 'Y' bindings    {{{2
+# • config file:
 #     ```
-#     echo -n "<edit-description>\\Cu$description<enter>"
-#     ```
-
-# backslash-escape spaces in field content    {{{2
-# • text entered into Content-ID and Content-Description fields cannot
-#   contain spaces
-# • any spaces in the field content must be backslash-escaped
-# • the script uses the following construction to ensure this:
-#     ```
-#     description='original markdown text'
-#     description="${description// /\\ }"
-#     echo -n "<edit-description>\\Cu$description<enter>"
+#     set my_utils = "$HOME"/.local/mail/utils
+#     set my_multipart_convert = "$my_utils"/neomutt_multipart-convert
+#     set my_cache = "$HOME"/.cache/neomutt
+#     set my_multipart_commands = "$my_cache"/multipart-commands
+#     # [c] y : convert markdown to html and send
+#     # - overrides [c] y = <send-message> (send the message)
+#     macro compose y "<first-entry>\
+#     <pipe-entry>$my_multipart_convert<enter>\
+#     <enter-command>source $my_multipart_commands<enter>\
+#     " 'send multipart text and html message'
+#     # [c] Y : send message
+#     # - no default [c] Y binding
+#     # - set to function bound by default to [c] y
+#     bind compose Y send-message
 #     ```
 # }}}2
 
@@ -318,8 +317,9 @@ flag() {
   esac
 }
 # prepare_content($text)
-#   intent: prepare field content by prepending 'kill-line' binding and
-#           backslash-escaping spaces
+#   intent: prepare field content
+#           • prepend 'kill-line' binding to delete existing field content
+#           • backslash-escape spaces since 'push' cannot handle spaces
 #   params: $text - text to enter into field [required]
 #   prints: altered text
 #   return: n/a
@@ -351,16 +351,16 @@ move_down_from_first_by() {
     done
   fi
   # assemble command to move attachment down
-  local number cmd
+  local number move_down_command
   number="$1"
-  cmd=''
+  move_down_command=''
   for ((i = 0; i < number; i++)); do
-    cmd+='<move-down>'
+    move_down_command+='<move-down>'
   done
   # echo commands
   echo -n "$move_to_first_command"
   echo "\\"
-  echo -n "$cmd"
+  echo -n "$move_down_command"
 }
 # }}}1
 
@@ -385,7 +385,7 @@ processOptions "$@"
 
 # create a html version of the email    {{{1
 cat - >"${markdown_file_original}"
-# • look for inline images
+# • get inline image filepaths
 cmd=('pandoc' "--lua-filter=$filter_img_src_list" "$markdown_file_original")
 mapfile -t inline_image_filepaths < <("${cmd[@]}")
 [ ${#inline_image_filepaths[@]} -gt 0 ] && inline_images 'true'
