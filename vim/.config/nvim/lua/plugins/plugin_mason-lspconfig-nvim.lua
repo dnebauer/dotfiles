@@ -5,7 +5,10 @@
 return {
   {
     "mason-org/mason-lspconfig.nvim",
-    dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
+    dependencies = {
+      { "mason-org/mason.nvim", opts = {} },
+      "neovim/nvim-lspconfig",
+    },
     opts = {
       ensure_installed = {
         "autotools_ls", -- autoconf, automake, make
