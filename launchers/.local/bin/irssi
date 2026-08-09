@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+# File: irssi
+# Author: David Nebauer (david at nebauer dot org)
+# Purpose: wrapper for irssi setting custom file locations
+# Created: 2026-08-09
+
+# ERROR HANDLING    {{{1
+
+# Exit on error. Append "|| true" if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+# set -o xtrace
+
+# VARIABLES    {{{1
+
+irssi='irssi'
+config_dir="$HOME/.config/$irssi"
+home_dir="$HOME/.local/share/$irssi"
+exe=''
+# }}}1
+
+# PROCEDURES
+
+# abort($msg)    {{{1
+#   intent: abort script execution with error message
+#   params: $msg - error message [string, required]
+#   prints: error message
+#   return: n/a, aborts scipts
+abort() {
+  echo "$1" 1>&2
+  exit 1
+}
+# }}}1
+
+# MAIN
+
+# set args    {{{1
+set -- --config "$config_dir" --home "$home_dir" "$@"
+
+# find irssi executable    {{{1
+spath=$(readlink -f "$0")
+IFS=:
+for p in $PATH; do
+  epath=$p/$irssi
+  if [ -x "$epath" ] && [ "$(readlink -f "$epath")" != "$spath" ]; then
+    exe="$epath"
+  fi
+done
+[[ -n "$exe" ]] || abort "unable to locate $irssi - is it installed?"
+
+# run irssi    {{{1
+exec "$exe" "$@"
+# }}}1
+
+# vim:foldmethod=marker:
