@@ -243,8 +243,8 @@ set $Transparent #00000000
 # Example font settings from https://i3wm.org/docs/userguide.html:
 
 ####font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
-####font pango:DejaVu Sans Mono 10
-font pango:DejaVu Sans Mono 11, Terminus Bold 11
+####font pango:DejaVu Sans Mono 10, Terminus Bold 10
+font pango:FiraCode Nerd Font Mono 11, DejaVu Sans Mono 11, Terminus Bold 11
 ####font pango:Terminus 11px
 
 
