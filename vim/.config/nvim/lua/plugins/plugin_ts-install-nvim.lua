@@ -1,18 +1,23 @@
---[[ dnebauer/dn-mail.nvim : mail file support ]]
+--[[ lewis6991/ts-install.nvim : install, update, and remove parsers ]]
 
 -- lua plugin
 
+--[[
 return {
   {
-    "dnebauer/dn-mail.nvim",
-    ft = { "mail", "notmuch-compose" },
-    opts = {}, -- required to force plugin loading
-  },
-  {
-    -- mail body uses pandoc markdown formatting
-    "dnebauer/dn-markdown.nvim",
-    ft = { "mail", "notmuch-compose" },
-    dependencies = { "dnebauer/dn-utils.nvim" },
-    opts = {}, -- required for plugin to load
+    "lewis6991/ts-install.nvim",
+    config = function()
+      require("ts-install").setup({
+        parsers = {
+          mail = {
+            install_info = {
+              url = "https://github.com/stevenxxiu/tree-sitter-mail",
+              branch = "master",
+            },
+          },
+        },
+      })
+    end,
   },
 }
+]]
