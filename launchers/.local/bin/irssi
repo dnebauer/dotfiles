@@ -3,6 +3,8 @@
 # File: irssi
 # Author: David Nebauer (david at nebauer dot org)
 # Purpose: wrapper for irssi setting custom file locations
+#          • config file = ~/.config/irssi
+#          • home directory = ~/.local/share/irssi
 # Created: 2026-08-09
 
 # ERROR HANDLING    {{{1
@@ -21,7 +23,7 @@ set -o pipefail
 # VARIABLES    {{{1
 
 irssi='irssi'
-config_dir="$HOME/.config/$irssi"
+config_file="$HOME/.config/$irssi"
 home_dir="$HOME/.local/share/$irssi"
 exe=''
 # }}}1
@@ -42,7 +44,7 @@ abort() {
 # MAIN
 
 # set args    {{{1
-set -- --config "$config_dir" --home "$home_dir" "$@"
+set -- --config "$config_file" --home "$home_dir" "$@"
 
 # find irssi executable    {{{1
 spath=$(readlink -f "$0")
