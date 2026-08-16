@@ -5,11 +5,13 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    keys = {},
+    lazy = false,
     branch = "main",
-    cmd = { "TSUpdate", "TSInstall", "TSLog", "TSUninstall" },
-    opts = {
-      ensure_installed = {
+    build = ":TSUpdate",
+    keys = {},
+    config = function()
+      -- languages to be handled by treesitter
+      local languages = {
         "bash",
         "c",
         "css",
@@ -24,6 +26,7 @@ return {
         "lua",
         "luadoc",
         "make",
+        "mail",
         "markdown",
         "markdown_inline",
         "perl",
@@ -39,24 +42,33 @@ return {
         "vimdoc",
         "xml",
         "yaml",
-      },
-      auto_install = true,
-      folds = { enable = true },
-      highlight = { enable = true },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "<C-space>",
-          --node_incremental = "<C-space>",
-          node_incremental = "v",
-          scope_incremental = false,
-          --node_decremental = "<bs>",
-          node_decremental = "V",
-        },
-      },
-      indent = { enable = true },
-      matchup = { enable = true },
-      sync_install = false,
-    },
+        "zsh",
+      }
+
+      -- use default setup
+      require("nvim-treesitter").setup({})
+
+      -- ensure language parsers are installed
+      require("nvim-treesitter").install(languages)
+
+      -- run treesitter
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("my_treesitter_run", { clear = true }),
+        pattern = languages,
+        callback = function()
+          -- enable native neovim treesitter highlighting
+          vim.treesitter.start()
+
+          -- configure code folding
+          -- • specifying bufid (second '[0]') forces setlocal behaviour
+          vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+          vim.wo[0][0].foldmethod = "expr"
+
+          -- enable treesitter-based indentation
+          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end,
+        desc = "Run treesitter",
+      })
+    end,
   },
 }

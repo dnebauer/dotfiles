@@ -19,8 +19,6 @@ require("lazy").setup({
   spec = {
     -- import/override with your plugins
     { import = "plugins" },
-    -- ensure installed parsers are always updated to match nvim-treesitter
-    { "nvim-treesitter/nvim-treesitter", branch = "master", lazy = false, build = ":TSUpdate" },
   },
   checker = { -- no automatic checking for plugin updates
     enabled = false,
