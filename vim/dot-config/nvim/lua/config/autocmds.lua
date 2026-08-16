@@ -214,6 +214,39 @@ autocmd_create("FileType", {
   desc = "Fold json files on {} and [] blocks",
 })
 
+-- mail {{{1
+autocmd_create("User", {
+  group = augroup_create("my_mail_parser", { clear = true }),
+  pattern = "TSUpdate",
+  callback = function()
+    require("nvim-treesitter.parsers").mail = {
+      tier = 1,
+      install_info = {
+        url = "https://github.com/stevenxxiu/tree-sitter-mail",
+        branch = "master",
+        --[[
+        using 'revision = "HEAD"' results in error:
+          [nvim-treesitter/install/mail] error: Could not rename temp:
+          ENOENT: no such file or directory:
+          $HOME/.cache/nvim/tree-sitter-mail-tmp/tree-sitter-mail-HEAD
+          -> $HOME/.cache/nvim/tree-sitter-mail
+        using 'revision = "8d2905d"' results in error:
+          [nvim-treesitter/install/mail] error: Could not rename temp:
+          ENOENT: no such file or directory:
+          $HOME/.cache/nvim/tree-sitter-mail-tmp/tree-sitter-mail-8d2905d
+          -> $HOME/.cache/nvim/tree-sitter-mail
+        --]]
+        -- must use full 40-byte long SHA-1 object name for commit
+        -- revision 8d2905d is from 11 February 2026
+        revision = "8d2905d06a15586652c3a73387b4170424201e1a",
+        -- 'highlights.scm' not found by default, must specify directory
+        queries = "queries",
+      },
+    }
+  end,
+  desc = "Mail parser for treesitter",
+})
+
 -- markdown/pandoc {{{1
 autocmd_create("FileType", {
   group = augroup_create("my_markdown_support", { clear = true }),
