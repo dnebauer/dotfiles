@@ -969,7 +969,6 @@ $my_trim_quotes %s ;\
 editor -S '$my_nvim_args'\
         +/^$/+1\
         '+nohlsearch'\
-        '+MUMailMDFormatSilent'\
         '+startinsert!'\
         %s\
 "
@@ -983,9 +982,6 @@ editor -S '$my_nvim_args'\
     #   * then move to the following line, i.e., in the message body
     # '+nohlsearch'
     #   * cancel any existing search highlighting
-    # '+MUMailMDFormatSilent'
-    #   * use markdown syntax highlighting for the message body
-    #   * command provided by plugin at github repo dnebauer/dn-mail.nvim
     # '+startinsert!'
     #   * start in insert mode
 set text_flowed
