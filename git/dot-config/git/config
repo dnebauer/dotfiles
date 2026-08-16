@@ -46,4 +46,4 @@
 	binary = true
 	cachetextconv = true
 [oh-my-zsh]
-	git-commit-alias = 6adfef3a8b25ca5ccf429bb87e10547ed444eaa1
+	git-commit-alias = 97b27bb2ec0701330b18c2d3e340b22e742b3fa8
