@@ -14,7 +14,7 @@ return {
         "autotools_ls", -- autoconf, automake, make
         "bashls", -- bash
         "clangd", -- c++, clang
-        "cmake", -- cmake
+        --"cmake", -- cmake
         "dockerls", -- docker
         "eslint", -- javascript, typescript
         "gopls", -- golang
