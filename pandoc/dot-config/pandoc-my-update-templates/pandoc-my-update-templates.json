@@ -331,7 +331,7 @@
     }
   ],
   "stow": {
-    "template-dir": "HOME/.config/dotfiles/pandoc/.local/share/pandoc/templates",
+    "template-dir": "HOME/.config/dotfiles/pandoc/dot-local/share/pandoc/templates",
     "extra": []
   }
 }

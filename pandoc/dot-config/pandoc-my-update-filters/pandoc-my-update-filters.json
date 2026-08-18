@@ -369,7 +369,7 @@
     }
   ],
   "stow": {
-    "filter-dir": "HOME/.config/dotfiles/pandoc/.local/share/pandoc/filters",
+    "filter-dir": "HOME/.config/dotfiles/pandoc/dot-local/share/pandoc/filters",
     "extra": []
   }
 }
