@@ -315,7 +315,7 @@
           "DOWNLOAD_ROOT/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff",
           "STOW_TEMPLATES_DIR/my-css/tufte-otsaloma-et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff"
         ],
-        ["DOWNLOAD_ROOT/my-letter.tex", "STOW_TEMPLATES_DIR/my-letter.tex"],
+        ["DOWNLOAD_ROOT/my-letter.latex", "STOW_TEMPLATES_DIR/my-letter.latex"],
         [
           "DOWNLOAD_ROOT/my-tufte-jez.html5",
           "STOW_TEMPLATES_DIR/my-tufte-jez.html5"
