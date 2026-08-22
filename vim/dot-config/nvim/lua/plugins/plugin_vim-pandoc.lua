@@ -19,7 +19,7 @@ return {
       -- utility functions
       local error_msg = function(...)
         for _, msg in ipairs({ ... }) do
-          vim.api.nvim_echo({ { msg } }, false, {})
+          vim.api.nvim_echo({ { msg } }, true, { err = true })
         end
       end
       local check_executables = function(executables, msg)
