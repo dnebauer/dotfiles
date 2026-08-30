@@ -34,8 +34,8 @@ return {
           error_msg(msg, "-- missing: " .. table.concat(missing_executables, ", "))
         end
       end
-      -- require pandoc and pander for output generation
-      check_executables({ "pandoc", "pander" }, "Cannot find the executables needed to generate output")
+      -- require pandoc and my-panzer for output generation
+      check_executables({ "pandoc", "my-panzer" }, "Cannot find the executables needed to generate output")
       -- require pandoc-crossref filter for cross-referencing
       check_executables({ "pandoc-crossref" }, "Cannot find the pandoc-crossref filter")
       -- enable pandoc functionality for markdown files
@@ -68,7 +68,7 @@ return {
       ]])
       vim.g["pandoc#command#custom_open"] = "PandocOpen"
       vim.g["pandoc#command#prefer_pdf"] = 1
-      vim.g["pandoc#compiler#command"] = "pander"
+      vim.g["pandoc#compiler#command"] = "my-panzer"
       -- hashes at end as well as start of headings
       vim.g["pandoc#keyboard#sections#header_style"] = "a"
       -- do not set shortcuts for opening hypertext links
@@ -167,9 +167,9 @@ return {
         vim.api.nvim_buf_set_lines(0, metadata_end_line, metadata_end_line, true, missing_metadata)
       end
       vim.api.nvim_create_user_command(
-        "PDLetterYAML",
+        "PZLetterYAML",
         insert_letter_yaml,
-        { desc = "Insert missing pander Letter-related metadata" }
+        { desc = "Insert missing my-panzer Letter-related metadata" }
       )
     end,
   },

@@ -1,0 +1,34 @@
+#compdef my-panzer
+
+_formats() {
+  local -a _formats
+  _formats=(
+    ansi asciidoc asciidoc_legacy bbcode bbcode_fluxbb bbcode_phpbb
+    bbcode_steam bbcode_hubzilla bbcode_xenforo beamer bibtex biblatex
+    chunkedhtml commonmark commonmark_x context csljson djot docbook docbook4
+    docbook5 docx dokuwiki epub epub3 epub2 fb2 gfm haddock html html5 html4
+    icml ipynb jats_archiving jats_articleauthoring jats_publishing jats jira
+    json latex man markdown markdown_mmd markdown_phpextra markdown_strict
+    markua mediawiki ms muse native odt opml opendocument org pdf plain pptx
+    rst rtf texinfo textile t2t slideous slidy dzslides revealjs s5 tei typst
+    vimdoc xml xwiki zimwiki
+  )
+  _values 'Pandoc output formats' "${_formats[@]}"
+}
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help ---help ---h)'{-h,--help,---help,---h}'[Show a help message]' \
+  - 'version_option' \
+    '(-v --version ---version ---v)'{-v,--version,---version,---v}'[Show the version]' \
+  - 'list_option' \
+    '---list-styles[List styles]' \
+  - 'script_options' \
+    '--to=:[Pandoc output format (string, required)]:_formats' \
+    '--output=:[Pandoc output filename (string, required)]:_files' \
+    '---quiet:[Only show errors/warnings (flag)]' \
+  && rc=0
+
+return rc

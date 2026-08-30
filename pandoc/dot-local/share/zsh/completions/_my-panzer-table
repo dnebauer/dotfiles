@@ -1,0 +1,20 @@
+#compdef my-panzer-table
+
+_types() {
+    local -a _types
+    _types=(actions conflict describe expand valid)
+    _values 'Table types' "${_types[@]}"
+}
+
+local rc=1
+
+_arguments -S \
+  - 'help_option' \
+    '(-h --help)'{-h,--help}'[Show a help message]' \
+  - 'list_option' \
+    '(-l --list-keywords)'{-l,--list-keywords}'[List styles]' \
+  - 'script_options' \
+    '1:[Table type (required)]:_types' \
+  && rc=0
+
+return rc

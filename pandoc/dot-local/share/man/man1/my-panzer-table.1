@@ -1,0 +1,508 @@
+.\" Hey, EMACS: -*- nroff -*-
+
+.\" Filename: my-panzer-table.1
+.\" Author:   David Nebauer
+.\" History:  2026-08-26 - created
+
+.\" -----------------------------------------------------------------
+.\" NOTES
+.\" -----------------------------------------------------------------
+.ig
+
+For header (.TH), first parameter, NAME, should be all caps
+Second parameter, SECTION, should be 1-8, maybe w/ subsection
+Other parameters are allowed: see man(7), man(1)
+Please adjust the date whenever revising the manpage.
+
+Some roff macros, for reference:
+.nh        disable hyphenation
+.hy        enable hyphenation
+.ad l      left justify
+.ad b      justify to both left and right margins
+.nf        disable filling
+.fi        enable filling
+.br        insert line break
+.sp <n>    insert n+1 empty lines
+for manpage-specific macros, see groff_man(7) and man(7)
+
+Formatting [see groff_char (7) and man (7) for details]:
+\(aq  : escape sequence for (')
+\[dq] : plain double quote
+\[lq] : left/open double quote
+\[rq] : right/close double quote
+`     : left/open single quote
+'     : right/close single quote
+\(em  : escape sequence for em dash
+\(en  : escape sequence for en dash
+\.    : escape sequence for period/dot
+\(rg  : registration symbol
+\(tm  : trademark symbol
+\fX   : escape sequence that changes font, where 'X' can be 'R|I|B|BI'
+        (R = roman/normal | I = italic | B = bold | BI = bold-italic)
+\fP   : switch to previous font
+        in this case '\fR' could also have been used
+.B    : following arguments are boldened
+.I    : following arguments are italicised
+.BI   : following arguments are bold alternating with italics
+.BR   : following arguments are bold alternating with roman
+.IB   : following arguments are italics alternating with bold
+.IR   : following arguments are italics alternating with roman
+.RB   : following arguments are roman alternating with bold
+.RI   : following arguments are roman alternating with italics
+.SM   : following arguments are small (scaled 9/10 of the regular size)
+.SB   : following arguments are small bold (not small alternating with bold)
+        [note: if argument in alternating pattern contains whitespace,
+               enclose in whitespace]
+.RS x : indent following lines by x characters
+.RE   : end indent
+
+Bulleted list:
+   A bulleted list:
+   .IP \[bu] 2
+   lawyers
+   .IP \[bu]
+   guns
+   .IP \[bu]
+   money
+Numbered list:
+   A numbered list:
+   .nr step 1 1
+   .IP \n[step]. 3
+   lawyers
+   .IP \n+[step].
+   guns
+   .IP \n+[step].
+   money
+..
+
+.\" -----------------------------------------------------------------
+.\" SETUP
+.\" -----------------------------------------------------------------
+
+.\" Macro: Format URL
+.\"  usage:  .URL "http:\\www.gnu.org" "GNU Project" " of the"
+.\"  params: 1 = url
+.\"          2 = link text/name
+.\"          3 = postamble (optional)
+.\"  note:   The www.tmac macro provides a .URL macro package; this
+.\"          is a local fallback in case www.tmac is unavailable
+.\"  credit: man(7)
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+
+.\" Prefer .URL macro from www.tmac macro package if it is available
+.\"  note: In the conditional below the '\n' escape returns the value of
+.\"        a register, in this the '.g'
+.\"        The '.g' register is only found in GNU 'troff', and it is
+.\"        assumed that GNU troff will always include the www.tmac
+.\"        macro package
+.if \n[.g] .mso www.tmac
+
+.\" Macro: Ellipsis
+.\"  usage: .ellipsis
+.\"  note: only works at beginning of line
+.de ellipsis
+.cc ^
+...
+^cc
+..
+
+.\" String: Command name
+.ds self my-panzer-table
+
+.\" -----------------------------------------------------------------
+.\" MANPAGE CONTENT
+.\" -----------------------------------------------------------------
+
+.TH "MY-PANZER-TABLE" "1" "2026-08-26" "" "MY-PANZER-TABLE Manual"
+
+.SH "NAME"
+
+\*[self] \- generate keyword data table constructors
+
+.SH "SYNOPSIS"
+
+.SY "\*[self]"
+.I "table"
+.YS
+.SY "\*[self]"
+.B "\-l"
+.YS
+.SY "\*[self]"
+.B "\-h"
+.YS
+
+.SH "REQUIRED ARGUMENTS"
+
+.TP
+.I "table"
+The table to build and output a constructor for. Must be one
+of: 'actions', 'conflict', 'describe', 'expand', 'valid'.
+
+.SH "OPTIONS"
+
+.TP
+.B "-l  --list-keywords"
+List style keywords with descriptions and then exit.
+.TP
+.B "-h  --help"
+Display help and exit.
+
+.SH "DESCRIPTION"
+
+.SS "Supports my-panzer"
+
+\*[self] is a utility script supporting the
+.I "my-panzer"
+script. The
+.I "my-panzer"
+script contains five tables that collectively define a number of style keywords
+that can be added to metadata for a markdown document. Each defined style
+keyword is associated with metadata settings and command line options that are
+collectively used to define a pandoc document conversion command.
+.PP
+The five tables are:
+.PP
+.TS
+tab(@);
+ri l x.
+T{
+keyword-actions-data
+T}@T{
+The metadata settings and command line options associated with style keywords.
+T}
+@
+T{
+keyword-conflict-data
+T}@T{
+Defines sets of style keywords that are mutually exclusive, i.e., that cannot
+be used together.
+T}
+@
+T{
+keyword-describe-data
+T}@T{
+A description of each style keyword.
+T}
+@
+T{
+keyword-expand-data
+T}@T{
+This applies to style keywords that expand to a set of style keywords.
+Note: there are currently no style keywords that have this behaviour.
+T}
+@
+T{
+keyword-valid-data
+T}@T{
+This is a simple list of all valid keywords.
+T}
+.TE
+
+.SS "Role of \*[self]"
+
+It is important to keep the four keyword tables synchronised. For example, if a
+new keyword is defined its actions must be added to the
+\&'keyword\-actions\-data' table while the keyword itself must be added to the
+\&'keyword\-valid\-data' table.
+.PP
+To make this task easier it makes sense to have a single master table defining
+all this behaviour for the style keywords and then derive the four keyword data
+tables from it. This script contains that master table and can output to stdout
+constructors for each of the keyword data tables.
+
+.SS "Master table structure"
+
+Here is an example definition of a style keyword in the master keyword data
+table called 'keyword\-data':
+.PP
+.EX
+.RS 4
+keyword_data = {
+    Latex8pt = {
+        description = "set font size to 8 pt in latex output",
+        expand_groups = {},
+        conflict_groups = {"documentclass", "font-size"},
+        actions = {
+            latex = {
+                metadata = {
+                    documentclass = "extarticle",
+                    fontsize = "8pt",
+                },
+            },
+        },
+    },
+    ...,
+}
+.RE
+.EE
+.PP
+The style keyword in this example is 'Latex8pt'. These keywords must be unique:
+this is enforced by lua since the style keywords are table keys and lua
+requires table keys to be unique. The custom is to use CamelCase for style
+keywords.
+.PP
+Each style subtable has the following keys:
+.PP
+.TS
+tab(@);
+ri l x.
+T{
+description
+T}@T{
+The keyword description printed to stdout when the '\-\-list\-keywords' option is used.
+T}
+@
+T{
+expand_groups
+T}@T{
+This key determines whether other style keywords expand into keyword sets that
+include this keyword. For example, if 'OtherKeyword' expanded into a set of
+keywords that included 'Latex8pt', then 'OtherKeyword' would be added to
+\&'Latex8pt's sequence value for the 'expand_groups' key.
+T}
+@
+T{
+conflict_groups
+T}@T{
+This key lists any groups of style keywords that are mutually exclusive, i.e.,
+that cannot be used together in the same markdown document. In the example
+there are two such groups defined. The conflict groups are not defined in a
+single place; rather, they are defined by adding the name of the conflict group
+to the 'conflict_group' value for all the style keywords in the conflict group.
+In the example the fact that one of the conflict group names is the same as a
+metadata key is coincidental; it is not necessary for this to be the case.
+T}
+@
+T{
+actions
+T}@T{
+Style keyword actions are at the heart of keyword definition. They are also
+what the 'my-panzer' script spends most of its time processing.
+T}
+.TE
+
+.SS "Keyword actions"
+
+The primary key for actions subtables are pandoc target formats, e.g., html,
+latex, epub, etc., with the additional pseudo-target 'all' applying to all
+formats.
+.PP
+Within each target format there are five types of actions that can be defined.
+Only one such action type, 'metadata', is shown in the example. Here are the
+details for each action type:
+.PP
+.TS
+tab(@);
+ri l x.
+T{
+metadata
+T}@T{
+Table of "keyword = value" where the keyword and value are valid pandoc
+metadata settings, with exceptions as described below.
+T}
+@
+T{
+T}@T{
+A value can be a
+.I "token"
+where a token has the value "::name::".
+T}
+@
+@T{
+The "metadata_token" function in the "my-panzer" script has matching sets of
+processing instructions for each token name. It is a fatal error if there is no
+matching token name in that function.
+T}
+@
+@T{
+There is currently only one defined token: "cover_image" means the metadata
+value is to be replaced by a cover image file name. The cover image file has to
+be a png, jpg or gif file in the current directory with the same basename as
+the input markdown file. It is a fatal error if no image file is located.
+T}
+@
+T{
+extensions
+T}@T{
+Sequence of pandoc extension names.
+T}
+@
+@T{
+Prefix each extension name with "+" or "-" as per pandoc convention. If neither
+prefix is present the default is "+".
+T}
+@
+T{
+options
+T}@T{
+Table of "option = value".
+T}
+@
+@T{
+Use true value if the option is a flag. The option will be added to the pandoc
+command without a value.
+T}
+@
+@T{
+An option with a false value causes a fatal processing error.
+T}
+@
+T{
+filters
+T}@T{
+Sequence of (a) filter names or (b) sequences, the latter of which can have 1,
+2 or 3 values as {filter_name, weighting, lua_type}.
+T}
+@
+@T{
+The "weighting" is an integer between 1 and 99 (default = 50).
+T}
+@
+@T{
+The "lua_type" is true if the filter is a lua filter and false if it is a
+non-lua filter (default = infer from presence or absence of a
+.I ".lua"
+extension).
+T}
+@
+T{
+post_run
+T}@T{
+Sequence of task names.
+T}
+@
+@T{
+These tasks are performed after pandoc document conversion has completed.
+T}
+@
+@T{
+The "post_process" function in the "my-panzer" script has matching sets of
+instructions for each task keyword. It is a fatal error if there is no matching
+task in that function.
+T}
+@
+@T{
+The tasks currently defined are: "create_mobi" which uses "ebook-convert" to
+generate a 'mobi' file from an 'epub' file, and "pause" which causes
+"my-panzer" to pause for the user to press the Enter key before exiting.
+T}
+.TE
+.PP
+Warning: if you set any key value to
+.I "nil"
+the key will not be added to the constructor that is output.
+.PP
+Note that the variable 'datadir' is available to construct file paths. This
+variable is set to the following in order of preference:
+.I "$XGD_DATA_HOME/pandoc"
+if it exists,
+.I "$HOME/.local/share/pandoc"
+if it exists, or
+.IR "$HOME/.pandoc" "."
+
+.SS "Action precedence"
+
+The actions for the generic format 'all' are processed first and then any
+format-specific actions are processed.
+.PP
+The 'extensions', 'filters' and 'post_run' values are all stored in sequences
+and are simply added to those structures as the actions are processed.
+.PP
+The order of post_run tasks does not matter as they are executed by my-panzer.
+.PP
+The extensions order is not significant since it does not matter to pandoc.
+.PP
+In pandoc the order in which filters are processed can matter, so filters
+defined in style keywords appear in the pandoc command in weighting order with
+smallest weighting value first and largest weighting value last. Filters with
+the same weighting value occur in the pandoc command in the order they are
+processed, i.e., by style keyword, then format, then sequence order within
+format. Given this scheme, it can be seen that the situation where no
+weightings are assigned to any filters is a special case: since filters with no
+weighting value are assigned a weighting value of 50, all the filters will have
+the same value and so will appear in the order they are processed.
+.PP
+Both 'metadata' and 'options' action data are stored in tables, i.e., with a
+"key=value" structure.
+.PP
+The rules applying when multiple styles and/or target formats attempt to modify
+the same metadata field or command line option can be complex. Here is a table
+comparing what happens when adding a new value to an existing value in each
+case. The new value may be a table (i.e., a sequence) or a non-table (i.e., a
+string). The existing value may be nil, or it may be a table (i.e., a sequence)
+or a non-table (i.e., a string) obtained from processing previous styles.
+.PP
+.TS
+tab(:);
+rb lb lb
+rb l  l .
+                     : New is string : New is sequence
+     Existing is nil : assign string : assign sequence
+  Existing is string : replace, WARN : ERROR
+Existing is sequence : ERROR         : append sequence
+.TE
+.PP
+From this arises the following processing logic:
+.PP
+.EX
+.RS 4
+if existing == nil then
+    assign new string or sequence to it
+    goto end of value processing
+end
+if existing == sequence then
+    if new == sequence then
+        append new items to existing ones
+    else (new == string and existing == sequence)
+        issue error
+    end
+    goto end of value processing
+end
+if new == sequence (and existing == string)
+    issue error
+else (new == string (and existing == string)) then
+    replace existing value
+    issue warning
+end
+.RE
+.EE
+
+.SH "DEPENDENCIES"
+
+lua (v5.3 or greater).
+
+.SH "BUGS AND LIMITATIONS"
+
+Please report any bugs to the author.
+
+.SH "AUTHOR"
+
+\*[self] was written by
+.URL "mailto:david at nebauer.org" "David Nebauer" "."
+.PP
+This manual page was written by
+.URL "mailto:david at nebauer.org" "David Nebauer"
+for the Debian project (but may be used by others).
+
+.SH "LICENSE AND COPYRIGHT"
+
+Copyright (c) 2021
+.URL "mailto:david at nebauer.org" "David Nebauer"
+.PP
+This file is part of Pander.
+.PP
+Pander is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+.PP
+Pander is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License
+along with Pander.  If not, you can find it
+.URL "https://www.gnu.org/licenses/" "online" "."

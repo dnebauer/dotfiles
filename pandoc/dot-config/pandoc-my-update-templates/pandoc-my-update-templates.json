@@ -317,6 +317,10 @@
         ],
         ["DOWNLOAD_ROOT/my-letter.latex", "STOW_TEMPLATES_DIR/my-letter.latex"],
         [
+          "DOWNLOAD_ROOT/my-extract-metadata.json",
+          "STOW_TEMPLATES_DIR/my-extract-metadata.json"
+        ],
+        [
           "DOWNLOAD_ROOT/my-tufte-jez.html5",
           "STOW_TEMPLATES_DIR/my-tufte-jez.html5"
         ],

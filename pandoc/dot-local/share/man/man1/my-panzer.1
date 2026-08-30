@@ -1,0 +1,1330 @@
+.\" Hey, EMACS: -*- nroff -*-
+
+.\" Filename: my-panzer.1
+.\" Author:   David Nebauer
+.\" History:  2026-08-26 - created
+
+.\" -----------------------------------------------------------------
+.\" NOTES
+.\" -----------------------------------------------------------------
+.ig
+
+For header (.TH), first parameter, NAME, should be all caps
+Second parameter, SECTION, should be 1-8, maybe w/ subsection
+Other parameters are allowed: see man(7), man(1)
+Please adjust the date whenever revising the manpage.
+
+Some roff macros, for reference:
+.nh        disable hyphenation
+.hy        enable hyphenation
+.ad l      left justify
+.ad b      justify to both left and right margins
+.nf        disable filling
+.fi        enable filling
+.br        insert line break
+.sp <n>    insert n+1 empty lines
+for manpage-specific macros, see groff_man(7) and man(7)
+
+Formatting [see groff_char (7) and man (7) for details]:
+\(aq  : escape sequence for (')
+\[dq] : plain double quote
+\[lq] : left/open double quote
+\[rq] : right/close double quote
+`     : left/open single quote
+'     : right/close single quote
+\(em  : escape sequence for em dash
+\(en  : escape sequence for en dash
+\.    : escape sequence for period/dot
+\(rg  : registration symbol
+\(tm  : trademark symbol
+\fX   : escape sequence that changes font, where 'X' can be 'R|I|B|BI'
+        (R = roman/normal | I = italic | B = bold | BI = bold-italic)
+\fP   : switch to previous font
+        in this case '\fR' could also have been used
+.B    : following arguments are boldened
+.I    : following arguments are italicised
+.BI   : following arguments are bold alternating with italics
+.BR   : following arguments are bold alternating with roman
+.IB   : following arguments are italics alternating with bold
+.IR   : following arguments are italics alternating with roman
+.RB   : following arguments are roman alternating with bold
+.RI   : following arguments are roman alternating with italics
+.SM   : following arguments are small (scaled 9/10 of the regular size)
+.SB   : following arguments are small bold (not small alternating with bold)
+        [note: if argument in alternating pattern contains whitespace,
+               enclose in whitespace]
+.RS x : indent following lines by x characters
+.RE   : end indent
+
+Bulleted list:
+   A bulleted list:
+   .IP \[bu] 2
+   lawyers
+   .IP \[bu]
+   guns
+   .IP \[bu]
+   money
+Numbered list:
+   A numbered list:
+   .nr step 1 1
+   .IP \n[step]. 3
+   lawyers
+   .IP \n+[step].
+   guns
+   .IP \n+[step].
+   money
+..
+
+.\" -----------------------------------------------------------------
+.\" SETUP
+.\" -----------------------------------------------------------------
+
+.\" Macro: Format URL
+.\"  usage:  .URL "http:\\www.gnu.org" "GNU Project" " of the"
+.\"  params: 1 = url
+.\"          2 = link text/name
+.\"          3 = postamble (optional)
+.\"  note:   The www.tmac macro provides a .URL macro package; this
+.\"          is a local fallback in case www.tmac is unavailable
+.\"  credit: man(7)
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+
+.\" Prefer .URL macro from www.tmac macro package if it is available
+.\"  note: In the conditional below the '\n' escape returns the value of
+.\"        a register, in this the '.g'
+.\"        The '.g' register is only found in GNU 'troff', and it is
+.\"        assumed that GNU troff will always include the www.tmac
+.\"        macro package
+.if \n[.g] .mso www.tmac
+
+.\" Macro: Ellipsis
+.\"  usage: .ellipsis
+.\"  note: only works at beginning of line
+.de ellipsis
+.cc ^
+...
+^cc
+..
+
+.\" String: Command name
+.ds self my-panzer
+
+.\" -----------------------------------------------------------------
+.\" MANPAGE CONTENT
+.\" -----------------------------------------------------------------
+
+.TH "MY-PANZER" "1" "2026-08-26" "" "MY-PANZER Manual"
+
+.SH "NAME"
+
+\*[self] \- pandoc wrapper
+
+.SH "SYNOPSIS"
+
+.SY "\*[self]"
+.BI "--to=" "format"
+.BI "--output=" "file"
+.I "input"
+.RB "[" "---quiet" "]"
+.YS
+
+.SY "\*[self]"
+.B "---list-styles"
+.YS
+
+.SY "\*[self]"
+.B "-v"
+.YS
+
+.SY "\*[self]"
+.B "-h"
+.YS
+
+.SH "REQUIRED ARGUMENTS"
+
+.TP
+.BI "\-\-to=" "format"
+Pandoc output format. Scalar string. Required.
+
+.TP
+.BI "\-\-output=" "file"
+Pandoc output filename. Scalar string. Required.
+
+.TP
+.I "input"
+Pandoc input markdown filename. Scalar string. Required.
+
+.SH "OPTIONS"
+
+.TP
+.B "\-\-\-list\-keywords"
+List each style keyword with description and then exit.
+
+.TP
+.B "\-\-\-quiet"
+Only print error and warning messages.
+
+.TP
+.B "\-v  \-\-version  \-\-\-version  \-\-\-v"
+Display version and exit.
+
+.TP
+.B "\-h  \-\-help  \-\-\-help  \-\-\-h"
+Display help and exit.
+
+.SH "DESCRIPTION"
+
+.SS "Function"
+
+my-panzer is a replacement for
+.URL "https://github.com/msprev/panzer" "msprev/panzer" "."
+Like that project, my-panzer keeps the concept of style keywords added to the
+document's metadata, and these keywords have associated pandoc metadata
+settings and pandoc command-line options. Like panzer, my-panzer constructs a
+pandoc command using the style keywords and options passed to it on the command
+line, executes the pandoc command, and carries out necessary post-processing.
+.PP
+In panzer the style behaviour of keywords was defined in a configuration file.
+In my-panzer, the behaviour of style keywords is defined in the my-panzer
+script itself. In fact, it is defined in four style keyword data tables. To
+ensure these tables are kept properly synchronised, a utility script called
+.I "my-panzer-table"
+is provided as part of my-panzer. This utility script contains a master keyword
+data table containing the complete definitions of all style keywords. The
+script can output constructors for all four of the style keyword data tables in
+the my-panzer script. See the manpage for
+.I "my-panzer-table"
+for details on how to define the style keywords in that script.
+
+.SS "Operation"
+
+my-panzer executes the following steps:
+.IP "\(bu" 4
+Extract style keywords by running pandoc on the input file. This relies on the
+existence of a template file named
+.I "my-extract-metadata.json"
+having as its sole content the line "$meta\-json$".
+.IP "\(bu" 4
+Assemble metadata settings associated with the style keywords and write them to
+a temporary json file.
+.IP "\(bu" 4
+Assemble pandoc command line options associated with the style keywords.
+.IP "\(bu" 4
+Add to the pandoc command a "\-\-metadata\-file" option to load the temporary
+json metadata file generated earlier.
+.IP "\(bu" 4
+Add to the pandoc command all options passed to my-panzer.
+.IP "\(bu" 4
+Execute the pandoc command.
+.IP "\(bu" 4
+Perform any post-execution tasks associated with the style keywords.
+.PP
+Note in the sequence above that options provided to my-panzer on the command
+line are added after options defined by style keywords. Because in pandoc later
+options in the pandoc command override earlier ones, options provided to
+my-panzer on the command line will override options defined by style keywords.
+
+.SS "Shortcuts (potential limitations)"
+
+my-panzer takes some shortcuts because it is intended to be run in a specific
+environment: called by vim's
+.URL "https://github.com/vim-pandoc/vim-pandoc" "vim-pandoc plugin" "."
+That plugin ensures the parameters passed to my-panzer include the
+"\-\-output" and "\-\-to" options, in the format "\-\-name=value", and the
+markdown input file is the last argument. my-panzer will fail if those
+conditions are not met.
+
+.SS "Data directory"
+
+Unlike panzer, my-panzer does not maintain its own data directory for pandoc to
+use. Pandoc is left to determine its own data directory.
+
+.SS "Style keywords"
+
+The style keywords differ in their requirements and usage. They can be grouped
+into two types: base keywords that provide an overall theme for output, and
+keywords that provide accessory features. Only one base keyword can be
+specified while multiple accessory keywords can be selected (provided they
+don't conflict with each other).
+.PP
+The base keywords are: Letter, NoFonts, Standard, and Tufte.
+.PP
+The accessory keywords are: A5, Include, IncludeAuto, KeepData, KeyboardFont,
+Latex8pt, Latex9pt, Latex10pt, Latex11pt, Latex12pt, Latex14pt, Latex17pt,
+Latex20pt, Libertinus, PageBreak, Pause, SaveTrees, SectFlush, SectNewpage,
+SubsectFlush, and TextColour.
+.PP
+The main features of each keyword are:
+.PP
+.I "A5"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set to a5 page size
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex, context
+T}
+.TE
+.PP
+.I "Include"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+include other files
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+@
+T{
+filters
+T}@T{
+.URL "https://github.com/pandoc/lua-filters" "pandoc/lua-filters" ":"
+.br
+\(bu "include-files.lua"
+.br
+\(bu "include-code-files.lua"
+T}
+.TE
+.PP
+.I "IncludeAuto"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+include other files, shifting headers automatically
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+@
+T{
+filters
+T}@T{
+.URL "https://github.com/pandoc/lua-filters" "pandoc/lua-filters" ":"
+.br
+\(bu "include-files.lua"
+.br
+\(bu "include-code-files.lua"
+T}
+.TE
+.PP
+.I "KeepData"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+do not delete the metadata file
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+.TE
+.PP
+.I "KeyboardFont"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+process font attribute 'kbd'
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+@
+T{
+filters
+T}@T{
+.URL "https://github.com/dnebauer/pandoc-filters-dn" "dnebauer/pandoc-filters-dn" ":"
+.br
+\(bu "keyboard-font.lua"
+T}
+.TE
+.PP
+.I "Latex8pt"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set font size to 8 pt
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: extarticle
+T}
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex documentclass: Latex9pt, Latex14pt, Latex17pt, Latex20pt,
+Letter, and Tufte
+T}
+@
+@T{
+styles that specify a latex font size: Latex9pt, Latex10pt, Latex11pt, Latex12pt,
+Latex14pt, Latex17pt, and Latex20pt
+T}
+.TE
+.PP
+.I "Latex9pt"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set font size to 9 pt
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: extarticle
+T}
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex documentclass: Latex8pt, Latex14pt, Latex17pt, Latex20pt,
+Letter, and Tufte
+T}
+@
+@T{
+styles that specify a latex font size: Latex8pt, Latex10pt, Latex11pt, Latex12pt,
+Latex14pt, Latex17pt, and Latex20pt
+T}
+.TE
+.PP
+.I "Latex10pt"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set font size to 10 pt
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex font size: Latex8pt, Latex9pt, Latex11pt, Latex12pt,
+Latex14pt, Latex17pt, and Latex20pt
+T}
+.TE
+.PP
+.I "Latex11pt"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set font size to 11 pt
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex font size: Latex8pt, Latex9pt, Latex10pt, Latex12pt,
+Latex14pt, Latex17pt, and Latex20pt
+T}
+.TE
+.PP
+.I "Latex12pt"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set font size to 12 pt
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex font size: Latex8pt, Latex9pt, Latex10pt, Latex11pt,
+Latex14pt, Latex17pt, and Latex20pt
+T}
+.TE
+.PP
+.I "Latex14pt"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set font size to 14 pt
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: extarticle
+T}
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex documentclass: Latex8pt, Latex9pt, Latex17pt, Latex20pt,
+Letter, and Tufte
+T}
+@
+@T{
+styles that specify a latex font size: Latex8pt, Latex9pt, Latex10pt, Latex11pt,
+Latex12pt, Latex17pt, and Latex20pt
+T}
+.TE
+.PP
+.I "Latex17pt"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set font size to 17 pt
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: extarticle
+T}
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex documentclass: Latex8pt, Latex9pt, Latex14pt, Latex20pt,
+Letter, and Tufte
+T}
+@
+@T{
+styles that specify a latex font size: Latex8pt, Latex9pt, Latex10pt, Latex11pt,
+Latex12pt, Latex14pt, and Latex20pt
+T}
+.TE
+.PP
+.I "Latex20pt"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+set font size to 20 pt
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: extarticle
+T}
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex documentclass: Latex8pt, Latex9pt, Latex14pt, Latex17pt,
+Letter, and Tufte
+T}
+@
+@T{
+styles that specify a latex font size: Latex8pt, Latex9pt, Latex10pt, Latex11pt,
+Latex12pt, Latex14pt, and Latex17pt
+T}
+.TE
+.PP
+.I "Letter"
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+Australian-style letters
+T}
+@
+T{
+type
+T}@T{
+base
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: letter
+T}
+@
+T{
+template
+T}@T{
+.URL "https://github.com/dnebauer/pandoc-templates-dn" "dnebauer/pandoc-templates-dn" ":"
+.br
+\(bu "my-letter.latex"
+T}
+@
+T{
+special
+T}@T{
+template relies on numerous letter-specific values provided as document yaml
+metadata; an nvim plugin distributed with \*[self] includes the command
+\&'PZLetterYAML' which inserts missing metadata with default values
+T}
+@
+T{
+fonts
+T}@T{
+specified in document-specific metadata
+T}
+@
+T{
+conflicts
+T}@T{
+base styles: NoFonts, Standard, and Tufte
+T}
+@
+@T{
+styles that specify a latex documentclass: Latex8pt, Latex9pt, Latex14pt, Latex17pt,
+Latex20pt, and Tufte
+T}
+@
+@T{
+styles that specify a latex font: Libertinus, Standard, and Tufte
+T}
+.TE
+.PP
+.I "Libertinus"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+use libertinus/xecjk latex font packages
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex, context
+T}
+@
+T{
+special
+T}@T{
+works well with the NoFonts style keyword
+T}
+@
+T{
+fonts
+T}@T{
+Libertinus Serif, xeCJK
+T}
+@
+T{
+conflicts
+T}@T{
+styles that specify a latex font: Letter, Standard, and Tufte
+T}
+.TE
+.PP
+.I "NoFonts"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+as Standard style but with no fonts defined for pdf
+T}
+@
+T{
+type
+T}@T{
+base
+T}
+@
+T{
+formats
+T}@T{
+html, epub, latex, context
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: [default]
+T}
+@
+T{
+template
+T}@T{
+[default]
+T}
+@
+T{
+css
+T}@T{
+buttondown.css
+T}
+@
+T{
+special
+T}@T{
+works well with the Libertinus style keyword
+T}
+@
+@T{
+epub output will incorporate a cover image if one is found in the current
+directory
+T}
+@
+T{
+fonts
+T}@T{
+none specified
+T}
+@
+T{
+conflicts
+T}@T{
+base styles: Letter, Standard, and Tufte
+T}
+.TE
+.PP
+.I "PageBreak"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+process latex \\newpage instructions
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+@
+T{
+conflicts
+T}@T{
+styles that affect pagination: SectNewpage
+T}
+.TE
+.PP
+.I "Pause"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+pause before exiting script
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+.TE
+.PP
+.I "SaveTrees"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+compact format for printing
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+.TE
+.PP
+.I "SectFlush"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+flush all sections before they end
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+.TE
+.PP
+.I "SectNewpage"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+start each section on a new page
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+html, latex
+T}
+@
+T{
+conflicts
+T}@T{
+styles that affect pagination: PageBreak
+T}
+.TE
+.PP
+.I "Standard"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+default theme intended for most use cases
+T}
+@
+T{
+type
+T}@T{
+base
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: [default]
+T}
+@
+T{
+css
+T}@T{
+buttondown.css
+T}
+@
+T{
+template
+T}@T{
+[default]
+T}
+@
+T{
+filters
+T}@T{
+.URL "https://github.com/lierdakil/pandoc-crossref" "lierdakil/pandoc-crossref" ":"
+.br
+\(bu "pandoc-crossref"
+T}
+@
+T{
+special
+T}@T{
+epub output will incorporate a cover image if one is found in the current
+directory
+T}
+@
+T{
+fonts
+T}@T{
+Libertinus Serif, IPAexMincho
+T}
+@
+T{
+conflicts
+T}@T{
+base styles: Letter, NoFonts, and Tufte
+T}
+@
+@T{
+styles that specify a latex font: Letter, Libertinus, and Tufte
+T}
+.TE
+.PP
+.I "SubsectFlush"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+flush all subsections before they end
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+latex
+T}
+.TE
+.PP
+.I "TextColour"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+process color attribute
+T}
+@
+T{
+type
+T}@T{
+accessory
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+@
+T{
+filters
+T}@T{
+.URL "https://github.com/dnebauer/pandoc-filters-dn" "dnebauer/pandoc-filters-dn" ":"
+.br
+\(bu "text-colour.lua"
+.TE
+.PP
+.I "Tufte"
+.PP
+.TS
+tab (@);
+r l x.
+T{
+usage
+T}@T{
+theme based on Edward R. Tufte's designs
+T}
+@
+T{
+type
+T}@T{
+base
+T}
+@
+T{
+formats
+T}@T{
+all
+T}
+@
+T{
+class
+T}@T{
+latex documentclass: tufte-handout
+T}
+@
+T{
+css
+T}@T{
+tufte-otsaloma.css
+T}
+@
+T{
+template
+T}@T{
+.URL "https://github.com/dnebauer/pandoc-templates-dn" "dnebauer/pandoc-templates-dn" ":"
+.br
+\(bu "my-tufte-jez.latex"
+T}
+@
+T{
+filters
+T}@T{
+.URL "https://github.com/lierdakil/pandoc-crossref" "lierdakil/pandoc-crossref" ":"
+.br
+\(bu "pandoc-crossref"
+T}
+@
+T{
+special
+T}@T{
+epub output will incorporate a cover image if one is found in the current
+directory
+T}
+@
+T{
+fonts
+T}@T{
+Linux Libertine O (main), Inconsolata Nerd Font Mono (mono),
+Linux Biolinum O (sans)
+T}
+@
+T{
+conflicts
+T}@T{
+base styles: Letter, NoFonts, and Standard
+T}
+@
+@T{
+styles that specify a latex documentclass: Latex8pt, Latex9pt, Latex14pt, Latex17pt,
+Latex20pt, and Letter
+T}
+@
+@T{
+styles that specify a latex font: Letter, Libertinus, and Standard
+T}
+.TE
+
+.SH "DEPENDENCIES"
+
+lua (v5.3 or greater)
+.PP
+pandoc (v2.12 or greater)
+
+.SS "Pandoc templates"
+
+.URL "https://github.com/dnebauer/pandoc-templates-dn" "dnebauer/pandoc-templates-dn" ":"
+.br
+\(bu my-extract-metadata.json
+.br
+\(bu my-letter.latex
+.br
+\(bu my-tufte-jez.latex
+
+.SS "Pandoc filters"
+
+.URL "https://github.com/dnebauer/pandoc-filters-dn" "dnebauer/pandoc-filters-dn" ":"
+.br
+\(bu keyboard-font.lua
+.br
+\(bu paginatesects.py
+.br
+\(bu text-colour.lua
+.PP
+.URL "https://github.com/lierdakil/pandoc-crossref" "lierdakil/pandoc-crossref" ":"
+.br
+\(bu pandoc-crossref
+.PP
+.URL "https://github.com/pandoc/lua-filters" "pandoc/lua-filters" ":"
+.br
+\(bu include-code-files.lua
+.PP
+.URL "https://github.com/pandoc-ext/include-files" "pandoc-ext/include-files" ":"
+.br
+\(bu include-files.lua
+.PP
+.URL "https://github.com/pandoc-ext/pagebreak" "pandoc-ext/pagebreak" ":"
+.br
+\(bu pagebreak.lua
+
+.SS "Latex-specific"
+
+Packages:
+.IP \[bu] 2
+extsizes
+.IP \[bu]
+fontspec
+.IP \[bu]
+libertinus-otf
+.IP \[bu]
+mathpazo (default Letter metadata)
+.IP \[bu]
+microtype
+.IP \[bu]
+placeins
+.IP \[bu]
+ucharclasses
+.IP \[bu]
+xcolor
+.IP \[bu]
+xeCJK.
+.PP
+
+Fonts:
+.IP \[bu] 2
+IPAexMincho
+.IP \[bu]
+Inconsolata Nerd Font Mono
+.IP \[bu]
+Libertinus Serif
+.IP \[bu]
+Linux Biolinum O
+.IP \[bu]
+Linux Libertine O
+.IP \[bu]
+Palatino (via default Letter metadata value 'mathpazo').
+
+.SH "BUGS AND LIMITATIONS"
+
+Please report any bugs to the author.
+
+.SH "AUTHOR"
+
+\*[self] was written by
+.URL "mailto:david at nebauer.org" "David Nebauer" "."
+.PP
+This manual page was written by
+.URL "mailto:david at nebauer.org" "David Nebauer"
+for the Debian project (but may be used by others).
+
+.SH "LICENSE AND COPYRIGHT"
+
+Copyright (c) 2021
+.URL "mailto:david at nebauer.org" "David Nebauer"
+.PP
+This file is part of Pander.
+.PP
+Pander is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+.PP
+Pander is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License
+along with Pander.  If not, you can find it
+.URL "https://www.gnu.org/licenses/" "online" "."
