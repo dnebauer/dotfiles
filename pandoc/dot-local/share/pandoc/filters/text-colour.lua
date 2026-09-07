@@ -18,35 +18,40 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 -- luacheck: ignore 111 113
 ---@diagnostic disable:undefined-global, lowercase-global
 function Span(el)
-	color = el.attributes["color"]
 
-	-- if no color attribute, return unchanged
-	if color == nil then
-		return nil
-	end
+    color = el.attributes['color']
 
-	-- {html,epub}: transform attribute to:
-	--              <span style="color: red;"></span>
-	if FORMAT:match("html") or FORMAT:match("epub") then
-		-- remove color attributes
-		el.attributes["color"] = nil
-		-- use style attribute instead
-		el.attributes["style"] = "color:" .. color .. ";"
-		-- return full span element
-		return el
+    -- if no color attribute, return unchanged
+    if color == nil then return nil end
 
-	-- latex/pdf: transform element to:
-	--            \textcolor{'red'}{content}
-	elseif FORMAT:match("latex") then
-		-- remove color attributes
-		el.attributes["color"] = nil
-		-- encapsulate in latex code
-		table.insert(el.content, 1, pandoc.RawInline("latex", "\\textcolor{" .. color .. "}{"))
-		table.insert(el.content, pandoc.RawInline("latex", "}"))
-		return el.content
+    -- {html,epub}: transform attribute to:
+    --              <span style="color: red;"></span>
+    if FORMAT:match 'html' or FORMAT:match 'epub' then
+        -- remove color attributes
+        el.attributes['color'] = nil
+        -- use style attribute instead
+        el.attributes['style'] = 'color:'..color..';'
+        -- return full span element
+        return el
 
-	-- other format: return unchanged
-	else
-		return nil
-	end
+    -- latex/pdf: transform element to:
+    --            \textcolor{'red'}{content}
+    elseif FORMAT:match 'latex' then
+        -- remove color attributes
+        el.attributes['color'] = nil
+        -- encapsulate in latex code
+        table.insert(
+            el.content, 1,
+            pandoc.RawInline('latex', '\\textcolor{'..color..'}{')
+        )
+        table.insert(
+            el.content,
+            pandoc.RawInline('latex', '}')
+        )
+        return el.content
+
+    -- other format: return unchanged
+    else
+        return nil
+    end
 end
