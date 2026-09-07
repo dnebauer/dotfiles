@@ -248,7 +248,7 @@ sub _build__config_schema ($self) {    ## no critic (ProhibitUnusedPrivateSubrou
           'asset-type' => {
             type        => 'string',
             description => 'file type (guide for extraction command)',
-            enum        => ['targz'],
+            enum        => [ 'targz', 'tarxz' ],
           },
           'obtain-method' => {
             type        => 'string',
@@ -575,7 +575,8 @@ sub _download_repos ($self) {    ## no critic (ProhibitExcessComplexity)
       my $filepath = $fetcher->fetch(to => $dir) or croak $fetcher->error;
       my ($asset_type, $release_path_extraction_regex) =
           ($repo->asset_type, $repo->release_path_extraction_regex);
-      if ($asset_type eq 'targz') {
+      my %tar_type = map { $_->$TRUE } qw(targz tarxz);
+      if (exists $tar_type{$asset_type}) {
         my $tar = Archive::Tar->new;
         say 'Extracting contents of release asset' or croak;
         $tar->read($filepath)                      or croak $tar->error;
@@ -1344,9 +1345,9 @@ set to a different value.)
 =item / → repos → repo → asset-type
 
 String (enumeration). Required if and only if S<< <obtain-method> >> is set to
-S<"download-release-asset">. Allowed value: "targz". This value is used to
-determine the command used to extract the contents of the downloaded release
-asset file.
+S<"download-release-asset">. Allowed values: "targz", "tarxz". This value is
+used to determine the command used to extract the contents of the downloaded
+release asset file.
 
 =item / → repos → repo → release-path-extraction-regex
 
