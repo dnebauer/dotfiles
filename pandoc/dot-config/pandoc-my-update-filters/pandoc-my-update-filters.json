@@ -1,6 +1,24 @@
 {
   "repos": [
     {
+      "name": "crossref",
+      "description": "number figures, equations, tables and cross-references",
+      "download-url": "https://github.com/lierdakil/pandoc-crossref/releases/latest/download/pandoc-crossref-Linux-X64.tar.xz",
+      "asset-type": "tarxz",
+      "obtain-method": "download-release-asset",
+      "release-path-extraction-regex": ".*",
+      "filepath-mappings": [
+        ["DOWNLOAD_ROOT/pandoc-crossref", "STOW_FILTERS_DIR/pandoc-crossref"],
+        [
+          "DOWNLOAD_ROOT/pandoc-crossref.1",
+          "STOW_FILTERS_DIR/pandoc-crossref.1"
+        ]
+      ],
+      "delete-after-download": [],
+      "ignore": [],
+      "substitutions": []
+    },
+    {
       "name": "lua-filters",
       "description": "original pandoc lua filters collection",
       "download-url": "https://github.com/pandoc/lua-filters.git",
