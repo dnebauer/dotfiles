@@ -459,7 +459,7 @@ sub _copy_files ($self, @install_file_objs) {
   for my $install_fp (sort keys %replacing) {
     my $stow_fp = $replacing{$install_fp};
     say "\n• $install_fp\n  -> $stow_fp" or croak;
-    if (File::Copy::copy($install_fp, $stow_fp)) {
+    if (File::Copy::cp($install_fp, $stow_fp)) {
       say '  -- copied' or croak;
     }
     else {
