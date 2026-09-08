@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lesspipe.sh, a preprocessor for less
-lesspipe_version=2.27
+lesspipe_version=2.28
 # Author: Wolfgang Friebel (wp.friebel AT gmail.com)
 # LICENSE: GPL-2.0-or-later
 
@@ -21,7 +21,7 @@ fileext () {
 		*.*) extension=${fn##*.} ;;
 		*) extension="$fn" ;;
 	esac
-	extension=$(echo "$extension"|tr -dc '[:alnum:]')
+	extension=$(echo "$extension"|tr -dc '[:alnum:]'|tr '[:upper:]' '[:lower:]')
 	echo "$extension"
 }
 
@@ -42,6 +42,9 @@ filetype () {
 	ft="${ft#*/}"; ft="${ft%;*}"; ft="${ft#x-script.}"; ft="${ft#x-}"
 	ftype="${ft#vnd\.}"
 	# chose better name
+	if [[ $ftype == html && -n $fext && $fext != htm* ]]; then
+		ftype="$fext"
+	fi
 	case "$ftype" in
 		openxmlformats-officedocument.wordprocessingml.document)
 			ftype=docx ;;
@@ -65,6 +68,8 @@ filetype () {
 			ftype=epub ;;
 		matlab-data)
 			ftype=matlab ;;
+		xhtml+xml)
+			ftype=html ;;
 	# file may report wrong type for given file names (ok in file 5.39)
 		troff)
 			case "${fname##*/}" in
@@ -74,6 +79,8 @@ filetype () {
 	esac
 	# correct for a more specific file type
 	case "$fext" in
+		xlsx)
+			[[ $ftype == zip ]] && ftype=xlsx ;;
 		sxi)
 			[[ $ftype == zip ]] && ftype=ooffice1 ;;
 		epub)
@@ -415,7 +422,6 @@ get_unpack_cmd () {
 analyze_args () {
 	# determine how we are called
 	cmdtree=$(ps -oargs= 2>/dev/null)
-	[[ $cmdtree == *perldoc\ * ]] && exit 0
 	while read -r line; do
 		arg1=${line%% *}; arg1=${arg1##*/}
 		[[ $arg1 == less ]] && lessarg=$line
@@ -423,8 +429,8 @@ analyze_args () {
 	# last argument starting with colon or equal sign is used for piping into less
 	[[ $lessarg == *\ [:=]* ]] && fext=${lessarg#*[:=]}
 	# return if we want to watch growing files
-	[[ $lessarg == *less\ *\ : ]] && exit 0
-	[[ $lessarg == *less\ *\+F\ * && $fext != log ]] && exit 0
+	[[ $lessarg == *less\ *\ : ]] && exit "$retval"
+	[[ $lessarg == *less\ *\+F\ * && $fext != log ]] && exit "$retval"
 	# color is set when calling less with -r or -R or LESS contains that option
 	COLOR="--color=auto"
 	colors=0
@@ -742,7 +748,8 @@ isfinal () {
 		[[ -z ${colorizer[*]} ]] && has_colorizer "$final_input" "$fext" "$fileext"
 		[[ -n ${colorizer[*]} && $fcat != binary ]] && "${colorizer[@]}" 2>/dev/null && return
 		# if fileext set, we need to filter to get rid of .fileext
-		[[ -n $fileext && "$1" != - ]] && cat "$1" && return
+		#[[ -n $fileext && "$1" != - ]] && cat "$1" && return
+		[[ -n $fileext && "$1" != - ]] && return
 		cat "$final_input"
 	fi
 }
@@ -973,14 +980,14 @@ elif [[ "$1" == *"$altsep"* ]]; then
 	[[ -e "${1%%"$altsep"*}" ]] && sep=$altsep
 fi
 
-tmpdir=$(mktemp -d --tmpdir "lesspipe.XXXXXX") || exit 1
+tmpdir=$(mktemp -d -t "lesspipe.XXXXXX") || exit 1
 trap 'rm -rf "$tmpdir"; exit 1' SIGINT
 trap 'rm -rf "$tmpdir"' EXIT
 trap - PIPE
 
+[[ $LESSOPEN == *\|\|* ]] && retval=1 || retval=0
 analyze_args
 # make LESSOPEN="|- ... " work
-[[ $LESSOPEN == *\|\|* ]] && retval=1 || retval=0
 if [[ $LESSOPEN == *\|-* && $1 == - ]]; then
 	t=$(nexttmp)
 	cat > "$t"
@@ -996,16 +1003,23 @@ if [[ -z "$1" && "$0" == */lesspipe.sh ]]; then
 		echo "export LESSOPEN"
 	fi
 else
-	# no filtering for file names contained in .lessignore
-	if [[ -r "${HOME}/.lessignore" ]]; then
-		name="$1"
-		while IFS= read -r pattern || [[ -n "$pattern" ]]; do
-			[[ -z "$pattern" ]] && continue
-			[[ "$pattern" == \#* ]] && continue
-			# shellcheck disable=SC2053
-			[[ "$name" == $pattern ]] && exit 0
-		done < "${HOME}/.lessignore"
-	fi
+	# no filtering for file names contained in .lessignore, check given parameter + resolved absolute path
+	# check "${HOME}/.lessignore" and global "/etc/lessignore", just process the first file found, do not mix them
+	for lessignore_file in "${HOME}/.lessignore" "/etc/lessignore"; do
+		if [[ -r "$lessignore_file" ]]; then
+			rawfilename="$1"
+			resolvedname=$(realpath "$rawfilename" 2>/dev/null)
+			while IFS= read -r pattern || [[ -n "$pattern" ]]; do
+				[[ -z "$pattern" ]] && continue
+				[[ "$pattern" == \#* ]] && continue
+				# shellcheck disable=SC2053
+				[[ "$rawfilename" == $pattern ]] && exit "$retval"
+				# shellcheck disable=SC2053
+				[[ "$resolvedname" == $pattern ]] && exit "$retval"
+			done < "$lessignore_file"
+			break
+		fi
+	done
 	[[ -x "${HOME}/.lessfilter" ]] && "${HOME}/.lessfilter" "$1" && exit "$retval"
 	if has_cmd lessfilter; then
 		lessfilter "$1" && exit "$retval"
