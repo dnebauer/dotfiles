@@ -6,44 +6,44 @@
     "root": "HOME/.config/dotfiles",
     "pkg": "lesspipe.sh",
     "extra": [
-      "STOW_PKG_DIR/.config/zshenv.d/lesspipe.sh.zsh",
-      "STOW_PKG_DIR/.config/zshrc.d/80-options-lessopen.sh.zsh",
-      "STOW_PKG_DIR/.local/share/man/man1/archive_color.1",
-      "STOW_PKG_DIR/.local/share/man/man1/lesscomplete.1",
-      "STOW_PKG_DIR/.config/lesspipe-my-update/lesspipe-my-update.json",
-      "STOW_PKG_DIR/.local/bin/lesspipe-my-update",
-      "STOW_PKG_DIR/.local/share/man/man1/App::My::LesspipeUpdate::InstallFile.1",
-      "STOW_PKG_DIR/.local/share/man/man1/App::My::LesspipeUpdate::Substitution.1",
-      "STOW_PKG_DIR/.local/share/man/man1/App::My::LesspipeUpdate::Update.1",
-      "STOW_PKG_DIR/.local/share/man/man1/lesspipe-my-update.1",
-      "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/InstallFile.pm",
-      "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/Substitution.pm",
-      "STOW_PKG_DIR/.local/share/perl5/App/My/LesspipeUpdate/Update.pm",
-      "STOW_PKG_DIR/.local/share/zsh/completions/_lesspipe-my-update"
+      "STOW_PKG_DIR/dot-config/zshenv.d/lesspipe.sh.zsh",
+      "STOW_PKG_DIR/dot-config/zshrc.d/80-options-lessopen.sh.zsh",
+      "STOW_PKG_DIR/dot-local/share/man/man1/archive_color.1",
+      "STOW_PKG_DIR/dot-local/share/man/man1/lesscomplete.1",
+      "STOW_PKG_DIR/dot-config/lesspipe-my-update/lesspipe-my-update.json",
+      "STOW_PKG_DIR/dot-local/bin/lesspipe-my-update",
+      "STOW_PKG_DIR/dot-local/share/man/man1/App::My::LesspipeUpdate::InstallFile.1",
+      "STOW_PKG_DIR/dot-local/share/man/man1/App::My::LesspipeUpdate::Substitution.1",
+      "STOW_PKG_DIR/dot-local/share/man/man1/App::My::LesspipeUpdate::Update.1",
+      "STOW_PKG_DIR/dot-local/share/man/man1/lesspipe-my-update.1",
+      "STOW_PKG_DIR/dot-local/share/perl5/App/My/LesspipeUpdate/InstallFile.pm",
+      "STOW_PKG_DIR/dot-local/share/perl5/App/My/LesspipeUpdate/Substitution.pm",
+      "STOW_PKG_DIR/dot-local/share/perl5/App/My/LesspipeUpdate/Update.pm",
+      "STOW_PKG_DIR/dot-local/share/zsh/completions/_lesspipe-my-update"
     ]
   },
   "install": {
     "filepath_maps": [
       [
         "INSTALL_DIR/bin/archive_color",
-        "STOW_PKG_DIR/.local/bin/archive_color"
+        "STOW_PKG_DIR/dot-local/bin/archive_color"
       ],
-      ["INSTALL_DIR/bin/lesspipe.sh", "STOW_PKG_DIR/.local/bin/lesspipe.sh"],
+      ["INSTALL_DIR/bin/lesspipe.sh", "STOW_PKG_DIR/dot-local/bin/lesspipe.sh"],
       [
         "INSTALL_DIR/etc/bashcompletion.d/less",
-        "STOW_PKG_DIR/.bash_completion/less"
+        "STOW_PKG_DIR/dot-bash_completion/less"
       ],
       [
         "INSTALL_DIR/libexec/lesspipe/lesscomplete",
-        "STOW_PKG_DIR/.local/libexec/lesspipe/lesscomplete"
+        "STOW_PKG_DIR/dot-local/libexec/lesspipe/lesscomplete"
       ],
       [
         "INSTALL_DIR/share/man/man1/lesspipe.1",
-        "STOW_PKG_DIR/.local/share/man/man1/lesspipe.sh.1"
+        "STOW_PKG_DIR/dot-local/share/man/man1/lesspipe.sh.1"
       ],
       [
         "INSTALL_DIR/share/zsh/completions/_less",
-        "STOW_PKG_DIR/.local/share/zsh/completions/_less"
+        "STOW_PKG_DIR/dot-local/share/zsh/completions/_less"
       ]
     ],
     "substitutions": [
