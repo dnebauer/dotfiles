@@ -575,8 +575,8 @@ sub _download_repos ($self) {    ## no critic (ProhibitExcessComplexity)
       my $filepath = $fetcher->fetch(to => $dir) or croak $fetcher->error;
       my ($asset_type, $release_path_extraction_regex) =
           ($repo->asset_type, $repo->release_path_extraction_regex);
-      my %tar_type = map { $_->$TRUE } qw(targz tarxz);
-      if (exists $tar_type{$asset_type}) {
+      my %is_tar_type = map { $_ => $TRUE } qw(targz tarxz);
+      if ($is_tar_type{$asset_type}) {
         my $tar = Archive::Tar->new;
         say 'Extracting contents of release asset' or croak;
         $tar->read($filepath)                      or croak $tar->error;
@@ -1065,7 +1065,9 @@ sub _update_files ($self) {
       my $show_stow_fp =
           $stow_fp =~ s/$stow_filters_dir/STOW_FILTERS_DIR/xsmrg;
       say "\n• ($name)$show_downloaded_fp\n  -> $show_stow_fp" or croak;
-      if (File::Copy::copy($downloaded_fp, $stow_fp)) {
+
+      # use 'cp' instead of 'copy' to preserve permission bits
+      if (File::Copy::cp($downloaded_fp, $stow_fp)) {
         say '  -- copied' or croak;
       }
       else {
