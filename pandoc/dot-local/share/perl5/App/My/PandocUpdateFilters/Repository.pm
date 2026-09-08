@@ -72,7 +72,7 @@ has 'download_url' => (
 has 'asset_type' => (
   is  => 'ro',
   isa => Types::Standard::Maybe [
-    Types::Standard::Enum [ \$TRUE, qw(targz) ]
+    Types::Standard::Enum [ \$TRUE, qw(targz tarxz) ]
   ],
   required => $TRUE,
   coerce   => $TRUE,
