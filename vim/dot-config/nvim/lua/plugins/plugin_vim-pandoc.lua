@@ -115,7 +115,7 @@ return {
           { geometry = { "geometry: margin=2.5cm" } },
           { blockquote = { "blockquote: true" } },
           { letterhead = { "letterhead: example/letterhead.pdf" } },
-          { signature = { "signature: example/signature.pdf" } },
+          { signature = { "signature: /home/david/.local/share/pandoc/resources/signature_dnebauer.pdf" } },
           { ["signature-before"] = { "signature-before: -8ex" } },
           { ["signature-after"] = { "signature-after: 0ex" } },
           { ["closing-indentation"] = { "closing-indentation: 0pt" } },
