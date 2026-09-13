@@ -116,6 +116,7 @@ return {
           { blockquote = { "blockquote: true" } },
           { letterhead = { "letterhead: example/letterhead.pdf" } },
           { signature = { "signature: /home/david/.local/share/pandoc/resources/signature_dnebauer.pdf" } },
+          { ["signature-width"] = { "signature-width: 4cm" } },
           { ["signature-before"] = { "signature-before: -8ex" } },
           { ["signature-after"] = { "signature-after: 0ex" } },
           { ["closing-indentation"] = { "closing-indentation: 0pt" } },
