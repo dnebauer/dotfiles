@@ -1074,9 +1074,9 @@ bind editor \cv quote-char
 bind editor \cu kill-line
 # [e] <Ctrl>+w : delete the word in front of the cursor (default binding)
 bind editor \cw kill-word
-# [c] A : attach multiple files with file manager
-# - overrides [c] A = <attach-message> (attach messages to this message)
-macro compose A "\
+# [c] a : attach multiple files with file manager
+# - overrides [c] a = <attach-file> (attach files to this message)
+macro compose a "\
 <shell-escape>bash $my_file_picker<enter>\
 <enter-command>source $my_picker_cache<enter>\
 <shell-escape>bash $my_file_picker clean<enter>\
