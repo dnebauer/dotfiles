@@ -13,9 +13,9 @@ plugins=(
   fasd
   fzf-tab
   fzf-zsh-plugin
+  gh
   git
   git-commit
-  github
   jump
   npm
   pass
