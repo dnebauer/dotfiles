@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lesspipe.sh, a preprocessor for less
-lesspipe_version=2.28
+lesspipe_version=2.29
 # Author: Wolfgang Friebel (wp.friebel AT gmail.com)
 # LICENSE: GPL-2.0-or-later
 
@@ -37,6 +37,7 @@ filetype () {
 	fext=$(fileext "$fname")
 	### get file type from mime type
 	ft=$(file -L -s -b --mime "$1" 2> /dev/null)
+	[[ $? ]] && ft=$(file -s -b --mime "$1" 2> /dev/null)
 	[[ $ft == *=* ]] && fchar="${ft##*=}" || fchar=utf-8
 	fcat="${ft%/*}"
 	ft="${ft#*/}"; ft="${ft%;*}"; ft="${ft#x-script.}"; ft="${ft#x-}"
@@ -120,7 +121,7 @@ filetype () {
 				ftype=docx ;;
 			Apple\ binary\ property\ list)
 				ftype=plist ;;
-			PGP\ *ncrypted*|GPG\ encrypted*)
+			PGP\ *ncrypted*|GPG\ *ncrypted*)
 				ftype=pgp ;;
 			Audio\ file\ with\ ID3\ *)
 				ftype=mp3 ;;
@@ -140,6 +141,8 @@ filetype () {
 						ftype=brotli ;;
 					lz4|lt4|tz4|tlz4)
 						ftype=lz4 ;;
+					pgp|gpg)
+						ftype=pgp ;;
 			esac
 		esac
 		### decide file type based on extension
@@ -317,12 +320,14 @@ get_unpack_cmd () {
 	[[ "$3" == $sep$sep ]] && return
 	# uncompress / transform
 	case $x in
-		gzip|bzip2|lzip|lzma|xz|brotli|compress)
+		gzip|bzip2|lzip|lzma|xz|compress)
 			# remember name of uncompressed file
 			[[ $2 == - ]] || fileext="$2"
 			fileext=${fileext%%.gz}; fileext=${fileext%%.bz2}
 			[[ $x == compress ]] && x=gzip
 			has_cmd "$x" && cmd=("$x" -cd "$2") ;;
+		brotli)
+			has_cmd "$x" "brotli 1.2.1" && cmd=("$x" -cd "$2") ;;
 		zstd)
 			has_cmd zstd && cmd=(zstd -cdqM1073741824 "$2") ;;
 		lz4)
@@ -721,7 +726,7 @@ isfinal () {
 			{ has_cmd exiftool && cmd=(exiftool "$1"); } ||
 			{ has_cmd identify && [[ $fcat == image ]] && cmd=(identify -verbose "$1"); }
 		else
-			cmd=(nodash strings "$1")
+			cmd=(nodash "strings -a" "$1")
 		fi
 	fi
 	if [[ -n ${cmd[*]} && "${cmd[*]}" != "cat" ]]; then
@@ -749,7 +754,8 @@ isfinal () {
 		[[ -n ${colorizer[*]} && $fcat != binary ]] && "${colorizer[@]}" 2>/dev/null && return
 		# if fileext set, we need to filter to get rid of .fileext
 		#[[ -n $fileext && "$1" != - ]] && cat "$1" && return
-		[[ -n $fileext && "$1" != - ]] && return
+		#[[ -n $fileext && "$1" != - ]] && return
+		[[ "$1" != - ]] && return
 		cat "$final_input"
 	fi
 }

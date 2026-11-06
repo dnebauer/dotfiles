@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# synced with lesspipe 2.28
+# synced with lesspipe 2.29
 # lesscomplete, a helper script for the _less (zsh) and less (bash) completion
 # mechanisms.
 # Author: Wolfgang Friebel (wp.friebel AT gmail.com)
@@ -170,12 +170,14 @@ get_unpack_cmd () {
 	[[ "$3" == $sep$sep ]] && return
 	# uncompress
 	case $x in
-		gzip|bzip2|lzip|lzma|xz|brotli|compress)
+		gzip|bzip2|lzip|lzma|xz|compress)
 			# remember name of uncompressed file
 			[[ $2 == - ]] || fileext="$2"
 			fileext=${fileext%%.gz}; fileext=${fileext%%.bz2}
 			[[ $x == compress ]] && x=gzip
 			has_cmd "$x" && cmd=("$x" -cd "$2") ;;
+		brotli)
+			has_cmd "$x" "brotli 1.2.0" && cmd=("$x" -cd "$2") ;;
 		zstd)
 			has_cmd zstd && cmd=(zstd -cdqM1073741824 "$2") ;;
 		lz4)
