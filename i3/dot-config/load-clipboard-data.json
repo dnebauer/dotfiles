@@ -126,6 +126,13 @@
   },
   {
     "menu": "Address",
+    "hotkey": "r",
+    "type": "option",
+    "value": "Parcel Locker 90, Parap NT 0820",
+    "default": 0
+  },
+  {
+    "menu": "Address",
     "hotkey": "m",
     "type": "option",
     "value": "PO Box 41326, Casuarina NT 0811",
