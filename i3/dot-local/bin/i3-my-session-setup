@@ -484,7 +484,8 @@ function notifyCompletion() {
 function notifyDisplay() {
   fkey=$RANDOM
   width=900
-  height=90
+  #height=90
+  height=180
   font='Monospace 18'
 
   # construct text-info pane
